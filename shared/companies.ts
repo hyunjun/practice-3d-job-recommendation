@@ -1,0 +1,40 @@
+import type { Company } from './types'
+
+export const COMPANIES: Company[] = [
+  { id: 'stripe', name: 'Stripe', initials: 'S', color: '#a79aff', industry: '핀테크 · 결제 인프라', careerUrl: 'https://stripe.com/jobs', board: 'stripe' },
+  { id: 'figma', name: 'Figma', initials: 'F', color: '#ff9c78', industry: '디자인 · 협업 도구', careerUrl: 'https://www.figma.com/careers/', board: 'figma' },
+  { id: 'notion', name: 'Notion', initials: 'N', color: '#e6e8e6', industry: '생산성 · 협업', careerUrl: 'https://www.notion.com/careers', board: 'notion' },
+  { id: 'linear', name: 'Linear', initials: 'L', color: '#a4a3ff', industry: '개발자 도구', careerUrl: 'https://linear.app/careers' },
+  { id: 'vercel', name: 'Vercel', initials: '▲', color: '#f4f4f4', industry: '클라우드 · 개발자 도구', careerUrl: 'https://vercel.com/careers', board: 'vercel' },
+  { id: 'cloudflare', name: 'Cloudflare', initials: 'C', color: '#ffa75a', industry: '인프라 · 보안', careerUrl: 'https://www.cloudflare.com/careers/', board: 'cloudflare' },
+  { id: 'datadog', name: 'Datadog', initials: 'D', color: '#bb9dfb', industry: '클라우드 · 모니터링', careerUrl: 'https://careers.datadoghq.com/', board: 'datadog' },
+  { id: 'mongodb', name: 'MongoDB', initials: 'M', color: '#84dba6', industry: '데이터베이스', careerUrl: 'https://www.mongodb.com/careers', board: 'mongodb' },
+  { id: 'spotify', name: 'Spotify', initials: 'S', color: '#72df99', industry: '오디오 · 미디어', careerUrl: 'https://www.lifeatspotify.com/jobs' },
+  { id: 'airbnb', name: 'Airbnb', initials: 'A', color: '#ff929b', industry: '여행 · 마켓플레이스', careerUrl: 'https://careers.airbnb.com/', board: 'airbnb' },
+  { id: 'gitlab', name: 'GitLab', initials: 'G', color: '#fbb384', industry: '개발자 도구 · DevSecOps', careerUrl: 'https://about.gitlab.com/jobs/', board: 'gitlab' },
+  { id: 'elastic', name: 'Elastic', initials: 'E', color: '#f7d878', industry: '검색 · 데이터 분석', careerUrl: 'https://www.elastic.co/careers', board: 'elastic' },
+  { id: 'wise', name: 'Wise', initials: 'W', color: '#b3e582', industry: '핀테크 · 글로벌 송금', careerUrl: 'https://wise.jobs/' },
+  { id: 'revolut', name: 'Revolut', initials: 'R', color: '#d7daff', industry: '핀테크 · 디지털 금융', careerUrl: 'https://www.revolut.com/careers/' },
+  { id: 'adyen', name: 'Adyen', initials: 'A', color: '#77dfa1', industry: '핀테크 · 결제', careerUrl: 'https://careers.adyen.com/' },
+  { id: 'shopify', name: 'Shopify', initials: 'S', color: '#b5db7a', industry: '커머스 · 플랫폼', careerUrl: 'https://www.shopify.com/careers' },
+  { id: 'canva', name: 'Canva', initials: 'C', color: '#7fdde1', industry: '디자인 · 크리에이티브', careerUrl: 'https://www.lifeatcanva.com/en/jobs/' },
+  { id: 'atlassian', name: 'Atlassian', initials: 'A', color: '#83b5ff', industry: '협업 · 개발자 도구', careerUrl: 'https://www.atlassian.com/company/careers' },
+  { id: 'miro', name: 'Miro', initials: 'M', color: '#f5d874', industry: '협업 · 비주얼 워크스페이스', careerUrl: 'https://miro.com/careers/' },
+  { id: 'n26', name: 'N26', initials: 'N', color: '#94cdc2', industry: '핀테크 · 모바일 뱅킹', careerUrl: 'https://n26.com/en-eu/careers' },
+  { id: 'zalando', name: 'Zalando', initials: 'Z', color: '#f6aa75', industry: '커머스 · 패션 테크', careerUrl: 'https://jobs.zalando.com/en/' },
+  { id: 'delivery-hero', name: 'Delivery Hero', initials: 'D', color: '#fc8794', industry: '커머스 · 배달 플랫폼', careerUrl: 'https://careers.deliveryhero.com/' },
+  { id: 'deepl', name: 'DeepL', initials: 'D', color: '#a1c3e1', industry: 'AI · 언어 기술', careerUrl: 'https://www.deepl.com/en/careers' },
+  { id: 'hugging-face', name: 'Hugging Face', initials: 'H', color: '#f3cf69', industry: 'AI · 오픈소스', careerUrl: 'https://huggingface.co/join-us' },
+  { id: 'anthropic', name: 'Anthropic', initials: 'A', color: '#d9b79f', industry: 'AI · 연구', careerUrl: 'https://www.anthropic.com/careers', board: 'anthropic' },
+  { id: 'toss', name: '토스', initials: 't', color: '#80aeff', industry: '핀테크 · 디지털 금융', careerUrl: 'https://toss.im/career/jobs' },
+  { id: 'karrot', name: '당근', initials: 'K', color: '#ffb084', industry: '로컬 · 커뮤니티', careerUrl: 'https://about.daangn.com/jobs/' },
+  { id: 'smartnews', name: 'SmartNews', initials: 'S', color: '#8fbded', industry: '미디어 · 추천 시스템', careerUrl: 'https://careers.smartnews.com/' },
+  { id: 'grab', name: 'Grab', initials: 'G', color: '#91dc9e', industry: '모빌리티 · 플랫폼', careerUrl: 'https://www.grab.careers/en/' },
+  { id: 'mercari', name: 'Mercari', initials: 'M', color: '#ffa3a6', industry: '커머스 · 마켓플레이스', careerUrl: 'https://careers.mercari.com/' },
+  { id: 'snyk', name: 'Snyk', initials: 'S', color: '#b8a3e6', industry: '개발자 보안', careerUrl: 'https://snyk.io/careers/', board: 'snyk' },
+  { id: 'intercom', name: 'Intercom', initials: 'I', color: '#91bafd', industry: 'AI · 고객 경험', careerUrl: 'https://www.intercom.com/careers', board: 'intercom' },
+]
+
+export const PUBLIC_COMPANIES = COMPANIES.filter(company =>
+  ['stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'gitlab', 'anthropic', 'intercom', 'airbnb'].includes(company.id),
+)

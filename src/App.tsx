@@ -1,0 +1,252 @@
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowRight, ArrowUpRight, Bookmark, BriefcaseBusiness, Check, ChevronDown, CircleHelp, Compass, Database, GitCompareArrows, Globe2, Maximize, Minus, Moon, MousePointer2, Plus, RotateCcw, Search, SlidersHorizontal, Sparkles, Sun, X } from 'lucide-react'
+import { CITY_BY_ID } from '../shared/cities'
+import { createSampleCatalog } from '../shared/sample'
+import { countFilters, filterJobs, groupCities, matchJob } from '../shared/matching'
+import { DEFAULT_FILTERS, MODE_LABELS, REGION_LABELS, ROLE_LABELS, SAMPLE_PROFILE } from '../shared/types'
+import type { Catalog, Filters, MatchedJob, Profile, Region, SavedJob, Source } from '../shared/types'
+import { CityPanel } from './components/CityPanel'
+import { ProfileDialog } from './components/ProfileDialog'
+import { FiltersDialog } from './components/FiltersDialog'
+import { DataDialog } from './components/DataDialog'
+import { JobDialog } from './components/JobDialog'
+import { CompareView, SavedView } from './components/Views'
+import { OrbitLogo, Spinner, Toast } from './components/ui'
+import type { GlobeHandle } from './components/Globe'
+import { deleteProfile, loadCompare, loadProfile, loadSaved, persist, STORAGE_KEYS } from './lib/storage'
+
+const Globe = lazy(() => import('./components/Globe').then(module => ({ default: module.Globe })))
+const FlatMap = lazy(() => import('./components/FlatMap').then(module => ({ default: module.FlatMap })))
+
+type View = 'explore' | 'saved' | 'compare'
+type Notice = { message: string; action?: { label: string; run: () => void } }
+const REGION_VIEWS: Record<Region, [number, number, number]> = {
+  all: [29, -39, 3.4], americas: [36, -98, 2.65], europe: [48, 7, 2.15], 'asia-pacific': [20, 119, 2.9],
+}
+
+function currentView(): View {
+  const hash = window.location.hash.slice(1)
+  return hash === 'saved' || hash === 'compare' ? hash : 'explore'
+}
+
+export default function App() {
+  const [view, setView] = useState<View>(currentView)
+  const [catalog, setCatalog] = useState<Catalog>(createSampleCatalog)
+  const [profile, setProfile] = useState<Profile>(loadProfile)
+  const [filters, setFilters] = useState<Filters>(() => {
+    const stored = loadProfile()
+    return { ...DEFAULT_FILTERS, ...stored.preferences, role: stored.desiredRole }
+  })
+  const [saved, setSaved] = useState<SavedJob[]>(loadSaved)
+  const [compareIds, setCompareIds] = useState<string[]>(loadCompare)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [panelTab, setPanelTab] = useState<'cities' | 'remote'>(() => loadProfile().preferences?.workMode === 'remote' ? 'remote' : 'cities')
+  const [mapMode, setMapMode] = useState<'globe' | 'flat'>('globe')
+  const [light, setLight] = useState(false)
+  const [modal, setModal] = useState<'profile' | 'filters' | 'data' | null>(null)
+  const [openJob, setOpenJob] = useState<MatchedJob | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [dataError, setDataError] = useState('')
+  const [notice, setNotice] = useState<Notice | null>(null)
+  const requestRef = useRef<AbortController | null>(null)
+  const mapRef = useRef<GlobeHandle>(null)
+  const mapStageRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const closeNotice = useCallback(() => setNotice(null), [])
+  const notify = useCallback((message: string, action?: Notice['action']) => setNotice({ message, action }), [])
+
+  const matches = useMemo(() => filterJobs(catalog, profile, filters), [catalog, profile, filters])
+  const cities = useMemo(() => groupCities(catalog, matches, filters), [catalog, matches, filters])
+  const remote = useMemo(() => matches.filter(match => match.job.workMode === 'remote'), [matches])
+  const companyCount = useMemo(() => new Set(matches.map(match => match.company.id)).size, [matches])
+  const savedIds = useMemo(() => new Set(saved.map(item => item.job.id)), [saved])
+  const savedOpenJob = saved.find(item => item.job.id === openJob?.job.id)
+
+  useEffect(() => {
+    const onHash = () => setView(currentView())
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+  useEffect(() => {
+    if (!persist(STORAGE_KEYS.saved, saved)) notify('브라우저 저장 공간이 부족해요. CSV로 내보내 보관해 주세요.')
+  }, [saved, notify])
+  useEffect(() => { persist(STORAGE_KEYS.compare, compareIds) }, [compareIds])
+  useEffect(() => () => requestRef.current?.abort(), [])
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const element = event.target as HTMLElement
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        if (modal || openJob) return
+        event.preventDefault()
+        if (view !== 'explore') navigate('explore')
+        requestAnimationFrame(() => searchRef.current?.focus())
+      } else if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName) && !modal && !openJob) {
+        event.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [view, modal, openJob])
+
+  const navigate = (next: View) => {
+    setView(next)
+    window.location.hash = next === 'explore' ? '' : next
+  }
+
+  const positionMap = useCallback(() => {
+    if (selectedId && panelTab === 'cities') {
+      const city = CITY_BY_ID.get(selectedId)
+      if (city) mapRef.current?.flyTo(city.lat, city.lng, 1.85)
+    } else if (filters.region === 'all') mapRef.current?.reset()
+    else mapRef.current?.flyTo(...REGION_VIEWS[filters.region])
+  }, [selectedId, panelTab, filters.region])
+  const positionMapRef = useRef(positionMap)
+  positionMapRef.current = positionMap
+  const onMapReady = useCallback(() => positionMapRef.current(), [])
+
+  useEffect(() => { positionMap() }, [positionMap, mapMode, view])
+
+  const onGlobeFailure = useCallback(() => {
+    setMapMode('flat')
+    notify('이 환경에서는 2D 지도로 같은 기회를 보여드릴게요.')
+  }, [notify])
+
+  const selectCity = (id: string | null) => {
+    setSelectedId(id)
+    setPanelTab('cities')
+    if (id && window.innerWidth < 900) panelRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })
+  }
+
+  const updateFilters = (next: Filters) => {
+    setFilters(next)
+    if (next.workMode === 'remote') setPanelTab('remote')
+    setModal(null)
+  }
+
+  const changeSource = async (source: Source, refresh = false) => {
+    requestRef.current?.abort()
+    setDataError('')
+    if (source === 'sample') {
+      setCatalog(createSampleCatalog())
+      setLoading(false)
+      return
+    }
+    const controller = new AbortController()
+    requestRef.current = controller
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/catalog?source=greenhouse${refresh ? '&refresh=1' : ''}`, { signal: controller.signal })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error ?? '공개 공고를 불러오지 못했어요.')
+      if (!Array.isArray(result.jobs) || result.source !== 'greenhouse') throw new Error('공고 데이터 형식을 확인하지 못했어요.')
+      if (!controller.signal.aborted) {
+        setCatalog(result as Catalog)
+        const failed = (result as Catalog).boards.filter(board => board.status === 'error').length
+        notify(result.stale ? '연결 실패로 이전에 조회한 공개 공고를 표시해요.' : `${result.jobs.length.toLocaleString()}개 개발 공고를 가져왔어요.${failed ? ` ${failed}개 게시판은 연결되지 않았어요.` : ''}`)
+      }
+    } catch (cause) {
+      if (!controller.signal.aborted) {
+        const message = cause instanceof Error ? cause.message : '공고를 불러오지 못했어요.'
+        setDataError(message)
+        notify(message)
+      }
+    } finally {
+      if (requestRef.current === controller) setLoading(false)
+    }
+  }
+
+  const toggleSave = (match: MatchedJob) => {
+    const existing = saved.find(item => item.job.id === match.job.id)
+    if (existing) {
+      setSaved(current => current.filter(item => item.job.id !== match.job.id))
+      notify('저장한 기회에서 제거했어요.', { label: '실행 취소', run: () => setSaved(current => current.some(item => item.job.id === existing.job.id) ? current : [existing, ...current]) })
+    } else {
+      if (saved.length >= 500) { notify('최대 500개까지 저장할 수 있어요. CSV로 내보낸 뒤 정리해 주세요.'); return }
+      setSaved(current => [{ job: match.job, company: match.company, savedAt: new Date().toISOString(), status: 'saved', note: '' }, ...current])
+      notify(`${match.company.name}의 기회를 저장했어요.`, { label: '모아보기', run: () => { setOpenJob(null); navigate('saved') } })
+    }
+  }
+
+  const toggleCompare = (id: string) => {
+    if (compareIds.includes(id)) {
+      setCompareIds(current => current.filter(value => value !== id))
+    } else if (compareIds.length < 3) {
+      setCompareIds(current => current.includes(id) ? current : [...current, id].slice(0, 3))
+      notify(`${CITY_BY_ID.get(id)?.name}을 비교에 추가했어요.`, { label: '비교하기', run: () => navigate('compare') })
+    } else notify('도시는 최대 3개까지 비교할 수 있어요. 기존 도시를 하나 빼주세요.')
+  }
+
+  const applyProfile = (next: Profile, preferences: Partial<Filters>, remember: boolean) => {
+    const updatedProfile: Profile = { ...next, preferences: {
+      workMode: preferences.workMode ?? filters.workMode,
+      visa: preferences.visa ?? filters.visa,
+      salaryMin: preferences.salaryMin ?? filters.salaryMin,
+    } }
+    setProfile(updatedProfile)
+    setFilters(current => ({ ...current, ...preferences }))
+    setSelectedId(null)
+    if (preferences.workMode === 'remote') setPanelTab('remote')
+    if (remember) {
+      if (!persist(STORAGE_KEYS.profile, updatedProfile)) notify('프로필을 저장하지 못했지만 이번 탐색에는 적용했어요.')
+      else notify(`${next.name}님의 경험으로 기회 지도를 업데이트했어요.`)
+    } else {
+      deleteProfile()
+      notify('프로필을 이번 탐색에만 적용했어요.')
+    }
+    setModal(null)
+    navigate('explore')
+  }
+
+  const resetFilters = () => { setFilters({ ...DEFAULT_FILTERS }); setSelectedId(null) }
+  const initials = profile.name.split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase()
+  const fullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen()
+    else void mapStageRef.current?.requestFullscreen().catch(() => notify('이 브라우저에서는 전체 화면을 사용할 수 없어요.'))
+  }
+
+  return <div className="app-shell">
+    <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus() }}>본문으로 건너뛰기</a>
+    <header className="app-header">
+      <button className="brand" onClick={() => navigate('explore')} aria-label="ORBIT 홈"><OrbitLogo /><span>orbit<span className="brand-period">.</span></span><span className="brand-caption">CAREER ATLAS</span></button>
+      <nav className="main-nav" aria-label="주요 메뉴">
+        <button className={view === 'explore' ? 'active' : ''} aria-current={view === 'explore' ? 'page' : undefined} onClick={() => navigate('explore')}><Compass size={16} />기회 탐색</button>
+        <button className={view === 'saved' ? 'active' : ''} aria-current={view === 'saved' ? 'page' : undefined} onClick={() => navigate('saved')}><Bookmark size={15} />저장한 기회{saved.length > 0 && <span className="nav-count">{saved.length}</span>}</button>
+        <button className={view === 'compare' ? 'active' : ''} aria-current={view === 'compare' ? 'page' : undefined} onClick={() => navigate('compare')}><GitCompareArrows size={16} />도시 비교{compareIds.length > 0 && <span className="nav-count">{compareIds.length}</span>}</button>
+      </nav>
+      <div className="header-actions"><button className="data-status-button" onClick={() => setModal('data')}>{loading ? <Spinner /> : <span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : ''}`} />}<span>{loading ? '공개 공고 조회 중' : catalog.source === 'sample' ? '샘플 탐색' : '공개 채용'}</span><ChevronDown size={12} /></button><span className="header-divider" /><button className="profile-avatar" onClick={() => setModal('profile')} aria-label="내 프로필 편집" title="내 프로필">{initials}<span /></button></div>
+    </header>
+    {view === 'explore' ? <>
+      <div className="search-toolbar">
+        <label className="global-search"><Search size={18} /><input ref={searchRef} value={filters.query} aria-label="도시, 회사 또는 포지션 검색" placeholder="도시, 회사 또는 포지션 검색" onChange={event => setFilters(current => ({ ...current, query: event.target.value }))} />{filters.query ? <button aria-label="검색어 지우기" onClick={() => setFilters(current => ({ ...current, query: '' }))}><X size={15} /></button> : <kbd>⌘ K</kbd>}</label>
+        <div className="quick-filters"><label className={`quick-filter ${filters.role !== 'all' ? 'is-active' : ''}`}><BriefcaseBusiness size={14} /><select aria-label="직무 필터" value={filters.role} onChange={event => setFilters(current => ({ ...current, role: event.target.value as Filters['role'] }))}>{Object.entries(ROLE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><ChevronDown size={12} /></label><label className={`quick-filter ${filters.workMode !== 'all' ? 'is-active' : ''}`}><Globe2 size={14} /><select aria-label="근무 형태 필터" value={filters.workMode} onChange={event => { const value = event.target.value as Filters['workMode']; setFilters(current => ({ ...current, workMode: value })); if (value === 'remote') setPanelTab('remote') }}>{Object.entries(MODE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><ChevronDown size={12} /></label><label className={`quick-filter visa-quick-filter ${filters.visa !== 'all' ? 'is-active' : ''}`}><select aria-label="비자 지원 필터" value={filters.visa} onChange={event => setFilters(current => ({ ...current, visa: event.target.value as Filters['visa'] }))}><option value="all">비자 지원 무관</option><option value="yes">비자 지원 확인</option><option value="possible">비자 미확인 포함</option></select><ChevronDown size={12} /></label><button className={`all-filters-button ${countFilters(filters) ? 'is-active' : ''}`} onClick={() => setModal('filters')}><SlidersHorizontal size={15} /><span>모든 필터</span>{countFilters(filters) > 0 && <span className="filter-count">{countFilters(filters)}</span>}</button></div>
+        <span className="toolbar-match-note"><Sparkles size={13} />내 경험과 연결되는 기회</span>
+      </div>
+      <main id="main-content" className="explore-layout" tabIndex={-1}>
+        <div className="map-stage" ref={mapStageRef}>
+          <div className="space-grain" />
+          <div className="map-title"><p className="eyebrow"><span />YOUR NEXT CHAPTER</p><h1>당신의 다음 챕터,<br /><span>어디서 시작할까요?</span></h1><p className="map-title-description">익숙한 경력에서, 예상하지 못한 가능성으로.</p><button className={`profile-cta ${profile.kind === 'personal' ? 'personal' : ''}`} onClick={() => setModal('profile')}>{profile.kind === 'sample' ? <Sparkles size={14} /> : <Check size={14} />}<span>{profile.kind === 'sample' ? '내 경력으로 기회 찾기' : `${profile.name} · 프로필 수정`}</span><ArrowUpRight size={14} /></button></div>
+          <div className="map-stats" aria-live="polite" aria-atomic="true"><div><span>추천 회사</span><strong>{companyCount}<small>곳</small></strong></div><span className="stats-divider" /><div><span>탐색 도시</span><strong>{cities.length}<small>곳</small></strong></div></div>
+          <div className="region-tabs" aria-label="탐색 지역">{Object.entries(REGION_LABELS).map(([value, label]) => <button className={filters.region === value ? 'active' : ''} key={value} aria-pressed={filters.region === value} onClick={() => { setSelectedId(null); setFilters(current => ({ ...current, region: value as Region })) }}>{value === 'all' && <Globe2 size={12} />}{label}</button>)}</div>
+          <Suspense fallback={<div className="map-loading"><span className="loading-planet" /><Spinner label="기회의 지도를 펼치는 중" /></div>}>
+            {mapMode === 'globe' ? <Globe ref={mapRef} results={cities} selectedId={selectedId} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onFailure={onGlobeFailure} onReady={onMapReady} light={light} /> : <FlatMap ref={mapRef} results={cities} selectedId={selectedId} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onReady={onMapReady} />}
+          </Suspense>
+          {profile.kind === 'sample' && <div className="sample-profile-card"><div className="sample-avatar">AK<span /></div><div><span>지금은 샘플 프로필로 탐색 중</span><strong>Software Engineer <span>· 5년</span></strong><p>TypeScript · React · Python +3</p></div><button aria-label="내 프로필 입력" onClick={() => setModal('profile')}><ArrowUpRight size={17} /></button></div>}
+          <div className="map-control-stack"><button className="map-compass" onClick={() => mapRef.current?.reset()} aria-label="지구 처음 위치로" title="처음 위치로"><span>N</span><Compass size={23} /></button><div className="map-zoom-controls"><button aria-label="지도 확대" title="확대" onClick={() => mapRef.current?.zoom(1)}><Plus size={18} /></button><span /><button aria-label="지도 축소" title="축소" onClick={() => mapRef.current?.zoom(-1)}><Minus size={18} /></button></div>{mapMode === 'globe' && <button className="map-single-control" aria-label={light ? '야간 지구로 전환' : '주간 지구로 전환'} title={light ? '야간 지구' : '주간 지구'} onClick={() => setLight(!light)}>{light ? <Moon size={17} /> : <Sun size={17} />}</button>}<button className="map-single-control fullscreen-button" aria-label="지도 전체 화면" title="전체 화면" onClick={fullscreen}><Maximize size={16} /></button></div>
+          <div className="map-bottom-bar"><div className="map-view-switch segmented"><button className={mapMode === 'globe' ? 'selected' : ''} aria-pressed={mapMode === 'globe'} onClick={() => setMapMode('globe')}><Globe2 size={13} />3D 지구</button><button className={mapMode === 'flat' ? 'selected' : ''} aria-pressed={mapMode === 'flat'} onClick={() => setMapMode('flat')}>2D 지도</button></div><span className="map-interaction-hint"><MousePointer2 size={12} />{mapMode === 'globe' ? '드래그로 회전 · 스크롤로 확대' : '드래그로 이동 · + / −로 확대'}</span><button className="map-legend" onClick={() => setModal('data')}><span />숫자 = 추천 회사 수<CircleHelp size={12} /></button></div>
+          <div className="map-footline"><span><span className="tiny-live-dot" />{catalog.cities.length}개 도시를 연결하는 커리어 지도</span><button onClick={() => { setPanelTab('remote'); setSelectedId(null) }}>원격으로 세계와 연결되기<ArrowRight size={12} /></button><button className="mobile-results-link" onClick={() => panelRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })}>도시 목록 보기<ChevronDown size={12} /></button></div>
+        </div>
+        <div ref={panelRef} className="panel-container"><CityPanel catalog={catalog} results={cities} remote={remote} selectedId={selectedId} tab={panelTab} profile={profile} compareIds={compareIds} savedIds={savedIds} onTab={setPanelTab} onSelect={selectCity} onHover={setHoveredId} onCompare={toggleCompare} onOpenJob={setOpenJob} onSave={toggleSave} onProfile={() => setModal('profile')} onData={() => setModal('data')} onFilters={() => setModal('filters')} onReset={resetFilters} /></div>
+      </main>
+      {(filters.query || countFilters(filters) > 0) && <div className="active-filter-summary"><span>{matches.length}개 공고가 현재 조건에 맞아요{filters.salaryMin > 0 && ` · 희망 연봉 $${filters.salaryMin / 1000}k+`}{filters.employment !== 'all' && ' · 고용 형태 필터 적용'}</span><button onClick={resetFilters}><RotateCcw size={11} />초기화</button></div>}
+    </> : view === 'saved' ? <SavedView saved={saved} profile={profile} onOpen={setOpenJob} onRemove={toggleSave} onExplore={() => navigate('explore')} /> : <CompareView catalog={catalog} results={cities} compareIds={compareIds} onToggle={toggleCompare} onAuto={() => setCompareIds(cities.slice(0, 3).map(result => result.city.id))} onSelect={id => { navigate('explore'); selectCity(id) }} onExplore={() => navigate('explore')} />}
+    <footer className="app-footer"><span><OrbitLogo small />A WORLD OF POSSIBILITIES.</span><span>{catalog.source === 'sample' ? 'DEMO WORKSPACE' : 'PUBLIC JOB BOARDS'}<span className="footer-dot">·</span>LOCAL FIRST<button onClick={() => setModal('data')}><Database size={11} />데이터와 추천 방식</button></span></footer>
+    {modal === 'profile' && <ProfileDialog profile={profile} filters={filters} onApply={applyProfile} onDelete={() => { deleteProfile(); setProfile(SAMPLE_PROFILE); setFilters({ ...DEFAULT_FILTERS }); setPanelTab('cities'); setSelectedId(null); setModal(null); notify('저장된 프로필을 삭제하고 샘플로 돌아왔어요.') }} onClose={() => setModal(null)} />}
+    {modal === 'filters' && <FiltersDialog filters={filters} catalog={catalog} profile={profile} onApply={updateFilters} onClose={() => setModal(null)} />}
+    {modal === 'data' && <DataDialog catalog={catalog} loading={loading} error={dataError} onSource={source => void changeSource(source)} onRefresh={() => void changeSource('greenhouse', true)} onClose={() => setModal(null)} />}
+    {openJob && <JobDialog match={{ ...openJob, ...matchJob(openJob.job, profile) }} saved={savedOpenJob} onToggleSave={() => toggleSave(openJob)} onUpdateSaved={update => setSaved(current => current.map(item => item.job.id === openJob.job.id ? { ...item, ...update } : item))} onClose={() => setOpenJob(null)} />}
+    {notice && <Toast message={notice.message} action={notice.action} onDismiss={closeNotice} />}
+  </div>
+}

@@ -1,0 +1,135 @@
+import { CITY_BY_ID } from './cities'
+import { MODE_LABELS, ROLE_LABELS, USD_RATES } from './types'
+import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
+
+export function toUsd(salary: Salary): { min: number; max: number } {
+  return { min: salary.min * USD_RATES[salary.currency], max: salary.max * USD_RATES[salary.currency] }
+}
+
+export function formatSalary(salary: Salary | null, usd = false): string {
+  if (!salary) return '연봉 미공개'
+  const value = usd ? { ...toUsd(salary), currency: 'USD' as const } : salary
+  if (value.currency === 'KRW') {
+    const short = (n: number) => n >= 100000000 ? `${Number((n / 100000000).toFixed(2))}억` : `${Math.round(n / 10000).toLocaleString('ko-KR')}만`
+    return `${short(value.min)}–${short(value.max)} 원`
+  }
+  const symbol = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', SGD: 'S$', JPY: '¥', CHF: 'CHF ' }[value.currency]
+  const divisor = value.currency === 'JPY' ? 1000000 : 1000
+  return `${symbol}${Math.round(value.min / divisor)}–${Math.round(value.max / divisor)}${value.currency === 'JPY' ? 'm' : 'k'}`
+}
+
+export function isRemoteEligible(job: Job, country: string): boolean {
+  return job.remoteWorldwide || job.remoteCountries.includes(country)
+}
+
+export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company' | 'job'> {
+  const profileSkills = new Set(profile.skills.map(skill => skill.toLowerCase()))
+  const matchedSkills = job.skills.filter(skill => profileSkills.has(skill.toLowerCase()))
+  const missingSkills = job.skills.filter(skill => !profileSkills.has(skill.toLowerCase()))
+  const skillScore = job.skills.length ? matchedSkills.length / job.skills.length * 60 : 12
+  const roleScore = profile.desiredRole === 'all' ? 15 : job.role === profile.desiredRole ? 25 : 0
+  const experienceScore = job.minExperience === null ? 8 : Math.max(0, 15 - Math.max(0, job.minExperience - profile.years) * 5)
+  const reasons: string[] = []
+  const cautions: string[] = []
+  if (matchedSkills.length) reasons.push(`${matchedSkills.slice(0, 3).join(' · ')} 경험과 연결돼요`)
+  if (profile.desiredRole !== 'all' && job.role === profile.desiredRole) reasons.push(`희망하는 ${ROLE_LABELS[job.role]} 직무예요`)
+  if (job.minExperience !== null && job.minExperience <= profile.years) reasons.push(`경력 ${profile.years}년이 공고의 ${job.minExperience}년 이상 조건에 부합해요`)
+  if (job.visa === 'yes') reasons.push('공고에서 비자 지원을 명시했어요')
+  if (job.workMode === 'remote' && isRemoteEligible(job, profile.residence)) reasons.push('선택한 거주 국가에서 원격 지원이 가능해요')
+  if (missingSkills.length) cautions.push(`경력에서 확인하지 못한 기술: ${missingSkills.slice(0, 5).join(', ')}`)
+  if (!job.skills.length) cautions.push('구체적인 기술 요구사항을 원문에서 확인해 주세요')
+  if (job.minExperience !== null && job.minExperience > profile.years) cautions.push(`요구 경력 ${job.minExperience}년 · 현재 입력한 경력보다 ${job.minExperience - profile.years}년 많아요`)
+  if (job.minExperience === null) cautions.push('최소 경력 연수가 확인되지 않았어요')
+  if (job.visa === 'unknown') cautions.push('비자 지원 여부는 회사에 확인이 필요해요')
+  if (job.visa === 'no') cautions.push('비자 지원이 없는 공고예요')
+  if (!job.salary) cautions.push('보상 범위가 공개되지 않았어요')
+  if (job.workMode === 'unknown') cautions.push('출근·원격 근무 형태를 확인해 주세요')
+  if (job.workMode === 'remote' && !isRemoteEligible(job, profile.residence)) cautions.push(job.remoteScopeUnknown ? '지원 가능한 거주 국가가 확인되지 않았어요' : '현재 선택한 거주 국가는 원격 지원 대상에 포함되지 않아요')
+  if (job.workMode === 'remote') cautions.push('원격근무 시간대와 현지 고용 가능 여부를 최종 확인해 주세요')
+  return { score: Math.round(skillScore + roleScore + experienceScore), matchedSkills, missingSkills, reasons, cautions }
+}
+
+export function filterJobs(catalog: Catalog, profile: Profile, filters: Filters): MatchedJob[] {
+  const companies = new Map(catalog.companies.map(company => [company.id, company]))
+  const query = filters.query.toLowerCase().trim().split(/\s+/).filter(Boolean)
+  const effectiveRole = filters.role
+  return catalog.jobs.flatMap(job => {
+    const company = companies.get(job.companyId)
+    if (!company) return []
+    if (effectiveRole !== 'all' && job.role !== effectiveRole) return []
+    if (filters.workMode !== 'all' && job.workMode !== filters.workMode) return []
+    if (filters.visa === 'yes' && job.visa !== 'yes') return []
+    if (filters.visa === 'possible' && job.visa === 'no') return []
+    if (filters.employment !== 'all' && job.employment !== filters.employment) return []
+    if (!job.salary && !filters.includeUnknownSalary) return []
+    if (filters.salaryMin > 0 && job.salary && toUsd(job.salary).max < filters.salaryMin) return []
+    if (job.workMode === 'remote' && filters.remoteEligibleOnly && !isRemoteEligible(job, profile.residence)) return []
+    if (filters.region !== 'all') {
+      if (job.workMode === 'remote') {
+        if (!job.remoteWorldwide && !catalog.cities.some(city => city.region === filters.region && job.remoteCountries.includes(city.countryCode))) return []
+      } else if (!job.cityIds.some(id => CITY_BY_ID.get(id)?.region === filters.region)) return []
+    }
+    if (query.length) {
+      const locations = job.cityIds.flatMap(id => {
+        const city = CITY_BY_ID.get(id)
+        return city ? [city.name, city.en, city.country, city.countryCode] : []
+      })
+      const haystack = [company.name, company.industry, job.title, ROLE_LABELS[job.role], MODE_LABELS[job.workMode], ...job.skills, ...locations, job.locationLabel].join(' ').toLowerCase()
+      if (!query.every(word => haystack.includes(word))) return []
+    }
+    const match = matchJob(job, profile)
+    if (job.skills.length && profile.skills.length && !match.matchedSkills.length && effectiveRole === 'all') return []
+    return [{ job, company, ...match }]
+  }).sort((a, b) => b.score - a.score || a.company.name.localeCompare(b.company.name) || a.job.id.localeCompare(b.job.id))
+}
+
+export function groupCities(catalog: Catalog, matches: MatchedJob[], filters: Filters): CityResult[] {
+  const byCity = new Map<string, MatchedJob[]>()
+  for (const match of matches) {
+    if (match.job.workMode === 'remote') continue
+    for (const id of new Set(match.job.cityIds)) {
+      const items = byCity.get(id) ?? []
+      items.push(match)
+      byCity.set(id, items)
+    }
+  }
+  return catalog.cities.flatMap(city => {
+    if (filters.region !== 'all' && city.region !== filters.region) return []
+    const cityMatches = byCity.get(city.id) ?? []
+    if (!cityMatches.length) return []
+    return [{
+      city, matches: cityMatches,
+      companyCount: new Set(cityMatches.map(match => match.company.id)).size,
+      averageScore: cityMatches.reduce((sum, match) => sum + match.score, 0) / cityMatches.length,
+    }]
+  }).sort((a, b) => b.companyCount - a.companyCount || b.averageScore - a.averageScore || a.city.en.localeCompare(b.city.en))
+}
+
+export function groupCompanies(matches: MatchedJob[]): { company: MatchedJob['company']; matches: MatchedJob[] }[] {
+  const grouped = new Map<string, { company: MatchedJob['company']; matches: MatchedJob[] }>()
+  for (const match of matches) {
+    const entry = grouped.get(match.company.id) ?? { company: match.company, matches: [] }
+    entry.matches.push(match)
+    grouped.set(match.company.id, entry)
+  }
+  return [...grouped.values()].sort((a, b) => b.matches[0].score - a.matches[0].score)
+}
+
+export function countFilters(filters: Filters): number {
+  return Number(filters.role !== 'all') + Number(filters.workMode !== 'all') + Number(filters.visa !== 'all')
+    + Number(filters.employment !== 'all') + Number(filters.salaryMin > 0 || !filters.includeUnknownSalary)
+}
+
+export function safeExternalUrl(value: string): string | undefined {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' && !url.username && !url.password ? url.href : undefined
+  } catch { return undefined }
+}
+
+export function medianSalary(matches: MatchedJob[]): number | null {
+  const salaries = matches.flatMap(({ job }) => job.salary ? [(toUsd(job.salary).min + toUsd(job.salary).max) / 2] : []).sort((a, b) => a - b)
+  if (!salaries.length) return null
+  const middle = Math.floor(salaries.length / 2)
+  return salaries.length % 2 ? salaries[middle] : (salaries[middle - 1] + salaries[middle]) / 2
+}

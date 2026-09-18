@@ -1,0 +1,53 @@
+import type { City } from './types'
+
+export const CITIES: City[] = [
+  { id: 'san-francisco', name: '샌프란시스코', en: 'San Francisco', country: '미국', countryCode: 'US', region: 'americas', lat: 37.7749, lng: -122.4194, timezone: 'America/Los_Angeles', description: '아이디어가 제품이 되는 곳. AI와 개발자 도구부터 차세대 스타트업까지 만나보세요.', image: 'san-francisco' },
+  { id: 'new-york', name: '뉴욕', en: 'New York', country: '미국', countryCode: 'US', region: 'americas', lat: 40.7128, lng: -74.006, timezone: 'America/New_York', description: '금융과 기술, 크리에이티브가 교차하는 도시. 다양한 산업의 엔지니어링 팀을 탐색하세요.', image: 'new-york' },
+  { id: 'seattle', name: '시애틀', en: 'Seattle', country: '미국', countryCode: 'US', region: 'americas', lat: 47.6062, lng: -122.3321, timezone: 'America/Los_Angeles', description: '클라우드와 인프라 기술이 성장하는 태평양 연안의 테크 허브.', image: 'seattle' },
+  { id: 'austin', name: '오스틴', en: 'Austin', country: '미국', countryCode: 'US', region: 'americas', lat: 30.2672, lng: -97.7431, timezone: 'America/Chicago', description: '새로운 팀과 기술이 모이는 텍사스의 엔지니어링 커뮤니티.' },
+  { id: 'boston', name: '보스턴', en: 'Boston', country: '미국', countryCode: 'US', region: 'americas', lat: 42.3601, lng: -71.0589, timezone: 'America/New_York', description: '연구와 산업을 잇는 도시. 데이터와 소프트웨어의 접점을 찾아보세요.' },
+  { id: 'toronto', name: '토론토', en: 'Toronto', country: '캐나다', countryCode: 'CA', region: 'americas', lat: 43.6532, lng: -79.3832, timezone: 'America/Toronto', description: '다양한 배경의 인재가 함께하는 캐나다의 기술 중심지.', image: 'toronto' },
+  { id: 'vancouver', name: '밴쿠버', en: 'Vancouver', country: '캐나다', countryCode: 'CA', region: 'americas', lat: 49.2827, lng: -123.1207, timezone: 'America/Vancouver', description: '태평양과 산 사이, 글로벌 기술 팀과 연결되는 도시.' },
+  { id: 'london', name: '런던', en: 'London', country: '영국', countryCode: 'GB', region: 'europe', lat: 51.5074, lng: -0.1278, timezone: 'Europe/London', description: '세계의 팀이 연결되는 도시. 핀테크부터 AI까지, 커리어의 다음 가능성을 발견하세요.', image: 'london' },
+  { id: 'berlin', name: '베를린', en: 'Berlin', country: '독일', countryCode: 'DE', region: 'europe', lat: 52.52, lng: 13.405, timezone: 'Europe/Berlin', description: '새로운 시도에 열려 있는 도시. 제품 중심의 스타트업과 글로벌 엔지니어링 팀을 만나보세요.', image: 'berlin' },
+  { id: 'amsterdam', name: '암스테르담', en: 'Amsterdam', country: '네덜란드', countryCode: 'NL', region: 'europe', lat: 52.3676, lng: 4.9041, timezone: 'Europe/Amsterdam', description: '국제적인 팀과 탄탄한 제품 문화. 유럽의 연결점에서 새로운 일을 시작하세요.', image: 'amsterdam' },
+  { id: 'paris', name: '파리', en: 'Paris', country: '프랑스', countryCode: 'FR', region: 'europe', lat: 48.8566, lng: 2.3522, timezone: 'Europe/Paris', description: 'AI 연구와 제품 개발이 만나는 유럽의 기술 생태계.', image: 'paris' },
+  { id: 'dublin', name: '더블린', en: 'Dublin', country: '아일랜드', countryCode: 'IE', region: 'europe', lat: 53.3498, lng: -6.2603, timezone: 'Europe/Dublin', description: '글로벌 기업의 유럽 팀과 함께 성장할 기회를 찾아보세요.' },
+  { id: 'stockholm', name: '스톡홀름', en: 'Stockholm', country: '스웨덴', countryCode: 'SE', region: 'europe', lat: 59.3293, lng: 18.0686, timezone: 'Europe/Stockholm', description: '음악, 결제, 디지털 경험을 만드는 북유럽의 제품 중심 도시.' },
+  { id: 'zurich', name: '취리히', en: 'Zurich', country: '스위스', countryCode: 'CH', region: 'europe', lat: 47.3769, lng: 8.5417, timezone: 'Europe/Zurich', description: '정교한 기술과 연구가 만나는 도시. 인프라와 데이터 분야를 살펴보세요.' },
+  { id: 'barcelona', name: '바르셀로나', en: 'Barcelona', country: '스페인', countryCode: 'ES', region: 'europe', lat: 41.3851, lng: 2.1734, timezone: 'Europe/Madrid', description: '지중해의 일상 속, 국제적인 제품 팀이 모여드는 도시.' },
+  { id: 'lisbon', name: '리스본', en: 'Lisbon', country: '포르투갈', countryCode: 'PT', region: 'europe', lat: 38.7223, lng: -9.1393, timezone: 'Europe/Lisbon', description: '대서양을 바라보며 세계의 팀과 연결되는 스타트업 커뮤니티.' },
+  { id: 'singapore', name: '싱가포르', en: 'Singapore', country: '싱가포르', countryCode: 'SG', region: 'asia-pacific', lat: 1.3521, lng: 103.8198, timezone: 'Asia/Singapore', description: '동남아시아를 연결하는 기술과 비즈니스의 허브.', image: 'singapore' },
+  { id: 'seoul', name: '서울', en: 'Seoul', country: '대한민국', countryCode: 'KR', region: 'asia-pacific', lat: 37.5665, lng: 126.978, timezone: 'Asia/Seoul', description: '빠른 제품 실험과 깊이 있는 기술. 익숙한 도시에서 새로운 팀을 발견하세요.', image: 'seoul' },
+  { id: 'tokyo', name: '도쿄', en: 'Tokyo', country: '일본', countryCode: 'JP', region: 'asia-pacific', lat: 35.6762, lng: 139.6503, timezone: 'Asia/Tokyo', description: '오랜 기술 기반과 새로운 스타트업이 함께 만들어가는 가능성.', image: 'tokyo' },
+  { id: 'sydney', name: '시드니', en: 'Sydney', country: '호주', countryCode: 'AU', region: 'asia-pacific', lat: -33.8688, lng: 151.2093, timezone: 'Australia/Sydney', description: '전 세계가 사용하는 제품을 만드는 호주의 크리에이티브 테크 허브.', image: 'sydney' },
+  { id: 'melbourne', name: '멜버른', en: 'Melbourne', country: '호주', countryCode: 'AU', region: 'asia-pacific', lat: -37.8136, lng: 144.9631, timezone: 'Australia/Melbourne', description: '디자인과 엔지니어링, 다양한 관점이 함께하는 도시.' },
+  { id: 'bengaluru', name: '벵갈루루', en: 'Bengaluru', country: '인도', countryCode: 'IN', region: 'asia-pacific', lat: 12.9716, lng: 77.5946, timezone: 'Asia/Kolkata', description: '대규모 시스템과 글로벌 제품을 개발하는 인도의 기술 중심지.' },
+]
+
+export const CITY_BY_ID = new Map(CITIES.map(city => [city.id, city]))
+
+export const LOCATION_ALIASES: Record<string, string[]> = {
+  'san-francisco': ['san francisco', 'san francisco bay area', 'bay area', 'south san francisco'],
+  'new-york': ['new york', 'new york city', 'nyc', 'manhattan', 'brooklyn'],
+  seattle: ['seattle'],
+  austin: ['austin'],
+  boston: ['boston', 'cambridge, ma', 'cambridge, massachusetts'],
+  toronto: ['toronto'],
+  vancouver: ['vancouver'],
+  london: ['london'],
+  berlin: ['berlin'],
+  amsterdam: ['amsterdam'],
+  paris: ['paris'],
+  dublin: ['dublin'],
+  stockholm: ['stockholm'],
+  zurich: ['zurich', 'zürich'],
+  barcelona: ['barcelona'],
+  lisbon: ['lisbon', 'lisboa'],
+  singapore: ['singapore'],
+  seoul: ['seoul', '서울'],
+  tokyo: ['tokyo', '東京'],
+  sydney: ['sydney'],
+  melbourne: ['melbourne'],
+  bengaluru: ['bengaluru', 'bangalore'],
+}
