@@ -13,8 +13,10 @@ import type { PostingStatusController } from '../hooks/usePostingStatus'
 import { EligibilityNotice } from './JobEligibilityDetails'
 import { jobRoleLabel } from '../../shared/job-roles'
 import { JobOccupationNotice } from './JobRoleDetails'
+import type { SavedJobsController } from '../hooks/useSavedJobs'
+import { SavedStorageNotice } from './SavedStorageNotice'
 
-export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
+export function SavedView({ saved, storage, showStorageStatus, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; storage: SavedJobsController; showStorageStatus: boolean; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [postingFilter, setPostingFilter] = useState('all')
@@ -38,13 +40,14 @@ export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onE
   }), [saved, status, query, postingFilter, observations, publicCount])
   return <main id="main-content" className="collection-page" tabIndex={-1}>
     <div className="page-heading"><div><p className="eyebrow">YOUR COLLECTION OF POSSIBILITIES</p><h1>가능성을 모아두는 곳<span className="accent-dot">.</span></h1><p>마음이 움직인 기회들. 이제 하나씩 다음 단계로 이어가 보세요.</p></div><button className="button secondary" disabled={!saved.length} onClick={() => exportSavedCsv(saved, observations)}><Download size={16} />CSV 내보내기</button></div>
+    {showStorageStatus && <SavedStorageNotice storage={storage} />}
     {publicCount > 0 && <section className="posting-toolbar" aria-labelledby="posting-status-title">
       <div className="posting-toolbar-top"><div><h2 id="posting-status-title">저장한 공고, 지금도 게시 중일까요?</h2><p>공개 공고 {publicCount}개의 게시 여부와 저장 내용의 차이를 확인해 보세요. 메모와 지원 기록은 그대로 보관돼요.</p></div><div className="posting-refresh"><button className="button secondary" disabled={loading || remaining > 0} onClick={() => void check()}><RefreshCw size={15} className={loading ? 'posting-refreshing' : ''} />{loading ? '게시 상태 확인 중' : checked ? '새로 확인' : '게시 상태 확인'}</button>{remaining > 0 && !loading && <small>{formatRetryWait(remaining)} 후 다시 확인 가능</small>}</div></div>
       <div className="posting-summary" role="status">{loading ? <p>회사별 공개 게시판을 확인하고 있어요.</p> : error ? <p>{error}</p> : checked ? <p><span>게시 확인 <strong>{counts.listed}</strong></span><span>내용 차이 <strong>{counts.changed}</strong></span><span>목록에서 미확인 <strong>{counts.missing}</strong></span><span>확인 필요 <strong>{counts.unknown}</strong></span></p> : <p>직접 확인할 때만 조회해요. 저장한 공고·메모·프로필은 전송하지 않습니다.</p>}</div>
       <div className="posting-toolbar-bottom"><p>공개 목록에서 찾지 못해도 채용 종료가 확정되는 것은 아니에요. 내용 차이는 원문 변경이나 정보 해석 방식에 따라 생길 수 있어요.</p><label className="posting-filter">게시 상태<select value={postingFilter} onChange={event => setPostingFilter(event.target.value)}><option value="all">전체 게시 상태</option><option value="listed">게시 확인</option><option value="changed">저장 내용과 차이</option><option value="missing">공개 목록에서 미확인</option><option value="unknown">확인 필요 · 미조회</option></select></label></div>
     </section>}
-    <div className="collection-toolbar"><div className="collection-tabs">{[['all', '전체', saved.length], ['saved', '검토 중', saved.filter(item => item.status === 'saved').length], ['applied', '지원 완료', saved.filter(item => item.status === 'applied').length]].map(([value, label, count]) => <button key={value} className={status === value ? 'active' : ''} onClick={() => setStatus(String(value))}>{label}<span>{count}</span></button>)}</div><label className="collection-search"><Search size={16} /><input aria-label="저장한 기회 검색" placeholder="저장한 기회 검색" value={query} onChange={event => setQuery(event.target.value)} /></label></div>
-    {matches.length ? <div className="saved-grid">{matches.map(item => {
+    {storage.ready && <div className="collection-toolbar"><div className="collection-tabs">{[['all', '전체', saved.length], ['saved', '검토 중', saved.filter(item => item.status === 'saved').length], ['applied', '지원 완료', saved.filter(item => item.status === 'applied').length]].map(([value, label, count]) => <button key={value} className={status === value ? 'active' : ''} onClick={() => setStatus(String(value))}>{label}<span>{count}</span></button>)}</div><label className="collection-search"><Search size={16} /><input aria-label="저장한 기회 검색" placeholder="저장한 기회 검색" value={query} onChange={event => setQuery(event.target.value)} /></label></div>}
+    {storage.ready && (matches.length ? <div className="saved-grid">{matches.map(item => {
       const match = { job: item.job, company: item.company, ...matchJob(item.job, profile) }
       return <article className="saved-card" key={item.job.id}>
         <header><CompanyLogo company={item.company} /><div><h2>{item.company.name}</h2><span>{item.company.industry}</span></div><button className="icon-button" aria-label={`${item.company.name} 저장 취소`} onClick={() => onRemove(match)}><BookmarkCheck size={18} /></button></header>
@@ -60,7 +63,7 @@ export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onE
         {item.note && <p className="saved-note-preview">{item.note}</p>}
         <footer><span className={`saved-status ${item.status === 'applied' ? 'applied' : ''}`}><span />{item.status === 'applied' ? '지원 완료' : '검토 중'}</span><span>{new Date(item.savedAt).toLocaleDateString('ko-KR')} 저장</span><button className="text-button" onClick={() => onOpen(match)}>자세히<ArrowRight size={13} /></button></footer>
       </article>
-    })}</div> : <EmptyState icon={<Bookmark size={31} />} title={saved.length ? '검색에 맞는 저장한 기회가 없어요' : '다음 챕터의 첫 기회를 저장해 보세요'} text={saved.length ? '다른 검색어나 상태를 선택해 보세요.' : '도시에서 관심 있는 회사를 발견하면 북마크를 눌러주세요. 공고와 메모를 이곳에서 이어서 볼 수 있어요.'}><button className="button primary" onClick={onExplore}>기회 탐색하기<ArrowRight size={16} /></button></EmptyState>}
+    })}</div> : <EmptyState icon={<Bookmark size={31} />} title={saved.length ? '검색에 맞는 저장한 기회가 없어요' : '다음 챕터의 첫 기회를 저장해 보세요'} text={saved.length ? '다른 검색어나 상태를 선택해 보세요.' : '도시에서 관심 있는 회사를 발견하면 북마크를 눌러주세요. 공고와 메모를 이곳에서 이어서 볼 수 있어요.'}><button className="button primary" onClick={onExplore}>기회 탐색하기<ArrowRight size={16} /></button></EmptyState>)}
     <p className="collection-footnote">저장한 공고와 메모는 이 브라우저에 보관돼요. 공개 공고의 채용 상태는 원문에서 다시 확인해 주세요.</p>
   </main>
 }

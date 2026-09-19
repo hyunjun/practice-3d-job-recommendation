@@ -1,3 +1,4 @@
+import { readSavedJson } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -52,7 +53,7 @@ test('an open job ages and expires without changing saved notes, application sta
   await page.getByRole('button', { name: '기회 저장', exact: true }).click()
   await page.getByLabel('이 기회에 대한 나의 메모').fill('Keep this private note after expiry')
   await page.getByRole('button', { name: '지원 완료로 표시', exact: true }).click()
-  const saved = await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))
+  const saved = await readSavedJson(page)
   await page.clock.fastForward(maxFallbackAge - freshFor + 1)
   await expect(page.locator('.job-freshness-notice')).toContainText('추천에서 제외된 조회 기록')
   await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue('Keep this private note after expiry')
@@ -66,7 +67,7 @@ test('an open job ages and expires without changing saved notes, application sta
   expect(server.requests).toHaveLength(1)
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
   await expect(page.locator('.saved-card .stale-job-badge')).toHaveText('확인 기간 지남')
-  expect(await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))).toBe(saved)
+  expect(await readSavedJson(page)).toBe(saved)
   const downloading = page.waitForEvent('download')
   await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
   const csv = await readFile((await (await downloading).path())!, 'utf8')
@@ -78,7 +79,7 @@ test('an open job ages and expires without changing saved notes, application sta
   await expect(page.locator('.catalog-placeholder, .company-card .stale-job-badge')).toHaveCount(0)
   expect(server.requests).toHaveLength(2)
   expect(server.requests.every(url => /\/api\/catalog\?source=public(?:&refresh=1)?$/.test(url))).toBe(true)
-  expect(await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))).toBe(saved)
+  expect(await readSavedJson(page)).toBe(saved)
 })
 
 test('partial expiry updates company counts, city comparison and per-board history without fabricating a failed fetch', async ({ page }) => {

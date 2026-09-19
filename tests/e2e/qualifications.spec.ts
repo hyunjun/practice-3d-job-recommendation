@@ -1,3 +1,4 @@
+import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -73,6 +74,7 @@ test('core qualifications rank ahead of optional overlaps and their evidence sur
   await page.getByRole('button', { name: '지원 완료로 표시', exact: true }).click()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.saved-card-match')).toHaveText('필수 항목 · Python · AWS')
   await expect(page.locator('.saved-note-preview')).toHaveText('필수 경험 확인 · Rust는 우대')
@@ -110,8 +112,9 @@ test('old saved qualification fields are rechecked while the application record 
   await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue('Keep this application record')
   await expect(page.getByRole('button', { name: '지원 완료로 표시됨', exact: true })).toBeVisible()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await waitForSavedCommit(page)
   await page.reload()
-  const stored = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
+  const stored = JSON.parse(await readSavedJson(page) || '[]')
   expect(stored[0]).toMatchObject({ savedAt: fetchedAt, status: 'applied', note: 'Keep this application record', job: { id: previous.id, fetchedAt, minExperience: 3, qualifications: { version: 1 } } })
 })
 

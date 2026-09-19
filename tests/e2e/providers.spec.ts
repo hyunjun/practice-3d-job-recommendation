@@ -1,3 +1,4 @@
+import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -88,6 +89,7 @@ test('mixed public sources preserve legacy exploration, saved jobs, conditional 
   await page.getByLabel('이 기회에 대한 나의 메모').fill('지역별 보상 조건 확인하기')
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.saved-card')).toHaveCount(2)
   await expect(page.locator('.saved-note-preview')).toContainText(['지역별 보상 조건 확인하기', 'Existing saved note'])
@@ -99,7 +101,7 @@ test('mixed public sources preserve legacy exploration, saved jobs, conditional 
   await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
   const csv = await readFile((await (await downloadPromise).path())!, 'utf8')
   for (const value of ['Greenhouse', 'Ashby', '별도 보상 조건', 'United Kingdom: GBP 100,000–140,000 / 년', 'Europe: EUR 90,000–130,000 / 년']) expect(csv).toContain(value)
-  const saved = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
+  const saved = JSON.parse(await readSavedJson(page) || '[]')
   expect(saved.map((item: SavedJob) => item.job.source)).toEqual(['ashby', 'greenhouse'])
   expect(saved[0].company.provider).toBe('ashby')
 })
@@ -167,8 +169,9 @@ test('a role-specific office schedule reaches the Vancouver hybrid filter withou
   await expect(page.locator('.job-compensation')).toContainText('지급 기간')
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await waitForSavedCommit(page)
   await page.reload()
-  const saved = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
+  const saved = JSON.parse(await readSavedJson(page) || '[]')
   expect(saved[0]).toMatchObject({
     company: { id: 'asana', provider: 'greenhouse', board: 'asana' },
     job: { workMode: 'hybrid', cityIds: ['vancouver'], fetchedAt: POSTING_TIME,
@@ -215,9 +218,10 @@ test('SmartRecruiters discovery, saved records, status checks and CSV keep the s
   await page.getByRole('button', { name: '지원 완료로 표시', exact: true }).click()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.saved-card')).toHaveCount(2)
-  const stored = await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))
+  const stored = await readSavedJson(page)
   expect(JSON.parse(stored || '[]')[0]).toMatchObject({
     company: { id: canva.id, provider: 'smartrecruiters', board: 'Canva' },
     job: { id: smartJob.id, source: 'smartrecruiters', fetchedAt: POSTING_TIME },
@@ -230,7 +234,7 @@ test('SmartRecruiters discovery, saved records, status checks and CSV keep the s
   await expect(notice).not.toContainText('내용 비교는 확인하지 못했습니다')
   await expect(notice.locator('.posting-changes')).toHaveCount(0)
   expect(requests).toEqual([{ url: expect.stringMatching(/\/api\/posting-status\?refresh=1$/), method: 'GET', body: null }])
-  expect(await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))).toBe(stored)
+  expect(await readSavedJson(page)).toBe(stored)
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
   const csv = await readFile((await (await downloadPromise).path())!, 'utf8')

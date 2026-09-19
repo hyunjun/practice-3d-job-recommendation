@@ -3,7 +3,7 @@ import { needsOccupationDescription, upgradeJobOccupation } from '../../shared/j
 import { JobSchema } from '../../shared/schemas'
 import { createSampleCatalog } from '../../shared/sample'
 import type { Company, Job, SavedJob } from '../../shared/types'
-import { loadSaved, STORAGE_KEYS } from '../../src/lib/storage'
+import { decodeSavedJobs } from '../../shared/saved-jobs'
 import { parseCachedBoards } from '../../server/board-cache'
 import { BoardFetchError, CATALOG_POLICY, createCatalogService } from '../../server/catalog-service'
 import { createSmartRecruitersFetcher, normalizeSmartRecruitersJob, SmartRecruitersJobSchema } from '../../server/providers/smartrecruiters'
@@ -132,8 +132,7 @@ describe('SmartRecruiters public facts', () => {
     expect(cached.snapshot?.publishedIds).toEqual([legacy.id, current.id])
     expect(cached.snapshot?.fetchedAt).toBe(POSTING_TIME)
     const saved: SavedJob = { job: legacy, company, savedAt: POSTING_TIME, note: 'preserve this private note', status: 'applied' }
-    vi.stubGlobal('localStorage', { getItem: (key: string) => key === STORAGE_KEYS.saved ? JSON.stringify([saved]) : null })
-    expect(loadSaved()).toMatchObject([{
+    expect(decodeSavedJobs(JSON.stringify([saved])).records).toMatchObject([{
       savedAt: POSTING_TIME, note: saved.note, status: 'applied',
       job: { id: legacy.id, fetchedAt: POSTING_TIME, occupation: { version: 2, category: 'other', departments: ['Product Research'] } },
     }])

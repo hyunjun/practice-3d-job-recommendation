@@ -15,7 +15,7 @@ import { createSearchIndex } from '../../shared/job-search'
 import { analyzeSearchRecovery } from '../../shared/search-recovery'
 import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Job, SavedJob } from '../../shared/types'
-import { loadSaved, STORAGE_KEYS } from '../../src/lib/storage'
+import { decodeSavedJobs } from '../../shared/saved-jobs'
 import { SEARCH_COMPANIES, SEARCH_TIME, searchCatalog, searchJob } from '../fixtures/search-catalog'
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals() })
@@ -231,8 +231,7 @@ describe('collection, cached scope and saved records', () => {
 
   it('reclassifies saved jobs without deleting records, notes, application status or original dates', () => {
     const saved: SavedJob = { job: legacySupport, company, savedAt: '2026-09-19T08:01:00.000Z', status: 'applied', note: 'private-scope-note' }
-    vi.stubGlobal('localStorage', { getItem: (key: string) => key === STORAGE_KEYS.saved ? JSON.stringify([saved]) : null })
-    const restored = loadSaved()
+    const restored = decodeSavedJobs(JSON.stringify([saved])).records
     expect(restored).toHaveLength(1)
     expect(restored[0]).toMatchObject({
       savedAt: saved.savedAt, status: 'applied', note: saved.note, company,

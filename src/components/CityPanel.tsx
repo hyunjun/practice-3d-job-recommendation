@@ -26,6 +26,7 @@ interface Props {
   profile: Profile
   compareIds: string[]
   savedIds: Set<string>
+  saveReady: boolean
   onTab: (tab: ExplorationState['panelTab']) => void
   onSort: (sort: ExplorationState['citySort']) => void
   onSelect: (id: string | null) => void
@@ -40,7 +41,7 @@ interface Props {
 }
 
 export function CityPanel(props: Props) {
-  const { catalog, results, remote, unmapped, remoteEligibleOnly, selectedId, tab, sort, status, emptyState, profile, compareIds, savedIds, onSort, onTab, onSelect, onHover, onCompare, onOpenJob, onSave, onProfile, onData, onFilters } = props
+  const { catalog, results, remote, unmapped, remoteEligibleOnly, selectedId, tab, sort, status, emptyState, profile, compareIds, savedIds, saveReady, onSort, onTab, onSelect, onHover, onCompare, onOpenJob, onSave, onProfile, onData, onFilters } = props
   const sorted = useMemo(() => [...results].sort((a, b) => sort === 'match' ? b.averageScore - a.averageScore : sort === 'salary' ? (medianSalary(b.matches) ?? -1) - (medianSalary(a.matches) ?? -1) : b.companyCount - a.companyCount || b.averageScore - a.averageScore), [results, sort])
   const selectedResult = results.find(result => result.city.id === selectedId)
   const selectedCity = selectedId ? CITY_BY_ID.get(selectedId) : null
@@ -67,7 +68,7 @@ export function CityPanel(props: Props) {
           {selectedResult && <div className="city-reason"><SparkleMark /><span>{mostMatchedSkills(selectedResult.matches).slice(0, 2).join(' · ') || '개발'} 경험을 찾는 팀이 있어요.</span></div>}
         </div>
         <div className="company-list">
-          {selectedResult ? groupCompanies(selectedResult.matches).map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} onOpen={onOpenJob} onSave={onSave} />) : emptyState}
+          {selectedResult ? groupCompanies(selectedResult.matches).map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} saveReady={saveReady} onOpen={onOpenJob} onSave={onSave} />) : emptyState}
         </div>
       </> : <>
         <div className="results-heading"><div><p className="eyebrow">YOUR NEXT DESTINATION</p><h2>가능성이 있는 도시<span className="accent-dot">.</span></h2><p>당신의 경험과 연결되는 팀을 찾아보세요.</p></div></div>
@@ -85,7 +86,7 @@ export function CityPanel(props: Props) {
       </> : tab === 'remote' ? <>
         <div className="results-heading remote-heading"><span className="remote-illustration"><Globe2 size={30} /><span /></span><p className="eyebrow">A CAREER WITHOUT BORDERS</p><h2>어디서든, 함께<span className="accent-dot">.</span></h2><p>출근할 도시보다 함께할 팀이 중요하다면.</p><button className="residence-button" onClick={onProfile}><MapPin size={13} />{COUNTRIES.find(([id]) => id === profile.residence)?.[1] ?? profile.residence}{remoteEligibleOnly ? ' 거주 기준' : ' · 프로필 거주 국가'}<ArrowRight size={13} /></button>{!remoteEligibleOnly && <p className="remote-range-note">거주 국가 밖·지역 미확인 공고도 표시 중이에요. 실제 근무 가능 지역은 원문에서 확인해 주세요.</p>}</div>
         <div className="list-toolbar"><span>{remoteCompanies.length}개 회사 · {remote.length}개 공고</span><button className="text-button muted" onClick={onFilters}><SlidersHorizontal size={12} />조건</button></div>
-        <div className="company-list">{remoteCompanies.length ? remoteCompanies.map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} onOpen={onOpenJob} onSave={onSave} />) : emptyState}</div>
+        <div className="company-list">{remoteCompanies.length ? remoteCompanies.map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} saveReady={saveReady} onOpen={onOpenJob} onSave={onSave} />) : emptyState}</div>
       </> : <>
         <div className="results-heading unmapped-heading">
           <p className="eyebrow">BEYOND THE MAP</p><h2>그 밖의 근무지<span className="accent-dot">.</span></h2>
@@ -98,14 +99,14 @@ export function CityPanel(props: Props) {
           </div>}
         </div>
         <div className="list-toolbar"><span>{unmappedCompanies.length}개 회사 · {unmapped.length}개 공고</span><button className="text-button muted" onClick={onFilters}><SlidersHorizontal size={12} />조건</button></div>
-        <div className="company-list">{unmappedCompanies.length ? unmappedCompanies.map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} onOpen={onOpenJob} onSave={onSave} />) : emptyState}</div>
+        <div className="company-list">{unmappedCompanies.length ? unmappedCompanies.map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} saveReady={saveReady} onOpen={onOpenJob} onSave={onSave} />) : emptyState}</div>
       </>)}
     </div>
     <button className="panel-data-footer" onClick={onData}><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>{catalog.source === 'sample' ? '샘플 데이터로 탐색 중' : catalog.boards.some(board => board.status === 'pending') ? '회사별 수집 진행 확인' : !catalog.fetchedAt ? '공개 공고 연결 확인' : catalogNeedsAttention(catalog) ? '일부 게시판 · 조회 상태 확인' : '회사별 공개 채용공고'}</span><CircleHelp size={14} /></button>
   </aside>
 }
 
-export function CompanyCard({ matches, savedIds, onOpen, onSave }: { matches: MatchedJob[]; savedIds: Set<string>; onOpen: (match: MatchedJob) => void; onSave: (match: MatchedJob) => void }) {
+export function CompanyCard({ matches, savedIds, saveReady, onOpen, onSave }: { matches: MatchedJob[]; savedIds: Set<string>; saveReady: boolean; onOpen: (match: MatchedJob) => void; onSave: (match: MatchedJob) => void }) {
   const [expanded, setExpanded] = useState(false)
   const company = matches[0].company
   const visible = expanded ? matches : matches.slice(0, 1)
@@ -119,7 +120,7 @@ export function CompanyCard({ matches, savedIds, onOpen, onSave }: { matches: Ma
       <JobFreshnessNotice job={match.job} compact />
       <EligibilityNotice job={match.job} />
       <div className="mini-job-reason">{match.matchedSkills.length ? <Check size={12} /> : <CircleHelp size={12} />}<span>{match.skillSummary}</span></div>
-      <div className="mini-job-footer"><span className={`visa-tag ${match.job.visa === 'yes' ? 'confirmed' : match.job.visa === 'conditional' ? 'conditional' : ''}`}>{match.job.visa === 'yes' ? <ShieldCheck size={12} /> : <CircleHelp size={12} />}비자 {VISA_LABELS[match.job.visa]}</span><button className={`icon-button bookmark-button ${savedIds.has(match.job.id) ? 'is-saved' : ''}`} aria-label={`${company.name} ${match.job.title} ${savedIds.has(match.job.id) ? '저장 취소' : '저장'}`} onClick={() => onSave(match)}>{savedIds.has(match.job.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button></div>
+      <div className="mini-job-footer"><span className={`visa-tag ${match.job.visa === 'yes' ? 'confirmed' : match.job.visa === 'conditional' ? 'conditional' : ''}`}>{match.job.visa === 'yes' ? <ShieldCheck size={12} /> : <CircleHelp size={12} />}비자 {VISA_LABELS[match.job.visa]}</span><button className={`icon-button bookmark-button ${savedIds.has(match.job.id) ? 'is-saved' : ''}`} aria-label={`${company.name} ${match.job.title} ${savedIds.has(match.job.id) ? '저장 취소' : '저장'}`} disabled={!saveReady} onClick={() => onSave(match)}>{savedIds.has(match.job.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button></div>
     </div>)}
     {matches.length > 1 && <button className="more-jobs" onClick={() => setExpanded(!expanded)}>{expanded ? '공고 접기' : `${matches.length - 1}개 공고 더 보기`}<ChevronDown size={13} className={expanded ? 'rotated' : ''} /></button>}
   </article>

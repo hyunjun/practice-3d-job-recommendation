@@ -662,6 +662,26 @@ select option { background: #1e271c; color: var(--text); }
 .board-error { color: #d0b786; }
 .board-pending { color: #b1d4df; }
 .collection-page { flex: 1; padding: 47px 5.5vw 30px; max-width: 1550px; width: 100%; align-self: center; }
+.saved-storage-notice { margin: 0 0 20px; padding: 13px 15px; border: 1px solid #415637; border-radius: 8px; background: #22301d; font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
+.saved-storage-summary { display: flex; align-items: flex-start; gap: 9px; }
+.saved-storage-summary > svg, .saved-storage-summary > .spinner-wrap { flex-shrink: 0; margin-top: 3px; color: var(--accent); }
+.saved-storage-summary > div { min-width: 0; }
+.saved-storage-summary p { margin: 0; color: #d9e6cf; font-weight: 500; }
+.saved-storage-summary small { display: block; margin-top: 4px; font-size: 11px; color: #bac6b1; }
+.saved-storage-notice.has-error { border-color: #8f7844; background: #302b1e; }
+.saved-storage-notice.has-error .saved-storage-summary > svg, .saved-storage-notice.has-error .saved-storage-summary p { color: #f1d798; }
+.saved-storage-notice.has-error .saved-storage-summary small { color: #d6caaa; }
+.saved-storage-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; margin-top: 12px; }
+.saved-storage-actions .button { min-height: 36px; padding: 8px 12px; font-size: 11px; }
+.saved-storage-actions .text-button { min-height: 36px; white-space: normal; text-align: left; }
+.saved-recovery { margin-top: 10px; padding-top: 10px; border-top: 1px solid #61714c; }
+.saved-recovery summary { color: #e5d7a9; cursor: pointer; }
+.saved-recovery p { margin: 8px 0; color: #c2cbb8; }
+.saved-recovery small { display: block; margin-top: 8px; color: #b2bea8; font-size: 10px; }
+.global-saved-status { padding: 12px 24px 0; }
+.global-saved-status .saved-storage-notice { max-width: 1100px; margin: 0 auto 12px; }
+.saved-note-section .saved-storage-notice { margin: 10px 0 0; }
+.job-dialog .dialog-body > .saved-storage-notice { margin-bottom: 20px; }
 .page-heading { display: flex; align-items: center; justify-content: space-between; gap: 30px; margin-bottom: 38px; }
 .page-heading .eyebrow { font-size: 8px; color: #9cba81; letter-spacing: 2px; margin-bottom: 15px; }
 .page-heading h1 { font-size: 32px; line-height: 1.5; letter-spacing: -1.2px; font-weight: 430; }

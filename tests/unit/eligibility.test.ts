@@ -11,7 +11,7 @@ import { BoardSnapshotSchema } from '../../server/board-cache'
 import { normalizeJob } from '../../server/normalize'
 import { normalizeAshbyJob } from '../../server/providers/ashby'
 import { normalizeLeverJob } from '../../server/providers/lever'
-import { loadSaved, STORAGE_KEYS } from '../../src/lib/storage'
+import { decodeSavedJobs } from '../../shared/saved-jobs'
 import { ashbyPosting, leverPosting, POSTING_TIME } from '../fixtures/public-postings'
 
 const company = PUBLIC_COMPANIES[0]
@@ -194,8 +194,7 @@ describe('normalization, persistence and matching', () => {
     const { eligibility: _current, ...legacy } = makeJob(countryPolicy)
     const oldJob = { ...legacy, visa: 'yes' as const, stale: true }
     const previous: SavedJob = { job: oldJob, company, savedAt: '2026-09-18T06:00:00.000Z', status: 'applied', note: 'Original application note' }
-    vi.stubGlobal('localStorage', { getItem: (key: string) => key === STORAGE_KEYS.saved ? JSON.stringify([previous]) : null })
-    const restored = loadSaved()[0]
+    const restored = decodeSavedJobs(JSON.stringify([previous])).records[0]
     expect(restored).toMatchObject({ savedAt: previous.savedAt, status: 'applied', note: previous.note, job: { id: oldJob.id, fetchedAt: POSTING_TIME, stale: true, visa: 'conditional', eligibility: { version: 1 } } })
     const snapshot = BoardSnapshotSchema.parse({ fetchedAt: POSTING_TIME, jobs: [oldJob], total: 1, unmappedCount: 0, publishedIds: [oldJob.id] })
     expect(snapshot.jobs[0]).toMatchObject({ id: oldJob.id, fetchedAt: POSTING_TIME, visa: 'conditional' })

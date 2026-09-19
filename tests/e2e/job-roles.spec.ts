@@ -1,3 +1,4 @@
+import { readSaved, waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -105,6 +106,7 @@ test('legacy unknown roles and new evidence survive saving, reload, local search
   await page.getByRole('button', { name: '기회 저장', exact: true }).click()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.getByLabel('직무 필터', { exact: true }).selectOption('unknown')
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.getByLabel('직무 필터', { exact: true })).toHaveValue('unknown')
   expect((await stored(page)).filters.role).toBe('unknown')
@@ -118,7 +120,7 @@ test('legacy unknown roles and new evidence survive saving, reload, local search
   await expect(page.locator('.saved-card')).toHaveCount(1)
   await expect(page.locator('.saved-status')).toHaveText('지원 완료')
   await expect(page.locator('.saved-note-preview')).toHaveText('private-role-note')
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.saved')!))
+  const saved = await readSaved(page)
   expect(saved.find((item: { job: Job }) => item.job.id === generic.id)).toMatchObject({ savedAt, status: 'applied', note: 'private-role-note', job: { role: 'unknown', fetchedAt: SEARCH_TIME } })
   await page.getByLabel('저장한 기회 검색', { exact: true }).fill('데이터 엔지니어링')
   await expect(page.locator('.saved-card')).toHaveCount(1)

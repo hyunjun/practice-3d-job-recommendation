@@ -46,6 +46,7 @@
     "@types/topojson-client": "^3.1.5",
     "@vitejs/plugin-react": "^6.1.1",
     "esbuild": "^0.28.2",
+    "fake-indexeddb": "^6.2.5",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vite": "^8.3.0",

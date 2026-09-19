@@ -1,3 +1,4 @@
+import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -90,17 +91,18 @@ test('search finds other locations and preserves their source through detail, sa
   await page.getByRole('button', { name: '지원 완료로 표시', exact: true }).click()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.saved-card')).toHaveCount(1)
   await expect(page.locator('.saved-location')).toHaveText('Gurugram')
   await expect(page.locator('.saved-status')).toHaveText('지원 완료')
   await expect(page.locator('.saved-note-preview')).toHaveText('private-location-note')
-  const savedBefore = await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))
+  const savedBefore = await readSavedJson(page)
   await page.getByRole('button', { name: '게시 상태 확인', exact: true }).click()
   await expect(page.locator('.posting-notice')).toHaveClass(/listed/)
   await expect(page.locator('.posting-notice')).not.toHaveClass(/changed/)
   await expect(page.locator('.posting-notice')).not.toContainText('탐색 범위 밖')
-  expect(await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))).toBe(savedBefore)
+  expect(await readSavedJson(page)).toBe(savedBefore)
   const download = page.waitForEvent('download')
   await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
   const csvPath = await (await download).path()
@@ -143,6 +145,7 @@ test('region recovery discloses the broader scope, supports undo and keeps non-r
   await page.getByLabel('근무 형태 필터').selectOption('unknown')
   await expect(page.locator('.mini-job-location')).toHaveText('Gurugram')
   expect((await stored(page)).panelTab).toBe('unmapped')
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.mini-job-location')).toHaveText('Gurugram')
   expect((await stored(page)).filters).toEqual({ ...filters, region: 'all', workMode: 'unknown' })

@@ -1,3 +1,4 @@
+import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import express from 'express'
@@ -172,10 +173,11 @@ test('the actual saved-status button revalidates across visits and never renews 
       localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'sample', mapMode: 'flat' }))
     }, { job: server.catalog.jobs[0], company: SEARCH_COMPANIES[0] })
     await page.goto(`${server.origin}/#saved`)
-    const before = await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))
+    const before = await readSavedJson(page)
     await page.getByRole('button', { name: '게시 상태 확인', exact: true }).click()
     await expect(page.locator('.posting-notice.listed')).toHaveCount(1)
     expect(server.responses.map(response => response.status)).toEqual([200])
+    await waitForSavedCommit(page)
     await page.reload()
     await expect(page.locator('.posting-notice.unchecked')).toHaveCount(1)
     expect(server.calls.posting).toHaveLength(1)
@@ -191,7 +193,7 @@ test('the actual saved-status button revalidates across visits and never renews 
     await expect(page.locator('.posting-summary')).toContainText('불러오지 못했어요')
     expect(server.responses.at(-1)).toMatchObject({ status: 503, cacheControl: 'no-store' })
     expect(server.responses.every(response => response.path === '/api/posting-status?refresh=1')).toBe(true)
-    expect(await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))).toBe(before)
+    expect(await readSavedJson(page)).toBe(before)
   } finally {
     await page.goto('about:blank')
     await server.close()

@@ -208,3 +208,14 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 2026-09-19 문서·실제 공고·API 응답을 확인했습니다. 해당 공고는 캐나다 CAD 152,000–237,500, 미국 USD 149,600–215,100을 표시하지만 지급 기간은 명시하지 않습니다. 다른 공고의 연간 지급 문구나 나라 이름으로 기간·통화를 채우지 않습니다. 예시 금액은 원문 안에 남기고 별도의 확정 급여로 추가하지 않습니다.
 
 보상 문맥은 근처의 제목·설명과 이어지는 지역별 행 안에서만 사용합니다. 다른 섹션·복지 예산·보너스 설명을 만나면 상속을 멈추고, 급여 검토 주기를 급여의 지급 기간으로 사용하지 않습니다. 기존 캐시·저장 공고를 다시 읽을 때는 구조화된 보상과 따로 보관한 원문 근거를 유지하며, 재해석을 새 조회로 표시하지 않습니다.
+
+## 브라우저 저장 용량과 기록별 저장
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [MDN: Storage quotas and eviction criteria](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria) | localStorage의 용량 한도·QuotaExceededError, 브라우저별 IndexedDB 용량과 best-effort 보관 | 큰 공고 스냅샷은 IndexedDB에 저장하고, 공간 부족과 데이터 보관의 제한을 표시 |
+| [MDN: Using IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB) | 비동기 요청·오브젝트 스토어·트랜잭션, 여러 탭에서 열린 데이터베이스의 변경 처리 | 공고별 읽기·쓰기, 한 트랜잭션으로 이전, 버전 변경 시 연결 종료 |
+| [MDN: IDBTransaction complete](https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction/complete_event) | complete는 트랜잭션이 성공적으로 커밋된 뒤 발생 | put 요청이 성공해도 이후 트랜잭션이 중단되면 저장 완료로 표시하지 않음 |
+| [MDN: beforeunload](https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event) | 저장하지 않은 입력이 있을 때 이탈 안내에 사용할 수 있지만 특히 모바일에서 항상 실행되지 않음 | 대기 중인 변경이 있을 때만 등록하고, 실제 보관은 저장 완료 표시와 CSV로 확인 |
+
+2026-09-19 원문을 확인했습니다. 실제 보관 공고 1,322개 중 본문이 긴 500개의 저장 문자열은 이 환경의 localStorage 한도를 넘었고, 같은 자료를 IndexedDB에 기록한 뒤 앱에서 다시 읽는 것을 확인했습니다. 모든 500개 조합이 같은 크기이거나 IndexedDB 용량이 무제한이라는 뜻은 아닙니다. [저장소 동작과 제한](saved-storage.md)에 이전 원본의 보관 범위, 실패 후 재시도, 여러 탭의 동시 수정 규칙을 정리했습니다.

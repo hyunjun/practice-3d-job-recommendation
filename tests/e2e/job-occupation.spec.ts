@@ -1,3 +1,4 @@
+import { readSaved, waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -84,6 +85,7 @@ test('research duties drive the ML filter and survive saving, reload, posting co
   await page.getByLabel('이 기회에 대한 나의 메모').fill('private-research-note')
   await page.getByRole('button', { name: '지원 완료로 표시', exact: true }).click()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await waitForSavedCommit(page)
   await page.reload()
   await savedMenu(page).click()
   await expect(page.locator('.saved-card')).toHaveCount(1)
@@ -93,7 +95,7 @@ test('research duties drive the ML filter and survive saving, reload, posting co
   await page.getByRole('button', { name: '게시 상태 확인', exact: true }).click()
   await expect(page.locator('.posting-notice.listed')).toHaveCount(1)
   await expect(page.locator('.posting-notice.changed')).toHaveCount(0)
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.saved')!))
+  const saved = await readSaved(page)
   expect(saved[0]).toMatchObject({
     note: 'private-research-note', status: 'applied',
     job: { id: researcher.id, fetchedAt: SEARCH_TIME, occupation: { category: 'research' }, role: 'ml' },
@@ -130,10 +132,11 @@ test('an old out-of-scope saved posting remains readable and listed without send
   await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue('private-scope-note')
   await expect(page.getByRole('button', { name: '지원 완료로 표시됨', exact: true })).toBeVisible()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await waitForSavedCommit(page)
   await page.reload()
   await savedMenu(page).click()
   await expect(page.locator('.occupation-notice')).toContainText('현재 탐색 범위 밖')
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.saved')!))
+  const saved = await readSaved(page)
   expect(saved[0]).toMatchObject({ savedAt, status: 'applied', note: 'private-scope-note', job: { id: legacySupport.id, fetchedAt: SEARCH_TIME, occupation: { category: 'support' } } })
   const download = page.waitForEvent('download')
   await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()

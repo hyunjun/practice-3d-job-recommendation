@@ -1,3 +1,4 @@
+import { waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import path from 'node:path'
@@ -51,6 +52,7 @@ test('profile text is parsed locally, reviewed and persisted without the raw res
   const storage = await page.evaluate(() => Object.values(localStorage).join('\n'))
   expect(storage).not.toContain('DO_NOT_PERSIST_RAW_RESUME')
   expect(storage).not.toContain('alice-private@example.test')
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.getByLabel('직무 필터')).toHaveValue('backend')
   await expect(page.getByLabel('비자 지원 필터')).toHaveValue('yes')
@@ -111,6 +113,7 @@ test('saved opportunities preserve notes and status, export CSV and support undo
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
   await expect(page.locator('.saved-card')).toHaveCount(1)
   await expect(page.locator('.saved-note-preview')).toContainText('다음 주 포트폴리오')
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.saved-status')).toHaveText('지원 완료')
   const downloadPromise = page.waitForEvent('download')
@@ -137,6 +140,7 @@ test('city comparison is limited to three cities and survives navigation', async
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /도시 비교/ }).click()
   await expect(page.locator('.comparison-city')).toHaveCount(3)
   await expect(page.locator('.comparison-city-name')).toContainText(['런던', '베를린', '샌프란시스코'])
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.comparison-city')).toHaveCount(3)
   await page.getByRole('button', { name: '런던 비교에서 제거', exact: true }).click()
@@ -208,6 +212,7 @@ test('public conditions expose their evidence, preserve visa distinctions and su
   await page.getByLabel('비자 지원 필터').selectOption('possible')
   await expect(page.locator('.mini-job-title')).toHaveCount(3)
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await waitForSavedCommit(page)
   await page.reload()
   await page.locator('.saved-title').click()
   await expect(page.locator('.job-key-facts')).toContainText('조건부 지원 명시')

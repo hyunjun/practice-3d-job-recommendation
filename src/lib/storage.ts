@@ -1,11 +1,8 @@
 import { z } from 'zod'
 import { CITY_BY_ID } from '../../shared/cities'
-import { JobProviderSchema, JobSchema } from '../../shared/schemas'
 import { DEFAULT_FILTERS, ELIGIBILITY_LABELS, ELIGIBILITY_LEVEL_LABELS, JOB_ROLES, JOB_SOURCE_LABELS, QUALIFICATION_LABELS, ROLE_FILTER_LABELS, SAMPLE_PROFILE, VISA_LABELS } from '../../shared/types'
 import { formatCompensation, formatJobSalary } from '../../shared/matching'
-import { upgradeJobCompensation } from '../../shared/job-compensation'
-import { formatExperienceYears, upgradeJobQualifications } from '../../shared/job-qualifications'
-import { upgradeJobEligibility } from '../../shared/job-eligibility'
+import { formatExperienceYears } from '../../shared/job-qualifications'
 import { jobRoleLabel, upgradeJobRole } from '../../shared/job-roles'
 import { jobOccupationLabel, upgradeJobOccupation } from '../../shared/job-occupation'
 import { jobFreshness } from '../../shared/catalog-freshness'
@@ -46,18 +43,6 @@ const ProfileSchema = z.object({
   }).optional(),
 })
 
-const SavedSchema = z.array(z.object({
-  job: JobSchema.transform(job => upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job, true)))))),
-  company: z.object({
-    id: z.string(), name: z.string().max(200), color: z.string().regex(/^#[0-9a-f]{6}$/i),
-    initials: z.string().max(8), industry: z.string().max(200), careerUrl: z.string().max(2000),
-    board: z.string().optional(), provider: JobProviderSchema.optional(), boardRegion: z.literal('eu').optional(),
-  }),
-  savedAt: z.string(),
-  status: z.enum(['saved', 'applied']),
-  note: z.string().max(5000),
-})).max(500)
-
 function load<T>(key: string, schema: z.ZodType<T>, fallback: T): T {
   try {
     const raw = localStorage.getItem(key)
@@ -69,10 +54,6 @@ function load<T>(key: string, schema: z.ZodType<T>, fallback: T): T {
 
 export function loadProfile(): Profile {
   return load<Profile>(STORAGE_KEYS.profile, ProfileSchema, SAMPLE_PROFILE)
-}
-
-export function loadSaved(): SavedJob[] {
-  return load(STORAGE_KEYS.saved, SavedSchema, [])
 }
 
 export function loadCompare(): string[] {

@@ -11,7 +11,8 @@ import { parseCachedBoards } from '../../server/board-cache'
 import { normalizeJob } from '../../server/normalize'
 import { AshbyJobSchema, normalizeAshbyJob } from '../../server/providers/ashby'
 import { LeverJobSchema, normalizeLeverJob } from '../../server/providers/lever'
-import { loadExploration, loadProfile, loadSaved, STORAGE_KEYS } from '../../src/lib/storage'
+import { loadExploration, loadProfile, STORAGE_KEYS } from '../../src/lib/storage'
+import { decodeSavedJobs } from '../../shared/saved-jobs'
 import { SEARCH_COMPANIES, SEARCH_TIME, searchCatalog } from '../fixtures/search-catalog'
 
 const company = SEARCH_COMPANIES[0]
@@ -182,7 +183,7 @@ describe('role upgrades and saved content comparisons', () => {
       [STORAGE_KEYS.saved, JSON.stringify([{ job: legacy, company, savedAt, status: 'applied', note: 'private role verification note' }])],
     ])
     vi.stubGlobal('localStorage', { getItem: (key: string) => values.get(key) ?? null })
-    const restored = loadSaved()
+    const restored = decodeSavedJobs(values.get(STORAGE_KEYS.saved)!).records
     expect(restored).toHaveLength(1)
     expect(restored[0]).toMatchObject({ savedAt, status: 'applied', note: 'private role verification note', job: { id: legacy.id, role: 'unknown', fetchedAt: SEARCH_TIME } })
     expect(loadExploration(loadProfile()).filters).toMatchObject({ role: 'unknown', query: 'Software' })

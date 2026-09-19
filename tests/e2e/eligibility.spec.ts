@@ -1,3 +1,4 @@
+import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -78,8 +79,9 @@ test('country-specific sponsorship stays conditional through filtering, evidence
   await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
   const csv = await readFile((await (await downloading).path())!, 'utf8')
   for (const value of ['취업 자격 조건', '취업 자격 근거', '조건부 지원 명시', countryPolicy, '독일과 다른 국가의 취업 허가 조건 확인']) expect(csv).toContain(value)
+  await waitForSavedCommit(page)
   await page.reload()
-  const stored = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
+  const stored = JSON.parse(await readSavedJson(page) || '[]')
   expect(stored[0]).toMatchObject({ status: 'applied', note: '독일과 다른 국가의 취업 허가 조건 확인', job: { id: countryJob.id, fetchedAt, visa: 'conditional', eligibility: { version: 1 } } })
 })
 
@@ -118,8 +120,9 @@ test('legacy saved support is rechecked while the original timestamp, note and a
   await expect(page.getByRole('button', { name: '지원 완료로 표시됨', exact: true })).toBeVisible()
   await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue(saved.note)
   await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await waitForSavedCommit(page)
   await page.reload()
-  const restored = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')[0]
+  const restored = JSON.parse(await readSavedJson(page) || '[]')[0]
   expect(restored).toMatchObject({ savedAt: saved.savedAt, status: saved.status, note: saved.note, job: { id: saved.job.id, fetchedAt: saved.job.fetchedAt, visa: 'conditional', eligibility: { version: 1 } } })
 })
 

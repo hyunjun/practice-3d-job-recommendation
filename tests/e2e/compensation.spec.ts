@@ -1,3 +1,4 @@
+import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -65,6 +66,7 @@ test('regional pay, original evidence and notes survive saving and CSV while onl
   await expect(salary).toContainText('$200k')
   await expect(salary).toContainText('연봉 공개 1개 공고 기준')
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.saved-note-preview')).toHaveText('내 지원 지역의 보상 구간 확인')
   await expect(page.locator('.saved-status')).toHaveText('지원 완료')
@@ -102,8 +104,9 @@ test('existing saved regional pay is rechecked without losing status or notes, a
     await expect(page.locator('.job-key-facts')).not.toContainText('USD / 년')
     await page.getByRole('button', { name: '닫기', exact: true }).click()
   }
+  await waitForSavedCommit(page)
   await page.reload()
-  const persisted = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
+  const persisted = JSON.parse(await readSavedJson(page) || '[]')
   expect(persisted[0]).toMatchObject({ savedAt: fetchedAt, status: 'applied', note: 'Keep this application note', job: { salary: null, compensationVersion: COMPENSATION_VERSION, fetchedAt } })
   expect(persisted[1].job.salary).toEqual(legacyJob.salary)
   expect(persisted[2].job).toMatchObject({ salary: legacyJob.salary, compensationVersion: 1 })
@@ -146,9 +149,10 @@ for (const width of [1440, 320]) {
     await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue(saved.note)
     await page.getByRole('button', { name: '닫기', exact: true }).click()
     await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+    await waitForSavedCommit(page)
     await page.reload()
     await expect(page.locator('.saved-status')).toHaveText('지원 완료')
-    const restored = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
+    const restored = JSON.parse(await readSavedJson(page) || '[]')
     expect(restored[0]).toMatchObject({
       company: { id: 'jane', provider: 'ashby', board: 'jane' },
       savedAt: fetchedAt, note: saved.note, status: 'applied',

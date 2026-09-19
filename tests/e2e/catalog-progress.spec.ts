@@ -1,3 +1,4 @@
+import { readSavedJson } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -44,7 +45,7 @@ test('first arrivals can be searched and saved while remaining companies load, w
   await page.getByRole('button', { name: '기회 저장', exact: true }).click()
   await page.getByLabel('이 기회에 대한 나의 메모').fill('수집 중에도 기록 유지')
   await page.getByRole('button', { name: '지원 완료로 표시', exact: true }).click()
-  const saved = await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))
+  const saved = await readSavedJson(page)
   completed = 2
   await page.clock.fastForward(1100)
   await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue('수집 중에도 기록 유지')
@@ -53,7 +54,7 @@ test('first arrivals can be searched and saved while remaining companies load, w
   await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
   await expect(page.getByLabel('도시, 회사 또는 포지션 검색')).toHaveValue('EarlyArrival')
   await expect(page.locator('.company-card')).toHaveCount(1)
-  expect(await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))).toBe(saved)
+  expect(await readSavedJson(page)).toBe(saved)
   await page.getByRole('button', { name: '검색어 지우기', exact: true }).click()
   await expect(page.locator('.company-card')).toHaveCount(2)
   const count = requests.length

@@ -1,3 +1,4 @@
+import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -86,9 +87,9 @@ test('explicit status checks compare locally, preserve private records and expor
   await restore(page)
   expect(requests).toHaveLength(0)
   await expect(page.locator('.posting-notice.unchecked')).toHaveCount(5)
-  const before = await page.evaluate(() => ({
-    saved: localStorage.getItem('orbit.v1.saved'), profile: localStorage.getItem('orbit.v1.profile'), exploration: localStorage.getItem('orbit.v1.exploration'),
-  }))
+  const before = ({ saved: await readSavedJson(page), ...(await page.evaluate(() => ({
+    profile: localStorage.getItem('orbit.v1.profile'), exploration: localStorage.getItem('orbit.v1.exploration'),
+  }))) })
   await page.getByRole('button', { name: '게시 상태 확인', exact: true }).click()
   await expect(card(page, 'saved title fixture').locator('.posting-changes')).toHaveText('포지션 · 보상 · 지원 링크 확인 필요')
   await expect(card(page, 'unchanged fixture').locator('.posting-notice')).toHaveClass(/listed/)
@@ -97,9 +98,9 @@ test('explicit status checks compare locally, preserve private records and expor
   await expect(card(page, 'outside map fixture').locator('.posting-notice')).toContainText('탐색 범위 밖')
   await expect(page.locator('.posting-summary')).toHaveText('게시 확인 3내용 차이 1목록에서 미확인 1확인 필요 1')
   expect(requests).toEqual([{ url: expect.stringMatching(/\/api\/posting-status\?refresh=1$/), method: 'GET', body: null }])
-  expect(await page.evaluate(() => ({
-    saved: localStorage.getItem('orbit.v1.saved'), profile: localStorage.getItem('orbit.v1.profile'), exploration: localStorage.getItem('orbit.v1.exploration'),
-  }))).toEqual(before)
+  expect(({ saved: await readSavedJson(page), ...(await page.evaluate(() => ({
+    profile: localStorage.getItem('orbit.v1.profile'), exploration: localStorage.getItem('orbit.v1.exploration'),
+  }))) })).toEqual(before)
   await page.getByRole('combobox', { name: '게시 상태', exact: true }).selectOption('changed')
   await expect(page.locator('.saved-card')).toHaveCount(1)
   await page.locator('.saved-title').click()
@@ -115,10 +116,11 @@ test('explicit status checks compare locally, preserve private records and expor
   await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
   const csv = await readFile((await (await downloading).path())!, 'utf8')
   for (const value of ['공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '표시 내용 일치', '미확인', '저장 내용과 다른 항목', '지원 완료', '공개 목록에서 미확인', '포지션 · 보상 · 지원 링크', 'Sample bookmark']) expect(csv).toContain(value)
+  await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.posting-notice.unchecked')).toHaveCount(5)
   expect(requests).toHaveLength(1)
-  expect(await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))).toBe(before.saved)
+  expect(await readSavedJson(page)).toBe(before.saved)
 })
 
 test('expired checks and request failures become unknown, then recover after the retry deadline', async ({ page }) => {
