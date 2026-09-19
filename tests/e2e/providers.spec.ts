@@ -140,6 +140,43 @@ test('regional remote discovery never implies country eligibility from a local o
   await expect(page.locator('.match-section.caution')).toContainText('원격근무 가능한 국가가 확인되지 않았어요')
 })
 
+test('a role-specific office schedule reaches the Vancouver hybrid filter without guessing annual pay or losing saved evidence', async ({ page }) => {
+  const company = PUBLIC_COMPANIES.find(item => item.id === 'asana')!
+  const schedule = 'This role is based in our Vancouver office with an office-centric hybrid schedule.'
+  const jobs = [true, false].map((annual, index) => normalizeJob({
+    id: 9700 + index, title: `Backend Engineer — ${annual ? 'annual' : 'unspecified period'} fixture`,
+    absolute_url: `https://example.com/jobs/vancouver-${index}`, location: { name: 'Vancouver, BC' },
+    content: `<p>${schedule}</p><p>Build software with TypeScript and Python. Three years of software engineering experience.</p><p>For this role, the base salary range is CAD $110,000 - $145,000${annual ? ' annually' : ''}.</p>`,
+  }, company.id, POSTING_TIME)!)
+  await page.addInitScript(filters => localStorage.setItem('orbit.v1.exploration', JSON.stringify({
+    source: 'public', selectedId: 'vancouver', mapMode: 'flat', filters: { ...filters, workMode: 'hybrid' },
+  })), DEFAULT_FILTERS)
+  await restore(page, catalog(jobs))
+  await expect(page.locator('.company-card')).toHaveCount(1)
+  await expect(page.locator('.company-card')).toContainText('Asana')
+  await expect(page.locator('.city-detail-count')).toContainText('2공고')
+  await page.getByRole('button', { name: '1개 공고 더 보기', exact: true }).click()
+  await page.locator('.mini-job-title').filter({ hasText: 'annual fixture' }).click()
+  await expect(page.locator('.job-meta-pills')).toContainText('하이브리드')
+  await expect(page.locator('.job-compensation')).toContainText('CAD 110,000–145,000 / 년')
+  await page.getByRole('button', { name: '기회 저장', exact: true }).click()
+  await page.getByLabel('이 기회에 대한 나의 메모').fill('밴쿠버 오피스 근무 조건 확인')
+  await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await page.locator('.mini-job-title').filter({ hasText: 'unspecified period' }).click()
+  await expect(page.locator('.job-key-facts')).toContainText('별도 보상 조건')
+  await expect(page.locator('.job-compensation')).toContainText('지급 기간')
+  await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await page.reload()
+  const saved = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
+  expect(saved[0]).toMatchObject({
+    company: { id: 'asana', provider: 'greenhouse', board: 'asana' },
+    job: { workMode: 'hybrid', cityIds: ['vancouver'], fetchedAt: POSTING_TIME,
+      evidence: { workMode: { source: 'description', text: schedule } } },
+    note: '밴쿠버 오피스 근무 조건 확인',
+  })
+})
+
 test('SmartRecruiters discovery, saved records, status checks and CSV keep the same public source identity', async ({ page }) => {
   const data = catalog([smartJob])
   const index: PostingStatusIndex = {
@@ -229,8 +266,8 @@ test.describe('mobile public sources', () => {
     })), DEFAULT_FILTERS)
     await restore(page, data)
     await page.getByRole('button', { name: '공개 채용', exact: true }).click()
-    await expect(page.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText(['Greenhouse10개 회사', 'Ashby5개 회사', 'Lever2개 회사', 'SmartRecruiters3개 회사'])
-    await expect(page.locator('.coverage-stats')).toContainText('20대상 회사')
+    await expect(page.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText(['Greenhouse11개 회사', 'Ashby6개 회사', 'Lever2개 회사', 'SmartRecruiters3개 회사'])
+    await expect(page.locator('.coverage-stats')).toContainText('22대상 회사')
     await page.locator('.board-details > summary').click()
     for (const name of ['Canva', 'Grab', 'Wise']) await expect(page.locator('.board-row').filter({ hasText: name })).toContainText('SmartRecruiters')
     expect(await page.locator('.dialog').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)

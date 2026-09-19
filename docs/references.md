@@ -185,3 +185,15 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 | [MDN: progressbar role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/progressbar_role) | 네이티브 `progress`, 접근 가능한 이름, 범위에 맞는 현재 값과 필요한 `aria-valuetext` | 처리된 회사 수로 진행을 표시하고 남은 시간·성공률처럼 표현하지 않음 |
 
 2026-09-19 원문을 확인했습니다. RFC는 구체적인 진행 확인·결과 병합 방식을 정하지 않으므로 [회사별 변경분 계약](catalog-progress.md)은 이 프로젝트에서 정의했습니다. 진행을 읽는 요청은 외부 게시판의 재조회와 분리하고, 완료된 회사의 공고만 추가 전송합니다. 연결 오류·취소 후에는 이미 받은 결과와 저장 기록을 유지하며 진행 번호가 다른 수집의 결과는 섞지 않습니다.
+
+## 밴쿠버와 캐나다 원격 공고
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [Asana 채용](https://asana.com/jobs) · [Vancouver 오피스](https://asana.com/jobs/vancouver) · [공개 Greenhouse API](https://boards-api.greenhouse.io/v1/boards/asana/jobs?content=true&pay_transparency=true) | 실제 공고별 근무지와 밴쿠버 채용, 직무 본문의 오피스 근무 일정 | Asana 공개 게시판을 추가하고, 해당 직무가 특정 오피스에서 하이브리드 일정으로 일한다는 명시적 문장을 판별 |
+| [Asana Senior Analytics Engineer](https://asana.com/jobs/apply/8075917?gh_jid=8075917) | 밴쿠버 근무, 직무별 하이브리드 문장, CAD 106,000–120,000와 연간 지급 명시 | 원문 근거와 통화·기간을 보존하며, 기간이 없는 다른 공고의 금액까지 연봉으로 추정하지 않음 |
+| [Jane 채용](https://jane.app/careers) · [공식 페이지에서 연결한 Ashby 게시판](https://jobs.ashbyhq.com/jane) · [공개 API](https://api.ashbyhq.com/posting-api/job-board/jane?includeCompensation=true) | 캐나다·미국의 원격 회사이며 개별 공고마다 근무 가능한 국가가 다름 | Jane 공개 게시판을 추가하고, 회사 주소를 도시 근무지로 사용하지 않으며 공고에 명시된 원격 국가 범위 유지 |
+
+2026-09-19 공식 페이지와 공개 API를 대조했습니다. 회사의 오피스 소개는 채용 출처를 확인하는 자료이며, 각 공고의 위치·근무 형태·원격근무 자격을 대신하지 않습니다. 회사 전체의 정책·가능성 표현·서로 충돌하는 본문은 직무의 확정된 근무 형태로 바꾸지 않습니다.
+
+같은 날 SmartRecruiters의 [Endpoints](https://developers.smartrecruiters.com/docs/endpoints)·[객체 설명](https://developers.smartrecruiters.com/docs/objects)과 상세 응답의 HTTP 재검증도 확인했습니다. `releasedDate`는 게시 날짜로 설명되어 있어 본문·활성 상태의 버전으로 취급하지 않았습니다. 확인한 상세 4건은 `ETag`가 있었지만 `If-None-Match` 요청에도 `200`으로 응답했고, 동일한 요청 헤더로 다시 확인한 Canva 공고도 같은 태그·본문의 `200`이었습니다. 이번 관측만으로 API 전체의 동작을 단정하지 않으며, 상세 조회를 생략하는 변경은 적용하지 않았습니다.

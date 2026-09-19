@@ -63,5 +63,6 @@
 - [Ashby Public Job Posting API](https://developers.ashbyhq.com/docs/public-job-posting-api): 회사별 공개 공고.
 - [Lever Postings API](https://github.com/lever/postings-api): 공개 공고와 페이지 조회.
 - [SmartRecruiters Posting API](https://developers.smartrecruiters.com/docs/posting-api): Canva·Grab·Wise의 공개 게시 목록과 공고 상세.
+- [Asana 공식 채용 페이지](https://asana.com/jobs)와 [Greenhouse 게시판](https://boards.greenhouse.io/asana), [Jane 공식 채용 페이지](https://jane.app/careers)와 [Ashby 게시판](https://jobs.ashbyhq.com/jane): 추가 공개 수집 대상. 회사 이니셜은 직접 만든 배지이며 공식 로고를 복사하지 않았습니다.
 - 원문 URL, 조회 시각, 회사와 근무지를 보존합니다. 공개 게시 여부는 조회 시점의 상태입니다.
 - 샘플 데이터는 ORBIT의 기능 체험용으로 작성한 가상 시나리오입니다.

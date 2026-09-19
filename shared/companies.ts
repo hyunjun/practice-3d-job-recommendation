@@ -45,11 +45,13 @@ function publicCompany(id: string, provider: JobProvider, board: string): Compan
 export const PUBLIC_COMPANIES: Company[] = [
   ...['stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'airbnb', 'gitlab', 'anthropic', 'intercom']
     .map(id => publicCompany(id, 'greenhouse', id)),
+  { id: 'asana', name: 'Asana', initials: 'A', color: '#f6a7aa', industry: '업무 관리 · 협업', careerUrl: 'https://asana.com/jobs', provider: 'greenhouse', board: 'asana' },
   publicCompany('linear', 'ashby', 'Linear'),
   publicCompany('deepl', 'ashby', 'DeepL'),
   { id: 'n8n', name: 'n8n', initials: 'n', color: '#f5a193', industry: '자동화 · 개발자 도구', careerUrl: 'https://n8n.io/careers/', provider: 'ashby', board: 'n8n' },
   { id: 'supabase', name: 'Supabase', initials: 'S', color: '#90deb8', industry: '데이터베이스 · 개발자 도구', careerUrl: 'https://supabase.com/careers', provider: 'ashby', board: 'supabase' },
   { id: 'mistral', name: 'Mistral AI', initials: 'M', color: '#f0ad7f', industry: 'AI · 언어 모델', careerUrl: 'https://mistral.ai/careers/', provider: 'ashby', board: 'mistral.ai' },
+  { id: 'jane', name: 'Jane', initials: 'J', color: '#83d1c7', industry: '헬스케어 · 진료 관리', careerUrl: 'https://jane.app/careers', provider: 'ashby', board: 'jane' },
   publicCompany('spotify', 'lever', 'spotify'),
   { id: 'contentsquare', name: 'Contentsquare', initials: 'C', color: '#f5bd83', industry: '디지털 경험 · 제품 분석', careerUrl: 'https://contentsquare.com/careers/', provider: 'lever', board: 'contentsquare' },
   publicCompany('canva', 'smartrecruiters', 'Canva'),

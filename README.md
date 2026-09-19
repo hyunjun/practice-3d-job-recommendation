@@ -64,12 +64,12 @@ PORT=5174 npm run dev
 
 샘플은 **22개 도시, 32개 실제 회사 이름을 활용한 체험용 시나리오**입니다. 공고·연봉·비자·근무 조건은 실제 채용 사실을 나타내지 않습니다. 샘플 공고의 링크는 실제 회사의 채용 페이지로 연결됩니다.
 
-공개 모드는 다음 **20개 회사의 공개 게시판 API**를 조회합니다.
+공개 모드는 다음 **22개 회사의 공개 게시판 API**를 조회합니다.
 
 | 출처 | 대상 회사 |
 | --- | --- |
-| Greenhouse | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom |
-| Ashby | Linear, DeepL, n8n, Supabase, Mistral AI |
+| Greenhouse | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom, Asana |
+| Ashby | Linear, DeepL, n8n, Supabase, Mistral AI, Jane |
 | Lever | Spotify, Contentsquare |
 | SmartRecruiters | Canva, Grab, Wise |
 
@@ -88,7 +88,7 @@ PORT=5174 npm run dev
 - 공고가 여러 도시에 해당하면 각 도시에 표시하고, 전체 회사 수에서는 중복을 제거합니다.
 - 직무별 위치 필드와 해당 공고의 위치 메타데이터를 우선합니다. `Hybrid`처럼 위치가 없는 경우에만 **그 공고에 연결된 오피스**를 확인합니다. 회사 본사를 임의로 사용하지 않습니다.
 - Ashby의 기본·추가 근무지와 구조화된 주소, Lever의 `allLocations`를 읽습니다. 주소에 국가가 있으면 같은 이름의 다른 도시로 연결하지 않습니다.
-- 근무·고용 형태는 `Workplace Type`, `Location Type`, `Employment Type`, `Time Type` 같은 공고별 필드를 우선합니다. 본문을 사용할 때는 해당 직무에 대한 명시적인 문장만 반영하며, 회사 전체의 복지나 유연근무 소개로 조건을 추정하지 않습니다.
+- 근무·고용 형태는 `Workplace Type`, `Location Type`, `Employment Type`, `Time Type` 같은 공고별 필드를 우선합니다. 본문을 사용할 때는 해당 직무에 대한 명시적인 문장만 반영합니다. 특정 오피스에서 하이브리드 일정으로 근무한다는 직무별 문장도 읽으며, 회사 전체의 복지나 유연근무 소개로 조건을 추정하지 않습니다.
 - 제공 도시에 연결되지 않은 개발 공고도 수집해 **기타 근무지**에서 보여줍니다. 원문 위치를 유지하고, 임의의 도시나 원격 공고로 바꾸지 않습니다. 회사 전체 집계·검색·저장·게시 상태 비교에도 포함합니다.
 - 기타 근무지는 **전 세계**에서만 표시합니다. 원문 지역명으로 검색할 수 있고 직무·보상·비자 등의 조건은 계속 적용합니다. 지역 필터를 해제해야 결과가 생기는 경우 변경 전·후 수치를 안내하고 사용자가 선택할 때만 적용합니다.
 - 데이터 화면에서 최근 조회·이전 조회·미확인 게시판, 회사별 마지막 정상 확인과 실패 시각, 재시도 가능 시각을 확인할 수 있습니다. 서버 조회와 열린 화면 모두 회사별 원래 시각을 기준으로 24시간을 넘긴 결과를 추천에서 제외합니다.

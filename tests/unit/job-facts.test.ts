@@ -73,6 +73,36 @@ describe('job-specific work and employment fields', () => {
     expect(employmentFact('Software Engineer', [], 'This role works with full-time colleagues.').value).toBe('unknown')
   })
 
+  it.each([
+    ['This role is based in our Vancouver office with an office-centric hybrid schedule.', 'hybrid'],
+    ['This position will be located at the Toronto office on a hybrid working arrangement.', 'hybrid'],
+    ['The job is based in Paris with a remote work arrangement.', 'remote'],
+  ])('keeps the role-specific schedule after an office location: %s', (text, expected) => {
+    expect(workModeFact('', [], text)).toEqual({ value: expected, evidence: { source: 'description', text } })
+  })
+
+  it.each([
+    'Our company has a Vancouver office with an office-centric hybrid schedule.',
+    'This role might be based in Vancouver with a hybrid schedule.',
+    'This role is not based in Vancouver with a hybrid schedule.',
+    'This role is based in Vancouver with a potential hybrid schedule.',
+    'This role is based in Vancouver with a team building hybrid schedule optimizers.',
+    'This role is based in Vancouver with a hybrid cloud model.',
+    'This role is based in Vancouver. Our other offices have a hybrid schedule.',
+  ])('does not turn a company policy, uncertain arrangement or product into the vacancy schedule: %s', text => {
+    expect(workModeFact('', [], text).value).toBe('unknown')
+  })
+
+  it('retains conflicting prose as unknown and gives an explicit board field precedence over an office schedule', () => {
+    const text = 'This role is based in our Vancouver office with an office-centric hybrid schedule.'
+    const contradictory = workModeFact('', [], `${text}\nThis role is fully remote.`)
+    expect(contradictory.value).toBe('unknown')
+    expect(contradictory.evidence?.text).toContain(text)
+    expect(workModeFact('', [{ name: 'Workplace Type', value: 'OnSite' }], text)).toEqual({
+      value: 'onsite', evidence: { source: 'board', text: 'Workplace Type: OnSite' },
+    })
+  })
+
   it('preserves contract categories and supports part-time and temporary positions', () => {
     expect(employmentFact('Software Engineer Intern', [{ name: 'Time Type', value: 'Full time' }], '').value).toBe('intern')
     expect(employmentFact('Software Engineer (Contract)', [{ name: 'Time Type', value: 'Full time' }], '').value).toBe('contract')
