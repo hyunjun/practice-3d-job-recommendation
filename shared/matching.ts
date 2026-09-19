@@ -1,8 +1,9 @@
-import { CITY_BY_ID } from './cities'
-import { MODE_LABELS, ROLE_LABELS, USD_RATES } from './types'
+import { ROLE_LABELS, USD_RATES } from './types'
 import { formatExperienceYears } from './job-qualifications'
-import { matchingSkills, matchQualifications } from './qualification-matching'
+import { matchQualifications } from './qualification-matching'
 import { eligibilitySummary } from './job-eligibility'
+import { createSearchIndex, selectSearchJobs } from './job-search'
+import type { SearchEntry } from './job-search'
 import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
 
 export function toUsd(salary: Salary): { min: number; max: number } {
@@ -77,39 +78,12 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
 }
 
 export function filterJobs(catalog: Catalog, profile: Profile, filters: Filters): MatchedJob[] {
-  const companies = new Map(catalog.companies.map(company => [company.id, company]))
-  const query = filters.query.toLowerCase().trim().split(/\s+/).filter(Boolean)
-  const effectiveRole = filters.role
-  return catalog.jobs.flatMap(job => {
-    const company = companies.get(job.companyId)
-    if (!company) return []
-    if (effectiveRole !== 'all' && job.role !== effectiveRole) return []
-    if (filters.workMode !== 'all' && job.workMode !== filters.workMode) return []
-    if (filters.visa === 'yes' && job.visa !== 'yes') return []
-    if (filters.visa === 'supported' && job.visa !== 'yes' && job.visa !== 'conditional') return []
-    if (filters.visa === 'possible' && job.visa === 'no') return []
-    if (filters.employment !== 'all' && job.employment !== filters.employment) return []
-    if (!job.salary && !filters.includeUnknownSalary) return []
-    if (filters.salaryMin > 0 && job.salary && toUsd(job.salary).max < filters.salaryMin) return []
-    if (job.workMode === 'remote' && filters.remoteEligibleOnly && !isRemoteEligible(job, profile.residence)) return []
-    if (filters.region !== 'all') {
-      if (job.workMode === 'remote') {
-        if (!job.remoteWorldwide && !job.remoteRegions?.includes(filters.region)
-          && !catalog.cities.some(city => city.region === filters.region && job.remoteCountries.includes(city.countryCode))) return []
-      } else if (!job.cityIds.some(id => CITY_BY_ID.get(id)?.region === filters.region)) return []
-    }
-    if (query.length) {
-      const locations = job.cityIds.flatMap(id => {
-        const city = CITY_BY_ID.get(id)
-        return city ? [city.name, city.en, city.country, city.countryCode] : []
-      })
-      const haystack = [company.name, company.industry, job.title, ROLE_LABELS[job.role], MODE_LABELS[job.workMode], ...job.skills, ...locations, job.locationLabel].join(' ').toLowerCase()
-      if (!query.every(word => haystack.includes(word))) return []
-    }
-    const match = matchJob(job, profile)
-    if (matchingSkills(job).length && profile.skills.length && !match.matchedSkills.length && effectiveRole === 'all') return []
-    return [{ job, company, ...match }]
-  }).sort((a, b) => b.score - a.score || a.company.name.localeCompare(b.company.name) || a.job.id.localeCompare(b.job.id))
+  return rankSearchJobs(selectSearchJobs(createSearchIndex(catalog, profile), filters), profile)
+}
+
+export function rankSearchJobs(entries: SearchEntry[], profile: Profile): MatchedJob[] {
+  return entries.map(({ job, company }) => ({ job, company, ...matchJob(job, profile) }))
+    .sort((a, b) => b.score - a.score || a.company.name.localeCompare(b.company.name) || a.job.id.localeCompare(b.job.id))
 }
 
 export function groupCities(catalog: Catalog, matches: MatchedJob[], filters: Filters): CityResult[] {
@@ -147,6 +121,7 @@ export function groupCompanies(matches: MatchedJob[]): { company: MatchedJob['co
 export function countFilters(filters: Filters): number {
   return Number(filters.role !== 'all') + Number(filters.workMode !== 'all') + Number(filters.visa !== 'all')
     + Number(filters.employment !== 'all') + Number(filters.salaryMin > 0 || !filters.includeUnknownSalary)
+    + Number(!filters.remoteEligibleOnly)
 }
 
 export function safeExternalUrl(value: string): string | undefined {

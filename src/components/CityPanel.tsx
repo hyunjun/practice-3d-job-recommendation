@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronDown, CircleHelp, Globe2, MapPin, Plus, SearchX, ShieldCheck, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronDown, CircleHelp, Globe2, MapPin, Plus, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import { CITY_BY_ID } from '../../shared/cities'
 import { catalogNeedsAttention } from '../../shared/catalog-health'
 import { formatJobSalary, groupCompanies, medianSalary } from '../../shared/matching'
 import { COUNTRIES, MODE_LABELS, VISA_LABELS } from '../../shared/types'
 import type { Catalog, CityResult, MatchedJob, Profile } from '../../shared/types'
 import type { ExplorationState } from '../lib/storage'
-import { CityImage, CompanyLogo, EmptyState } from './ui'
+import { CityImage, CompanyLogo } from './ui'
 import { JobFreshnessNotice } from './JobFreshnessNotice'
 import { EligibilityNotice } from './JobEligibilityDetails'
 
@@ -15,6 +15,7 @@ interface Props {
   catalog: Catalog
   results: CityResult[]
   remote: MatchedJob[]
+  remoteEligibleOnly: boolean
   selectedId: string | null
   tab: 'cities' | 'remote'
   sort: ExplorationState['citySort']
@@ -32,17 +33,17 @@ interface Props {
   onProfile: () => void
   onData: () => void
   onFilters: () => void
-  onReset: () => void
+  emptyState: ReactNode
 }
 
 export function CityPanel(props: Props) {
-  const { catalog, results, remote, selectedId, tab, sort, status, profile, compareIds, savedIds, onSort, onTab, onSelect, onHover, onCompare, onOpenJob, onSave, onProfile, onData, onFilters, onReset } = props
+  const { catalog, results, remote, remoteEligibleOnly, selectedId, tab, sort, status, emptyState, profile, compareIds, savedIds, onSort, onTab, onSelect, onHover, onCompare, onOpenJob, onSave, onProfile, onData, onFilters } = props
   const sorted = useMemo(() => [...results].sort((a, b) => sort === 'match' ? b.averageScore - a.averageScore : sort === 'salary' ? (medianSalary(b.matches) ?? -1) - (medianSalary(a.matches) ?? -1) : b.companyCount - a.companyCount || b.averageScore - a.averageScore), [results, sort])
   const selectedResult = results.find(result => result.city.id === selectedId)
   const selectedCity = selectedId ? CITY_BY_ID.get(selectedId) : null
   const remoteCompanies = groupCompanies(remote)
 
-  return <aside className="results-panel" aria-label="도시와 회사 탐색 결과">
+  return <aside className="results-panel" aria-label="도시와 회사 탐색 결과" tabIndex={-1}>
     <div className="results-tabs">
       <button className={tab === 'cities' ? 'active' : ''} aria-pressed={tab === 'cities'} onClick={() => onTab('cities')}><MapPin size={15} />도시 탐색<span>{catalog.fetchedAt ? results.length : '—'}</span></button>
       <button className={tab === 'remote' ? 'active' : ''} aria-pressed={tab === 'remote'} onClick={() => onTab('remote')}><Globe2 size={15} />원격 기회<span>{catalog.fetchedAt ? remoteCompanies.length : '—'}</span></button>
@@ -60,7 +61,7 @@ export function CityPanel(props: Props) {
           {selectedResult && <div className="city-reason"><SparkleMark /><span>{mostMatchedSkills(selectedResult.matches).slice(0, 2).join(' · ') || '개발'} 경험을 찾는 팀이 있어요.</span></div>}
         </div>
         <div className="company-list">
-          {selectedResult ? groupCompanies(selectedResult.matches).map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} onOpen={onOpenJob} onSave={onSave} />) : <EmptyState icon={<SearchX size={25} />} title="이 도시에서 맞는 공고를 찾지 못했어요" text="다른 도시를 살펴보거나 검색 조건을 조정해 보세요."><button className="button secondary" onClick={onFilters}>조건 조정하기</button></EmptyState>}
+          {selectedResult ? groupCompanies(selectedResult.matches).map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} onOpen={onOpenJob} onSave={onSave} />) : emptyState}
         </div>
       </> : <>
         <div className="results-heading"><div><p className="eyebrow">YOUR NEXT DESTINATION</p><h2>가능성이 있는 도시<span className="accent-dot">.</span></h2><p>당신의 경험과 연결되는 팀을 찾아보세요.</p></div></div>
@@ -73,12 +74,12 @@ export function CityPanel(props: Props) {
             <ArrowUpRight className="city-hover-arrow" size={17} />
           </button>
           <button className={`row-compare ${compareIds.includes(result.city.id) ? 'added' : ''}`} aria-label={`${result.city.name} ${compareIds.includes(result.city.id) ? '비교에서 제거' : '비교에 추가'}`} title="도시 비교" onClick={() => onCompare(result.city.id)}>{compareIds.includes(result.city.id) ? <Check size={12} /> : <Plus size={12} />}</button>
-        </article>)}</div> : <EmptyState icon={<SearchX size={27} />} title="조건에 맞는 도시가 아직 없어요" text="검색어를 바꾸거나 직무, 연봉, 비자 조건을 조정해 보세요."><button className="button secondary" onClick={onFilters}><SlidersHorizontal size={15} />조건 조정</button><button className="text-button" onClick={onReset}>검색 조건 초기화</button></EmptyState>}
+        </article>)}</div> : emptyState}
         <div className="list-bottom-note"><CircleHelp size={14} /><span>숫자는 조건에 맞는 공고가 있는 회사 수예요.<br />기회가 많은 도시와 잘 맞는 도시는 다를 수 있어요.</span></div>
       </> : <>
-        <div className="results-heading remote-heading"><span className="remote-illustration"><Globe2 size={30} /><span /></span><p className="eyebrow">A CAREER WITHOUT BORDERS</p><h2>어디서든, 함께<span className="accent-dot">.</span></h2><p>출근할 도시보다 함께할 팀이 중요하다면.</p><button className="residence-button" onClick={onProfile}><MapPin size={13} />{COUNTRIES.find(([id]) => id === profile.residence)?.[1] ?? profile.residence} 거주 기준<ArrowRight size={13} /></button></div>
+        <div className="results-heading remote-heading"><span className="remote-illustration"><Globe2 size={30} /><span /></span><p className="eyebrow">A CAREER WITHOUT BORDERS</p><h2>어디서든, 함께<span className="accent-dot">.</span></h2><p>출근할 도시보다 함께할 팀이 중요하다면.</p><button className="residence-button" onClick={onProfile}><MapPin size={13} />{COUNTRIES.find(([id]) => id === profile.residence)?.[1] ?? profile.residence}{remoteEligibleOnly ? ' 거주 기준' : ' · 프로필 거주 국가'}<ArrowRight size={13} /></button>{!remoteEligibleOnly && <p className="remote-range-note">거주 국가 밖·지역 미확인 공고도 표시 중이에요. 실제 근무 가능 지역은 원문에서 확인해 주세요.</p>}</div>
         <div className="list-toolbar"><span>{remoteCompanies.length}개 회사 · {remote.length}개 공고</span><button className="text-button muted" onClick={onFilters}><SlidersHorizontal size={12} />조건</button></div>
-        <div className="company-list">{remoteCompanies.length ? remoteCompanies.map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} onOpen={onOpenJob} onSave={onSave} />) : <EmptyState icon={<Globe2 size={27} />} title="지금 조건에 맞는 원격 기회가 없어요" text="거주 국가, 직무, 비자 필터를 확인해 주세요. 지원 지역이 미확인인 공고는 기본적으로 제외돼요."><button className="button secondary" onClick={onFilters}>원격 조건 확인</button><button className="text-button" onClick={onProfile}>거주 국가 변경</button></EmptyState>}</div>
+        <div className="company-list">{remoteCompanies.length ? remoteCompanies.map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} onOpen={onOpenJob} onSave={onSave} />) : emptyState}</div>
       </>)}
     </div>
     <button className="panel-data-footer" onClick={onData}><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>{catalog.source === 'sample' ? '샘플 데이터로 탐색 중' : !catalog.fetchedAt ? '공개 공고 연결 확인' : catalogNeedsAttention(catalog) ? '일부 게시판 · 조회 상태 확인' : '회사별 공개 채용공고'}</span><CircleHelp size={14} /></button>

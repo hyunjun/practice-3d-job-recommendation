@@ -262,6 +262,36 @@ select option { background: #1e271c; color: var(--text); }
 .visa-tag.conditional, .job-key-facts strong.conditional-visa { color: #e0c68f; }
 .eligibility-notice { display: flex; align-items: flex-start; gap: 6px; color: #e0c68f; font-size: 10px; line-height: 1.7; margin: 12px 0; }
 .eligibility-notice > svg { flex-shrink: 0; margin-top: 2px; }
+.search-recovery { margin: 18px; padding: 20px 16px; background: #1c2818; border: 1px solid #455b34; border-radius: 8px; overflow-wrap: anywhere; }
+.company-list > .search-recovery { margin: 0; grid-column: 1 / -1; }
+.search-recovery .recovery-icon { color: #b6cba1; margin-bottom: 12px; }
+.search-recovery > h3 { font-size: 15px; line-height: 1.6; font-weight: 550; margin: 0 0 10px; }
+.search-recovery > p, .recovery-suggestions > p { color: #b8c5ab; font-size: 11px; line-height: 1.8; margin: 0; }
+.search-recovery h4 { font-size: 12px; font-weight: 550; margin: 0 0 10px; color: #d8e6c9; }
+.recovery-alternatives, .recovery-suggestions { margin-top: 22px; }
+.recovery-alternatives > button { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 12px; margin-top: 9px; background: #2b3e21; border: 1px solid #627d48; border-radius: 5px; text-align: left; }
+.recovery-alternatives > button:hover { background: #354c28; border-color: #a4c579; }
+.recovery-alternatives strong { display: block; font-size: 12px; font-weight: 500; color: #d9edc3; }
+.recovery-alternatives small { display: block; font-size: 10px; color: #b8cda5; margin-top: 6px; line-height: 1.6; }
+.recovery-alternatives svg, .recovery-option > button > svg, .recovery-profile-note > svg { flex-shrink: 0; }
+.search-recovery > .recovery-profile-note { display: flex; align-items: flex-start; gap: 7px; color: #dec99e; margin-top: 18px; }
+.recovery-profile-note > svg { margin-top: 3px; }
+.recovery-option { margin-top: 12px; border: 1px solid #4c613a; border-radius: 6px; background: #172313; overflow: hidden; }
+.recovery-option > div { padding: 13px 12px; }
+.recovery-option h5 { margin: 0 0 12px; font-size: 10px; font-weight: 500; color: #bdcda9; }
+.recovery-option dl { margin: 0; display: grid; gap: 12px; }
+.recovery-option dt { font-size: 10px; color: #b0bc9f; margin-bottom: 4px; }
+.recovery-option dd { display: flex; flex-wrap: wrap; gap: 4px 7px; margin: 0; font-size: 11px; line-height: 1.8; color: #b8c4a9; }
+.recovery-option dd > span, .recovery-option dd > strong { max-width: 100%; }
+.recovery-option dd > strong { color: #e0edd0; font-weight: 500; }
+.recovery-option .recovery-warning { font-size: 10px; line-height: 1.8; color: #e2cba0; margin: 12px 0 0; }
+.recovery-option > button { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; border-top: 1px solid #526b3d; background: #304525; color: #dcf0c5; padding: 12px; font-size: 11px; line-height: 1.7; text-align: left; }
+.recovery-option > button:hover { background: #405b2e; }
+.recovery-option > button strong { font-weight: 600; }
+.recovery-suggestions > .recovery-count-note { margin-top: 12px; font-size: 10px; color: #aebd9c; }
+.recovery-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 16px; margin-top: 20px; }
+.recovery-actions .button { min-height: 38px; font-size: 11px; padding: 9px 12px; }
+.recovery-actions .text-button { font-size: 10px; }
 .job-eligibility { margin: 22px 0; padding: 18px; border: 1px solid #756541; border-radius: 7px; background: #202719; }
 .job-eligibility > h4 { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #edd8ae; margin: 0 0 10px; }
 .job-eligibility > p { font-size: 11px; color: #cbd0bc; line-height: 1.8; margin: 0; }
@@ -285,6 +315,7 @@ select option { background: #1e271c; color: var(--text); }
 .remote-illustration > span { height: 5px; width: 5px; border-radius: 50%; background: var(--accent); position: absolute; top: 3px; right: 0; box-shadow: 0 0 8px #b9f082; }
 .residence-button { display: flex; align-items: center; gap: 6px; font-size: 9px; color: #c9e3b0; padding: 8px 10px; border: 1px solid #4c603c; border-radius: 5px; background: #2c3b22; margin-top: 16px; }
 .residence-button > svg:last-child { margin-left: 12px; }
+.remote-heading > .remote-range-note { color: #e1ca9d; font-size: 11px; line-height: 1.8; margin-top: 14px; }
 .city-image-fallback { background: radial-gradient(ellipse at 70% 20%, #7b916748, transparent 65%), linear-gradient(30deg, #283b29, #26352c); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #a9bf9190; overflow: hidden; }
 .city-image-fallback > svg { width: 28px; height: 28px; stroke-width: .8; }
 .city-image-fallback > span { font-family: var(--mono); font-size: 8px; letter-spacing: 2px; }

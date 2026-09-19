@@ -83,3 +83,14 @@ Stripe의 `Minimum requirements`·`Preferred qualifications`, MongoDB의 `Key Qu
 실제 n8n 공고의 독일 한정 비자 지원, Anthropic의 필수 시민권·우대 보안 인가, MongoDB·GitLab의 시민권 문구, Airbnb의 주별 거주 제한과 Cloudflare의 수출 허가 조건을 확인했습니다. 특정 조건의 적용 범위와 필수·우대를 보존하고, 차별 금지 문구·개인정보 수집 목록·증명 수단의 예시를 필수 자격으로 오인하지 않도록 반영했습니다.
 
 이 자료는 데이터 의미를 구분하는 기준입니다. ORBIT은 법률을 자동 적용하거나 지원자의 국적·취업 허가를 추정하지 않습니다. 영어 원문의 명시적인 문구만 해석하며, 조건을 찾지 못한 경우에도 제한이 없다고 판단하지 않습니다.
+
+## 빈 검색 결과에서 탐색 이어가기
+
+| 레퍼런스 | 확인한 원칙 | 반영 |
+| --- | --- | --- |
+| [NN/g: Designing Empty States in Complex Applications](https://www.nngroup.com/articles/empty-state-interface-design/) | 시스템 상태를 정확히 설명하고 현재 작업의 다음 경로를 제공 | 조회 대기·오류·수집 범위·필터 결과를 구분하고 다른 도시·원격 기회로 연결 |
+| [Baymard: No Results Pages](https://baymard.com/research-articles/no-results-page) | 검색어를 지워도 다시 빈 결과일지 모르는 불확실성, 맥락을 유지한 탐색 경로의 필요 | 현재 공고로 변경 후 후보 수를 계산하고 다른 조건은 유지 |
+| [PatternFly: Empty state](https://www.patternfly.org/components/empty-state/design-guidelines/) | 비어 있는 이유와 다음 행동을 간결하게 제시 | 실제로 후보가 생기는 변경안과 직접 조건 조정·수집 범위 확인 |
+| [WCAG 2.2: Understanding Status Messages](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html) | 검색 결과 상태와 작업 완료를 보조 기술에 전달하되 불필요하게 방해하지 않음 | 입력 중에는 포커스를 유지하고, 명시적 변경 후 결과 영역으로 이동하며 상태 알림과 실행 취소 제공 |
+
+Baymard 자료는 전자상거래 검색 연구입니다. 채용 서비스의 전환율이나 개선 효과를 입증하는 자료로 사용하지 않았습니다. ORBIT에서는 비자·보상·거주 국가 조건의 중요도를 임의로 판단하지 않고 변경 항목을 먼저 공개하며, 사용자가 선택한 경우에만 적용합니다.

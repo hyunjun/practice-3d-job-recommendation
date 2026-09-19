@@ -27,7 +27,7 @@ test('3D map, region selection, city panel and 2D view stay connected', async ({
   await page.getByLabel('도시, 회사 또는 포지션 검색').fill('존재하지않는회사')
   await expect(page.getByRole('heading', { name: '조건에 맞는 도시가 아직 없어요' })).toBeVisible()
   await expect(page.locator('.flat-marker')).toHaveCount(0)
-  await page.getByRole('button', { name: '검색 조건 초기화', exact: true }).click()
+  await page.locator('.active-filter-summary').getByRole('button', { name: '초기화', exact: true }).click()
   await expect(page.locator('.city-row')).toHaveCount(22)
   expect(errors).toEqual([])
 })
