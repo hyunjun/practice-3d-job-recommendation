@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION } from './types'
+import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, JOB_ROLES, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, ROLE_CLASSIFICATION_VERSION } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 const QualificationKindSchema = z.enum(['required', 'qualification', 'preferred', 'context'])
@@ -12,7 +12,16 @@ const EvidenceSchema = z.object({
 // Shared by saved opportunities and the server's last successful board snapshots.
 export const JobSchema = z.object({
   id: z.string().max(200), companyId: z.string().max(100), title: z.string().max(1000),
-  role: z.enum(['backend', 'frontend', 'fullstack', 'ml', 'data', 'devops', 'mobile', 'security']),
+  role: z.enum([...JOB_ROLES, 'unknown']),
+  roleClassification: z.object({
+    version: z.literal(ROLE_CLASSIFICATION_VERSION),
+    roles: z.array(z.enum(JOB_ROLES)).max(JOB_ROLES.length),
+    evidence: z.array(z.object({
+      role: z.enum(JOB_ROLES), source: z.enum(['title', 'board']), text: z.string().min(1).max(1000),
+    })).max(20 * JOB_ROLES.length),
+  }).refine(value => new Set(value.roles).size === value.roles.length
+    && value.roles.every(role => value.evidence.some(item => item.role === role))
+    && value.evidence.every(item => value.roles.includes(item.role))).optional(),
   cityIds: z.array(z.string()).max(50), locationLabel: z.string().max(2000),
   workMode: z.enum(['remote', 'hybrid', 'onsite', 'unknown']),
   employment: z.enum(['fulltime', 'parttime', 'permanent', 'contract', 'intern', 'temporary', 'unknown']),

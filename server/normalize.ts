@@ -1,5 +1,5 @@
 import { CITY_BY_ID, LOCATION_ALIASES } from '../shared/cities'
-import { inferRole } from '../shared/profile'
+import { classifyJobRoles } from '../shared/job-roles'
 import { qualificationFacts } from '../shared/job-qualifications'
 import { plainText } from '../shared/text'
 export { plainText } from '../shared/text'
@@ -19,6 +19,7 @@ export interface GreenhouseJob {
   content?: string
   offices?: { name?: string; location?: string | null }[]
   metadata?: { name?: string; value?: unknown }[]
+  departments?: { name?: string }[]
   pay_input_ranges?: { min_cents?: number; max_cents?: number; currency_type?: string; currency_code?: string; title?: string; blurb?: string }[]
 }
 
@@ -138,14 +139,17 @@ interface PostingInput extends Pick<Job, 'companyId' | 'title' | 'cityIds' | 'lo
   employment: Fact<Employment>
   scope?: ReturnType<typeof remoteScope>
   updatedAt?: string | null
+  departments?: string[]
 }
 
 export function normalizePosting(input: PostingInput): Job | null {
   if (!input.id || !/^https:\/\//i.test(input.url) || !isDeveloperTitle(input.title)) return null
   const { companyId, title, text, workMode, employment, salary, compensationRanges, compensationNote } = input
   const eligibility = eligibilityFacts(text)
+  const roleClassification = classifyJobRoles(title, input.departments)
   return {
-    id: `${input.provider}-${companyId}-${input.id}`, companyId, title, role: inferRole(title),
+    id: `${input.provider}-${companyId}-${input.id}`, companyId, title,
+    role: roleClassification.roles[0] ?? 'unknown', roleClassification,
     cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
     employment: employment.value, ...qualificationFacts(text, companyId), salary,
     ...(compensationRanges?.length ? { compensationRanges } : {}),
@@ -187,6 +191,7 @@ export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: s
   const employment = employmentFact(raw.title, raw.metadata ?? [], text)
   return normalizePosting({
     provider: 'greenhouse', id: raw.id, companyId, title: raw.title, text, fetchedAt,
+    departments: Array.isArray(raw.departments) ? raw.departments.flatMap(department => typeof department?.name === 'string' ? [department.name] : []) : [],
     cityIds, locationLabel: location, workMode, employment, scope,
     ...greenhouseCompensation(text, raw.pay_input_ranges),
     url: raw.absolute_url, updatedAt: raw.updated_at,

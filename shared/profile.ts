@@ -1,4 +1,4 @@
-import type { Profile, Role } from './types'
+import type { Profile } from './types'
 
 const SKILL_PATTERNS: [string, RegExp][] = [
   ['TypeScript', /\btypescript\b|\bts\b/i],
@@ -55,17 +55,6 @@ export const KNOWN_SKILLS = SKILL_PATTERNS.map(([name]) => name)
 
 export function extractSkills(text: string): string[] {
   return SKILL_PATTERNS.filter(([, pattern]) => pattern.test(text)).map(([name]) => name)
-}
-
-export function inferRole(title: string): Exclude<Role, 'all'> {
-  if (/machine learning|artificial intelligence|\bml\b|\bai\b|머신러닝|인공지능/i.test(title)) return 'ml'
-  if (/data engineer|data scientist|analytics engineer|데이터/i.test(title)) return 'data'
-  if (/security|보안/i.test(title)) return 'security'
-  if (/devops|infrastructure|platform engineer|site reliability|\bsre\b|인프라/i.test(title)) return 'devops'
-  if (/mobile|android|ios|모바일/i.test(title)) return 'mobile'
-  if (/front[\s-]?end|프론트엔드/i.test(title)) return 'frontend'
-  if (/back[\s-]?end|백엔드/i.test(title)) return 'backend'
-  return 'fullstack'
 }
 
 export function extractYears(text: string): number | null {

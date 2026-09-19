@@ -118,7 +118,7 @@ describe('search recovery uses actual results in the visible scope', () => {
   })
 
   it('accounts for the profile gate becoming active when a role filter is removed', () => {
-    const index = createSearchIndex(searchCatalog([searchJob('frontend-rust', { role: 'frontend', skills: ['Rust'] })]), SEARCH_PROFILE)
+    const index = createSearchIndex(searchCatalog([searchJob('frontend-rust', { title: 'Frontend Engineer', role: 'frontend', skills: ['Rust'] })]), SEARCH_PROFILE)
     expect(analyzeSearchRecovery(index, SEARCH_FILTERS, { kind: 'cities' })!.suggestions).toEqual([])
     const sameRole = createSearchIndex(searchCatalog([searchJob('backend-rust', { skills: ['Rust'], salary: null })]), SEARCH_PROFILE)
     expect(analyzeSearchRecovery(sameRole, SEARCH_FILTERS, { kind: 'cities' })!.suggestions[0].changes).toEqual({ includeUnknownSalary: true })

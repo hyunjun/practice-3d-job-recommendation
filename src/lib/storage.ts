@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { CITY_BY_ID } from '../../shared/cities'
 import { JobProviderSchema, JobSchema } from '../../shared/schemas'
-import { DEFAULT_FILTERS, ELIGIBILITY_LABELS, ELIGIBILITY_LEVEL_LABELS, JOB_SOURCE_LABELS, QUALIFICATION_LABELS, SAMPLE_PROFILE, VISA_LABELS } from '../../shared/types'
+import { DEFAULT_FILTERS, ELIGIBILITY_LABELS, ELIGIBILITY_LEVEL_LABELS, JOB_ROLES, JOB_SOURCE_LABELS, QUALIFICATION_LABELS, ROLE_FILTER_LABELS, SAMPLE_PROFILE, VISA_LABELS } from '../../shared/types'
 import { formatCompensation, formatJobSalary } from '../../shared/matching'
 import { upgradeJobCompensation } from '../../shared/job-compensation'
 import { formatExperienceYears, upgradeJobQualifications } from '../../shared/job-qualifications'
 import { upgradeJobEligibility } from '../../shared/job-eligibility'
+import { jobRoleLabel, upgradeJobRole } from '../../shared/job-roles'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
 import { POSTING_STATE_LABELS, REVISION_LABELS } from '../../shared/posting-status'
 import type { PostingObservation } from '../../shared/posting-status'
@@ -33,7 +34,7 @@ const ProfileSchema = z.object({
   headline: z.string().max(200),
   years: z.number().int().min(0).max(50),
   skills: z.array(z.string().min(1).max(60)).max(60),
-  desiredRole: z.enum(['all', 'backend', 'frontend', 'fullstack', 'ml', 'data', 'devops', 'mobile', 'security']),
+  desiredRole: z.enum(['all', ...JOB_ROLES]),
   residence: z.string().min(2).max(2),
   linkedinUrl: z.string().max(400),
   preferences: z.object({
@@ -44,7 +45,7 @@ const ProfileSchema = z.object({
 })
 
 const SavedSchema = z.array(z.object({
-  job: JobSchema.transform(job => upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job, true)))),
+  job: JobSchema.transform(job => upgradeJobRole(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job, true))))),
   company: z.object({
     id: z.string(), name: z.string().max(200), color: z.string().regex(/^#[0-9a-f]{6}$/i),
     initials: z.string().max(8), industry: z.string().max(200), careerUrl: z.string().max(2000),
@@ -89,7 +90,7 @@ export function loadExploration(profile: Profile): ExplorationState {
     filters: z.object({
       query: z.string().max(500).catch(filters.query),
       region: z.enum(['all', 'americas', 'europe', 'asia-pacific']).catch(filters.region),
-      role: z.enum(['all', 'backend', 'frontend', 'fullstack', 'ml', 'data', 'devops', 'mobile', 'security']).catch(filters.role),
+      role: z.enum(['all', ...JOB_ROLES, 'unknown']).catch(filters.role),
       workMode: z.enum(['all', 'remote', 'hybrid', 'onsite', 'unknown']).catch(filters.workMode),
       visa: z.enum(['all', 'yes', 'supported', 'possible']).catch(filters.visa),
       employment: z.enum(['all', 'fulltime', 'parttime', 'permanent', 'contract', 'intern', 'temporary', 'unknown']).catch(filters.employment),
@@ -134,7 +135,7 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
     return `"${safe.replace(/"/g, '""')}"`
   }
   const rows = [
-    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목', '비자 지원', '취업 자격 조건', '취업 자격 근거'],
+    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목', '비자 지원', '취업 자격 조건', '취업 자격 근거', '직무 분류', '직무 분류 근거'],
     ...saved.map(item => [
       item.company.name, item.job.title, item.job.locationLabel, JOB_SOURCE_LABELS[item.job.source],
       item.status === 'applied' ? '지원 완료' : '저장됨', item.savedAt, item.note, item.job.url,
@@ -152,6 +153,8 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
       VISA_LABELS[item.job.visa],
       item.job.eligibility?.rules.map(rule => `${ELIGIBILITY_LABELS[rule.kind]}: ${ELIGIBILITY_LEVEL_LABELS[rule.level]}`).join('\n') ?? '',
       [...new Set(item.job.eligibility?.rules.map(rule => rule.evidence.text) ?? [])].join('\n\n'),
+      jobRoleLabel(item.job),
+      upgradeJobRole(item.job).roleClassification?.evidence.map(evidence => `${ROLE_FILTER_LABELS[evidence.role]} · ${evidence.source === 'title' ? '공고 제목' : '공개 부서·팀'}\n${evidence.text}`).join('\n\n') ?? '',
     ]),
   ]
   const blob = new Blob(['\ufeff', rows.map(row => row.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' })

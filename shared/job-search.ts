@@ -1,7 +1,8 @@
 import { CITY_BY_ID } from './cities'
 import { matchingSkills } from './qualification-matching'
 import { isUnmappedJob } from './job-location'
-import { MODE_LABELS, ROLE_LABELS, USD_RATES } from './types'
+import { jobRoleLabel, matchesJobRole } from './job-roles'
+import { MODE_LABELS, USD_RATES } from './types'
 import type { Catalog, City, Company, Filters, Job, Profile, Region } from './types'
 
 export type FilterFailure = keyof Filters | 'profile'
@@ -37,7 +38,7 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
       : job.cityIds.flatMap(id => CITY_BY_ID.get(id)?.region ?? [])
     return [{
       job, company,
-      text: [company.name, company.industry, job.title, ROLE_LABELS[job.role], MODE_LABELS[job.workMode], ...job.skills, ...locations, job.locationLabel].join(' ').toLowerCase(),
+      text: [company.name, company.industry, job.title, jobRoleLabel(job), MODE_LABELS[job.workMode], ...job.skills, ...locations, job.locationLabel].join(' ').toLowerCase(),
       profileMatches: !skills.length || !profileSkills.size || skills.some(skill => profileSkills.has(skill.toLowerCase())),
       residenceMatches: job.remoteWorldwide || job.remoteCountries.includes(profile.residence),
       salaryMax: job.salary ? job.salary.max * USD_RATES[job.salary.currency] : null,
@@ -54,7 +55,7 @@ export function searchWords(query: string): string[] {
 export function failedSearchFilters(entry: SearchEntry, filters: Filters, words = searchWords(filters.query)): FilterFailure[] {
   const { job } = entry
   const failed: FilterFailure[] = []
-  if (filters.role !== 'all' && job.role !== filters.role) failed.push('role')
+  if (!matchesJobRole(job, filters.role)) failed.push('role')
   if (filters.workMode !== 'all' && job.workMode !== filters.workMode) failed.push('workMode')
   if (filters.visa === 'yes' && job.visa !== 'yes'
     || filters.visa === 'supported' && job.visa !== 'yes' && job.visa !== 'conditional'
@@ -65,7 +66,7 @@ export function failedSearchFilters(entry: SearchEntry, filters: Filters, words 
   if (job.workMode === 'remote' && filters.remoteEligibleOnly && !entry.residenceMatches) failed.push('remoteEligibleOnly')
   if (filters.region !== 'all' && !(job.workMode === 'remote' && job.remoteWorldwide) && !entry.regions.has(filters.region)) failed.push('region')
   if (!words.every(word => entry.text.includes(word))) failed.push('query')
-  if (filters.role === 'all' && !entry.profileMatches) failed.push('profile')
+  if ((filters.role === 'all' || filters.role === 'unknown') && !entry.profileMatches) failed.push('profile')
   return failed
 }
 

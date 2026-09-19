@@ -11,6 +11,7 @@ import type { ExplorationState } from '../lib/storage'
 import { CityImage, CompanyLogo } from './ui'
 import { JobFreshnessNotice } from './JobFreshnessNotice'
 import { EligibilityNotice } from './JobEligibilityDetails'
+import { jobRoleLabel } from '../../shared/job-roles'
 
 interface Props {
   catalog: Catalog
@@ -112,6 +113,7 @@ export function CompanyCard({ matches, savedIds, onOpen, onSave }: { matches: Ma
     <header><CompanyLogo company={company} /><div><h3>{company.name}</h3><p>{company.industry}</p></div>{matches[0].job.source === 'sample' && <span className="sample-label">샘플</span>}</header>
     {visible.map(match => <div key={match.job.id} className="mini-job">
       <button className="mini-job-title" onClick={() => onOpen(match)}>{match.job.title}<ArrowUpRight size={14} /></button>
+      {match.job.source !== 'sample' && <p className="mini-job-role">{jobRoleLabel(match.job)}</p>}
       {isUnmappedJob(match.job) && <p className="mini-job-location"><MapPinOff size={12} /><span>{match.job.locationLabel}</span></p>}
       <div className="mini-job-meta"><span>{formatJobSalary(match.job)}</span><span>·</span><span>{MODE_LABELS[match.job.workMode]}</span></div>
       <JobFreshnessNotice job={match.job} compact />

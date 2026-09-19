@@ -12,6 +12,7 @@ export const LeverJobSchema = z.object({
   id: z.string().min(1), text: z.string().min(1), hostedUrl: z.url().startsWith('https://'),
   categories: z.object({
     location: z.string().nullish(), allLocations: z.array(z.string()).nullish(), commitment: z.string().nullish(),
+    department: z.string().nullish(), team: z.string().nullish(),
   }).nullish(),
   country: z.string().nullish(), workplaceType: z.string().nullish(),
   descriptionPlain: z.string().nullish(), description: z.string().nullish(),
@@ -50,6 +51,7 @@ export function normalizeLeverJob(raw: LeverJob, companyId: string, fetchedAt: s
     : parseTextCompensation(text)
   return normalizePosting({
     provider: 'lever', id: raw.id, companyId, title: raw.text, text, url: raw.hostedUrl, fetchedAt,
+    departments: [raw.categories?.department, raw.categories?.team].filter((value): value is string => typeof value === 'string'),
     cityIds: workMode.value === 'remote' ? [] : cities, locationLabel: postingLocationLabel(locations, workMode.value),
     workMode, employment, ...(workMode.value === 'remote' ? { scope: postingRemoteScope(locations) } : {}), ...salary,
   })

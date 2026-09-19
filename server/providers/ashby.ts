@@ -21,6 +21,7 @@ const Component = z.object({
 })
 export const AshbyJobSchema = z.object({
   id: z.string().min(1), title: z.string().min(1), jobUrl: z.url().startsWith('https://'), isListed: z.boolean(),
+  department: z.string().nullish(), team: z.string().nullish(),
   location: z.string().nullish(), address: Address.nullish(),
   secondaryLocations: z.array(z.object({ location: z.string().nullish(), address: Address.nullish() })).nullish(),
   workplaceType: z.string().nullish(), isRemote: z.boolean().nullish(), employmentType: z.string().nullish(),
@@ -62,6 +63,7 @@ export function normalizeAshbyJob(raw: AshbyJob, companyId: string, fetchedAt: s
   }))) : parseTextCompensation(text)
   return normalizePosting({
     provider: 'ashby', id: raw.id, companyId, title: raw.title, text, url: raw.jobUrl, fetchedAt,
+    departments: [raw.department, raw.team].filter((value): value is string => typeof value === 'string'),
     cityIds: mode.value === 'remote' ? [] : cities, locationLabel: postingLocationLabel(locations, mode.value),
     workMode: mode, employment, ...(mode.value === 'remote' ? { scope: postingRemoteScope(locations) } : {}), ...salary,
   })

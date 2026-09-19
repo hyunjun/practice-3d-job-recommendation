@@ -326,7 +326,10 @@ describe('cache validation and migration', () => {
       expect(JSON.parse(await readFile(currentFile, 'utf8')).version).toBe(5)
       expect((await cache.load())[0].snapshot).toEqual({
         ...previous.snapshot,
-        jobs: previous.snapshot!.jobs.map(job => ({ ...job, visa: 'unknown', eligibility: { version: 1, rules: [] }, evidence: {} })),
+        jobs: previous.snapshot!.jobs.map(job => ({
+          ...job, visa: 'unknown', eligibility: { version: 1, rules: [] }, evidence: {},
+          roleClassification: { version: 1, roles: ['backend'], evidence: [{ role: 'backend', source: 'title', text: job.title }] },
+        })),
       })
       await rm(currentFile)
       await writeFile(previousFile, '{invalid-json')

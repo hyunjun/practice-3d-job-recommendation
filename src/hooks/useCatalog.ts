@@ -3,6 +3,7 @@ import { CITIES } from '../../shared/cities'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { catalogNeedsAttention, collectionHealth } from '../../shared/catalog-health'
 import { createSampleCatalog } from '../../shared/sample'
+import { upgradeJobRole } from '../../shared/job-roles'
 import type { Catalog, Source } from '../../shared/types'
 
 function initialCatalog(source: Source): Catalog {
@@ -51,7 +52,7 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
         throw new Error('공고 데이터 형식을 확인하지 못했어요.')
       }
       if (!controller.signal.aborted) {
-        setCatalog(result as Catalog)
+        setCatalog({ ...result as Catalog, jobs: (result as Catalog).jobs.map(upgradeJobRole) })
         const health = collectionHealth(result as Catalog)
         const attention = catalogNeedsAttention(result as Catalog)
         if (announce) notify(attention

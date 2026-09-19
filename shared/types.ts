@@ -1,5 +1,8 @@
 export type Region = 'all' | 'americas' | 'europe' | 'asia-pacific'
-export type Role = 'all' | 'backend' | 'frontend' | 'fullstack' | 'ml' | 'data' | 'devops' | 'mobile' | 'security'
+export const JOB_ROLES = ['backend', 'frontend', 'fullstack', 'ml', 'data', 'devops', 'mobile', 'security'] as const
+export type KnownJobRole = typeof JOB_ROLES[number]
+export type Role = 'all' | KnownJobRole
+export type JobRole = KnownJobRole | 'unknown'
 export type WorkMode = 'remote' | 'hybrid' | 'onsite' | 'unknown'
 export type Visa = 'yes' | 'conditional' | 'no' | 'unknown'
 export const PUBLIC_PROVIDERS = ['greenhouse', 'ashby', 'lever'] as const
@@ -10,6 +13,7 @@ export type Employment = 'fulltime' | 'parttime' | 'permanent' | 'contract' | 'i
 export const COMPENSATION_VERSION = 1 as const
 export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 1 as const
+export const ROLE_CLASSIFICATION_VERSION = 1 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever',
@@ -99,11 +103,18 @@ export interface JobEligibility {
   truncated?: boolean
 }
 
+export interface JobRoleClassification {
+  version: typeof ROLE_CLASSIFICATION_VERSION
+  roles: KnownJobRole[]
+  evidence: { role: KnownJobRole; source: 'title' | 'board'; text: string }[]
+}
+
 export interface Job {
   id: string
   companyId: string
   title: string
-  role: Exclude<Role, 'all'>
+  role: JobRole
+  roleClassification?: JobRoleClassification
   cityIds: string[]
   locationLabel: string
   workMode: WorkMode
@@ -175,7 +186,7 @@ export interface Profile {
 export interface Filters {
   query: string
   region: Region
-  role: Role
+  role: Role | 'unknown'
   workMode: 'all' | WorkMode
   visa: 'all' | 'yes' | 'supported' | 'possible'
   employment: 'all' | Employment
@@ -220,6 +231,10 @@ export const ROLE_LABELS: Record<Role, string> = {
   devops: '인프라 · DevOps',
   mobile: '모바일',
   security: '보안',
+}
+
+export const ROLE_FILTER_LABELS: Record<Filters['role'], string> = {
+  ...ROLE_LABELS, unknown: '세부 직무 미확인',
 }
 
 export const MODE_LABELS: Record<WorkMode | 'all', string> = {

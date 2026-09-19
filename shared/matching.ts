@@ -3,6 +3,7 @@ import { formatExperienceYears } from './job-qualifications'
 import { matchQualifications } from './qualification-matching'
 import { eligibilitySummary } from './job-eligibility'
 import { createSearchIndex, selectSearchJobs } from './job-search'
+import { jobRoles, matchesJobRole } from './job-roles'
 import type { SearchEntry } from './job-search'
 import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
 
@@ -45,12 +46,14 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
   const matchedSkills = qualificationMatch?.matchedSkills ?? job.skills.filter(skill => profileSkills.has(skill.toLowerCase()))
   const missingSkills = qualificationMatch?.missingSkills ?? job.skills.filter(skill => !profileSkills.has(skill.toLowerCase()))
   const skillScore = qualificationMatch?.skillScore ?? (job.skills.length ? matchedSkills.length / job.skills.length * 60 : 12)
-  const roleScore = profile.desiredRole === 'all' ? 15 : job.role === profile.desiredRole ? 25 : 0
+  const roleMatches = matchesJobRole(job, profile.desiredRole)
+  const roleScore = profile.desiredRole === 'all' ? 15 : roleMatches ? 25 : 0
   const experienceScore = job.minExperience === null ? 8 : Math.max(0, 15 - Math.max(0, job.minExperience - profile.years) * 5)
   const reasons: string[] = [...(qualificationMatch?.reasons ?? [])]
   const cautions: string[] = [...(qualificationMatch?.cautions ?? [])]
   if (!qualificationMatch && matchedSkills.length) reasons.push(`${matchedSkills.slice(0, 3).join(' · ')} 경험과 연결돼요`)
-  if (profile.desiredRole !== 'all' && job.role === profile.desiredRole) reasons.push(`희망하는 ${ROLE_LABELS[job.role]} 직무예요`)
+  if (profile.desiredRole !== 'all' && roleMatches) reasons.push(`희망하는 ${ROLE_LABELS[profile.desiredRole]} 직무 표기가 있어요`)
+  if (!jobRoles(job).length) cautions.push('세부 직무를 확인하지 못했어요. 실제 업무 범위는 원문에서 확인해 주세요.')
   if (job.minExperience !== null && job.minExperience <= profile.years) reasons.push(job.qualifications
     ? `입력 경력 ${formatExperienceYears(profile.years)} · 공고에서 확인한 연수 하한 ${formatExperienceYears(job.minExperience)}`
     : `경력 ${profile.years}년이 공고의 ${job.minExperience}년 이상 조건에 부합해요`)

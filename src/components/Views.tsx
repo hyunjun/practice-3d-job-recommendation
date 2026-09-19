@@ -11,6 +11,7 @@ import { JobFreshnessNotice } from './JobFreshnessNotice'
 import { SavedPostingNotice } from './SavedPostingNotice'
 import type { PostingStatusController } from '../hooks/usePostingStatus'
 import { EligibilityNotice } from './JobEligibilityDetails'
+import { jobRoleLabel } from '../../shared/job-roles'
 
 export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
   const [query, setQuery] = useState('')
@@ -32,7 +33,7 @@ export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onE
         : postingFilter === 'unknown' ? observation?.state === 'unknown' || observation?.state === 'unchecked'
           : observation?.state === postingFilter)
     return postingMatches && (status === 'all' || item.status === status)
-      && `${item.company.name} ${item.job.title} ${item.job.locationLabel} ${item.note}`.toLowerCase().includes(query.toLowerCase())
+      && `${item.company.name} ${item.job.title} ${jobRoleLabel(item.job)} ${item.job.locationLabel} ${item.note}`.toLowerCase().includes(query.toLowerCase())
   }), [saved, status, query, postingFilter, observations, publicCount])
   return <main id="main-content" className="collection-page" tabIndex={-1}>
     <div className="page-heading"><div><p className="eyebrow">YOUR COLLECTION OF POSSIBILITIES</p><h1>가능성을 모아두는 곳<span className="accent-dot">.</span></h1><p>마음이 움직인 기회들. 이제 하나씩 다음 단계로 이어가 보세요.</p></div><button className="button secondary" disabled={!saved.length} onClick={() => exportSavedCsv(saved, observations)}><Download size={16} />CSV 내보내기</button></div>
@@ -47,6 +48,7 @@ export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onE
       return <article className="saved-card" key={item.job.id}>
         <header><CompanyLogo company={item.company} /><div><h2>{item.company.name}</h2><span>{item.company.industry}</span></div><button className="icon-button" aria-label={`${item.company.name} 저장 취소`} onClick={() => onRemove(match)}><BookmarkCheck size={18} /></button></header>
         <button className="saved-title" onClick={() => onOpen(match)}>{item.job.title}<ArrowUpRight size={17} /></button>
+        {item.job.source !== 'sample' && <p className="saved-role">{jobRoleLabel(item.job)}</p>}
         <p className="saved-location"><MapPin size={13} />{item.job.locationLabel}</p>
         <div className="saved-card-tags"><span>{formatJobSalary(item.job)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
         <JobFreshnessNotice job={item.job} compact />

@@ -55,6 +55,19 @@ Greenhouse 문서는 단일 공고 조회의 `pay_transparency=true`를 설명�
 
 지도 표시 범위와 공고 수집 범위는 구분합니다. 기타 근무지는 현재 전 세계 범위에서만 표시하고, 지역을 해제하는 변경안에는 범위가 넓어진다는 설명을 붙입니다. 기존 캐시에 개수만 남아 있는 공고는 실제 열람 가능한 목록으로 계산하지 않으며 다음 정상 조회에서 갱신합니다. 이 화면 구성은 자료의 구분과 실제 응답을 바탕으로 정한 제품 설계이며, 제공자가 요구하는 특정 UI 규칙은 아닙니다.
 
+## 세부 직무와 미확인 분류
+
+| 레퍼런스 | 확인한 의미 | 반영 |
+| --- | --- | --- |
+| [O*NET: Software Developers, 15-1252.00](https://www.onetonline.org/link/summary/15-1252.00) | Software Engineer·Application Developer·Infrastructure Engineer 등 여러 직함과 업무를 포함하는 직업군 | 일반적인 Software Engineer라는 제목만으로 풀스택 업무를 추정하지 않음 |
+| [MDN: Introduction to the server side](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Introduction) | 클라이언트·서버 코드의 역할과 실행 환경 구분, JavaScript는 양쪽에서 사용 가능 | 기술 언어만으로 백엔드·프론트엔드·풀스택 담당 여부를 정하지 않음 |
+| [Ashby Public Job Posting API](https://developers.ashbyhq.com/docs/public-job-posting-api) | 공고별 `title`, `department`, `team` | 제목이 일반적일 때 공개 부서·팀의 명시적인 전문 분야를 보조 근거로 보존 |
+| [Lever Postings API](https://github.com/lever/postings-api) | 공고의 `text`, `categories.team`, `categories.department` | 응답 검증에서 부서·팀 필드를 유지하고 다른 제공자와 같은 분류 규칙 적용 |
+
+17개 게시판의 실제 제목·부서를 대조했습니다. 기존에는 분류 규칙에 걸리지 않는 제목을 모두 풀스택으로 취급했습니다. 이제 제목에서 확인한 직무가 있으면 더 넓은 부서 표기로 덮어쓰지 않고, 여러 직무 표기는 함께 보존합니다. 특정할 수 없는 공고는 **세부 직무 미확인**으로 남겨 계속 탐색할 수 있게 했습니다. Greenhouse의 공고별 `departments`도 실제 응답에서 확인해 보조 정보로 사용합니다.
+
+O*NET 직업 코드를 공고에 자동 부여하거나 이 규칙의 정확도를 보증하는 자료로 사용하지 않았습니다. 일반 직업군·웹 개발 업무·게시판 필드의 의미를 구분하는 근거로 참고했으며, 제목·부서의 키워드 분류 자체는 ORBIT의 탐색 설계입니다. 실제 업무·직급·개발 직군 여부는 추가 검증이 필요합니다.
+
 ## 기술·경력의 추천 근거
 
 | 레퍼런스 | 확인한 의미 | 반영 |

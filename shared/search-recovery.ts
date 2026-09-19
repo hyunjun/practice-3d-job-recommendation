@@ -1,6 +1,6 @@
 import { countSearchJobs, failedSearchFilters, inSearchScope, searchWords, selectSearchJobs } from './job-search'
 import type { FilterFailure, SearchCount, SearchEntry, SearchIndex, SearchScope } from './job-search'
-import { EMPLOYMENT_LABELS, MODE_LABELS, REGION_LABELS, ROLE_LABELS, VISA_FILTER_LABELS } from './types'
+import { EMPLOYMENT_LABELS, MODE_LABELS, REGION_LABELS, ROLE_FILTER_LABELS, VISA_FILTER_LABELS } from './types'
 import type { Filters } from './types'
 
 export interface RecoverySuggestion {
@@ -95,7 +95,7 @@ function describeFilter(filters: Filters, key: keyof Filters): string {
   switch (key) {
     case 'query': return filters.query.trim() ? `“${filters.query.trim().slice(0, 70)}${filters.query.trim().length > 70 ? '…' : ''}”` : '검색어 지우기'
     case 'region': return REGION_LABELS[filters.region]
-    case 'role': return ROLE_LABELS[filters.role]
+    case 'role': return ROLE_FILTER_LABELS[filters.role]
     case 'workMode': return MODE_LABELS[filters.workMode]
     case 'employment': return EMPLOYMENT_LABELS[filters.employment]
     case 'salaryMin': return filters.salaryMin ? `$${filters.salaryMin.toLocaleString('ko-KR')} 이상` : '연봉 하한 해제'
