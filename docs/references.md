@@ -130,3 +130,17 @@ Stripe의 `Minimum requirements`·`Preferred qualifications`, MongoDB의 `Key Qu
 | [WCAG 2.2: Understanding Status Messages](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html) | 검색 결과 상태와 작업 완료를 보조 기술에 전달하되 불필요하게 방해하지 않음 | 입력 중에는 포커스를 유지하고, 명시적 변경 후 결과 영역으로 이동하며 상태 알림과 실행 취소 제공 |
 
 Baymard 자료는 전자상거래 검색 연구입니다. 채용 서비스의 전환율이나 개선 효과를 입증하는 자료로 사용하지 않았습니다. ORBIT에서는 비자·보상·거주 국가 조건의 중요도를 임의로 판단하지 않고 변경 항목을 먼저 공개하며, 사용자가 선택한 경우에만 적용합니다.
+
+## 공개 데이터의 전송과 HTTP 재검증
+
+| 레퍼런스 | 확인한 동작 | 반영 |
+| --- | --- | --- |
+| [Express: Production best practices — performance](https://expressjs.com/en/advanced/best-practice-performance.html) | 응답 압축으로 본문 크기 감소, 큰 서비스에서는 프록시 압축 권장 | 로컬 Express 서버에서 공개 JSON과 배포용 정적 응답 압축 |
+| [Express compression](https://github.com/expressjs/compression#readme) | `Accept-Encoding` 협상, 압축 임계값과 Brotli·gzip 옵션 | 검증된 미들웨어로 형식 선택, 1KB 임계값·Brotli 품질 4·gzip 수준 6 |
+| [MDN: Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control) | `no-cache`는 저장을 허용하지만 재사용 전 검증 필요, `private`는 공유 캐시 저장 방지 | 공개 API의 정상 응답만 브라우저 저장·재검증 허용, 실패 응답은 `no-store` |
+| [MDN: If-None-Match](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match) | ETag 조건이 일치하는 GET·HEAD의 본문 없는 `304` 응답 | 수집 서비스의 상태 확인 후 응답 전체를 비교하고 변경 없을 때 본문 전송 생략 |
+| [MDN: Content-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding) · [Vary](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Vary) | 지원하는 인코딩 협상과 캐시 키 구분, `304`에도 같은 `Vary` 필요 | 압축을 풀면 원래 JSON과 같음을 검증하고 압축·비압축·조건부 응답에 같은 헤더 유지 |
+
+2026-09-19 실제 공개 공고 960개를 담은 JSON의 전송 본문이 약 8.80MB였습니다. 원문과 추천 근거를 유지하면서 전송량을 줄이기 위해 압축을 적용했고, 브라우저의 재조회는 항상 서버 검증을 거치게 했습니다. 개인별 공고 요청을 추가하지 않으므로 프로필·검색 조건·저장한 공고 ID는 계속 브라우저 안에서 처리합니다.
+
+HTTP 재검증은 게시판의 실시간 채용 상태를 보증하지 않습니다. 기존 수집 주기·재시도·24시간 보존 한도와 원래 조회 시각을 따르며, 새 정상 조회로 시각이 바뀌면 새 본문을 반환합니다. 이 정책은 네트워크 응답의 재사용에 적용하며 페이지의 뒤로 가기 복원이나 백그라운드 자동 수집을 구현한 것은 아닙니다. 전송 바이트 감소를 서버 처리 시간이나 전체 화면 로딩 속도의 동일한 감소로 해석하지 않습니다.

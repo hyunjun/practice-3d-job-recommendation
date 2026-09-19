@@ -51,8 +51,16 @@
 - [Mammoth](https://github.com/mwilliamson/mammoth.js): BSD-2-Clause.
 - 테스트 이력서는 가상의 이름과 경력으로 작성했습니다.
 
+## 서버
+
+- [Express](https://github.com/expressjs/express): MIT.
+- [compression](https://github.com/expressjs/compression): MIT. API와 배포용 정적 응답의 압축을 처리합니다.
+- 서버 패키지는 의존성으로 설치하며 라이선스 원문은 각 패키지에 포함됩니다.
+
 ## 채용 데이터
 
 - [Greenhouse Job Board API](https://developers.greenhouse.io/job-board.html): 회사별 공개 채용 게시판.
+- [Ashby Public Job Posting API](https://developers.ashbyhq.com/docs/public-job-posting-api): 회사별 공개 공고.
+- [Lever Postings API](https://github.com/lever/postings-api): 공개 공고와 페이지 조회.
 - 원문 URL, 조회 시각, 회사와 근무지를 보존합니다. 공개 게시 여부는 조회 시점의 상태입니다.
 - 샘플 데이터는 ORBIT의 기능 체험용으로 작성한 가상 시나리오입니다.
