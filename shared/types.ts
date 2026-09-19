@@ -14,7 +14,7 @@ export const COMPENSATION_VERSION = 2 as const
 export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 1 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
-export const OCCUPATION_VERSION = 2 as const
+export const OCCUPATION_VERSION = 3 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever', smartrecruiters: 'SmartRecruiters',
@@ -116,8 +116,8 @@ export interface JobManagement {
 }
 
 export interface JobOccupation {
-  /** Version 1 remains readable in saved records and cached snapshots. */
-  version: 1 | typeof OCCUPATION_VERSION
+  /** Versions 1 and 2 remain readable in saved records and cached snapshots. */
+  version: 1 | 2 | typeof OCCUPATION_VERSION
   category: 'engineering' | 'research' | 'support' | 'management' | 'other' | 'unconfirmed'
   evidence: FactEvidence[]
   departments: string[]

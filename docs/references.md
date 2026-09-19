@@ -240,3 +240,16 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 | [React: Adjusting some state when a prop changes](https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes) | 입력 변경 시 상태 일부를 조정하는 조건부 렌더링과 부수 효과의 분리 | 공고 ID·정렬 순서가 바뀌면 페이지를 초기화하고, 실제 포커스·스크롤은 사용자 동작 후 처리 |
 
 2026-09-20 원문을 확인했습니다. 페이지당 10개는 이 앱의 회사 카드 크기와 탐색 흐름에 맞춘 선택이며 레퍼런스가 지정한 수치가 아닙니다. 검색·추천·집계는 전체 후보로 계산하고 페이지 선택은 브라우저에서 처리합니다. 데스크톱에서는 회사 목록의 스크롤 영역만 이동하고, 모바일에서는 문서를 이동해 선택한 공고를 보여줍니다.
+
+## 개발자 대상 글쓰기와 개발 직무
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [Anthropic: Copywriter, Developer](https://job-boards.greenhouse.io/anthropic/jobs/5423931008) · [공개 공고 API](https://boards-api.greenhouse.io/v1/boards/anthropic/jobs/5423931008) | 개발자 대상 브랜드 캠페인·문체 지침·행사 및 광고 문구를 작성하는 역할 | 쉼표 뒤의 Developer를 직업으로 읽지 않고 명시적인 Copywriter 역할과 원래 제목을 보존 |
+| [Mistral: Senior Technical Writer / Developer Educator](https://jobs.ashbyhq.com/mistral.ai/81f093c9-d49d-4353-85da-c758cd1f383f) | API·SDK·튜토리얼·배포 문서의 품질과 문체를 담당하는 기술 문서 작성 역할 | Engineering 부서와 개발 경험 요구만으로 개발 직군으로 바꾸지 않음 |
+| [O*NET: Writers and Authors, 27-3043.00](https://www.onetonline.org/link/summary/27-3043.00) | 광고 등을 포함한 글 작성, Copywriter·Content Marketing Writer 등의 직함 | 개발자가 대상 독자인 글쓰기 직무와 엔지니어 직무의 구분 |
+| [O*NET: Technical Writers, 27-3042.00](https://www.onetonline.org/link/summary/27-3042.00) | 기술 자료·설명서·운영 지침 작성, Engineering Writer·Technical Writer 등의 직함 | Engineering이라는 단어가 포함된 기술 문서 작성 직함의 해석 |
+
+2026-09-20 두 공고의 공식 페이지와 O*NET 설명을 확인했습니다. Anthropic은 단일 공고 API도 대조했고, Mistral은 공식 페이지에 포함된 본문과 이전에 보관한 공개 공고 본문을 확인했습니다. 전체 게시판을 새로 수집한 결과는 아닙니다.
+
+제목에서 명시적인 글쓰기 역할을 먼저 구분하되 주된 직함에 엔지니어·소프트웨어 개발자·연구원 역할이 함께 명시된 경우와 공개 관리자 정보를 유지합니다. 마케팅 부서나 Developer Relations 전체를 제외하는 규칙은 아닙니다. O*NET은 업무 의미를 확인하는 참고 자료이며 직업 코드를 자동 부여하거나 분류 정확도를 보증하는 근거로 사용하지 않습니다. 원래 공고 제목과 부서 표기는 저장·상세 근거에서 계속 확인할 수 있습니다.

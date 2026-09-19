@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { needsOccupationDescription, upgradeJobOccupation } from '../../shared/job-occupation'
 import { JobSchema } from '../../shared/schemas'
 import { createSampleCatalog } from '../../shared/sample'
+import { OCCUPATION_VERSION } from '../../shared/types'
 import type { Company, Job, SavedJob } from '../../shared/types'
 import { decodeSavedJobs } from '../../shared/saved-jobs'
 import { parseCachedBoards } from '../../server/board-cache'
@@ -134,7 +135,7 @@ describe('SmartRecruiters public facts', () => {
     const saved: SavedJob = { job: legacy, company, savedAt: POSTING_TIME, note: 'preserve this private note', status: 'applied' }
     expect(decodeSavedJobs(JSON.stringify([saved])).records).toMatchObject([{
       savedAt: POSTING_TIME, note: saved.note, status: 'applied',
-      job: { id: legacy.id, fetchedAt: POSTING_TIME, occupation: { version: 2, category: 'other', departments: ['Product Research'] } },
+      job: { id: legacy.id, fetchedAt: POSTING_TIME, occupation: { version: OCCUPATION_VERSION, category: 'other', departments: ['Product Research'] } },
     }])
     expect(legacy.occupation?.version).toBe(1)
     for (const title of ['User Researcher', 'Market Researcher', 'People Researchers']) expect(needsOccupationDescription(title)).toBe(false)
@@ -147,7 +148,7 @@ describe('SmartRecruiters public facts', () => {
       ...current, title: 'Lead Platform Engineer',
       occupation: { ...current.occupation!, version: 1, category: 'management', departments: ['Infrastructure'], management },
     }
-    expect(upgradeJobOccupation(manager).occupation).toMatchObject({ version: 2, category: 'management', departments: ['Infrastructure'], management })
+    expect(upgradeJobOccupation(manager).occupation).toMatchObject({ version: OCCUPATION_VERSION, category: 'management', departments: ['Infrastructure'], management })
     const researcher: Job = {
       ...current, title: 'Applied Scientist', description: 'About Example\nWe make digital products.',
       occupation: {
@@ -156,7 +157,7 @@ describe('SmartRecruiters public facts', () => {
       },
     }
     const upgraded = upgradeJobOccupation(researcher)
-    expect(upgraded.occupation).toMatchObject({ version: 2, category: 'research', departments: ['Science'] })
+    expect(upgraded.occupation).toMatchObject({ version: OCCUPATION_VERSION, category: 'research', departments: ['Science'] })
     expect(upgraded.occupation?.evidence).toContainEqual({ source: 'description', text: 'Responsibilities\nDevelop language models.' })
     expect(upgraded.description).toBe(researcher.description)
     expect(upgraded.fetchedAt).toBe(POSTING_TIME)

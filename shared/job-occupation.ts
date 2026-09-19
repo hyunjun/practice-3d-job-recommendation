@@ -12,6 +12,7 @@ const SERVICES_TITLE = /\btechnical services? engineers?\b/i
 const SUPPORT_DEPARTMENT = /\b(?:technical support|customer support|support engineering)\b/i
 const PHYSICAL_TITLE = /\b(?:mechanical|electrical|civil|structural|chemical|manufacturing|facilities|hardware)\b|\bdata[\s-]?cent(?:er|re)\s+(?:(?:design|systems?|operations?|infrastructure)\s+){0,2}engineers?\b/i
 const COMMERCIAL_TITLE = /\b(?:recruiter|recruiting|account executive|sales representative|pre[- ]sales|post[- ]sales)\b/i
+const WRITING_TITLE = /\b(?:copy[\s-]?writers?|writers?|(?:technical|content)\s+editors?)\b/i
 const OTHER_RESEARCH = /\b(?:ux|user experience|(?:user|market|people) research(?:ers?)?|recruit(?:ing|ment)?|medicinal chemistry|wet[- ]lab)\b|\blife sciences\b.*\bchemistry\b/i
 const SOFTWARE_TITLE = /\b(?:(?:software|firmware|embedded|back[\s-]?end|front[\s-]?end|full[\s-]?stack|data|machine learning|security|devops|site reliability)\s+(?:engineers?|developers?)|software architects?)\b/i
 const MAX_TEXT = 100000
@@ -80,6 +81,14 @@ export function occupationFacts(input: { title: string; description: string; dep
   // A suffix can name the product ("Software Engineer, Resource Manager").
   // A published people-manager field still takes precedence over that title.
   const primaryTitle = title.split(/[,;|]|\s-\s/)[0]
+  // Developers can be the writer's audience. Keep the stated writing role
+  // separate from product/audience qualifiers, while retaining explicit
+  // engineering or research roles such as "Software Engineer / Technical Writer".
+  const roleTitle = primaryTitle.split(/\s+(?:for|serving|supporting)\s+|\(/i)[0]
+  if (WRITING_TITLE.test(roleTitle) && !MANAGEMENT_TITLE.test(roleTitle)
+    && !SOFTWARE_TITLE.test(roleTitle) && !RESEARCH_TITLE.test(roleTitle) && !/\bengineers?\b/i.test(roleTitle)) {
+    return assessment('other', [titleEvidence])
+  }
   if (MANAGEMENT_TITLE.test(title) && !(SOFTWARE_TITLE.test(primaryTitle) && !MANAGEMENT_TITLE.test(primaryTitle))) {
     return assessment('management', [titleEvidence])
   }

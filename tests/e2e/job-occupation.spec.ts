@@ -6,7 +6,7 @@ import { readFile } from 'node:fs/promises'
 import { normalizeJob } from '../../server/normalize'
 import { createJobRevision } from '../../shared/posting-status'
 import type { PostingStatusIndex } from '../../shared/posting-status'
-import { DEFAULT_FILTERS } from '../../shared/types'
+import { DEFAULT_FILTERS, OCCUPATION_VERSION } from '../../shared/types'
 import type { Catalog, Job } from '../../shared/types'
 import { SEARCH_COMPANIES, SEARCH_PROFILE, SEARCH_TIME, searchCatalog, searchJob } from '../fixtures/search-catalog'
 
@@ -172,3 +172,87 @@ test('long research evidence and preserved out-of-scope notices remain accessibl
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   expect((await new AxeBuilder({ page }).include('.job-dialog').analyze()).violations).toEqual([])
 })
+
+for (const width of [1440, 320]) {
+  test(`version 2 writing jobs leave search while saved notes, dates, posting status and exports survive at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 960 })
+    const title = 'Copywriter, Developer'
+    const base = normalizeJob({
+      id: 903, title: 'Software Engineer', absolute_url: 'https://example.com/jobs/developer-copywriter',
+      location: { name: 'London, UK' },
+      content: '<h2>Responsibilities</h2><p>Write brand campaigns and tutorials for developers.</p><h2>Requirements</h2><p>Experience with software development and technical writing.</p>',
+    }, company.id, SEARCH_TIME)!
+    const writer: Job = {
+      ...base, title,
+      occupation: { version: 2, category: 'engineering', evidence: [{ source: 'title', text: title }], departments: ['Marketing'] },
+    }
+    const oldDeveloper: Job = { ...developer, occupation: { ...developer.occupation!, version: 2 } }
+    const record = {
+      job: writer, company, savedAt: '2026-09-19T08:01:00.000Z',
+      status: 'applied' as const, note: 'private-developer-writing-note',
+    }
+    await page.addInitScript(record => {
+      if (!sessionStorage.getItem('writing-fixture-seeded')) {
+        localStorage.setItem('orbit.v1.saved', JSON.stringify([record]))
+        sessionStorage.setItem('writing-fixture-seeded', 'true')
+      }
+    }, record)
+    const index = await postingIndex()
+    index.boards[0].listing!.publishedIds = [writer.id, developer.id]
+    index.boards[0].listing!.jobs = index.boards[0].listing!.jobs.filter(job => job.id === developer.id)
+    await page.route('**/api/posting-status*', route => route.fulfill({ json: index }))
+    const requests: { url: string; body: string | null; method: string }[] = []
+    const errors: string[] = []
+    page.on('pageerror', error => errors.push(error.message))
+    page.on('request', request => {
+      if (request.url().includes('/api/')) requests.push({ url: request.url(), body: request.postData(), method: request.method() })
+    })
+    await restore(page, searchCatalog([writer, oldDeveloper]))
+    await page.getByLabel('직무 필터', { exact: true }).selectOption('all')
+    await expect(page.locator('.mini-job-title')).toHaveText(developer.title)
+    await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '1'])
+    await savedMenu(page).click()
+    await expect(page.locator('.saved-card')).toHaveCount(1)
+    await expect(page.locator('.occupation-notice')).toContainText('현재 탐색 범위 밖 · 기타 직군')
+    await expect(page.locator('.saved-note-preview')).toHaveText(record.note)
+    await expect(page.locator('.saved-status')).toHaveText('지원 완료')
+    await page.getByRole('button', { name: '게시 상태 확인', exact: true }).click()
+    await expect(page.locator('.posting-notice.listed')).toContainText('게시판에는 있지만 현재 탐색 범위 밖')
+    await expect(page.locator('.posting-notice.changed, .posting-notice.missing')).toHaveCount(0)
+    expect((await new AxeBuilder({ page }).include('.collection-page').analyze()).violations).toEqual([])
+    await page.locator('.saved-title').click()
+    await page.getByText('탐색 직군을 판단한 원문', { exact: true }).click()
+    await expect(page.locator('.occupation-evidence')).toContainText(title)
+    await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue(record.note)
+    await expect(page.getByRole('button', { name: '지원 완료로 표시됨', exact: true })).toBeVisible()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    expect((await new AxeBuilder({ page }).include('.job-dialog').analyze()).violations).toEqual([])
+    await page.getByRole('button', { name: '닫기', exact: true }).click()
+    await waitForSavedCommit(page)
+    await page.reload()
+    await savedMenu(page).click()
+    await expect(page.locator('.occupation-notice')).toContainText('현재 탐색 범위 밖 · 기타 직군')
+    const expected = JSON.parse(JSON.stringify({
+      ...record, job: { ...writer, occupation: { ...writer.occupation, version: OCCUPATION_VERSION, category: 'other' } },
+    }))
+    expect(await readSaved(page)).toEqual([expected])
+    const csvDownload = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
+    const csv = await readFile((await (await csvDownload).path())!, 'utf8')
+    for (const text of ['기타 직군', record.note, title, record.savedAt]) expect(csv).toContain(text)
+    await page.getByRole('button', { name: '기록 백업·복원', exact: true }).click()
+    const jsonDownload = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'JSON 백업', exact: true }).click()
+    const backup = JSON.parse(await readFile((await (await jsonDownload).path())!, 'utf8'))
+    expect(backup).toMatchObject({ format: 'orbit-saved-backup', version: 1, records: [expected] })
+    for (const request of requests) {
+      const url = new URL(request.url)
+      expect(['/api/catalog', '/api/posting-status']).toContain(url.pathname)
+      expect([...url.searchParams.keys()].every(key => key === 'source' || key === 'refresh')).toBe(true)
+      expect(request.method).toBe('GET')
+      expect(request.body).toBeNull()
+      expect(request.url).not.toMatch(/private-developer|developer-copywriter|Python/)
+    }
+    expect(errors).toEqual([])
+  })
+}
