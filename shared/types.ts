@@ -65,6 +65,7 @@ export interface Job {
   updatedAt: string | null
   fetchedAt: string
   evidence?: JobEvidence
+  stale?: boolean
 }
 
 export interface BoardStatus {
@@ -74,6 +75,10 @@ export interface BoardStatus {
   total: number
   included: number
   message?: string
+  dataStatus?: 'fresh' | 'stale' | 'unavailable'
+  checkedAt?: string
+  lastSuccessAt?: string | null
+  retryAt?: string | null
 }
 
 export interface Catalog {
@@ -84,7 +89,9 @@ export interface Catalog {
   cities: City[]
   jobs: Job[]
   boards: BoardStatus[]
-  unmappedCount: number
+  unmappedCount: number | null
+  checkedAt?: string
+  refreshAfter?: string
 }
 
 export interface Profile {

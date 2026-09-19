@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CITIES } from '../../shared/cities'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
+import { catalogNeedsAttention, collectionHealth } from '../../shared/catalog-health'
 import { createSampleCatalog } from '../../shared/sample'
 import type { Catalog, Source } from '../../shared/types'
 
@@ -16,12 +17,14 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
   const [catalog, setCatalog] = useState<Catalog>(() => initialCatalog(initialSource))
   const [loading, setLoading] = useState(initialSource !== 'sample')
   const [error, setError] = useState('')
+  const [errorRetryAt, setErrorRetryAt] = useState<string>()
   const requestRef = useRef<AbortController | null>(null)
 
   const changeSource = useCallback(async (source: Source, { refresh = false, announce = true }: { refresh?: boolean; announce?: boolean } = {}) => {
     requestRef.current?.abort()
     requestRef.current = null
     setError('')
+    setErrorRetryAt(undefined)
     if (source === 'sample') {
       setCatalog(createSampleCatalog())
       setLoading(false)
@@ -33,7 +36,15 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
     try {
       const response = await fetch(`/api/catalog?source=greenhouse${refresh ? '&refresh=1' : ''}`, { signal: controller.signal })
       const result = await response.json()
-      if (!response.ok) throw new Error(result?.error ?? '공개 공고를 불러오지 못했어요.')
+      if (!response.ok) {
+        if (!controller.signal.aborted) {
+          if (typeof result?.retryAt === 'string' && Number.isFinite(Date.parse(result.retryAt))) setErrorRetryAt(result.retryAt)
+          if (response.status === 503 && result?.code === 'CATALOG_EXPIRED') {
+            setCatalog(previous => previous.source === 'greenhouse' ? initialCatalog('greenhouse') : previous)
+          }
+        }
+        throw new Error(result?.error ?? '공개 공고를 불러오지 못했어요.')
+      }
       if (!result || result.source !== 'greenhouse'
         || !['jobs', 'companies', 'cities', 'boards'].every(key => Array.isArray(result[key]))
         || typeof result.fetchedAt !== 'string' || !Number.isFinite(Date.parse(result.fetchedAt))) {
@@ -41,8 +52,11 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
       }
       if (!controller.signal.aborted) {
         setCatalog(result as Catalog)
-        const failed = (result as Catalog).boards.filter(board => board.status === 'error').length
-        if (announce) notify(result.stale ? '연결 실패로 이전에 조회한 공개 공고를 표시해요.' : `${result.jobs.length.toLocaleString()}개 개발 공고를 가져왔어요.${failed ? ` ${failed}개 게시판은 연결되지 않았어요.` : ''}`, result.stale ? 'error' : undefined)
+        const health = collectionHealth(result as Catalog)
+        const attention = catalogNeedsAttention(result as Catalog)
+        if (announce) notify(attention
+          ? `${health.failed}개 게시판 연결 확인이 필요해요. 이전 조회 공고 ${health.retained}개를 유지했어요.`
+          : `${result.jobs.length.toLocaleString()}개 개발 공고를 가져왔어요.`, attention ? 'error' : undefined)
       }
     } catch (cause) {
       if (!controller.signal.aborted) {
@@ -63,5 +77,5 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
     return () => requestRef.current?.abort()
   }, [initialSource, changeSource])
 
-  return { catalog, loading, error, changeSource, ready: Boolean(catalog.fetchedAt) }
+  return { catalog, loading, error, changeSource, ready: Boolean(catalog.fetchedAt), retryAt: errorRetryAt ?? catalog.refreshAfter }
 }

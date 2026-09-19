@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, ArrowUpRight, Bookmark, BriefcaseBusiness, Check, ChevronDown, CircleHelp, Compass, Database, GitCompareArrows, Globe2, Maximize, Minus, Moon, MousePointer2, Plus, RotateCcw, Search, SlidersHorizontal, Sparkles, Sun, X } from 'lucide-react'
 import { CITY_BY_ID } from '../shared/cities'
+import { catalogNeedsAttention } from '../shared/catalog-health'
 import { countFilters, filterJobs, groupCities, matchJob } from '../shared/matching'
 import { DEFAULT_FILTERS, MODE_LABELS, REGION_LABELS, ROLE_LABELS, SAMPLE_PROFILE, VISA_FILTER_LABELS } from '../shared/types'
 import type { Filters, MatchedJob, Profile, Region, SavedJob } from '../shared/types'
@@ -59,7 +60,7 @@ export default function App() {
   const closeNotice = useCallback(() => setNotice(null), [])
   const notify = useCallback((message: string, action?: Notice['action'], tone?: Notice['tone']) => setNotice({ message, action, tone }), [])
   const notifyCatalog = useCallback((message: string, tone?: Notice['tone']) => notify(message, undefined, tone), [notify])
-  const { catalog, loading, error: dataError, changeSource, ready: catalogReady } = useCatalog(initial.exploration.source, notifyCatalog)
+  const { catalog, loading, error: dataError, changeSource, ready: catalogReady, retryAt } = useCatalog(initial.exploration.source, notifyCatalog)
   const retryCatalog = () => void changeSource('greenhouse', { refresh: true, announce: catalogReady })
   const showData = () => setModal('data')
 
@@ -192,6 +193,7 @@ export default function App() {
     if (document.fullscreenElement) void document.exitFullscreen()
     else void mapStageRef.current?.requestFullscreen().catch(() => notify('이 브라우저에서는 전체 화면을 사용할 수 없어요.'))
   }
+  const catalogStatus = <CatalogStatus catalog={catalog} loading={loading} error={dataError} retryAt={retryAt} onRetry={retryCatalog} onData={showData} />
 
   return <div className="app-shell">
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus() }}>본문으로 건너뛰기</a>
@@ -202,7 +204,7 @@ export default function App() {
         <button className={view === 'saved' ? 'active' : ''} aria-current={view === 'saved' ? 'page' : undefined} onClick={() => navigate('saved')}><Bookmark size={15} />저장한 기회{saved.length > 0 && <span className="nav-count">{saved.length}</span>}</button>
         <button className={view === 'compare' ? 'active' : ''} aria-current={view === 'compare' ? 'page' : undefined} onClick={() => navigate('compare')}><GitCompareArrows size={16} />도시 비교{compareIds.length > 0 && <span className="nav-count">{compareIds.length}</span>}</button>
       </nav>
-      <div className="header-actions"><button className="data-status-button" onClick={showData}>{loading ? <Spinner /> : <span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : ''}`} />}<span>{loading ? '공개 공고 조회 중' : catalog.source === 'sample' ? '샘플 탐색' : dataError ? '공개 공고 연결 필요' : '공개 채용'}</span><ChevronDown size={12} /></button><span className="header-divider" /><button className="profile-avatar" onClick={() => setModal('profile')} aria-label="내 프로필 편집" title="내 프로필">{initials}<span /></button></div>
+      <div className="header-actions"><button className="data-status-button" onClick={showData}>{loading ? <Spinner /> : <span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : dataError || catalogNeedsAttention(catalog) ? 'attention' : ''}`} />}<span>{loading ? '공개 공고 조회 중' : catalog.source === 'sample' ? '샘플 탐색' : dataError ? '공개 공고 연결 필요' : '공개 채용'}</span><ChevronDown size={12} /></button><span className="header-divider" /><button className="profile-avatar" onClick={() => setModal('profile')} aria-label="내 프로필 편집" title="내 프로필">{initials}<span /></button></div>
     </header>
     {view === 'explore' ? <>
       <div className="search-toolbar">
@@ -229,14 +231,14 @@ export default function App() {
           <div className="map-bottom-bar"><div className="map-view-switch segmented"><button className={mapMode === 'globe' ? 'selected' : ''} aria-pressed={mapMode === 'globe'} onClick={() => setMapMode('globe')}><Globe2 size={13} />3D 지구</button><button className={mapMode === 'flat' ? 'selected' : ''} aria-pressed={mapMode === 'flat'} onClick={() => setMapMode('flat')}>2D 지도</button></div><span className="map-interaction-hint"><MousePointer2 size={12} />{mapMode === 'globe' ? '드래그로 회전 · 스크롤로 확대' : '드래그로 이동 · + / −로 확대'}</span><button className="map-legend" onClick={() => setModal('data')}><span />숫자 = 추천 회사 수<CircleHelp size={12} /></button></div>
           <div className="map-footline"><span><span className="tiny-live-dot" />{catalog.cities.length}개 도시를 연결하는 커리어 지도</span><button onClick={() => { setPanelTab('remote'); setSelectedId(null) }}>원격으로 세계와 연결되기<ArrowRight size={12} /></button><button className="mobile-results-link" onClick={() => panelRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })}>도시 목록 보기<ChevronDown size={12} /></button></div>
         </div>
-        <div ref={panelRef} className="panel-container"><CityPanel catalog={catalog} results={cities} remote={remote} selectedId={selectedId} tab={panelTab} sort={citySort} profile={profile} compareIds={compareIds} savedIds={savedIds} onSort={setCitySort} onTab={setPanelTab} onSelect={selectCity} onHover={setHoveredId} onCompare={toggleCompare} onOpenJob={setOpenJob} onSave={toggleSave} onProfile={() => setModal('profile')} onData={showData} onFilters={() => setModal('filters')} onReset={resetFilters} status={<CatalogStatus catalog={catalog} loading={loading} error={dataError} onRetry={retryCatalog} onData={showData} />} /></div>
+        <div ref={panelRef} className="panel-container"><CityPanel catalog={catalog} results={cities} remote={remote} selectedId={selectedId} tab={panelTab} sort={citySort} profile={profile} compareIds={compareIds} savedIds={savedIds} onSort={setCitySort} onTab={setPanelTab} onSelect={selectCity} onHover={setHoveredId} onCompare={toggleCompare} onOpenJob={setOpenJob} onSave={toggleSave} onProfile={() => setModal('profile')} onData={showData} onFilters={() => setModal('filters')} onReset={resetFilters} status={catalogStatus} /></div>
       </main>
       {catalogReady && (filters.query || countFilters(filters) > 0) && <div className="active-filter-summary"><span>{matches.length}개 공고가 현재 조건에 맞아요{filters.salaryMin > 0 && ` · 희망 연봉 $${filters.salaryMin / 1000}k+`}{filters.employment !== 'all' && ' · 고용 형태 필터 적용'}</span><button onClick={resetFilters}><RotateCcw size={11} />초기화</button></div>}
-    </> : view === 'saved' ? <SavedView saved={saved} profile={profile} onOpen={setOpenJob} onRemove={toggleSave} onExplore={() => navigate('explore')} /> : !catalogReady ? <main id="main-content" className="collection-page" tabIndex={-1}><CatalogStatus catalog={catalog} loading={loading} error={dataError} onRetry={retryCatalog} onData={showData} /></main> : <CompareView catalog={catalog} results={cities} compareIds={compareIds} onToggle={toggleCompare} onAuto={() => setCompareIds(cities.slice(0, 3).map(result => result.city.id))} onSelect={id => { navigate('explore'); selectCity(id) }} onExplore={() => navigate('explore')} />}
+    </> : view === 'saved' ? <SavedView saved={saved} profile={profile} onOpen={setOpenJob} onRemove={toggleSave} onExplore={() => navigate('explore')} /> : !catalogReady ? <main id="main-content" className="collection-page" tabIndex={-1}>{catalogStatus}</main> : <CompareView catalog={catalog} results={cities} compareIds={compareIds} status={catalogStatus} onToggle={toggleCompare} onAuto={() => setCompareIds(cities.slice(0, 3).map(result => result.city.id))} onSelect={id => { navigate('explore'); selectCity(id) }} onExplore={() => navigate('explore')} />}
     <footer className="app-footer"><span><OrbitLogo small />A WORLD OF POSSIBILITIES.</span><span>{catalog.source === 'sample' ? 'DEMO WORKSPACE' : 'PUBLIC JOB BOARDS'}<span className="footer-dot">·</span>LOCAL FIRST<button onClick={() => setModal('data')}><Database size={11} />데이터와 추천 방식</button></span></footer>
     {modal === 'profile' && <ProfileDialog profile={profile} filters={filters} remember={rememberProfile} onApply={applyProfile} onDelete={() => { deleteProfile(); setProfile(SAMPLE_PROFILE); setRememberProfile(true); setFilters({ ...DEFAULT_FILTERS }); setPanelTab('cities'); setSelectedId(null); setModal(null); notify('저장된 프로필을 삭제하고 샘플로 돌아왔어요.') }} onClose={() => setModal(null)} />}
     {modal === 'filters' && <FiltersDialog filters={filters} catalog={catalog} profile={profile} onApply={updateFilters} onClose={() => setModal(null)} />}
-    {modal === 'data' && <DataDialog catalog={catalog} loading={loading} error={dataError} onSource={source => void changeSource(source, { announce: catalogReady })} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
+    {modal === 'data' && <DataDialog catalog={catalog} loading={loading} error={dataError} retryAt={retryAt} onSource={source => void changeSource(source, { announce: catalogReady })} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
     {openJob && <JobDialog match={{ ...openJob, ...matchJob(openJob.job, profile) }} saved={savedOpenJob} onToggleSave={() => toggleSave(openJob)} onUpdateSaved={update => setSaved(current => current.map(item => item.job.id === openJob.job.id ? { ...item, ...update } : item))} onClose={() => setOpenJob(null)} />}
     {notice && <Toast message={notice.message} action={notice.action} tone={notice.tone} onDismiss={closeNotice} />}
   </div>

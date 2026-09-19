@@ -3,9 +3,11 @@ import { ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, CheckCircle2, Downlo
 import { CITY_BY_ID } from '../../shared/cities'
 import { formatSalary, groupCompanies, matchJob, medianSalary } from '../../shared/matching'
 import { MODE_LABELS } from '../../shared/types'
+import { catalogNeedsAttention } from '../../shared/catalog-health'
 import type { Catalog, CityResult, MatchedJob, Profile, SavedJob } from '../../shared/types'
 import { exportSavedCsv } from '../lib/storage'
 import { CityImage, CompanyLogo, EmptyState } from './ui'
+import { JobFreshnessNotice } from './JobFreshnessNotice'
 
 export function SavedView({ saved, profile, onOpen, onRemove, onExplore }: { saved: SavedJob[]; profile: Profile; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
   const [query, setQuery] = useState('')
@@ -21,6 +23,7 @@ export function SavedView({ saved, profile, onOpen, onRemove, onExplore }: { sav
         <button className="saved-title" onClick={() => onOpen(match)}>{item.job.title}<ArrowUpRight size={17} /></button>
         <p className="saved-location"><MapPin size={13} />{item.job.locationLabel}</p>
         <div className="saved-card-tags"><span>{formatSalary(item.job.salary)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
+        <JobFreshnessNotice job={item.job} compact />
         <div className="saved-card-match"><CheckCircle2 size={13} />{match.matchedSkills.length ? `${match.matchedSkills.slice(0, 3).join(' · ')} 경험 일치` : '공고 조건을 확인해 보세요'}</div>
         {item.note && <p className="saved-note-preview">{item.note}</p>}
         <footer><span className={`saved-status ${item.status === 'applied' ? 'applied' : ''}`}><span />{item.status === 'applied' ? '지원 완료' : '검토 중'}</span><span>{new Date(item.savedAt).toLocaleDateString('ko-KR')} 저장</span><button className="text-button" onClick={() => onOpen(match)}>자세히<ArrowRight size={13} /></button></footer>
@@ -30,7 +33,7 @@ export function SavedView({ saved, profile, onOpen, onRemove, onExplore }: { sav
   </main>
 }
 
-export function CompareView({ catalog, results, compareIds, onToggle, onAuto, onSelect, onExplore }: { catalog: Catalog; results: CityResult[]; compareIds: string[]; onToggle: (id: string) => void; onAuto: () => void; onSelect: (id: string) => void; onExplore: () => void }) {
+export function CompareView({ catalog, results, compareIds, status, onToggle, onAuto, onSelect, onExplore }: { catalog: Catalog; results: CityResult[]; compareIds: string[]; status?: React.ReactNode; onToggle: (id: string) => void; onAuto: () => void; onSelect: (id: string) => void; onExplore: () => void }) {
   const selected = compareIds.flatMap(id => {
     const city = CITY_BY_ID.get(id)
     return city ? [{ city, result: results.find(result => result.city.id === id) }] : []
@@ -39,6 +42,11 @@ export function CompareView({ catalog, results, compareIds, onToggle, onAuto, on
   const metricRows = [
     { label: '추천 회사', note: '조건에 맞는 공고가 있는 회사', render: (result?: CityResult) => <strong className="metric-primary">{result?.companyCount ?? 0}<small>곳</small></strong> },
     { label: '관련 채용공고', note: '현재 검색 조건 기준', render: (result?: CityResult) => <strong>{result?.matches.length ?? 0}<small>개</small></strong> },
+    { label: '공고 조회 상태', note: '이전 결과는 원문 확인 필요', render: (result?: CityResult) => {
+      if (catalog.source === 'sample') return <small>체험용 샘플 공고</small>
+      const retained = result?.matches.filter(match => match.job.stale).length ?? 0
+      return <><strong>{(result?.matches.length ?? 0) - retained}<small>개 최근 조회</small></strong><small>{retained}개 이전 조회 공고 포함</small></>
+    } },
     { label: '공개 연봉의 중앙값', note: '세전 연간 USD · 고정 참고 환율', render: (result?: CityResult) => {
       const median = result ? medianSalary(result.matches) : null
       const count = result?.matches.filter(match => match.job.salary).length ?? 0
@@ -51,7 +59,8 @@ export function CompareView({ catalog, results, compareIds, onToggle, onAuto, on
   ]
   return <main id="main-content" className="collection-page compare-page" tabIndex={-1}>
     <div className="page-heading"><div><p className="eyebrow">DIFFERENT CITIES. YOUR POSSIBILITIES.</p><h1>어느 도시에서 시작할까요<span className="accent-dot">?</span></h1><p>최대 3개 도시를 나란히 놓고, 중요한 조건을 비교해 보세요.</p></div><button className="button secondary" onClick={onAuto} disabled={!results.length}><GitCompareArrows size={16} />회사 많은 3개 도시</button></div>
-    <div className="comparison-source-note"><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : ''}`} />{catalog.source === 'sample' ? '샘플 시나리오로 비교 중 · 보상 및 채용 조건은 예시입니다.' : '조회한 공개 채용공고의 비교 · 생활비와 세금은 반영하지 않습니다.'}</div>
+    <div className="comparison-source-note"><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} />{catalog.source === 'sample' ? '샘플 시나리오로 비교 중 · 보상 및 채용 조건은 예시입니다.' : '조회한 공개 채용공고의 비교 · 생활비와 세금은 반영하지 않습니다.'}</div>
+    {status}
     {selected.length > 0 ? <div className="comparison-scroll"><div className="comparison-table" role="table" aria-label="도시별 채용 조건 비교" style={{ '--city-columns': 3 } as React.CSSProperties}>
       <div className="comparison-row" role="row">
       <div className="comparison-corner" role="columnheader"><GitCompareArrows size={21} /><strong>나의 다음 도시</strong><span>현재 프로필과 필터 기준</span></div>

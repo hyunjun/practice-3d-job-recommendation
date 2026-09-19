@@ -2,6 +2,7 @@ import express from 'express'
 import path from 'node:path'
 import { createSampleCatalog } from '../shared/sample'
 import { getPublicCatalog } from './catalog'
+import { CatalogUnavailableError } from './catalog-service'
 
 const app = express()
 const port = Number(process.env.PORT ?? 5173)
@@ -31,7 +32,12 @@ app.get('/api/catalog', async (request, response) => {
     const catalog = source === 'greenhouse' ? await getPublicCatalog(request.query.refresh === '1') : createSampleCatalog()
     response.json(catalog)
   } catch (error) {
-    response.status(503).json({ error: error instanceof Error ? error.message : '공고를 불러오지 못했습니다.' })
+    const retryAt = error instanceof CatalogUnavailableError ? error.retryAt : undefined
+    if (retryAt) response.setHeader('Retry-After', Math.max(0, Math.ceil((Date.parse(retryAt) - Date.now()) / 1000)))
+    response.status(503).json({
+      error: error instanceof Error ? error.message : '공고를 불러오지 못했습니다.',
+      ...(error instanceof CatalogUnavailableError ? { retryAt, code: error.code } : {}),
+    })
   }
 })
 

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { CITY_BY_ID } from '../../shared/cities'
+import { JobSchema } from '../../shared/schemas'
 import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
 
@@ -36,34 +37,8 @@ const ProfileSchema = z.object({
   }).optional(),
 })
 
-const EvidenceSchema = z.object({
-  source: z.enum(['board', 'description', 'title']),
-  text: z.string().max(3000),
-})
-
 const SavedSchema = z.array(z.object({
-  job: z.object({
-    id: z.string().max(200), companyId: z.string().max(100), title: z.string().max(1000),
-    role: z.enum(['backend', 'frontend', 'fullstack', 'ml', 'data', 'devops', 'mobile', 'security']),
-    cityIds: z.array(z.string()).max(50), locationLabel: z.string().max(2000),
-    workMode: z.enum(['remote', 'hybrid', 'onsite', 'unknown']),
-    employment: z.enum(['fulltime', 'parttime', 'contract', 'intern', 'temporary', 'unknown']),
-    minExperience: z.number().min(0).max(50).nullable(), skills: z.array(z.string()).max(100),
-    salary: z.object({
-      min: z.number().nonnegative(), max: z.number().nonnegative(),
-      currency: z.enum(['USD', 'EUR', 'GBP', 'CAD', 'SGD', 'AUD', 'KRW', 'JPY', 'CHF']),
-    }).nullable(),
-    visa: z.enum(['yes', 'conditional', 'no', 'unknown']), remoteCountries: z.array(z.string()).max(300),
-    remoteWorldwide: z.boolean(), remoteScopeUnknown: z.boolean(),
-    description: z.string().max(30000), requirements: z.array(z.string()).max(50),
-    url: z.string().max(2000), source: z.enum(['sample', 'greenhouse']),
-    updatedAt: z.string().nullable(), fetchedAt: z.string(),
-    evidence: z.object({
-      visa: EvidenceSchema.optional(),
-      workMode: EvidenceSchema.optional(),
-      employment: EvidenceSchema.optional(),
-    }).optional(),
-  }),
+  job: JobSchema,
   company: z.object({
     id: z.string(), name: z.string().max(200), color: z.string().regex(/^#[0-9a-f]{6}$/i),
     initials: z.string().max(8), industry: z.string().max(200), careerUrl: z.string().max(2000),
