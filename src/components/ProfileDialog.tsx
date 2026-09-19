@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check, CheckCheck, FileText, Fingerprint, Link2, Plus, ShieldCheck, Sparkles, Upload, X } from 'lucide-react'
 import { analyzeResume, KNOWN_SKILLS } from '../../shared/profile'
-import { COUNTRIES, MODE_LABELS, ROLE_LABELS } from '../../shared/types'
+import { COUNTRIES, MODE_LABELS, ROLE_LABELS, VISA_FILTER_LABELS } from '../../shared/types'
 import type { Filters, Profile } from '../../shared/types'
 import { readResume } from '../lib/resume'
 import { Dialog, OrbitLogo, Spinner, Toggle } from './ui'
@@ -133,11 +133,11 @@ export function ProfileDialog({ profile, filters, onApply, onDelete, onClose }: 
           </div>
           {warnings.length > 0 && <p className="field-description">{warnings.join(' ')}</p>}
           <div className="form-section-label">다음 커리어에서 바라는 것</div>
-          <div className="form-grid">
+          <div className="form-grid preference-grid">
             <div className="field-group"><label htmlFor="profile-role">희망 직무</label><select id="profile-role" value={draft.desiredRole} onChange={event => setDraft({ ...draft, desiredRole: event.target.value as Profile['desiredRole'] })}>{Object.entries(ROLE_LABELS).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></div>
             <div className="field-group"><label htmlFor="profile-mode">선호 근무 형태</label><select id="profile-mode" value={preferences.workMode} onChange={event => setPreferences({ ...preferences, workMode: event.target.value as Filters['workMode'] })}>{Object.entries(MODE_LABELS).filter(([value]) => value !== 'unknown').map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></div>
             <div className="field-group"><label htmlFor="profile-country">원격근무 시 거주 국가</label><select id="profile-country" value={draft.residence} onChange={event => setDraft({ ...draft, residence: event.target.value })}>{COUNTRIES.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></div>
-            <div className="field-group"><label htmlFor="profile-visa">비자 지원</label><select id="profile-visa" value={preferences.visa} onChange={event => setPreferences({ ...preferences, visa: event.target.value as Filters['visa'] })}><option value="all">상관없음</option><option value="yes">지원 확인된 공고만</option><option value="possible">미확인 공고도 함께 보기</option></select></div>
+            <div className="field-group"><label htmlFor="profile-visa">비자 지원</label><select id="profile-visa" value={preferences.visa} onChange={event => setPreferences({ ...preferences, visa: event.target.value as Filters['visa'] })}>{Object.entries(VISA_FILTER_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
           </div>
           <div className="salary-field"><label htmlFor="profile-salary">희망 연봉 <strong>{preferences.salaryMin ? `$${preferences.salaryMin / 1000}k 이상` : '제한 없음'}</strong></label><input id="profile-salary" type="range" min={0} max={250000} step={10000} value={preferences.salaryMin} onChange={event => setPreferences({ ...preferences, salaryMin: Number(event.target.value) })} /><p className="field-description">세전 연간 USD 환산 · 공고의 연봉 상한 기준으로 탐색해요.</p></div>
           <Toggle checked={remember} onChange={setRemember} label="이 브라우저에 프로필 기억하기" description="기술·경력·조건만 저장하고, 이력서 원문은 저장하지 않아요." />

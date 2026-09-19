@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronDown, CircleHelp, Globe2, MapPin, Plus, SearchX, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import { CITY_BY_ID } from '../../shared/cities'
 import { formatSalary, groupCompanies, medianSalary } from '../../shared/matching'
-import { COUNTRIES, MODE_LABELS } from '../../shared/types'
+import { COUNTRIES, MODE_LABELS, VISA_LABELS } from '../../shared/types'
 import type { Catalog, CityResult, MatchedJob, Profile } from '../../shared/types'
 import { CityImage, CompanyLogo, EmptyState } from './ui'
 
@@ -87,7 +87,7 @@ export function CompanyCard({ matches, savedIds, onOpen, onSave }: { matches: Ma
       <button className="mini-job-title" onClick={() => onOpen(match)}>{match.job.title}<ArrowUpRight size={14} /></button>
       <div className="mini-job-meta"><span>{formatSalary(match.job.salary)}</span><span>·</span><span>{MODE_LABELS[match.job.workMode]}</span></div>
       <div className="mini-job-reason">{match.matchedSkills.length ? <><Check size={12} /><span>{match.matchedSkills.slice(0, 2).join(' · ')} 경험 일치</span></> : <><CircleHelp size={12} /><span>기술 요구사항 확인 필요</span></>}</div>
-      <div className="mini-job-footer"><span className={`visa-tag ${match.job.visa === 'yes' ? 'confirmed' : ''}`}>{match.job.visa === 'yes' ? <ShieldCheck size={12} /> : <CircleHelp size={12} />}{match.job.visa === 'yes' ? '비자 지원' : match.job.visa === 'no' ? '비자 미지원' : '비자 확인 필요'}</span><button className={`icon-button bookmark-button ${savedIds.has(match.job.id) ? 'is-saved' : ''}`} aria-label={`${company.name} ${match.job.title} ${savedIds.has(match.job.id) ? '저장 취소' : '저장'}`} onClick={() => onSave(match)}>{savedIds.has(match.job.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button></div>
+      <div className="mini-job-footer"><span className={`visa-tag ${match.job.visa === 'yes' ? 'confirmed' : match.job.visa === 'conditional' ? 'conditional' : ''}`}>{match.job.visa === 'yes' ? <ShieldCheck size={12} /> : <CircleHelp size={12} />}비자 {VISA_LABELS[match.job.visa]}</span><button className={`icon-button bookmark-button ${savedIds.has(match.job.id) ? 'is-saved' : ''}`} aria-label={`${company.name} ${match.job.title} ${savedIds.has(match.job.id) ? '저장 취소' : '저장'}`} onClick={() => onSave(match)}>{savedIds.has(match.job.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button></div>
     </div>)}
     {matches.length > 1 && <button className="more-jobs" onClick={() => setExpanded(!expanded)}>{expanded ? '공고 접기' : `${matches.length - 1}개 공고 더 보기`}<ChevronDown size={13} className={expanded ? 'rotated' : ''} /></button>}
   </article>

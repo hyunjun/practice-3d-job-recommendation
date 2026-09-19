@@ -1,9 +1,16 @@
 export type Region = 'all' | 'americas' | 'europe' | 'asia-pacific'
 export type Role = 'all' | 'backend' | 'frontend' | 'fullstack' | 'ml' | 'data' | 'devops' | 'mobile' | 'security'
 export type WorkMode = 'remote' | 'hybrid' | 'onsite' | 'unknown'
-export type Visa = 'yes' | 'no' | 'unknown'
+export type Visa = 'yes' | 'conditional' | 'no' | 'unknown'
 export type Source = 'sample' | 'greenhouse'
-export type Employment = 'fulltime' | 'contract' | 'intern' | 'unknown'
+export type Employment = 'fulltime' | 'parttime' | 'contract' | 'intern' | 'temporary' | 'unknown'
+
+export interface FactEvidence {
+  source: 'board' | 'description' | 'title'
+  text: string
+}
+
+export type JobEvidence = Partial<Record<'visa' | 'workMode' | 'employment', FactEvidence>>
 
 export interface City {
   id: string
@@ -57,6 +64,7 @@ export interface Job {
   source: Source
   updatedAt: string | null
   fetchedAt: string
+  evidence?: JobEvidence
 }
 
 export interface BoardStatus {
@@ -96,7 +104,7 @@ export interface Filters {
   region: Region
   role: Role
   workMode: 'all' | WorkMode
-  visa: 'all' | 'yes' | 'possible'
+  visa: 'all' | 'yes' | 'supported' | 'possible'
   employment: 'all' | Employment
   salaryMin: number
   includeUnknownSalary: boolean
@@ -157,10 +165,32 @@ export const REGION_LABELS: Record<Region, string> = {
 
 export const EMPLOYMENT_LABELS: Record<Employment | 'all', string> = {
   all: '모든 고용 형태',
-  fulltime: '정규직',
+  fulltime: '풀타임',
+  parttime: '파트타임',
   contract: '계약직',
   intern: '인턴',
+  temporary: '임시직',
   unknown: '고용 형태 미확인',
+}
+
+export const VISA_LABELS: Record<Visa, string> = {
+  yes: '지원 명시',
+  conditional: '조건부 지원 명시',
+  no: '지원 없음',
+  unknown: '확인 필요',
+}
+
+export const VISA_FILTER_LABELS: Record<Filters['visa'], string> = {
+  all: '비자 지원 무관',
+  supported: '지원 명시 · 조건부 포함',
+  yes: '지원 명시 · 조건부 제외',
+  possible: '미확인 공고도 포함',
+}
+
+export const FACT_LABELS: Record<keyof JobEvidence, string> = {
+  visa: '비자 지원',
+  workMode: '근무 형태',
+  employment: '고용 형태',
 }
 
 export const COUNTRIES = [

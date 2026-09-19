@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import path from 'node:path'
 import { readFile } from 'node:fs/promises'
+import { createSampleCatalog } from '../../shared/sample'
+import { normalizeJob } from '../../server/normalize'
 
 const profileText = `Alex Kim\nBackend Engineer\n5 years of software engineering experience.\nI build payment APIs with Python, TypeScript, React, Node.js, PostgreSQL and AWS.\nDO_NOT_PERSIST_RAW_RESUME alice-private@example.test`
 
@@ -156,6 +158,60 @@ test('a failed public feed never relabels sample data as real jobs', async ({ pa
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
   await expect(page.locator('.city-row')).toHaveCount(22)
+})
+
+test('public conditions expose their evidence, preserve visa distinctions and survive saving', async ({ page }) => {
+  const conditional = "We do sponsor visas! However, we aren't able to successfully sponsor visas for every role and every candidate."
+  const policies = [
+    ['conditional', conditional],
+    ['yes', 'We provide visa sponsorship.'],
+    ['no', 'We cannot sponsor visas for this role.'],
+    ['unknown', 'Employment may depend on export authorization without sponsorship for an export license.'],
+  ]
+  const demo = createSampleCatalog()
+  const fetchedAt = '2026-09-19T03:00:00.000Z'
+  const jobs = policies.map(([kind, policy], index) => normalizeJob({
+    id: 900 + index, title: `Backend Engineer — ${kind} fixture`,
+    absolute_url: `https://example.com/jobs/fixture-${index}`, location: { name: 'London, UK' },
+    content: `<p>5 years of software engineering experience. Python and AWS.</p><p>${policy}</p>`,
+    metadata: [{ name: 'Location Type', value: 'On-Site' }, { name: 'Time Type', value: 'Full time' }],
+  }, 'stripe', fetchedAt)!)
+  const catalog = {
+    ...demo, source: 'greenhouse', fetchedAt, jobs,
+    companies: demo.companies.filter(company => company.id === 'stripe'),
+    boards: [{ companyId: 'stripe', board: 'stripe', status: 'ok', total: 4, included: 4 }],
+  }
+  await page.route('**/api/catalog?source=greenhouse*', route => route.fulfill({ json: catalog }))
+  await page.goto('/')
+  await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
+  await page.getByRole('button', { name: /공개 채용공고/ }).click()
+  await expect(page.locator('.data-quality-list > div').filter({ hasText: '조건부 비자 지원' }).locator('dd')).toHaveText('1개')
+  await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await page.getByLabel('비자 지원 필터').selectOption('supported')
+  await page.getByRole('button', { name: /^런던, 추천 회사 1곳 보기$/ }).click()
+  await page.getByRole('button', { name: '1개 공고 더 보기', exact: true }).click()
+  await expect(page.locator('.mini-job-title')).toHaveCount(2)
+  await page.locator('.mini-job-title').filter({ hasText: 'conditional fixture' }).click()
+  await expect(page.locator('.job-key-facts')).toContainText('조건부 지원 명시')
+  await expect(page.locator('.job-meta-pills')).toContainText('풀타임')
+  await page.locator('.job-evidence > summary').click()
+  await expect(page.locator('.job-evidence blockquote').first()).toHaveText(conditional)
+  await expect(page.locator('.job-evidence')).toContainText('Location Type: On-Site')
+  const accessibility = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
+  expect(accessibility.violations).toEqual([])
+  await page.getByRole('button', { name: '기회 저장', exact: true }).click()
+  await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await page.getByLabel('비자 지원 필터').selectOption('yes')
+  await expect(page.locator('.mini-job-title')).toHaveCount(1)
+  await expect(page.locator('.mini-job-title')).toContainText('yes fixture')
+  await page.getByLabel('비자 지원 필터').selectOption('possible')
+  await expect(page.locator('.mini-job-title')).toHaveCount(3)
+  await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await page.reload()
+  await page.locator('.saved-title').click()
+  await expect(page.locator('.job-key-facts')).toContainText('조건부 지원 명시')
+  await page.locator('.job-evidence > summary').click()
+  await expect(page.locator('.job-evidence blockquote').first()).toHaveText(conditional)
 })
 
 test('explore and profile forms pass WCAG A/AA checks and keyboard focus returns', async ({ page }) => {

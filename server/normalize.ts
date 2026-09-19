@@ -1,6 +1,7 @@
 import { CITY_BY_ID, LOCATION_ALIASES } from '../shared/cities'
 import { extractSkills, extractYears, inferRole } from '../shared/profile'
 import type { Job, Salary, Visa } from '../shared/types'
+import { employmentFact, visaFact, workModeFact } from './job-facts'
 
 export interface GreenhouseJob {
   id: number
@@ -11,7 +12,7 @@ export interface GreenhouseJob {
   content?: string
   offices?: { name?: string; location?: string | null }[]
   metadata?: { name?: string; value?: unknown }[]
-  pay_input_ranges?: { min_cents?: number; max_cents?: number; currency_code?: string }[]
+  pay_input_ranges?: { min_cents?: number; max_cents?: number; currency_type?: string; currency_code?: string }[]
 }
 
 export function plainText(html: string): string {
@@ -47,9 +48,7 @@ export function locateCities(location: string): string[] {
 }
 
 export function detectVisa(text: string): Visa {
-  if (/\b(?:no|without)\s+(?:immigration\s+|work\s+)?(?:visa\s+)?sponsorship\b|\b(?:cannot|can't|can not|do not|does not|will not|unable to|not able to)\s+(?:currently\s+)?(?:provide\s+|offer\s+)?sponsor(?:ship)?(?:\s+(?:for\s+)?(?:work\s+)?visas?)?\b|visa sponsorship\s+(?:is\s+)?not\s+(?:available|provided|offered)/i.test(text)) return 'no'
-  if (/\b(?:we\s+)?(?:offer|provide)\s+(?:work\s+)?visa sponsorship\b|\bvisa sponsorship\s+(?:is\s+)?(?:available|provided|offered)\b|\bwe\s+(?:will|can)\s+sponsor\s+(?:work\s+)?visas?\b/i.test(text)) return 'yes'
-  return 'unknown'
+  return visaFact(text).value
 }
 
 const COUNTRY_TERMS: Record<string, RegExp> = {
@@ -74,9 +73,9 @@ export function remoteScope(location: string): { remoteCountries: string[]; remo
 
 export function parseSalary(text: string, cityIds: string[], ranges?: GreenhouseJob['pay_input_ranges']): Salary | null {
   const supported = ['USD', 'EUR', 'GBP', 'CAD', 'SGD', 'AUD', 'KRW', 'JPY', 'CHF']
-  const structured = ranges?.find(range => typeof range.min_cents === 'number' && typeof range.max_cents === 'number' && supported.includes(range.currency_code ?? ''))
+  const structured = ranges?.find(range => typeof range.min_cents === 'number' && typeof range.max_cents === 'number' && supported.includes(range.currency_type ?? range.currency_code ?? ''))
   if (structured && structured.min_cents! >= 1000000 && structured.max_cents! >= structured.min_cents!) {
-    return { min: structured.min_cents! / 100, max: structured.max_cents! / 100, currency: structured.currency_code as Salary['currency'] }
+    return { min: structured.min_cents! / 100, max: structured.max_cents! / 100, currency: (structured.currency_type ?? structured.currency_code) as Salary['currency'] }
   }
   const pattern = /([$€£])\s*([\d,]{2,9}(?:\.\d+)?)\s*(k)?\s*(?:-|–|—|to)\s*[$€£]?\s*([\d,]{2,9}(?:\.\d+)?)\s*(k)?(?:\s*(USD|EUR|GBP|CAD|SGD|AUD|CHF))?/gi
   for (const match of text.matchAll(pattern)) {
@@ -110,17 +109,15 @@ export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: s
   const locationName = raw.location?.name?.trim() || ''
   const postingLocation = raw.metadata?.find(item => /^job posting location$|^job location$/i.test(item.name ?? ''))?.value
   const explicitLocations = typeof postingLocation === 'string' ? [postingLocation] : Array.isArray(postingLocation) ? postingLocation.filter(value => typeof value === 'string') as string[] : []
-  const workplaceType = raw.metadata?.find(item => /^workplace type$|^work arrangement$|^work location type$/i.test(item.name ?? ''))?.value
-  const workplace = typeof workplaceType === 'string' ? workplaceType : ''
   // These are offices attached to this vacancy, not a company's headquarters.
   // Explicit job-posting metadata takes precedence over potentially broader office tags.
   const officeNames = raw.offices?.map(office => office.location || office.name || '').filter(Boolean) ?? []
   const genericLocation = !locationName || /^(?:hybrid|remote|in[- ]office|on[- ]site|multiple locations|various locations)$/i.test(locationName)
   const locationDetails = explicitLocations.length ? explicitLocations.join(' · ') : genericLocation && officeNames.length ? officeNames.join(' · ') : locationName
-  const workText = `${locationName} ${workplace}`
-  const isRemote = /\bremote\b|원격/i.test(workText)
+  const workMode = workModeFact(locationName, raw.metadata ?? [], text)
+  const mode = workMode.value
+  const isRemote = mode === 'remote'
   const cityIds = isRemote ? [] : locateCities(locationDetails)
-  const mode = isRemote ? 'remote' : /\bhybrid\b/i.test(workText) ? 'hybrid' : /\bon[- ]?site\b|\bin[- ]office\b/i.test(workText) ? 'onsite' : 'unknown'
   const role = inferRole(raw.title)
   // A remote post's own location establishes eligibility; office tags do not.
   const remoteLocation = explicitLocations.length ? explicitLocations.join(' · ') : locationName
@@ -128,14 +125,18 @@ export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: s
   const location = [displayLocation || '근무지 미확인', mode === 'remote' && !/\bremote\b/i.test(displayLocation) ? 'Remote' : mode === 'hybrid' && !/\bhybrid\b/i.test(displayLocation) ? 'Hybrid' : ''].filter(Boolean).join(' · ')
   const scope = isRemote ? remoteScope(remoteLocation) : { remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false }
   const experience = extractYears(text)
-  const employmentMetadata = raw.metadata?.find(item => /employment type|employment_type|commitment/i.test(item.name ?? ''))?.value
-  const employmentText = `${raw.title} ${typeof employmentMetadata === 'string' ? employmentMetadata : ''}`
-  const employment = /\bintern(?:ship)?\b/i.test(employmentText) ? 'intern' : /\bcontract(?:or)?\b/i.test(employmentText) ? 'contract' : /\bfull[\s-]?time\b/i.test(employmentText) ? 'fulltime' : 'unknown'
+  const employment = employmentFact(raw.title, raw.metadata ?? [], text)
+  const visa = visaFact(text)
   return {
     id: `greenhouse-${companyId}-${raw.id}`, companyId, title: raw.title, role, cityIds,
-    locationLabel: location, workMode: mode, employment, minExperience: experience,
+    locationLabel: location, workMode: mode, employment: employment.value, minExperience: experience,
     skills: extractSkills(text), salary: parseSalary(text, isRemote ? locateCities(remoteLocation) : cityIds, raw.pay_input_ranges),
-    visa: detectVisa(text), ...scope,
+    visa: visa.value, ...scope,
+    evidence: {
+      ...(visa.evidence ? { visa: visa.evidence } : {}),
+      ...(workMode.evidence ? { workMode: workMode.evidence } : {}),
+      ...(employment.evidence ? { employment: employment.evidence } : {}),
+    },
     description: text.slice(0, 26000),
     requirements: [],
     url: raw.absolute_url,

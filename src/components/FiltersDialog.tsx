@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ArrowRight, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { filterJobs } from '../../shared/matching'
-import { DEFAULT_FILTERS, EMPLOYMENT_LABELS, MODE_LABELS, ROLE_LABELS } from '../../shared/types'
+import { DEFAULT_FILTERS, EMPLOYMENT_LABELS, MODE_LABELS, ROLE_LABELS, VISA_FILTER_LABELS } from '../../shared/types'
 import type { Catalog, Filters, Profile } from '../../shared/types'
 import { Dialog, Toggle } from './ui'
 
@@ -14,11 +14,11 @@ export function FiltersDialog({ filters, catalog, profile, onApply, onClose }: {
       <p className="dialog-intro">경험과 맞는 기회 중, 원하는 조건을 더해보세요.</p>
       <div className="field-group"><label htmlFor="filter-role">직무</label><select id="filter-role" value={draft.role} onChange={event => update('role', event.target.value as Filters['role'])}>{Object.entries(ROLE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
       <div className="field-group"><label>근무 형태</label><div className="filter-options">{Object.entries(MODE_LABELS).map(([value, label]) => <button key={value} className={draft.workMode === value ? 'selected' : ''} aria-pressed={draft.workMode === value} onClick={() => update('workMode', value as Filters['workMode'])}>{label}</button>)}</div></div>
-      <div className="form-grid">
-        <div className="field-group"><label htmlFor="filter-visa">비자 지원</label><select id="filter-visa" value={draft.visa} onChange={event => update('visa', event.target.value as Filters['visa'])}><option value="all">상관없음</option><option value="yes">지원 확인된 공고만</option><option value="possible">미확인 공고도 포함</option></select></div>
+      <div className="form-grid preference-grid">
+        <div className="field-group"><label htmlFor="filter-visa">비자 지원</label><select id="filter-visa" value={draft.visa} onChange={event => update('visa', event.target.value as Filters['visa'])}>{Object.entries(VISA_FILTER_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
         <div className="field-group"><label htmlFor="filter-employment">고용 형태</label><select id="filter-employment" value={draft.employment} onChange={event => update('employment', event.target.value as Filters['employment'])}>{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
       </div>
-      {draft.visa !== 'all' && <p className="inline-note">{draft.visa === 'yes' ? '비자 지원이 명시된 공고만 포함해요. 미확인 공고는 제외됩니다.' : '비자 지원 불가 공고만 제외해요. 미확인 공고는 개별 확인이 필요합니다.'}</p>}
+      {draft.visa !== 'all' && <p className="inline-note">{draft.visa === 'yes' ? '지원 문구가 있고 별도 제한 조건이 감지되지 않은 공고만 포함해요. 조건부·미확인 공고는 제외됩니다.' : draft.visa === 'supported' ? '지원 문구가 있는 공고를 보여줘요. 조건부 지원은 별도로 표시하며, 직무·지원자별 조건을 원문에서 확인할 수 있어요.' : '지원 불가 공고만 제외해요. 조건부·미확인 공고는 개별 확인이 필요합니다.'}</p>}
       <div className="salary-field">
         <label htmlFor="filter-salary">희망 연봉 <strong>{draft.salaryMin ? `$${draft.salaryMin / 1000}k 이상` : '제한 없음'}</strong></label>
         <input id="filter-salary" type="range" min={0} max={250000} step={10000} value={draft.salaryMin} onChange={event => update('salaryMin', Number(event.target.value))} />

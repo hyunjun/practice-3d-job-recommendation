@@ -35,6 +35,7 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
   if (profile.desiredRole !== 'all' && job.role === profile.desiredRole) reasons.push(`희망하는 ${ROLE_LABELS[job.role]} 직무예요`)
   if (job.minExperience !== null && job.minExperience <= profile.years) reasons.push(`경력 ${profile.years}년이 공고의 ${job.minExperience}년 이상 조건에 부합해요`)
   if (job.visa === 'yes') reasons.push('공고에서 비자 지원을 명시했어요')
+  if (job.visa === 'conditional') cautions.push('비자 지원을 명시했지만 직무·지원자별 조건이 있어요. 원문 근거를 확인해 주세요.')
   if (job.workMode === 'remote' && isRemoteEligible(job, profile.residence)) reasons.push('선택한 거주 국가에서 원격 지원이 가능해요')
   if (missingSkills.length) cautions.push(`경력에서 확인하지 못한 기술: ${missingSkills.slice(0, 5).join(', ')}`)
   if (!job.skills.length) cautions.push('구체적인 기술 요구사항을 원문에서 확인해 주세요')
@@ -59,6 +60,7 @@ export function filterJobs(catalog: Catalog, profile: Profile, filters: Filters)
     if (effectiveRole !== 'all' && job.role !== effectiveRole) return []
     if (filters.workMode !== 'all' && job.workMode !== filters.workMode) return []
     if (filters.visa === 'yes' && job.visa !== 'yes') return []
+    if (filters.visa === 'supported' && job.visa !== 'yes' && job.visa !== 'conditional') return []
     if (filters.visa === 'possible' && job.visa === 'no') return []
     if (filters.employment !== 'all' && job.employment !== filters.employment) return []
     if (!job.salary && !filters.includeUnknownSalary) return []

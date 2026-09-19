@@ -45,10 +45,14 @@ describe('company counts and actual workplaces', () => {
 })
 
 describe('hard conditions and unknown information', () => {
-  const visas = catalog([job({ id: 'yes', visa: 'yes' }), job({ id: 'no', visa: 'no' }), job({ id: 'unknown', visa: 'unknown' })])
+  const visas = catalog([job({ id: 'yes', visa: 'yes' }), job({ id: 'conditional', visa: 'conditional' }), job({ id: 'no', visa: 'no' }), job({ id: 'unknown', visa: 'unknown' })])
   it('excludes both denied and unknown visa sponsorship when required', () => {
     expect(filterJobs(visas, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, visa: 'yes' }).map(item => item.job.id)).toEqual(['yes'])
-    expect(filterJobs(visas, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, visa: 'possible' }).map(item => item.job.id).sort()).toEqual(['unknown', 'yes'])
+    expect(filterJobs(visas, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, visa: 'supported' }).map(item => item.job.id).sort()).toEqual(['conditional', 'yes'])
+    expect(filterJobs(visas, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, visa: 'possible' }).map(item => item.job.id).sort()).toEqual(['conditional', 'unknown', 'yes'])
+    const match = matchJob(job({ visa: 'conditional' }), SAMPLE_PROFILE)
+    expect(match.reasons.some(reason => reason.includes('비자'))).toBe(false)
+    expect(match.cautions.some(reason => reason.includes('직무·지원자별 조건'))).toBe(true)
   })
 
   it('checks remote eligibility by country rather than headquarters or continent', () => {

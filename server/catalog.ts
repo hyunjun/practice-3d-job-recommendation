@@ -6,7 +6,7 @@ import type { BoardStatus, Catalog, Company } from '../shared/types'
 import { normalizeJob } from './normalize'
 import type { GreenhouseJob } from './normalize'
 
-const CACHE_FILE = path.resolve('.local/greenhouse-cache-v2.json')
+const CACHE_FILE = path.resolve('.local/greenhouse-cache-v3.json')
 const CACHE_TTL = 30 * 60 * 1000
 let cache: Catalog | null = null
 let pending: Promise<Catalog> | null = null
