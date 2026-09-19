@@ -1,4 +1,6 @@
-import type { Employment, FactEvidence, Visa, WorkMode } from '../shared/types'
+import type { Employment, FactEvidence, WorkMode } from '../shared/types'
+
+export { visaFact } from '../shared/job-eligibility'
 
 export interface BoardMetadata {
   name?: string
@@ -24,31 +26,6 @@ function metadataFacts<T extends string>(metadata: BoardMetadata[], names: RegEx
   if (!entries.length) return undefined
   const unique = [...new Set(entries.map(item => item.value))]
   return { value: unique.length === 1 ? unique[0] : 'unknown' as T, evidence: evidence('board', entries.map(item => item.text).join('\n')) }
-}
-
-const VISA_POSITIVE = /\b(?:(?:we\s+)?(?:do\s+)?(?:offer|provide)\s+(?:(?:work|employment)\s+)?visa sponsorship|visa sponsorship\s+(?:is\s+)?(?:available|provided|offered)|we\s+(?:(?:do|will|can)\s+)?sponsor\s+(?:(?:work|employment)\s+)?visas?)\b/i
-const VISA_NEGATIVE = /\b(?:no|without)\s+(?:(?:immigration|work|employment)\s+)?(?:visa\s+)?sponsorship\b(?!\s+(?:is\s+)?(?:required|needed))|\b(?:cannot|can't|can not|do not|does not|will not|unable to|not able to)\s+(?:currently\s+)?(?:(?:provide|offer)\s+)?(?:visa\s+sponsorship|sponsor(?:ship)?(?:\s+(?:for\s+)?(?:work\s+)?visas?)?)\b|visa sponsorship\s+(?:is\s+)?not\s+(?:available|provided|offered)/i
-const VISA_CONDITION = /\b(?:not\s+(?:all|every)|(?:for|in)\s+(?:all|every)\s+(?:role|candidate|case)|case[- ]by[- ]case|subject to|depending on|eligible candidates|if we make you an offer|reasonable effort|may be available)\b/i
-const IMMIGRATION_TOPIC = /\bvisas?\b|\bimmigration\b|\bwork[\s-]+(?:permits?|authori[sz]ation)\b|\bauthori[sz]ed to work\b/i
-
-/** An affirmative policy with exceptions is distinct from both a guarantee and missing data. */
-export function visaFact(text: string): Fact<Visa> {
-  // Export licenses, event sponsorships and payment-network sponsorships are not immigration policies.
-  const passages = text.split(/\n+/).map(line => line.trim()).filter(line => IMMIGRATION_TOPIC.test(line))
-  const positive = passages.filter(line => line.split(/(?<=[.!?;])\s+/).some(sentence => VISA_POSITIVE.test(sentence) && !VISA_NEGATIVE.test(sentence)))
-  const negative = passages.filter(line => line.split(/(?<=[.!?;])\s+/).some(sentence => IMMIGRATION_TOPIC.test(sentence) && VISA_NEGATIVE.test(sentence)))
-  const conditional = passages.filter(line => VISA_CONDITION.test(line))
-  const firmDenial = passages.some(line => line.split(/(?<=[.!?;])\s+/).some(sentence =>
-    IMMIGRATION_TOPIC.test(sentence) && VISA_NEGATIVE.test(sentence) && !VISA_CONDITION.test(sentence),
-  ))
-  let value: Visa = 'unknown'
-  if (positive.length && firmDenial) value = 'unknown'
-  else if (positive.length && conditional.length) value = 'conditional'
-  else if (positive.length && !negative.length) value = 'yes'
-  else if (negative.length && !positive.length && !conditional.length) value = 'no'
-  // Contradictory positive/negative claims without an explicit condition remain unknown.
-  const relevant = [...new Set([...positive, ...negative, ...conditional])]
-  return { value, ...(relevant.length ? { evidence: evidence('description', relevant.join('\n\n')) } : {}) }
 }
 
 function workModeValue(text: string): WorkMode {

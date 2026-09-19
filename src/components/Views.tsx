@@ -10,6 +10,7 @@ import { CityImage, CompanyLogo, EmptyState } from './ui'
 import { JobFreshnessNotice } from './JobFreshnessNotice'
 import { SavedPostingNotice } from './SavedPostingNotice'
 import type { PostingStatusController } from '../hooks/usePostingStatus'
+import { EligibilityNotice } from './JobEligibilityDetails'
 
 export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
   const [query, setQuery] = useState('')
@@ -50,6 +51,7 @@ export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onE
         <div className="saved-card-tags"><span>{formatJobSalary(item.job)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
         <JobFreshnessNotice job={item.job} compact />
         <SavedPostingNotice observation={observations.get(item.job.id)} job={item.job} compact />
+        <EligibilityNotice job={item.job} />
         <div className="saved-card-match"><CheckCircle2 size={13} />{match.skillSummary}</div>
         {item.note && <p className="saved-note-preview">{item.note}</p>}
         <footer><span className={`saved-status ${item.status === 'applied' ? 'applied' : ''}`}><span />{item.status === 'applied' ? '지원 완료' : '검토 중'}</span><span>{new Date(item.savedAt).toLocaleDateString('ko-KR')} 저장</span><button className="text-button" onClick={() => onOpen(match)}>자세히<ArrowRight size={13} /></button></footer>

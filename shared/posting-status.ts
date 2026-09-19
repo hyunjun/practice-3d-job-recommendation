@@ -92,6 +92,7 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
       workMode: job.workMode, employment: job.employment, visa: job.visa,
       remoteCountries: job.remoteCountries, remoteWorldwide: job.remoteWorldwide,
       remoteScopeUnknown: job.remoteScopeUnknown, remoteRegions: job.remoteRegions ?? [],
+      eligibility: job.eligibility ?? null,
     },
     compensation: {
       salary: job.salary, ranges: job.compensationRanges ?? [],

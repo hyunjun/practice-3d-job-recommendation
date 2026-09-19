@@ -69,3 +69,17 @@ Stripe의 `Minimum requirements`·`Preferred qualifications`, MongoDB의 `Key Qu
 공개 목록의 게시 여부는 원문에서 현재 지원을 받는다는 보장이 아닙니다. 회사가 게시판을 옮기거나 목록 표시를 바꿀 수 있고, 페이지를 나누어 조회하는 동안에도 공고가 바뀔 수 있습니다. 따라서 ORBIT은 최근 같은 게시판의 전체 목록에 포함되어 있는지만 표시하고 종료를 확정하지 않습니다.
 
 저장 내용의 비교는 브라우저가 보관한 표시 항목을 기준으로 합니다. 수집 시각·저장 메모·지원 상태·배열 순서·서식 공백은 비교에서 제외하며, 원문 변경과 정규화 방식의 변화는 구별할 수 없으므로 **저장 내용과 차이**로 표현합니다. 서버에 저장한 공고나 개인 정보를 전송하지 않습니다.
+
+## 취업 자격과 비자 지원 범위
+
+| 레퍼런스 | 확인한 의미 | 반영 |
+| --- | --- | --- |
+| [Schema.org eligibilityToWorkRequirement](https://schema.org/eligibilityToWorkRequirement) | 지원자에게 필요한 시민권·비자·기타 서류 등의 법적 요건 | 비자 지원 정책과 추가 취업 자격을 구분하고 원문 보존 |
+| [Google JobPosting의 applicantLocationRequirements](https://developers.google.com/search/docs/appearance/structured-data/job-posting#applicant-location-requirements) | 재택근무가 가능한 지원자의 지리적 위치 | 원격근무 지역과 거주 국가만 비교하며 법적 취업 자격을 충족했다고 표시하지 않음 |
+| [GOV.UK: Prove your right to work to an employer](https://www.gov.uk/prove-right-to-work) | 취업 권한의 증명 방식은 국적과 체류·취업 권한에 따라 다름 | 거주 국가를 취업 허가나 국적으로 간주하지 않음 |
+| [USCIS: Working in the United States](https://www.uscis.gov/working-in-the-united-states) | 취업 관련 비자 분류와 고용 허가의 여러 경로 | 비자 스폰서십 문구만으로 지원자의 취업 권한을 판정하지 않음 |
+| [22 CFR §120.62 — U.S. person, Cornell LII](https://www.law.cornell.edu/cfr/text/22/120.62) | 해당 규정의 U.S. person에는 영주권자와 보호 대상자도 포함됨 | 수출 통제의 U.S. person 요건을 미국 시민권만의 조건으로 바꾸지 않음 |
+
+실제 n8n 공고의 독일 한정 비자 지원, Anthropic의 필수 시민권·우대 보안 인가, MongoDB·GitLab의 시민권 문구, Airbnb의 주별 거주 제한과 Cloudflare의 수출 허가 조건을 확인했습니다. 특정 조건의 적용 범위와 필수·우대를 보존하고, 차별 금지 문구·개인정보 수집 목록·증명 수단의 예시를 필수 자격으로 오인하지 않도록 반영했습니다.
+
+이 자료는 데이터 의미를 구분하는 기준입니다. ORBIT은 법률을 자동 적용하거나 지원자의 국적·취업 허가를 추정하지 않습니다. 영어 원문의 명시적인 문구만 해석하며, 조건을 찾지 못한 경우에도 제한이 없다고 판단하지 않습니다.

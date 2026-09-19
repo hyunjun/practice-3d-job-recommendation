@@ -2,6 +2,7 @@ import { CITY_BY_ID } from './cities'
 import { MODE_LABELS, ROLE_LABELS, USD_RATES } from './types'
 import { formatExperienceYears } from './job-qualifications'
 import { matchingSkills, matchQualifications } from './qualification-matching'
+import { eligibilitySummary } from './job-eligibility'
 import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
 
 export function toUsd(salary: Salary): { min: number; max: number } {
@@ -21,6 +22,7 @@ export function formatSalary(salary: Salary | null, usd = false): string {
 }
 
 export function isRemoteEligible(job: Job, country: string): boolean {
+  // Geographic coverage only. Residence never establishes permission to work or citizenship.
   return job.remoteWorldwide || job.remoteCountries.includes(country)
 }
 
@@ -52,8 +54,10 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
     ? `입력 경력 ${formatExperienceYears(profile.years)} · 공고에서 확인한 연수 하한 ${formatExperienceYears(job.minExperience)}`
     : `경력 ${profile.years}년이 공고의 ${job.minExperience}년 이상 조건에 부합해요`)
   if (job.visa === 'yes') reasons.push('공고에서 비자 지원을 명시했어요')
-  if (job.visa === 'conditional') cautions.push('비자 지원을 명시했지만 직무·지원자별 조건이 있어요. 원문 근거를 확인해 주세요.')
-  if (job.workMode === 'remote' && isRemoteEligible(job, profile.residence)) reasons.push('선택한 거주 국가에서 원격 지원이 가능해요')
+  if (job.visa === 'conditional') cautions.push('비자 지원을 명시했지만 국가·직무·지원자별 조건이 있어요. 원문 근거를 확인해 주세요.')
+  if (job.workMode === 'remote' && isRemoteEligible(job, profile.residence)) reasons.push('선택한 거주 국가가 공고의 원격근무 지역에 포함돼요')
+  const eligibility = eligibilitySummary(job)
+  if (eligibility) cautions.push(`${eligibility}. 적용 범위는 취업 자격 조건의 원문에서 확인해 주세요.`)
   if (!qualificationMatch && missingSkills.length) cautions.push(`경력에서 확인하지 못한 기술: ${missingSkills.slice(0, 5).join(', ')}`)
   if (!qualificationMatch && !job.skills.length) cautions.push('구체적인 기술 요구사항을 원문에서 확인해 주세요')
   if (job.minExperience !== null && job.minExperience > profile.years) cautions.push(`요구 경력 ${formatExperienceYears(job.minExperience)} · 현재 입력한 경력보다 ${formatExperienceYears(job.minExperience - profile.years)} 많아요`)
@@ -64,7 +68,7 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
   if (!job.salary) cautions.push(job.compensationRanges?.length || job.compensationNote
     ? '급여 구간·통화·지급 기간을 보상 조건에서 확인해 주세요' : '보상 범위가 공개되지 않았어요')
   if (job.workMode === 'unknown') cautions.push('출근·원격 근무 형태를 확인해 주세요')
-  if (job.workMode === 'remote' && !isRemoteEligible(job, profile.residence)) cautions.push(job.remoteScopeUnknown ? '지원 가능한 거주 국가가 확인되지 않았어요' : '현재 선택한 거주 국가는 원격 지원 대상에 포함되지 않아요')
+  if (job.workMode === 'remote' && !isRemoteEligible(job, profile.residence)) cautions.push(job.remoteScopeUnknown ? '원격근무 가능한 국가가 확인되지 않았어요' : '현재 선택한 거주 국가는 명시된 원격근무 지역에 포함되지 않아요')
   if (job.workMode === 'remote') cautions.push('원격근무 시간대와 현지 고용 가능 여부를 최종 확인해 주세요')
   return {
     score: Math.round(skillScore + roleScore + experienceScore), matchedSkills, missingSkills, reasons, cautions,

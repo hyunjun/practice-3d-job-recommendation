@@ -6,6 +6,7 @@ export { plainText } from '../shared/text'
 import { COMPENSATION_VERSION } from '../shared/types'
 import type { Employment, Job, JobProvider, Salary, Visa, WorkMode } from '../shared/types'
 import { employmentFact, visaFact, workModeFact } from './job-facts'
+import { eligibilityFacts } from '../shared/job-eligibility'
 import type { Fact } from './job-facts'
 import { greenhouseCompensation } from './greenhouse-compensation'
 
@@ -142,7 +143,7 @@ interface PostingInput extends Pick<Job, 'companyId' | 'title' | 'cityIds' | 'lo
 export function normalizePosting(input: PostingInput): Job | null {
   if (!input.id || !/^https:\/\//i.test(input.url) || !isDeveloperTitle(input.title)) return null
   const { companyId, title, text, workMode, employment, salary, compensationRanges, compensationNote } = input
-  const visa = visaFact(text)
+  const eligibility = eligibilityFacts(text)
   return {
     id: `${input.provider}-${companyId}-${input.id}`, companyId, title, role: inferRole(title),
     cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
@@ -151,10 +152,10 @@ export function normalizePosting(input: PostingInput): Job | null {
     ...(compensationNote ? { compensationNote } : {}),
     ...(input.compensationEvidence?.length ? { compensationEvidence: input.compensationEvidence } : {}),
     compensationVersion: COMPENSATION_VERSION,
-    visa: visa.value,
+    visa: eligibility.visa, eligibility: eligibility.eligibility,
     ...(input.scope ?? { remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false }),
     evidence: {
-      ...(visa.evidence ? { visa: visa.evidence } : {}),
+      ...(eligibility.visaEvidence ? { visa: eligibility.visaEvidence } : {}),
       ...(workMode.evidence ? { workMode: workMode.evidence } : {}),
       ...(employment.evidence ? { employment: employment.evidence } : {}),
     },

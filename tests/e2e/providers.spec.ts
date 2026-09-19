@@ -120,14 +120,14 @@ test('regional remote discovery never implies country eligibility from a local o
   await restore(page, catalog([remote]), true)
   await expect(page.locator('.mini-job-title')).toHaveCount(0)
   await page.getByRole('button', { name: /^모든 필터/ }).click()
-  await page.getByRole('checkbox', { name: /거주 국가에서 가능한 원격근무만/ }).uncheck()
+  await page.getByRole('checkbox', { name: /거주 국가가 포함된 원격근무만/ }).uncheck()
   await page.getByRole('button', { name: /1개 공고 보기$/ }).click()
   await expect(page.locator('.mini-job-title')).toHaveCount(1)
   await expect(page.locator('.flat-marker')).toHaveCount(0)
   await page.locator('.mini-job-title').click()
-  await expect(page.locator('.remote-scope')).toContainText('국가별 지원 가능 여부 미확인')
+  await expect(page.locator('.remote-scope')).toContainText('국가별 근무 지역 미확인')
   await expect(page.locator('.remote-scope')).not.toContainText('영국')
-  await expect(page.locator('.match-section.caution')).toContainText('지원 가능한 거주 국가가 확인되지 않았어요')
+  await expect(page.locator('.match-section.caution')).toContainText('원격근무 가능한 국가가 확인되지 않았어요')
 })
 
 test.describe('mobile public sources', () => {

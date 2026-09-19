@@ -9,6 +9,7 @@ import type { Catalog, CityResult, MatchedJob, Profile } from '../../shared/type
 import type { ExplorationState } from '../lib/storage'
 import { CityImage, CompanyLogo, EmptyState } from './ui'
 import { JobFreshnessNotice } from './JobFreshnessNotice'
+import { EligibilityNotice } from './JobEligibilityDetails'
 
 interface Props {
   catalog: Catalog
@@ -94,6 +95,7 @@ export function CompanyCard({ matches, savedIds, onOpen, onSave }: { matches: Ma
       <button className="mini-job-title" onClick={() => onOpen(match)}>{match.job.title}<ArrowUpRight size={14} /></button>
       <div className="mini-job-meta"><span>{formatJobSalary(match.job)}</span><span>·</span><span>{MODE_LABELS[match.job.workMode]}</span></div>
       <JobFreshnessNotice job={match.job} compact />
+      <EligibilityNotice job={match.job} />
       <div className="mini-job-reason">{match.matchedSkills.length ? <Check size={12} /> : <CircleHelp size={12} />}<span>{match.skillSummary}</span></div>
       <div className="mini-job-footer"><span className={`visa-tag ${match.job.visa === 'yes' ? 'confirmed' : match.job.visa === 'conditional' ? 'conditional' : ''}`}>{match.job.visa === 'yes' ? <ShieldCheck size={12} /> : <CircleHelp size={12} />}비자 {VISA_LABELS[match.job.visa]}</span><button className={`icon-button bookmark-button ${savedIds.has(match.job.id) ? 'is-saved' : ''}`} aria-label={`${company.name} ${match.job.title} ${savedIds.has(match.job.id) ? '저장 취소' : '저장'}`} onClick={() => onSave(match)}>{savedIds.has(match.job.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button></div>
     </div>)}

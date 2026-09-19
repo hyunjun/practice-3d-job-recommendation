@@ -18,7 +18,7 @@ export function FiltersDialog({ filters, catalog, profile, onApply, onClose }: {
         <div className="field-group"><label htmlFor="filter-visa">비자 지원</label><select id="filter-visa" value={draft.visa} onChange={event => update('visa', event.target.value as Filters['visa'])}>{Object.entries(VISA_FILTER_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
         <div className="field-group"><label htmlFor="filter-employment">고용 형태</label><select id="filter-employment" value={draft.employment} onChange={event => update('employment', event.target.value as Filters['employment'])}>{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
       </div>
-      {draft.visa !== 'all' && <p className="inline-note">{draft.visa === 'yes' ? '지원 문구가 있고 별도 제한 조건이 감지되지 않은 공고만 포함해요. 조건부·미확인 공고는 제외됩니다.' : draft.visa === 'supported' ? '지원 문구가 있는 공고를 보여줘요. 조건부 지원은 별도로 표시하며, 직무·지원자별 조건을 원문에서 확인할 수 있어요.' : '지원 불가 공고만 제외해요. 조건부·미확인 공고는 개별 확인이 필요합니다.'}</p>}
+      {draft.visa !== 'all' && <p className="inline-note">{draft.visa === 'yes' ? '지원 문구가 있고 별도 제한 조건이 감지되지 않은 공고만 포함해요. 국가·직무별 조건부 지원과 미확인 공고는 제외됩니다.' : draft.visa === 'supported' ? '지원 문구가 있는 공고를 보여줘요. 지원하는 국가·직무·지원자별 조건은 원문에서 확인해야 합니다.' : '비자 지원 불가로 명시된 공고만 제외해요. 조건부·미확인 공고는 개별 확인이 필요합니다.'} 비자 지원 표시만으로 국적·취업 허가 등 다른 요건을 충족한 것은 아닙니다.</p>}
       <div className="salary-field">
         <label htmlFor="filter-salary">희망 연봉 <strong>{draft.salaryMin ? `$${draft.salaryMin / 1000}k 이상` : '제한 없음'}</strong></label>
         <input id="filter-salary" type="range" min={0} max={250000} step={10000} value={draft.salaryMin} onChange={event => update('salaryMin', Number(event.target.value))} />
@@ -26,7 +26,7 @@ export function FiltersDialog({ filters, catalog, profile, onApply, onClose }: {
         <p className="field-description">세전 연간 보상 · 표시 범위의 상한이 희망 금액 이상인 공고를 보여줘요. 고정 환율로 USD 환산하며 실제 제안 금액은 다를 수 있어요.</p>
       </div>
       <Toggle checked={draft.includeUnknownSalary} onChange={value => update('includeUnknownSalary', value)} label="연봉 미공개·별도 보상 공고도 포함" description="지역별 구간이나 다른 지급 기간 때문에 연봉을 함께 비교할 수 없는 공고도 찾아요." />
-      <Toggle checked={draft.remoteEligibleOnly} onChange={value => update('remoteEligibleOnly', value)} label="거주 국가에서 가능한 원격근무만" description="프로필의 거주 국가를 기준으로, 지원 지역이 확인된 공고만 포함해요." />
+      <Toggle checked={draft.remoteEligibleOnly} onChange={value => update('remoteEligibleOnly', value)} label="거주 국가가 포함된 원격근무만" description="명시된 근무 지역과 거주 국가를 비교해요. 취업 허가나 주별 제한까지 확인한 결과는 아닙니다." />
     </div>
     <footer className="dialog-footer"><button className="text-button muted" onClick={() => setDraft({ ...DEFAULT_FILTERS, query: filters.query, region: filters.region })}><RotateCcw size={15} />조건 초기화</button><button className="button primary" onClick={() => onApply(draft)}><SlidersHorizontal size={16} />{matches.length}개 공고 보기<ArrowRight size={16} /></button></footer>
   </Dialog>

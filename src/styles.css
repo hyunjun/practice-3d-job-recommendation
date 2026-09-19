@@ -260,6 +260,18 @@ select option { background: #1e271c; color: var(--text); }
 .visa-tag { display: inline-flex; align-items: center; gap: 4px; color: #b6b296; font-size: 10px; }
 .visa-tag.confirmed { color: #b4d691; }
 .visa-tag.conditional, .job-key-facts strong.conditional-visa { color: #e0c68f; }
+.eligibility-notice { display: flex; align-items: flex-start; gap: 6px; color: #e0c68f; font-size: 10px; line-height: 1.7; margin: 12px 0; }
+.eligibility-notice > svg { flex-shrink: 0; margin-top: 2px; }
+.job-eligibility { margin: 22px 0; padding: 18px; border: 1px solid #756541; border-radius: 7px; background: #202719; }
+.job-eligibility > h4 { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #edd8ae; margin: 0 0 10px; }
+.job-eligibility > p { font-size: 11px; color: #cbd0bc; line-height: 1.8; margin: 0; }
+.eligibility-rules { display: grid; gap: 9px; margin: 15px 0; }
+.eligibility-rule { background: #182012; border: 1px solid #5e6549; border-radius: 5px; overflow-wrap: anywhere; }
+.eligibility-rule > summary { padding: 11px 12px; cursor: pointer; color: #e0e7cb; font-size: 11px; line-height: 1.8; }
+.eligibility-rule > summary > small { display: inline-block; font-size: 10px; color: #e8c98d; margin-left: 8px; }
+.eligibility-rule.preferred > summary > small { color: #b8d7a0; }
+.eligibility-rule blockquote { border-left: 2px solid #7a8055; padding: 1px 12px; margin: 4px 12px 14px; color: #d6dccb; font-size: 11px; line-height: 1.8; white-space: pre-wrap; }
+.job-eligibility > .eligibility-footnote { font-size: 10px; color: #b8c2a7; }
 .icon-button { display: inline-flex; justify-content: center; align-items: center; width: 30px; height: 30px; border-radius: 5px; color: #aab89d; flex-shrink: 0; }
 .icon-button:hover { color: #e0f7c4; background: #5267413b; }
 .bookmark-button { height: 26px; width: 26px; color: #91a47f; }

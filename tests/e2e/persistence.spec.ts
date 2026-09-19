@@ -43,7 +43,7 @@ test('public data, every search condition, city selection and map preferences su
   await page.getByLabel('희망 연봉').press('Home')
   for (let step = 0; step < 12; step++) await page.getByLabel('희망 연봉').press('ArrowRight')
   await page.getByRole('checkbox', { name: /연봉 미공개·별도 보상 공고도 포함/ }).uncheck()
-  await page.getByRole('checkbox', { name: /거주 국가에서 가능한 원격근무만/ }).uncheck()
+  await page.getByRole('checkbox', { name: /거주 국가가 포함된 원격근무만/ }).uncheck()
   await page.getByRole('button', { name: /개 공고 보기$/ }).click()
   await page.getByLabel('도시, 회사 또는 포지션 검색').fill('런던 Stripe')
   await page.getByRole('button', { name: '런던, 추천 회사 1곳 보기', exact: true }).click()
@@ -63,7 +63,7 @@ test('public data, every search condition, city selection and map preferences su
   await expect(page.getByLabel('고용 형태', { exact: true })).toHaveValue('fulltime')
   await expect(page.getByLabel('희망 연봉')).toHaveValue('120000')
   await expect(page.getByRole('checkbox', { name: /연봉 미공개·별도 보상 공고도 포함/ })).not.toBeChecked()
-  await expect(page.getByRole('checkbox', { name: /거주 국가에서 가능한 원격근무만/ })).not.toBeChecked()
+  await expect(page.getByRole('checkbox', { name: /거주 국가가 포함된 원격근무만/ })).not.toBeChecked()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
 
   const revisit = await context.newPage()

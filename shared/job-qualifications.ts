@@ -22,6 +22,8 @@ function sectionOf(value: string): Section | undefined {
   return undefined
 }
 
+export { sectionOf as qualificationSection }
+
 function isOtherHeading(text: string): boolean {
   return text.length < 90 && !extractSkills(text).length && !CANDIDATE.test(text) && !/\d/.test(text)
     && (/^[\p{L}][\p{L}\s/'’&()-]+:$/u.test(text) || /^(?:[A-Z][a-z]+[ ]+){1,5}[A-Z][a-z]+$/.test(text))

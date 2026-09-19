@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { COMPENSATION_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION } from './types'
+import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 const QualificationKindSchema = z.enum(['required', 'qualification', 'preferred', 'context'])
@@ -46,6 +46,15 @@ export const JobSchema = z.object({
   compensationEvidence: z.array(EvidenceSchema).max(20).optional(),
   compensationVersion: z.literal(COMPENSATION_VERSION).optional(),
   visa: z.enum(['yes', 'conditional', 'no', 'unknown']), remoteCountries: z.array(z.string()).max(300),
+  eligibility: z.object({
+    version: z.literal(ELIGIBILITY_VERSION),
+    rules: z.array(z.object({
+      kind: z.enum(['sponsorship-scope', 'work-authorization', 'citizenship', 'residency', 'security-clearance', 'export-authorization']),
+      level: z.enum(['required', 'conditional', 'preferred', 'unspecified']),
+      evidence: EvidenceSchema,
+    })).max(50),
+    truncated: z.boolean().optional(),
+  }).optional(),
   remoteWorldwide: z.boolean(), remoteScopeUnknown: z.boolean(),
   remoteRegions: z.array(z.enum(['americas', 'europe', 'asia-pacific'])).max(3).optional(),
   description: z.string().max(30000), requirements: z.array(z.string()).max(50),

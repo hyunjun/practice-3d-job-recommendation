@@ -9,6 +9,7 @@ export type Source = 'sample' | 'public'
 export type Employment = 'fulltime' | 'parttime' | 'permanent' | 'contract' | 'intern' | 'temporary' | 'unknown'
 export const COMPENSATION_VERSION = 1 as const
 export const QUALIFICATIONS_VERSION = 1 as const
+export const ELIGIBILITY_VERSION = 1 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever',
@@ -89,6 +90,15 @@ export interface JobQualifications {
   truncated?: boolean
 }
 
+export type EligibilityKind = 'sponsorship-scope' | 'work-authorization' | 'citizenship' | 'residency' | 'security-clearance' | 'export-authorization'
+export type EligibilityLevel = 'required' | 'conditional' | 'preferred' | 'unspecified'
+
+export interface JobEligibility {
+  version: typeof ELIGIBILITY_VERSION
+  rules: { kind: EligibilityKind; level: EligibilityLevel; evidence: FactEvidence }[]
+  truncated?: boolean
+}
+
 export interface Job {
   id: string
   companyId: string
@@ -107,6 +117,7 @@ export interface Job {
   compensationEvidence?: FactEvidence[]
   compensationVersion?: typeof COMPENSATION_VERSION
   visa: Visa
+  eligibility?: JobEligibility
   remoteCountries: string[]
   remoteWorldwide: boolean
   remoteScopeUnknown: boolean
@@ -261,6 +272,16 @@ export const QUALIFICATION_LABELS: Record<QualificationKind, string> = {
   qualification: '자격 항목',
   preferred: '우대 사항',
   context: '업무·본문 언급',
+}
+
+export const ELIGIBILITY_LABELS: Record<EligibilityKind, string> = {
+  'sponsorship-scope': '비자 지원 적용 범위', 'work-authorization': '취업 허가',
+  citizenship: '국적·시민권', residency: '거주 요건',
+  'security-clearance': '보안 인가', 'export-authorization': '수출 통제 자격',
+}
+
+export const ELIGIBILITY_LEVEL_LABELS: Record<EligibilityLevel, string> = {
+  required: '필수로 명시', conditional: '적용 조건 확인', preferred: '우대 사항', unspecified: '원문 확인',
 }
 
 export const COUNTRIES = [
