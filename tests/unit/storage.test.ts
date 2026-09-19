@@ -72,6 +72,20 @@ describe('restoring exploration without changing profile preferences', () => {
 })
 
 describe('storage boundaries and opting out', () => {
+  it.each([null, 0, 0.5, 3, 3.5, 7 / 12, 50])('restores personal experience %s without resetting the profile or preferences', years => {
+    const profile = { ...personal, years }
+    expect(persist(STORAGE_KEYS.profile, profile)).toBe(true)
+    expect(loadProfile()).toEqual(profile)
+    expect(loadExploration(loadProfile()).filters).toMatchObject({ role: 'backend', workMode: 'remote', visa: 'supported', salaryMin: 130000 })
+  })
+
+  it('rejects malformed or out-of-range stored durations without coercing them to zero', () => {
+    for (const years of ['', '3.5', -1, 50.5, { value: 3 }]) {
+      values.set(STORAGE_KEYS.profile, JSON.stringify({ ...personal, years }))
+      expect(loadProfile()).toEqual(SAMPLE_PROFILE)
+    }
+  })
+
   it('omits personal exploration conditions when profile remembering is disabled', () => {
     persistExploration(exploration, false)
     const restored = loadExploration(SAMPLE_PROFILE)

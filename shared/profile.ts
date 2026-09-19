@@ -58,10 +58,34 @@ export function extractSkills(text: string): string[] {
 }
 
 export function extractYears(text: string): number | null {
-  const explicit = [...text.matchAll(/(?<![\d/])(\d{1,2})(?:\s*[-–]\s*\d{1,2})?\+?\s*(?:years?(?:\s+of)?(?:\s+\w+){0,3}\s+experience|years?['’]\s+experience|년(?:\s*이상)?(?:의)?\s*(?:경력|경험)|년차)/gi)]
-    .map(match => Number(match[1]))
-    .filter(value => value >= 0 && value <= 45)
-  return explicit.length ? Math.max(...explicit) : null
+  // Match complete quantities so a decimal, range or date cannot become its last digit.
+  const number = String.raw`\d{1,3}(?:\.\d+)?`
+  const duration = new RegExp(String.raw`(?<![\p{N}\p{Pd}A-Za-z.,/+−])(${number})(?:\s*(?:[\p{Pd}−~～]|to)\s*(${number}))?\s*\+?\s*(years?|yrs?|months?|mos?|년차|년|개월)(?![a-z])(?:\s*(?:and\s+)?(${number})\s*(months?|mos?|개월)(?![a-z]))?`, 'giu')
+  const values: { years: number | null; total: boolean }[] = []
+  for (const line of text.normalize('NFKC').split(/\r?\n/)) {
+    for (const match of line.matchAll(duration)) {
+      const before = line.slice(0, match.index).trim()
+      const after = line.slice(match.index + match[0].length).trim()
+      const contextBefore = /(?:\b(?:experience|exp\.?)|(?:경력|경험)(?:\s*(?:기간|연수))?)\s*[:：=·-]?\s*$/i.test(before)
+      const following = after.match(/^(?:['’]\s*)?(?:of\s+)?(?:[a-z][a-z-]*\s+){0,5}experience\b/i)?.[0]
+        ?? after.match(/^(?:이상(?:의)?\s*|의\s*)?(?:(?:전체|개발|관련|실무|업무)\s*){0,2}(?:경력|경험)/)?.[0]
+      const contextAfter = Boolean(following) || match[3] === '년차'
+      if (!contextBefore && !contextAfter) continue
+      // Scope "total" to this quantity's own phrase, not another duration on the same line.
+      const total = /\b(?:total|overall)(?:\s+[a-z-]+){0,5}\s*[:：=·-]?\s*$/i.test(before)
+        || /(?:총|전체)\s*(?:(?:개발|관련|실무|업무)\s*)?(?:경력|경험)?(?:\s*(?:기간|연수))?\s*[:：=·-]?\s*$/.test(before)
+        || /\b(?:total|overall)\b|전체/i.test(following ?? '')
+      // A range or upper bound is not a confirmed total. Leave it for the user.
+      const unclear = Boolean(match[2]) || /\b(?:less than|under|up to|at most|about|around|nearly)\s*$/i.test(before)
+        || /(?:약|미만|이하)\s*$/.test(before) || /^(?:미만|이하|정도)/.test(after)
+      const monthly = /^(?:months?|mos?|개월)$/i.test(match[3])
+      const years = Number(match[1]) / (monthly ? 12 : 1) + (match[4] ? Number(match[4]) / 12 : 0)
+      values.push({ years: unclear || monthly && match[4] || !Number.isFinite(years) || years < 0 || years > 50 ? null : years, total })
+    }
+  }
+  const totals = values.filter(value => value.total)
+  const distinct = [...new Set((totals.length ? totals : values).map(value => value.years))]
+  return distinct.length === 1 ? distinct[0] : null
 }
 
 export function analyzeResume(text: string): { profile: Profile; warnings: string[] } {
@@ -74,12 +98,12 @@ export function analyzeResume(text: string): { profile: Profile; warnings: strin
     && !/resume|curriculum|engineer|developer|profile|이력서|개발자|엔지니어|경력|summary/i.test(first)
   const headline = lines.find(line => line.length < 100 && /engineer|developer|scientist|엔지니어|개발자/i.test(line)) ?? 'Software Engineer'
   const warnings: string[] = []
-  if (years === null) warnings.push('전체 경력 연수를 확인해 주세요. 프로젝트 기간은 자동으로 합산하지 않습니다.')
+  if (years === null) warnings.push('경력 연수를 확인하지 못해 비워 두었어요. 직접 입력하거나 그대로 탐색할 수 있습니다. 여러 기간은 자동으로 합산하지 않아요.')
   if (skills.length === 0) warnings.push('인식된 기술이 없어요. 아래에서 직접 기술을 추가할 수 있습니다.')
   return {
     profile: {
       kind: 'personal', name: plausibleName ? first : '내 프로필', headline,
-      years: years ?? 3, skills, desiredRole: 'all', residence: 'KR', linkedinUrl: '',
+      years, skills, desiredRole: 'all', residence: 'KR', linkedinUrl: '',
     },
     warnings,
   }

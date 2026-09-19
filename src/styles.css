@@ -442,6 +442,8 @@ select option { background: #1e271c; color: var(--text); }
 .privacy-note { display: flex; gap: 8px; padding-top: 19px; border-top: 1px solid #466232; font-size: 9px; color: #afc598; line-height: 1.9; }
 .privacy-note > svg { margin-top: 3px; }
 .profile-form { padding: 26px 29px; align-self: start; }
+.profile-experience-field .field-description, .profile-experience-field .form-error { font-size: 12px; }
+.profile-experience-field .form-error { margin: 0; }
 .profile-input-tabs { width: 100%; margin-bottom: 22px; }
 .profile-input-tabs button { flex: 1; padding: 9px; }
 .upload-zone { width: 100%; min-height: 218px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: #2a3c204d; border: 1px dashed #7d9f575c; border-radius: 8px; padding: 25px 18px; }
@@ -1201,6 +1203,9 @@ select option { background: #1e271c; color: var(--text); }
   .field-description { font-size: 10px; }
   .field-meta { font-size: 7px; }
   .form-grid { gap: 0 12px; }
+  .profile-identity-grid { grid-template-columns: minmax(0, 1fr); }
+  .profile-identity-grid .field-group > label { font-size: 12px; }
+  .profile-identity-grid input { min-height: 44px; font-size: 16px; }
   .preference-grid { grid-template-columns: 1fr; }
   .extraction-note { font-size: 10px; }
   .toggle-label { font-size: 11px; }

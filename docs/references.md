@@ -321,3 +321,15 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 실제 자료에는 호주의 `SA`, 미국의 `New Jersey`, n8n의 `Georgia`도 함께 있었습니다. 마지막 항목의 주소는 `United States`였습니다. 자유 형식의 두 글자 약어와 동명 지역을 국가로 단정하지 않고, 명시적인 국가 필드로 확인 가능한 경우를 구분합니다. `Europe`·`EMEA`·`APAC`·`AMER`를 국가 목록으로 펼치지 않으며, 거주 국가 일치는 국적·취업 허가·주별 제한·협업 시간대의 충족을 뜻하지 않습니다.
 
 정적 국가 표의 기준일과 코드 출처는 [출처 고지](attributions.md)에 기록했습니다. 국가 파싱 규칙을 바꿀 때는 `REMOTE_SCOPE_VERSION`과 이전 캐시·저장 기록의 재해석도 함께 검토합니다.
+
+## 개인 경력의 미입력과 소수 연수
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [MDN: number 입력](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/number) | 선택 입력의 빈 값은 유효하며, 기본 `step=1`은 소수 입력과 맞지 않을 수 있음. 입력 범위와 숫자 형식을 별도로 확인 | 빈 값과 0을 구분하고 소수 입력 허용. 0~50년 범위를 확인하며 자동 반올림·범위 보정 제거 |
+| [WCAG 2.2: Labels or Instructions, 3.3.2](https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions.html) | 선택 입력을 포함해 필요한 정보와 기대하는 입력 형식 안내 | 경력 입력 옆에 선택 사항·허용 범위·소수 예시·비워 둘 때의 동작 안내 |
+| [WCAG 2.2: Error Identification, 3.3.1](https://www.w3.org/WAI/WCAG22/Understanding/error-identification.html) | 오류가 난 항목과 오류 내용을 텍스트로 식별 | 해당 경력 입력으로 포커스 이동, `aria-invalid`와 연결된 오류 설명 제공. 작성 중인 값 유지 |
+
+2026-09-20 각 원문을 확인했습니다. 경력 정보가 없을 때 기본값 3년을 넣고, `3.5 years of experience`를 5년으로 읽던 동작은 앱의 실제 분석 함수와 보관된 공개 공고로 재현했습니다.
+
+미입력 경력의 점수를 제외하고 경력 충족 여부를 설명하지 않는 것은 이 앱의 추천 설계입니다. 위 표준이 특정 추출 규칙이나 추천 가중치를 보장한다는 의미는 아닙니다. 한국어·영어의 명시적 기간을 읽는 기능이며, 전체 경력과 기술별 경력의 중복·경력 공백을 자동 계산하지 않습니다.

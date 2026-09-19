@@ -23,6 +23,8 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
   const [text, setText] = useState('')
   const [linkedin, setLinkedin] = useState(profile.linkedinUrl)
   const [draft, setDraft] = useState<Profile>({ ...profile, kind: 'personal' })
+  const [years, setYears] = useState(profile.years?.toString() ?? '')
+  const [yearsError, setYearsError] = useState('')
   const [preferences, setPreferences] = useState({ workMode: filters.workMode, visa: filters.visa, salaryMin: filters.salaryMin })
   const [warnings, setWarnings] = useState<string[]>([])
   const [error, setError] = useState('')
@@ -32,6 +34,7 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
   const [skill, setSkill] = useState('')
   const [remember, setRemember] = useState(initialRemember)
   const fileRef = useRef<HTMLInputElement>(null)
+  const yearsRef = useRef<HTMLInputElement>(null)
 
   const importFile = async (file?: File) => {
     if (!file) return
@@ -55,6 +58,8 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
     }
     const result = analyzeResume(text)
     setDraft({ ...result.profile, linkedinUrl: linkedin.trim() })
+    setYears(result.profile.years?.toString() ?? '')
+    setYearsError('')
     setWarnings(result.warnings)
     setStep(2)
   }
@@ -70,9 +75,16 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
   }
 
   const submit = () => {
+    const parsedYears = years.trim() === '' ? null : Number(years)
+    if (yearsRef.current?.validity.badInput || parsedYears !== null && (!Number.isFinite(parsedYears) || parsedYears < 0 || parsedYears > 50)) {
+      setYearsError('개발 경력은 0~50년 사이의 숫자로 입력해 주세요. 소수도 입력할 수 있어요.')
+      yearsRef.current?.focus()
+      return
+    }
+    setYearsError('')
     if (!draft.name.trim()) { setError('프로필 이름을 입력해 주세요. 별명도 좋아요.'); return }
     if (!draft.skills.length && draft.desiredRole === 'all') { setError('기술을 하나 이상 추가하거나 희망 직무를 선택해 주세요.'); return }
-    onApply({ ...draft, name: draft.name.trim(), kind: 'personal' }, { ...preferences, role: draft.desiredRole }, remember)
+    onApply({ ...draft, years: parsedYears, name: draft.name.trim(), kind: 'personal' }, { ...preferences, role: draft.desiredRole }, remember)
   }
 
   return <Dialog title={step === 1 ? '커리어의 다음 좌표를 찾아보세요.' : '당신의 경험을 이렇게 이해했어요.'} eyebrow="YOUR CAREER, A WORLD OF POSSIBILITIES" onClose={onClose} className="profile-dialog">
@@ -122,9 +134,16 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
           <button className="sample-text-button" onClick={() => { setText(EXAMPLE_RESUME); setTab('text'); setFileName(''); setError('') }}>먼저 샘플 경력으로 체험하기 <ArrowUpRightSmall /></button>
         </> : <>
           <div className="extraction-note"><Fingerprint size={18} /><span>경력에서 찾은 기술과 경험이에요.<br /><strong>빠진 내용이나 희망 조건을 자유롭게 수정하세요.</strong></span></div>
-          <div className="form-grid">
+          <div className="form-grid profile-identity-grid">
             <div className="field-group"><label htmlFor="profile-name">이름 또는 별명</label><input id="profile-name" value={draft.name} maxLength={100} onChange={event => setDraft({ ...draft, name: event.target.value })} /></div>
-            <div className="field-group"><label htmlFor="profile-years">개발 경력</label><div className="input-suffix"><input id="profile-years" type="number" min={0} max={50} value={draft.years} onChange={event => setDraft({ ...draft, years: Math.round(Math.max(0, Math.min(50, Number(event.target.value)))) })} /><span>년</span></div></div>
+            <div className="field-group profile-experience-field">
+              <label htmlFor="profile-years">개발 경력</label>
+              <div className="input-suffix"><input ref={yearsRef} id="profile-years" type="number" min={0} max={50} step="any" inputMode="decimal" value={years} placeholder="미입력"
+                aria-describedby={`profile-years-help${yearsError ? ' profile-years-error' : ''}`} aria-invalid={Boolean(yearsError)}
+                onChange={event => { setYears(event.target.value); setYearsError('') }} /><span>년</span></div>
+              <p id="profile-years-help" className="field-description">선택 입력 · 0~50년, 소수도 가능해요(예: 3.5). 비워 두면 경력 조건은 비교하지 않아요.</p>
+              {yearsError && <p id="profile-years-error" className="form-error" role="alert">{yearsError}</p>}
+            </div>
           </div>
           <div className="field-group">
             <label htmlFor="profile-skill">보유 기술 <span className="optional">{draft.skills.length}개</span></label>

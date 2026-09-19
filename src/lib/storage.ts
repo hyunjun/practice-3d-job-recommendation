@@ -34,7 +34,7 @@ const ProfileSchema = z.object({
   kind: z.literal('personal'),
   name: z.string().min(1).max(100),
   headline: z.string().max(200),
-  years: z.number().int().min(0).max(50),
+  years: z.number().min(0).max(50).nullable(),
   skills: z.array(z.string().min(1).max(60)).max(60),
   desiredRole: z.enum(['all', ...JOB_ROLES]),
   residence: z.string().min(2).max(2),

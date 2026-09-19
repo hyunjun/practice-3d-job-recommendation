@@ -53,13 +53,15 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
   const skillScore = qualificationMatch?.skillScore ?? (job.skills.length ? matchedSkills.length / job.skills.length * 60 : 12)
   const roleMatches = matchesJobRole(job, profile.desiredRole)
   const roleScore = !technical ? 0 : profile.desiredRole === 'all' ? 15 : roleMatches ? 25 : 0
-  const experienceScore = job.minExperience === null ? 8 : Math.max(0, 15 - Math.max(0, job.minExperience - profile.years) * 5)
+  // An omitted personal duration contributes no experience signal to ranking.
+  const experienceScore = profile.years === null ? 0 : job.minExperience === null ? 8
+    : Math.max(0, 15 - Math.max(0, job.minExperience - profile.years) * 5)
   const reasons: string[] = [...(qualificationMatch?.reasons ?? [])]
   const cautions: string[] = [...(qualificationMatch?.cautions ?? [])]
   if (!qualificationMatch && matchedSkills.length) reasons.push(`${matchedSkills.slice(0, 3).join(' · ')} 경험과 연결돼요`)
   if (profile.desiredRole !== 'all' && roleMatches) reasons.push(`희망하는 ${ROLE_LABELS[profile.desiredRole]} 직무 표기가 있어요`)
   if (technical && !jobRoles(job).length) cautions.push('세부 직무를 확인하지 못했어요. 실제 업무 범위는 원문에서 확인해 주세요.')
-  if (job.minExperience !== null && job.minExperience <= profile.years) reasons.push(job.qualifications
+  if (profile.years !== null && job.minExperience !== null && job.minExperience <= profile.years) reasons.push(job.qualifications
     ? `입력 경력 ${formatExperienceYears(profile.years)} · 공고에서 확인한 연수 하한 ${formatExperienceYears(job.minExperience)}`
     : `경력 ${profile.years}년이 공고의 ${job.minExperience}년 이상 조건에 부합해요`)
   if (job.visa === 'yes') reasons.push('공고에서 비자 지원을 명시했어요')
@@ -69,9 +71,12 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
   if (eligibility) cautions.push(`${eligibility}. 적용 범위는 취업 자격 조건의 원문에서 확인해 주세요.`)
   if (!qualificationMatch && missingSkills.length) cautions.push(`경력에서 확인하지 못한 기술: ${missingSkills.slice(0, 5).join(', ')}`)
   if (!qualificationMatch && !job.skills.length) cautions.push('구체적인 기술 요구사항을 원문에서 확인해 주세요')
-  if (job.minExperience !== null && job.minExperience > profile.years) cautions.push(`요구 경력 ${formatExperienceYears(job.minExperience)} · 현재 입력한 경력보다 ${formatExperienceYears(job.minExperience - profile.years)} 많아요`)
+  if (profile.years === null) cautions.push('내 경력 연수가 미입력이라 공고의 경력 조건과 비교하지 않았어요. 프로필에서 입력할 수 있습니다.')
+  if (profile.years !== null && job.minExperience !== null && job.minExperience > profile.years) cautions.push(`요구 경력 ${formatExperienceYears(job.minExperience)} · 현재 입력한 경력보다 ${formatExperienceYears(job.minExperience - profile.years)} 많아요`)
   if (job.minExperience === null) cautions.push(job.qualifications?.experienceNote || '최소 경력 연수가 확인되지 않았어요')
-  if (job.qualifications?.experience.length) cautions.push('전체 경력 연수만 비교합니다. 기술·직무별 경력과 학력 조건의 충족 여부는 원문에서 확인해 주세요.')
+  if (job.qualifications?.experience.length) cautions.push(profile.years === null
+    ? '기술·직무별 경력과 학력 조건의 충족 여부는 원문에서 확인해 주세요.'
+    : '전체 경력 연수만 비교합니다. 기술·직무별 경력과 학력 조건의 충족 여부는 원문에서 확인해 주세요.')
   if (job.visa === 'unknown') cautions.push('비자 지원 여부는 회사에 확인이 필요해요')
   if (job.visa === 'no') cautions.push('비자 지원이 없는 공고예요')
   if (!job.salary) cautions.push(job.compensationRanges?.length || job.compensationNote

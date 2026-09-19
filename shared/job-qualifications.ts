@@ -169,6 +169,10 @@ export function upgradeJobQualifications<T extends Job>(job: T): T {
 }
 
 export function formatExperienceYears(years: number): string {
-  const months = Math.round(years * 12)
-  return months % 12 === 0 ? `${months / 12}년` : `${months}개월`
+  const months = years * 12
+  const wholeMonths = Math.round(months)
+  if (Math.abs(months - wholeMonths) < 1e-9 && (wholeMonths > 0 || years === 0)) {
+    return wholeMonths % 12 === 0 ? `${wholeMonths / 12}년` : `${wholeMonths}개월`
+  }
+  return `${Number(years.toPrecision(12))}년`
 }

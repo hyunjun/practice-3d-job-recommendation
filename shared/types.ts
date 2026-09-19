@@ -204,7 +204,7 @@ export interface Profile {
   kind: 'sample' | 'personal'
   name: string
   headline: string
-  years: number
+  years: number | null
   skills: string[]
   desiredRole: Role
   residence: string
