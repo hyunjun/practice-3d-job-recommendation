@@ -49,7 +49,7 @@ export function classifyJobRoles(title: string, departments: string[] = [], occu
 }
 
 /** Reclassify legacy public records without changing their collection or save time. */
-export function upgradeJobRole(job: Job): Job {
+export function upgradeJobRole<T extends Job>(job: T): T {
   if (job.source === 'sample') return job
   const roleClassification = job.roleClassification?.roles.length ? job.roleClassification
     : classifyJobRoles(job.title, job.occupation?.departments, job.occupation)

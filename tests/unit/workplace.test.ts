@@ -5,7 +5,8 @@ import { normalizeAshbyJob } from '../../server/providers/ashby'
 import { normalizeLeverJob } from '../../server/providers/lever'
 import { normalizeSmartRecruitersJob } from '../../server/providers/smartrecruiters'
 import { createSearchIndex, selectSearchJobs, inSearchScope } from '../../shared/job-search'
-import { isUnmappedJob, unmappedCoverage, upgradeJobLocation, upgradeJobLocations } from '../../shared/job-location'
+import { isUnmappedJob, unmappedCoverage, upgradeJobLocation } from '../../shared/job-location'
+import { upgradeJobCollection } from '../../shared/job-upgrade'
 import { createJobRevision } from '../../shared/posting-status'
 import { createSavedBackup, parseSavedImport } from '../../shared/saved-backup'
 import { SavedJobSchema, decodeSavedJobs } from '../../shared/saved-jobs'
@@ -187,9 +188,9 @@ describe('workplace migration without loss of prior records', () => {
     expect(BoardSnapshotSchema.parse({ ...snapshot, unmappedCount: null }).unmappedCount).toBeNull()
     expect(BoardSnapshotSchema.safeParse({ ...snapshot, total: 1 }).success).toBe(false)
     expect(BoardSnapshotSchema.safeParse({ ...snapshot, publishedIds: jobs.map(job => job.id) }).success).toBe(false)
-    const current = upgradeJobLocations(searchCatalog(jobs))
+    const current = upgradeJobCollection(searchCatalog(jobs))
     expect(current.unmappedCount).toBe(1)
-    expect(upgradeJobLocations(current)).toEqual(current)
+    expect(upgradeJobCollection(current)).toEqual(current)
   })
 
   it('preserves saved notes, status, identity and timestamps through legacy loading and JSON backup restore', () => {

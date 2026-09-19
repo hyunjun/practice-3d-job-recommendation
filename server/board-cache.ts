@@ -3,19 +3,15 @@ import { mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { z } from 'zod'
 import { JobProviderSchema, JobSchema } from '../shared/schemas'
-import { upgradeJobCompensation } from '../shared/job-compensation'
-import { upgradeJobQualifications } from '../shared/job-qualifications'
-import { upgradeJobEligibility } from '../shared/job-eligibility'
-import { upgradeJobEmployment } from '../shared/job-employment'
-import { isUnmappedJob, upgradeJobLocation, upgradeJobLocations } from '../shared/job-location'
-import { upgradeJobRole } from '../shared/job-roles'
-import { filterTechnicalJobs, upgradeJobOccupation } from '../shared/job-occupation'
+import { isUnmappedJob } from '../shared/job-location'
+import { filterTechnicalJobs } from '../shared/job-occupation'
+import { upgradeJob, upgradeJobCollection } from '../shared/job-upgrade'
 import type { Company } from '../shared/types'
 
 const Timestamp = z.iso.datetime({ offset: true })
 export const BoardSnapshotSchema = z.object({
   fetchedAt: Timestamp,
-  jobs: z.array(JobSchema.extend({ source: JobProviderSchema, fetchedAt: Timestamp }).transform(job => upgradeJobEmployment(upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job)))))))).max(20000),
+  jobs: z.array(JobSchema.extend({ source: JobProviderSchema, fetchedAt: Timestamp })).max(20000),
   total: z.number().int().nonnegative(),
   unmappedCount: z.number().int().nonnegative().nullable(),
   publishedIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
@@ -33,7 +29,7 @@ export const BoardSnapshotSchema = z.object({
       && snapshot.jobs.every(job => ids.has(job.id))
   })
   // Validate the stored counts first, then migrate locations and their count together.
-  .transform(snapshot => upgradeJobLocations(snapshot))
+  .transform(snapshot => upgradeJobCollection(snapshot))
 
 const CachedBoardSchema = z.object({
   companyId: z.string().min(1).max(100),
@@ -50,7 +46,8 @@ const CachedBoardSchema = z.object({
 export type BoardSnapshot = z.infer<typeof BoardSnapshotSchema>
 export type CachedBoard = z.infer<typeof CachedBoardSchema>
 export function filterBoardSnapshot(snapshot: BoardSnapshot): BoardSnapshot {
-  return upgradeJobLocations({ ...snapshot, ...filterTechnicalJobs(snapshot.jobs, snapshot.unmappedCount) })
+  const current = upgradeJobCollection(snapshot)
+  return { ...current, ...filterTechnicalJobs(current.jobs, current.unmappedCount) }
 }
 
 export function belongsToBoard(snapshot: BoardSnapshot, company: Pick<Company, 'id' | 'provider'>): boolean {
@@ -87,7 +84,7 @@ export function parseCachedBoards(input: unknown): CachedBoard[] {
 function migrateLegacy(input: unknown, companies: Company[]): CachedBoard[] {
   const legacy = z.object({
     source: z.literal('greenhouse'), fetchedAt: Timestamp,
-    jobs: z.array(JobSchema.extend({ source: z.literal('greenhouse'), fetchedAt: Timestamp }).transform(job => upgradeJobEmployment(upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job)))))))).max(20000),
+    jobs: z.array(JobSchema.extend({ source: z.literal('greenhouse'), fetchedAt: Timestamp }).transform(job => upgradeJob(job))).max(20000),
     boards: z.array(z.object({
       companyId: z.string(), board: z.string(), status: z.enum(['ok', 'error']),
       total: z.number().int().nonnegative(), message: z.string().optional(),
@@ -107,7 +104,7 @@ function migrateLegacy(input: unknown, companies: Company[]): CachedBoard[] {
       ...(failed ? { error: (board.message || '이전 조회에 실패했어요.').slice(0, 500) } : {
         snapshot: {
           fetchedAt: legacy.data.fetchedAt,
-          jobs: filterTechnicalJobs(jobs.map(job => upgradeJobLocation(job)), null).jobs,
+          jobs: filterTechnicalJobs(jobs, null).jobs,
           total: board.total,
           // v3 recorded only a global total; a per-company count cannot be recovered.
           unmappedCount: null,

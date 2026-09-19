@@ -1,10 +1,8 @@
 import { z } from 'zod'
 import { PUBLIC_PROVIDERS } from './types'
-import { jobRoleEvidence, jobRoles, upgradeJobRole } from './job-roles'
-import { isTechnicalJob, upgradeJobOccupation } from './job-occupation'
-import { upgradeJobLocation } from './job-location'
-import { upgradeJobEligibility } from './job-eligibility'
-import { upgradeJobEmployment } from './job-employment'
+import { jobRoleEvidence, jobRoles } from './job-roles'
+import { isTechnicalJob } from './job-occupation'
+import { upgradeJob } from './job-upgrade'
 import type { Job, JobProvider, SavedJob } from './types'
 
 export const REVISION_FIELDS = ['title', 'location', 'conditions', 'compensation', 'qualifications', 'description', 'url'] as const
@@ -90,7 +88,7 @@ function stable(value: unknown): unknown {
 }
 
 export async function createJobRevision(job: Job): Promise<JobRevision> {
-  const current = upgradeJobEmployment(upgradeJobEligibility(upgradeJobLocation(upgradeJobRole(upgradeJobOccupation(job)))))
+  const current = upgradeJob(job, { preserveUnverifiablePay: true })
   const sections: Record<RevisionField, unknown> = {
     title: {
       text: job.title, roles: jobRoles(current), evidence: jobRoleEvidence(current),
@@ -112,10 +110,10 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
       ...(current.evidence?.visa && !job.description.includes(current.evidence.visa.text) ? { visaEvidence: current.evidence.visa } : {}),
     },
     compensation: {
-      salary: job.salary, ranges: job.compensationRanges ?? [],
-      note: job.compensationNote ?? '', evidence: job.compensationEvidence ?? [],
+      salary: current.salary, ranges: current.compensationRanges ?? [],
+      note: current.compensationNote ?? '', evidence: current.compensationEvidence ?? [],
     },
-    qualifications: { skills: job.skills, years: job.minExperience, details: job.qualifications ?? null },
+    qualifications: { skills: current.skills, years: current.minExperience, details: current.qualifications ?? null },
     description: job.description,
     url: job.url,
   }

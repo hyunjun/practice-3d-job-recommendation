@@ -10,12 +10,13 @@ import { SEARCH_COMPANIES as companies, SEARCH_TIME, searchJob } from '../fixtur
 
 const base = Date.parse(SEARCH_TIME)
 const iso = (time: number) => new Date(time).toISOString()
-const job = (company: Company, time = base, id = 'new') => searchJob(id, {
-  companyId: company.id, id: `greenhouse-${company.id}-${id}`, fetchedAt: iso(time),
+const job = (company: Company, time = base, id = 'new') => ({
+  ...searchJob(id, { companyId: company.id, id: `greenhouse-${company.id}-${id}`, fetchedAt: iso(time) }),
+  source: 'greenhouse' as const,
 })
-const result = (company: Company, time = base): BoardResult => ({
+const result = (company: Company, time = base) => ({
   jobs: [job(company, time)], total: 1, unmappedCount: 0, publishedIds: [job(company, time).id],
-})
+}) satisfies BoardResult
 const cached = (company: Company, time = base): CachedBoard => ({
   companyId: company.id, board: company.board!, provider: 'greenhouse', checkedAt: iso(time), failures: 0, retryAt: null,
   snapshot: { ...result(company, time), fetchedAt: iso(time) },

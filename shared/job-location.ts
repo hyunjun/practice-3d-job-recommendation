@@ -86,13 +86,6 @@ export function upgradeJobLocation<T extends Job>(job: T, description = job.desc
   }
 }
 
-/** Keep legacy count-only omissions while accounting for newly unmapped conflicts. */
-export function upgradeJobLocations<T extends Pick<Catalog, 'jobs' | 'unmappedCount'>>(collection: T): T {
-  const jobs = collection.jobs.map(job => upgradeJobLocation(job))
-  const delta = jobs.filter(isUnmappedJob).length - collection.jobs.filter(isUnmappedJob).length
-  return { ...collection, jobs, unmappedCount: collection.unmappedCount === null ? null : collection.unmappedCount + delta }
-}
-
 export function jobLocationSearchText(job: Job): string {
   const conflict = job.locationResolution?.status === 'conflict' ? job.locationResolution : undefined
   return [job.locationLabel, ...(conflict ? [

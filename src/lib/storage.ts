@@ -4,10 +4,8 @@ import { DEFAULT_FILTERS, ELIGIBILITY_LABELS, ELIGIBILITY_LEVEL_LABELS, EMPLOYME
 import { formatCompensation, formatJobSalary } from '../../shared/matching'
 import { formatExperienceYears } from '../../shared/job-qualifications'
 import { jobRoleEvidence, jobRoleLabel } from '../../shared/job-roles'
-import { jobOccupationLabel, upgradeJobOccupation } from '../../shared/job-occupation'
-import { upgradeJobLocation } from '../../shared/job-location'
-import { upgradeJobEligibility } from '../../shared/job-eligibility'
-import { upgradeJobEmployment } from '../../shared/job-employment'
+import { jobOccupationLabel } from '../../shared/job-occupation'
+import { upgradeJob } from '../../shared/job-upgrade'
 import { REMOTE_SCOPE_CAUTION, remoteScopeLabel } from '../../shared/job-remote'
 import { jobFreshness } from '../../shared/catalog-freshness'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
@@ -116,7 +114,7 @@ export function deleteProfile(): void {
 
 export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<string, PostingObservation>): void {
   const exportedAt = new Date()
-  const current = saved.map(item => ({ ...item, job: upgradeJobEmployment(upgradeJobEligibility(upgradeJobLocation(item.job))) }))
+  const current = saved.map(item => ({ ...item, job: upgradeJob(item.job, { preserveUnverifiablePay: true }) }))
   // Neutralize spreadsheet formulas in imported job titles and user notes.
   const cell = (value: unknown) => {
     const text = String(value ?? '')
@@ -145,7 +143,7 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
       jobRoleLabel(item.job),
       jobRoleEvidence(item.job).map(evidence => `${ROLE_FILTER_LABELS[evidence.role]} · ${evidence.source === 'title' ? '공고 제목' : evidence.source === 'board' ? '공개 부서·팀' : '연구 업무·자격 원문'}\n${evidence.text}`).join('\n\n'),
       jobOccupationLabel(item.job),
-      upgradeJobOccupation(item.job).occupation?.evidence.map(evidence => `${evidence.source === 'title' ? '공고 제목' : evidence.source === 'board' ? '공개 게시판 정보' : '업무·자격 원문'}\n${evidence.text}`).join('\n\n') ?? '',
+      item.job.occupation?.evidence.map(evidence => `${evidence.source === 'title' ? '공고 제목' : evidence.source === 'board' ? '공개 게시판 정보' : '업무·자격 원문'}\n${evidence.text}`).join('\n\n') ?? '',
       item.job.source === 'sample' ? '' : item.job.fetchedAt,
       item.job.source === 'sample' ? '체험용 샘플' : { fresh: '최근 조회', stale: '이전 조회', expired: '확인 기간 지남', unknown: '조회 시각 미확인' }[jobFreshness(item.job, exportedAt.getTime())],
       exportedAt.toISOString(),

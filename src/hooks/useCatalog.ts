@@ -3,12 +3,7 @@ import { CITIES } from '../../shared/cities'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { catalogNeedsAttention, collectionHealth } from '../../shared/catalog-health'
 import { createSampleCatalog } from '../../shared/sample'
-import { upgradeJobRole } from '../../shared/job-roles'
-import { upgradeCatalogOccupations } from '../../shared/job-occupation'
-import { upgradeJobLocations } from '../../shared/job-location'
-import { upgradeJobCompensation } from '../../shared/job-compensation'
-import { upgradeJobEligibility } from '../../shared/job-eligibility'
-import { upgradeJobEmployment } from '../../shared/job-employment'
+import { upgradeCatalog } from '../../shared/job-upgrade'
 import type { Catalog, Source } from '../../shared/types'
 import type { CatalogProgress } from '../../shared/catalog-progress'
 import { CatalogRequestError, requestPublicCatalog } from '../lib/catalog-request'
@@ -47,8 +42,7 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
       let current: Catalog | undefined
       await requestPublicCatalog({ refresh, signal: controller.signal, onUpdate(result, latest) {
         if (controller.signal.aborted) return
-        current = upgradeJobLocations(upgradeCatalogOccupations(result))
-        current.jobs = current.jobs.map(job => upgradeJobEmployment(upgradeJobRole(upgradeJobEligibility(upgradeJobCompensation(job)))))
+        current = upgradeCatalog(result)
         setCatalog(current)
         setProgress(latest)
       } })

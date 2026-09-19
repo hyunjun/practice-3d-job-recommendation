@@ -1,11 +1,12 @@
 import { COMPENSATION_VERSION, ROLE_LABELS, USD_RATES } from './types'
 import { formatExperienceYears } from './job-qualifications'
 import { matchQualifications } from './qualification-matching'
-import { eligibilitySummary, upgradeJobEligibility } from './job-eligibility'
+import { eligibilitySummary } from './job-eligibility'
 import { createSearchIndex, selectSearchJobs } from './job-search'
 import { jobRoles, matchesJobRole } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
 import { upgradeJobRemoteScope } from './job-remote'
+import { upgradeJob } from './job-upgrade'
 import type { SearchEntry } from './job-search'
 import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
 
@@ -44,7 +45,7 @@ export function formatCompensation(range: NonNullable<Job['compensationRanges']>
 }
 
 export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company' | 'job'> {
-  job = upgradeJobRemoteScope(upgradeJobEligibility(job))
+  job = upgradeJob(job, { preserveUnverifiablePay: true })
   const technical = isTechnicalJob(job)
   const profileSkills = new Set(profile.skills.map(skill => skill.toLowerCase()))
   const qualificationMatch = job.qualifications ? matchQualifications(job, profile) : undefined

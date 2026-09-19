@@ -1,11 +1,10 @@
 import { CITY_BY_ID } from './cities'
 import { COUNTRY_BY_CODE, countrySearchText } from './countries'
 import { matchingSkills } from './qualification-matching'
-import { isUnmappedJob, jobLocationSearchText, upgradeJobLocation } from './job-location'
-import { jobRoleLabel, matchesJobRole, upgradeJobRole } from './job-roles'
-import { isTechnicalJob, upgradeJobOccupation } from './job-occupation'
-import { upgradeJobEligibility } from './job-eligibility'
-import { upgradeJobEmployment } from './job-employment'
+import { isUnmappedJob, jobLocationSearchText } from './job-location'
+import { jobRoleLabel, matchesJobRole } from './job-roles'
+import { isTechnicalJob } from './job-occupation'
+import { upgradeJob } from './job-upgrade'
 import { MODE_LABELS, USD_RATES } from './types'
 import type { Catalog, City, Company, Filters, Job, Profile, Region } from './types'
 
@@ -30,7 +29,7 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
   const cities = new Map(catalog.cities.map(city => [city.id, city]))
   const profileSkills = new Set(profile.skills.map(skill => skill.toLowerCase()))
   return { entries: catalog.jobs.flatMap(previous => {
-    const job = upgradeJobEmployment(upgradeJobEligibility(upgradeJobLocation(upgradeJobRole(upgradeJobOccupation(previous)))))
+    const job = upgradeJob(previous)
     if (!isTechnicalJob(job)) return []
     const company = companies.get(job.companyId)
     if (!company) return []

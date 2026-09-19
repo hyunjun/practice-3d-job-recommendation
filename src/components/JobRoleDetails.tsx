@@ -1,12 +1,13 @@
 import { BriefcaseBusiness, ChevronDown } from 'lucide-react'
-import { jobRoleEvidence, jobRoleLabel, jobRoles, upgradeJobRole } from '../../shared/job-roles'
-import { isTechnicalJob, jobOccupationLabel, upgradeJobOccupation } from '../../shared/job-occupation'
+import { jobRoleEvidence, jobRoleLabel, jobRoles } from '../../shared/job-roles'
+import { isTechnicalJob, jobOccupationLabel } from '../../shared/job-occupation'
+import { upgradeJob } from '../../shared/job-upgrade'
 import { ROLE_FILTER_LABELS } from '../../shared/types'
 import type { Job } from '../../shared/types'
 
 export function JobRoleDetails({ job }: { job: Job }) {
   if (job.source === 'sample') return null
-  const current = upgradeJobRole(upgradeJobOccupation(job))
+  const current = upgradeJob(job, { preserveUnverifiablePay: true })
   const roles = jobRoles(current)
   const evidence = jobRoleEvidence(current)
   const occupation = current.occupation!

@@ -1,6 +1,6 @@
 import { createSampleCatalog } from '../../shared/sample'
 import { isUnmappedJob } from '../../shared/job-location'
-import { COMPENSATION_VERSION, DEFAULT_FILTERS, ELIGIBILITY_VERSION, SAMPLE_PROFILE } from '../../shared/types'
+import { COMPENSATION_VERSION, DEFAULT_FILTERS, ELIGIBILITY_VERSION, QUALIFICATIONS_VERSION, SAMPLE_PROFILE } from '../../shared/types'
 import type { Catalog, Company, Filters, Job, Profile } from '../../shared/types'
 
 const sample = createSampleCatalog()
@@ -20,14 +20,22 @@ export const SEARCH_FILTERS: Filters = {
 }
 
 export function searchJob(id: string, overrides: Partial<Job> = {}): Job {
+  const skills = overrides.skills ?? ['TypeScript']
+  const years = overrides.minExperience === undefined ? 3 : overrides.minExperience
   return {
     ...sample.jobs[0], id: `greenhouse-search-fixture-a-${id}`, companyId: SEARCH_COMPANIES[0].id,
     title: `Backend Engineer ${id}`, role: 'backend', cityIds: ['london'], locationLabel: 'London',
     source: 'greenhouse', fetchedAt: SEARCH_TIME, stale: false, url: `https://example.com/jobs/${id}`,
-    workMode: 'onsite', employment: 'fulltime', visa: 'yes', skills: ['TypeScript'], minExperience: 3,
+    workMode: 'onsite', employment: 'fulltime', visa: 'yes', skills, minExperience: years,
     salary: { min: 100000, max: 180000, currency: 'USD' },
     compensationVersion: COMPENSATION_VERSION, compensationRanges: undefined, compensationNote: undefined, compensationEvidence: undefined,
-    qualifications: undefined, eligibility: { version: ELIGIBILITY_VERSION, rules: [] }, evidence: undefined,
+    // These are current normalized fixtures. An explicit undefined override exercises old records.
+    qualifications: {
+      version: QUALIFICATIONS_VERSION,
+      skills: skills.length ? [{ kind: 'qualification', skills, match: 'all', evidence: { source: 'description', text: `Qualifications: experience with ${skills.join(' and ')}.` } }] : [],
+      experience: years === null ? [] : [{ kind: 'qualification', minYears: years, conditional: false, evidence: { source: 'description', text: `Qualifications: ${years} years of experience.` } }],
+    },
+    eligibility: { version: ELIGIBILITY_VERSION, rules: [] }, evidence: undefined,
     remoteWorldwide: false, remoteCountries: [], remoteRegions: undefined, remoteScopeUnknown: false,
     description: 'Synthetic job for search recovery verification.', requirements: ['TypeScript'],
     ...overrides,
