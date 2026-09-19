@@ -110,7 +110,9 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
       if (!width || !height) return
       camera.aspect = width / height
       baseDistance = Math.max(3.4, (width < 600 ? 3.6 : 2.85) / camera.aspect)
-      camera.setViewOffset(width, height, -width * (width < 600 ? 0 : 0.035), -height * (width < 600 ? 0.17 : 0.08), width, height)
+      // A map with its own layout space needs no offset for overlaid headings.
+      const centered = getComputedStyle(container).getPropertyValue('--map-centered-camera').trim() === '1'
+      camera.setViewOffset(width, height, centered ? 0 : -width * (width < 600 ? 0 : 0.035), centered ? 0 : -height * (width < 600 ? 0.17 : 0.08), width, height)
       camera.updateProjectionMatrix()
       renderer.setSize(width, height)
       dirty = true
