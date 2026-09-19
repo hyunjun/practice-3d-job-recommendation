@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, JOB_ROLES, OCCUPATION_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION } from './types'
+import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, OCCUPATION_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 const QualificationKindSchema = z.enum(['required', 'qualification', 'preferred', 'context'])
@@ -43,6 +43,7 @@ export const JobSchema = z.object({
     && new Set(value.statedCityIds).size === value.statedCityIds.length).optional(),
   workMode: z.enum(['remote', 'hybrid', 'onsite', 'unknown']),
   employment: z.enum(['fulltime', 'parttime', 'permanent', 'contract', 'intern', 'temporary', 'unknown']),
+  employmentVersion: z.literal(EMPLOYMENT_VERSION).optional(),
   minExperience: z.number().min(0).max(50).nullable(), skills: z.array(z.string()).max(100),
   qualifications: z.object({
     version: z.literal(QUALIFICATIONS_VERSION),

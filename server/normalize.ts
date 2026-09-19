@@ -7,7 +7,7 @@ import { isTechnicalOccupation, occupationFacts } from '../shared/job-occupation
 import { qualificationFacts } from '../shared/job-qualifications'
 import { plainText } from '../shared/text'
 export { plainText } from '../shared/text'
-import { COMPENSATION_VERSION } from '../shared/types'
+import { COMPENSATION_VERSION, EMPLOYMENT_VERSION } from '../shared/types'
 import type { Employment, Job, JobManagement, JobProvider, Salary, Visa, WorkMode } from '../shared/types'
 import { employmentFact, managementFact, visaFact, workModeFact } from './job-facts'
 import { eligibilityFacts } from '../shared/job-eligibility'
@@ -106,7 +106,7 @@ export function normalizePosting(input: PostingInput): Job | null {
     id: `${input.provider}-${companyId}-${input.id}`, companyId, title,
     role: roleClassification.roles[0] ?? 'unknown', roleClassification, occupation,
     cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
-    employment: employment.value, ...qualificationFacts(text, companyId), salary,
+    employment: employment.value, employmentVersion: EMPLOYMENT_VERSION, ...qualificationFacts(text, companyId), salary,
     ...(compensationRanges?.length ? { compensationRanges } : {}),
     ...(compensationNote ? { compensationNote } : {}),
     ...(input.compensationEvidence?.length ? { compensationEvidence: input.compensationEvidence } : {}),

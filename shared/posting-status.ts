@@ -4,6 +4,7 @@ import { jobRoleEvidence, jobRoles, upgradeJobRole } from './job-roles'
 import { isTechnicalJob, upgradeJobOccupation } from './job-occupation'
 import { upgradeJobLocation } from './job-location'
 import { upgradeJobEligibility } from './job-eligibility'
+import { upgradeJobEmployment } from './job-employment'
 import type { Job, JobProvider, SavedJob } from './types'
 
 export const REVISION_FIELDS = ['title', 'location', 'conditions', 'compensation', 'qualifications', 'description', 'url'] as const
@@ -89,7 +90,7 @@ function stable(value: unknown): unknown {
 }
 
 export async function createJobRevision(job: Job): Promise<JobRevision> {
-  const current = upgradeJobEligibility(upgradeJobLocation(upgradeJobRole(upgradeJobOccupation(job))))
+  const current = upgradeJobEmployment(upgradeJobEligibility(upgradeJobLocation(upgradeJobRole(upgradeJobOccupation(job)))))
   const sections: Record<RevisionField, unknown> = {
     title: {
       text: job.title, roles: jobRoles(current), evidence: jobRoleEvidence(current),
@@ -104,7 +105,7 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
       ...(current.locationResolution ? { resolution: current.locationResolution } : {}),
     },
     conditions: {
-      workMode: job.workMode, employment: job.employment, visa: current.visa,
+      workMode: job.workMode, employment: current.employment, visa: current.visa,
       remoteCountries: current.remoteCountries, remoteWorldwide: current.remoteWorldwide,
       remoteScopeUnknown: current.remoteScopeUnknown, remoteRegions: current.remoteRegions ?? [],
       eligibility: current.eligibility ?? null,

@@ -1,4 +1,5 @@
 import type { Employment, FactEvidence, JobManagement, WorkMode } from '../shared/types'
+import { employmentDescriptionFact, employmentTitleFact, employmentValue } from '../shared/job-employment'
 
 export { visaFact } from '../shared/job-eligibility'
 
@@ -60,7 +61,6 @@ const WORK_ASSERTION = new RegExp(`${ROLE_ASSERTION}(remote|hybrid|on[- ]?site|i
 // about this vacancy. Require the schedule clause, not a nearby company's
 // policy, hybrid cloud product, or remote colleagues.
 const LOCATED_WORK_ASSERTION = /\b(?:this|the)\s+(?:role|position|job)\s+(?:is|will be)\s+(?:based|located)\s+(?:in|at)\s+[^.!?\n;]{1,140}?\s+(?:with|on)\s+(?:(?:a|an|our)\s+)?(?:office[- ]centric\s+)?(remote|hybrid|on[- ]?site|in[- ]office|office[- ]based)\s+(?:work(?:ing)?\s+)?(?:schedule|arrangement|model)\b/i
-const EMPLOYMENT_ASSERTION = new RegExp(`${ROLE_ASSERTION}(full[\\s-]*time|part[\\s-]*time|contract(?:or)?|intern(?:ship)?|temporary|fixed[- ]term)\\b`, 'i')
 
 export function workModeFact(location: string, metadata: BoardMetadata[], text: string): Fact<WorkMode> {
   const structured = metadataFacts(metadata, /^(?:workplace[\s_-]*type|work[\s_-]*arrangement|work[\s_-]*location[\s_-]*type|location[\s_-]*type)$/i, workModeValue)
@@ -80,29 +80,11 @@ export function workModeFact(location: string, metadata: BoardMetadata[], text: 
   }
 }
 
-function employmentValue(text: string): Employment {
-  // A board's exact contract-duration category does not establish working hours.
-  if (/^permanent$/i.test(text.trim())) return 'permanent'
-  if (/\bintern(?:ship)?\b/i.test(text)) return 'intern'
-  if (/\bcontract(?:or)?\b|\bfreelance\b/i.test(text)) return 'contract'
-  if (/\btemporary\b|\bfixed[- ]term\b/i.test(text)) return 'temporary'
-  const full = /\bfull[\s-]*time\b/i.test(text)
-  const part = /\bpart[\s-]*time\b/i.test(text)
-  return full === part ? 'unknown' : full ? 'fulltime' : 'parttime'
-}
-
 export function employmentFact(title: string, metadata: BoardMetadata[], text: string): Fact<Employment> {
-  const titled = employmentValue(title)
+  const titled = employmentTitleFact(title)
   // An internship/contract may also be full-time. Keep its explicit contract category.
-  if (['intern', 'contract', 'temporary'].includes(titled)) return { value: titled, evidence: evidence('title', title) }
+  if (titled.evidence && ['intern', 'contract', 'temporary', 'unknown'].includes(titled.value)) return titled
   const structured = metadataFacts(metadata, /^(?:employment[\s_-]*type|commitment|time[\s_-]*type|job[\s_-]*type)$/i, employmentValue)
   if (structured) return structured
-  if (titled !== 'unknown') return { value: titled, evidence: evidence('title', title) }
-  const sentences = roleSentences(text).filter(sentence => employmentValue(sentence) !== 'unknown'
-    && (EMPLOYMENT_ASSERTION.test(sentence) || /^(?:employment(?: type)?|job type)\s*:/i.test(sentence))
-    && !/\b(?:may|might|could|benefits?|employees|not|isn't)\b/i.test(sentence))
-  const values = [...new Set(sentences.map(employmentValue))]
-  return values.length === 1
-    ? { value: values[0], evidence: evidence('description', sentences.join('\n')) }
-    : { value: 'unknown' }
+  return titled.evidence ? titled : employmentDescriptionFact(text)
 }

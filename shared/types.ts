@@ -16,6 +16,7 @@ export const ELIGIBILITY_VERSION = 2 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
 export const OCCUPATION_VERSION = 3 as const
 export const REMOTE_SCOPE_VERSION = 1 as const
+export const EMPLOYMENT_VERSION = 1 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever', smartrecruiters: 'SmartRecruiters',
@@ -147,6 +148,7 @@ export interface Job {
   locationResolution?: JobLocationResolution
   workMode: WorkMode
   employment: Employment
+  employmentVersion?: typeof EMPLOYMENT_VERSION
   minExperience: number | null
   skills: string[]
   qualifications?: JobQualifications

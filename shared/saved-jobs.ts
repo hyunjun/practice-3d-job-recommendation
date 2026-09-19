@@ -6,12 +6,13 @@ import { upgradeJobEligibility } from './job-eligibility'
 import { upgradeJobOccupation } from './job-occupation'
 import { upgradeJobRole } from './job-roles'
 import { upgradeJobLocation } from './job-location'
+import { upgradeJobEmployment } from './job-employment'
 import type { SavedJob } from './types'
 
 export const MAX_SAVED_JOBS = 500
 
 export const SavedJobSchema = z.object({
-  job: JobSchema.transform(job => upgradeJobLocation(upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job, true))))))),
+  job: JobSchema.transform(job => upgradeJobEmployment(upgradeJobLocation(upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job, true)))))))),
   company: z.object({
     id: z.string(), name: z.string().max(200), color: z.string().regex(/^#[0-9a-f]{6}$/i),
     initials: z.string().max(8), industry: z.string().max(200), careerUrl: z.string().max(2000),

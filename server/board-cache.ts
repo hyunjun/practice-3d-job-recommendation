@@ -6,6 +6,7 @@ import { JobProviderSchema, JobSchema } from '../shared/schemas'
 import { upgradeJobCompensation } from '../shared/job-compensation'
 import { upgradeJobQualifications } from '../shared/job-qualifications'
 import { upgradeJobEligibility } from '../shared/job-eligibility'
+import { upgradeJobEmployment } from '../shared/job-employment'
 import { isUnmappedJob, upgradeJobLocation, upgradeJobLocations } from '../shared/job-location'
 import { upgradeJobRole } from '../shared/job-roles'
 import { filterTechnicalJobs, upgradeJobOccupation } from '../shared/job-occupation'
@@ -14,7 +15,7 @@ import type { Company } from '../shared/types'
 const Timestamp = z.iso.datetime({ offset: true })
 export const BoardSnapshotSchema = z.object({
   fetchedAt: Timestamp,
-  jobs: z.array(JobSchema.extend({ source: JobProviderSchema, fetchedAt: Timestamp }).transform(job => upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job))))))).max(20000),
+  jobs: z.array(JobSchema.extend({ source: JobProviderSchema, fetchedAt: Timestamp }).transform(job => upgradeJobEmployment(upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job)))))))).max(20000),
   total: z.number().int().nonnegative(),
   unmappedCount: z.number().int().nonnegative().nullable(),
   publishedIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
@@ -86,7 +87,7 @@ export function parseCachedBoards(input: unknown): CachedBoard[] {
 function migrateLegacy(input: unknown, companies: Company[]): CachedBoard[] {
   const legacy = z.object({
     source: z.literal('greenhouse'), fetchedAt: Timestamp,
-    jobs: z.array(JobSchema.extend({ source: z.literal('greenhouse'), fetchedAt: Timestamp }).transform(job => upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job))))))).max(20000),
+    jobs: z.array(JobSchema.extend({ source: z.literal('greenhouse'), fetchedAt: Timestamp }).transform(job => upgradeJobEmployment(upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job)))))))).max(20000),
     boards: z.array(z.object({
       companyId: z.string(), board: z.string(), status: z.enum(['ok', 'error']),
       total: z.number().int().nonnegative(), message: z.string().optional(),

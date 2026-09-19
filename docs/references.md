@@ -349,3 +349,18 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 취소된 요청도 기록에 남겨 개인정보 전송 여부와 추가 조회 횟수 검사를 유지합니다. 초기화 검증이 끝난 뒤의 사용자 재조회는 정확히 한 건 증가해야 하며, 초기 조회 중 샘플로 바꾼 경우에는 대기 중인 요청이 취소되고 늦은 응답이 샘플을 바꾸지 않아야 합니다.
 
 추가 검증에서는 `.local`에 생성된 추적용 HTML에 개발 서버가 `full-reload`를 보내는 것을 기록했습니다. 설치된 Vite 8.3.0의 middleware 모드에서 전체 페이지를 새로고침하는 동작이었으며, 파일 감시 제외 설정으로 대응했습니다.
+
+## 기술 용어와 고용 형태의 구분
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [Ethereum: Introduction to smart contracts](https://ethereum.org/developers/docs/smart-contracts/) | Smart contract는 Ethereum 블록체인에서 실행되는 프로그램과 코드·데이터를 가리킴 | 제목의 기술 대상을 계약직 조건으로 사용하지 않음 |
+| [Stripe: Software Engineer — Smart Contract, Bridge](https://stripe.com/careers/listing/software-engineer-smart-contract-bridge/7507904) · [공개 API](https://boards-api.greenhouse.io/v1/boards/stripe/jobs/7507904) | 채용 페이지에는 `Employment type: Full time`이 있지만, 같은 공고의 공개 API는 `metadata: null`이며 본문에도 해당 고용 조건이 없음 | API 결과를 계약직으로 분류하던 오류 수정. 현재 수집 경로에서 확인하지 못한 풀타임 값을 만들어 넣지 않고 미확인으로 표시 |
+| [Canva 공개 API: Senior Data Scientist — Video, 12-month contract](https://api.smartrecruiters.com/v1/companies/Canva/postings/6000000001291862) | 제목이 채용 기간과 계약직 조건을 명시함 | 실제 `12-month contract` 제목은 계약직으로 유지 |
+| [Google Search: JobPosting의 employmentType](https://developers.google.com/search/docs/appearance/structured-data/job-posting#employment-type) | `FULL_TIME`, `PART_TIME`, `CONTRACTOR`, `TEMPORARY`, `INTERN` 등 직무의 고용 형태를 설명하며 복수 유형도 허용 | 직무에 대한 고용 선언과 다른 대상의 언급을 구분. 현재 단일 표시값은 계약·인턴 등의 유형을 근무 시간보다 우선하고, 함께 명시된 원문도 보존 |
+
+2026-09-20 원문과 Stripe·Canva의 공개 API 응답을 확인했습니다. 보관 공고의 `Smart Contract` 제목에서 단어 `Contract`만 읽어 계약직으로 표시하던 문제를 실제 자료로 재현했습니다. 본문에서도 풀타임 직무의 인턴 멘토링이나 계약 관련 업무를 고용 형태로 사용하지 않도록, 해당 직무를 수식하는 명시적인 조건을 읽습니다.
+
+앱의 수집 경로에 없는 정보를 채용 페이지의 정보로 자동 보충하지 않습니다. 공고마다 HTML을 추가 요청하거나 회사·공고별 예외를 하드코딩하지 않으며, 근거를 확인할 수 없는 값은 미확인으로 유지합니다. 영어의 명시적인 제목·본문 표현을 다루는 규칙이고, 모든 언어·계약 유형을 판별한다는 의미는 아닙니다.
+
+이전 기록에 제목·본문 근거가 남아 있으면 같은 규칙으로 다시 해석합니다. 원래 게시판 필드가 유실된 기록은 복구할 수 없으므로, 근거 없는 이전 값이나 보관된 게시판의 명시적 고용 조건은 유지합니다. 검색·저장·캐시·게시 내용 비교·CSV에서 같은 해석을 사용하고 메모·지원 상태·시각은 보존합니다.
