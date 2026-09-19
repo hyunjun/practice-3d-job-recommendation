@@ -12,6 +12,7 @@ import type { PostingObservation } from '../../shared/posting-status'
 import { SavedPostingNotice } from './SavedPostingNotice'
 import { JobEligibilityDetails } from './JobEligibilityDetails'
 import { isUnmappedJob } from '../../shared/job-location'
+import { JobLocationDetails } from './JobLocationDetails'
 import { isTechnicalJob } from '../../shared/job-occupation'
 import { JobRoleDetails } from './JobRoleDetails'
 import type { SavedJobsController } from '../hooks/useSavedJobs'
@@ -41,12 +42,13 @@ export function JobDialog({ match, saved, storage, onManageSaved, postingObserva
       <div className="job-meta-pills"><span><BriefcaseBusiness size={13} />{EMPLOYMENT_LABELS[job.employment]}</span><span><Globe2 size={13} />{MODE_LABELS[job.workMode]}</span><span><Clock3 size={13} />{job.minExperience !== null ? `${formatExperienceYears(job.minExperience)} 이상` : '경력 확인 필요'}</span></div>
       {job.source === 'sample' && <div className="sample-notice"><span className="sample-dot" /><span><strong>체험용 샘플 공고</strong>회사별 채용 여부·기술·보상 조건은 실제 공고가 아닌 예시입니다.</span></div>}
       <JobFreshnessNotice job={job} />
+      <JobLocationDetails job={job} />
       {saved && <SavedPostingNotice observation={postingObservation} job={saved.job} />}
       <JobRoleDetails job={job} />
       <div className="job-key-facts"><div><span>{verifiedSalary ? '세전 연봉' : '보상 정보'}</span><strong>{formatJobSalary(job)}</strong>{verifiedSalary && job.salary && job.salary.currency !== 'USD' && <small>약 {formatSalary(job.salary, true)} USD / 년</small>}</div><div><span>비자 지원</span><strong className={job.visa === 'conditional' ? 'conditional-visa' : job.visa === 'yes' ? 'text-accent' : ''}>{VISA_LABELS[job.visa]}</strong><small>{job.source === 'sample' ? '샘플 시나리오 기준' : '공고의 명시적 문구 기준'}</small></div></div>
       <CompensationDetails job={job} />
       {job.workMode === 'remote' && <div className="remote-scope"><Globe2 size={18} /><div><strong>명시된 원격근무 지역</strong><p>{job.remoteWorldwide ? '전 세계 · 공고에 Global / Worldwide 명시' : job.remoteCountries.length ? job.remoteCountries.map(code => COUNTRIES.find(([id]) => id === code)?.[1] ?? code).join(' · ') : '국가별 근무 지역 미확인'}</p><small>지역에 포함되어도 취업 허가·국적·주별 제한·협업 시간대는 별도로 확인해야 해요.</small></div></div>}
-      {isUnmappedJob(job) && <div className="unmapped-job-notice"><MapPin size={17} /><div><strong>지도에 표시되지 않은 근무지</strong><p>위에 적힌 공고의 위치를 확인해 주세요. 제공 도시 밖이거나 도시를 특정하기 어려워 지도에는 표시하지 않아요. 출근 장소와 근무 형태는 원문에서 다시 확인해 주세요.</p></div></div>}
+      {isUnmappedJob(job) && job.locationResolution?.status !== 'conflict' && <div className="unmapped-job-notice"><MapPin size={17} /><div><strong>지도에 표시되지 않은 근무지</strong><p>위에 적힌 공고의 위치를 확인해 주세요. 제공 도시 밖이거나 도시를 특정하기 어려워 지도에는 표시하지 않아요. 출근 장소와 근무 형태는 원문에서 다시 확인해 주세요.</p></div></div>}
       <JobEvidenceDetails evidence={job.evidence} />
       <JobEligibilityDetails job={job} />
       <section className="match-section"><h4><span className={`section-icon ${technical ? 'green' : 'amber'}`}>{technical ? <Check size={15} /> : <CircleHelp size={15} />}</span>{technical ? '이 기회와 연결되는 이유' : '입력 정보와 공고의 조건'}</h4>{reasons.length ? <ul>{reasons.map(reason => <li key={reason}><Check size={14} /><span>{reason}</span></li>)}</ul> : <p className="field-description">현재 입력 정보에서 공고와 연결되는 조건을 확인하지 못했어요. 실제 업무와 자격 조건은 원문에서 확인해 주세요.</p>}{!job.qualifications && <div className="skill-list">{job.skills.map(skill => <span className={`skill-tag ${matchedSkills.includes(skill) ? 'matched' : ''}`} key={skill}>{matchedSkills.includes(skill) && <Check size={11} />}{skill}</span>)}</div>}</section>

@@ -124,6 +124,16 @@ export interface JobOccupation {
   management?: JobManagement
 }
 
+export interface JobLocationResolution {
+  version: 1
+  status: 'relocation' | 'conflict'
+  listedCityIds: string[]
+  listedLabel: string
+  statedCityIds: string[]
+  statedLabel: string
+  evidence: FactEvidence[]
+}
+
 export interface Job {
   id: string
   companyId: string
@@ -133,6 +143,7 @@ export interface Job {
   occupation?: JobOccupation
   cityIds: string[]
   locationLabel: string
+  locationResolution?: JobLocationResolution
   workMode: WorkMode
   employment: Employment
   minExperience: number | null

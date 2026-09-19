@@ -5,6 +5,7 @@ import { formatCompensation, formatJobSalary } from '../../shared/matching'
 import { formatExperienceYears } from '../../shared/job-qualifications'
 import { jobRoleEvidence, jobRoleLabel } from '../../shared/job-roles'
 import { jobOccupationLabel, upgradeJobOccupation } from '../../shared/job-occupation'
+import { upgradeJobLocation } from '../../shared/job-location'
 import { jobFreshness } from '../../shared/catalog-freshness'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
 import { POSTING_STATE_LABELS, REVISION_LABELS } from '../../shared/posting-status'
@@ -112,6 +113,7 @@ export function deleteProfile(): void {
 
 export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<string, PostingObservation>): void {
   const exportedAt = new Date()
+  const current = saved.map(item => ({ ...item, job: upgradeJobLocation(item.job) }))
   // Neutralize spreadsheet formulas in imported job titles and user notes.
   const cell = (value: unknown) => {
     const text = String(value ?? '')
@@ -119,8 +121,8 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
     return `"${safe.replace(/"/g, '""')}"`
   }
   const rows = [
-    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목', '비자 지원', '취업 자격 조건', '취업 자격 근거', '직무 분류', '직무 분류 근거', '탐색 직군', '탐색 직군 근거', '저장 내용의 조회 시각', '내보낼 때의 조회 기록', '내보낸 시각'],
-    ...saved.map(item => [
+    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목', '비자 지원', '취업 자격 조건', '취업 자격 근거', '직무 분류', '직무 분류 근거', '탐색 직군', '탐색 직군 근거', '저장 내용의 조회 시각', '내보낼 때의 조회 기록', '내보낸 시각', '근무지 판단', '원래 게시 위치', '본문의 근무지', '근무지 원문 근거'],
+    ...current.map(item => [
       item.company.name, item.job.title, item.job.locationLabel, JOB_SOURCE_LABELS[item.job.source],
       item.status === 'applied' ? '지원 완료' : '저장됨', item.savedAt, item.note, item.job.url,
       formatJobSalary(item.job),
@@ -144,6 +146,10 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
       item.job.source === 'sample' ? '' : item.job.fetchedAt,
       item.job.source === 'sample' ? '체험용 샘플' : { fresh: '최근 조회', stale: '이전 조회', expired: '확인 기간 지남', unknown: '조회 시각 미확인' }[jobFreshness(item.job, exportedAt.getTime())],
       exportedAt.toISOString(),
+      item.job.locationResolution ? item.job.locationResolution.status === 'relocation' ? '제목·본문의 근무지로 표시' : '정보 불일치 · 근무지 확인 필요' : '',
+      item.job.locationResolution?.listedLabel ?? '',
+      item.job.locationResolution?.statedLabel ?? '',
+      item.job.locationResolution?.evidence.map(evidence => `${evidence.source === 'title' ? '공고 제목' : evidence.source === 'board' ? '공개 게시판 정보' : '공고 본문'}\n${evidence.text}`).join('\n\n') ?? '',
     ]),
   ]
   const blob = new Blob(['\ufeff', rows.map(row => row.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' })

@@ -6,7 +6,7 @@ import { JobProviderSchema, JobSchema } from '../shared/schemas'
 import { upgradeJobCompensation } from '../shared/job-compensation'
 import { upgradeJobQualifications } from '../shared/job-qualifications'
 import { upgradeJobEligibility } from '../shared/job-eligibility'
-import { isUnmappedJob } from '../shared/job-location'
+import { isUnmappedJob, upgradeJobLocation, upgradeJobLocations } from '../shared/job-location'
 import { upgradeJobRole } from '../shared/job-roles'
 import { filterTechnicalJobs, upgradeJobOccupation } from '../shared/job-occupation'
 import type { Company } from '../shared/types'
@@ -31,6 +31,8 @@ export const BoardSnapshotSchema = z.object({
     return snapshot.publishedIds.length === snapshot.total && ids.size === snapshot.publishedIds.length
       && snapshot.jobs.every(job => ids.has(job.id))
   })
+  // Validate the stored counts first, then migrate locations and their count together.
+  .transform(snapshot => upgradeJobLocations(snapshot))
 
 const CachedBoardSchema = z.object({
   companyId: z.string().min(1).max(100),
@@ -47,7 +49,7 @@ const CachedBoardSchema = z.object({
 export type BoardSnapshot = z.infer<typeof BoardSnapshotSchema>
 export type CachedBoard = z.infer<typeof CachedBoardSchema>
 export function filterBoardSnapshot(snapshot: BoardSnapshot): BoardSnapshot {
-  return { ...snapshot, ...filterTechnicalJobs(snapshot.jobs, snapshot.unmappedCount) }
+  return upgradeJobLocations({ ...snapshot, ...filterTechnicalJobs(snapshot.jobs, snapshot.unmappedCount) })
 }
 
 export function belongsToBoard(snapshot: BoardSnapshot, company: Pick<Company, 'id' | 'provider'>): boolean {
@@ -104,7 +106,7 @@ function migrateLegacy(input: unknown, companies: Company[]): CachedBoard[] {
       ...(failed ? { error: (board.message || '이전 조회에 실패했어요.').slice(0, 500) } : {
         snapshot: {
           fetchedAt: legacy.data.fetchedAt,
-          jobs: filterTechnicalJobs(jobs, null).jobs,
+          jobs: filterTechnicalJobs(jobs.map(job => upgradeJobLocation(job)), null).jobs,
           total: board.total,
           // v3 recorded only a global total; a per-company count cannot be recovered.
           unmappedCount: null,

@@ -1,4 +1,7 @@
-import { CITY_BY_ID, LOCATION_ALIASES } from '../shared/cities'
+import { CITY_BY_ID } from '../shared/cities'
+import { locateCities } from '../shared/city-location'
+export { locateCities } from '../shared/city-location'
+import { upgradeJobLocation } from '../shared/job-location'
 import { classifyJobRoles } from '../shared/job-roles'
 import { isTechnicalOccupation, occupationFacts } from '../shared/job-occupation'
 import { qualificationFacts } from '../shared/job-qualifications'
@@ -22,20 +25,6 @@ export interface GreenhouseJob {
   metadata?: { name?: string; value?: unknown }[]
   departments?: { name?: string }[]
   pay_input_ranges?: { min_cents?: number; max_cents?: number; currency_type?: string; currency_code?: string; title?: string; blurb?: string }[]
-}
-
-export function locateCities(location: string): string[] {
-  const text = location.toLowerCase()
-  const ambiguousLocations: Record<string, RegExp> = {
-    london: /\blondon,?\s+(?:ontario|on\b|canada)/i,
-    paris: /\bparis,?\s+(?:texas|tx\b)/i,
-    dublin: /\bdublin,?\s+(?:ohio|oh\b|california|ca\b)/i,
-    vancouver: /\bvancouver,?\s+(?:washington|wa\b)/i,
-  }
-  return Object.entries(LOCATION_ALIASES).filter(([id, aliases]) => !ambiguousLocations[id]?.test(text) && aliases.some(alias => {
-    const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    return new RegExp(`(^|[^\\p{L}])${escaped}($|[^\\p{L}])`, 'iu').test(text)
-  })).map(([id]) => id)
 }
 
 export function detectVisa(text: string): Visa {
@@ -146,7 +135,7 @@ export function normalizePosting(input: PostingInput): Job | null {
   if (!isTechnicalOccupation(occupation)) return null
   const eligibility = eligibilityFacts(text)
   const roleClassification = classifyJobRoles(title, input.departments, occupation)
-  return {
+  const job: Job = {
     id: `${input.provider}-${companyId}-${input.id}`, companyId, title,
     role: roleClassification.roles[0] ?? 'unknown', roleClassification, occupation,
     cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
@@ -165,6 +154,7 @@ export function normalizePosting(input: PostingInput): Job | null {
     description: text.slice(0, 26000), requirements: [], url: input.url,
     source: input.provider, updatedAt: input.updatedAt ?? null, fetchedAt: input.fetchedAt,
   }
+  return upgradeJobLocation(job, text)
 }
 
 export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: string): Job | null {

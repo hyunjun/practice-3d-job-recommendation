@@ -12,6 +12,8 @@ import { SavedPostingNotice } from './SavedPostingNotice'
 import type { PostingStatusController } from '../hooks/usePostingStatus'
 import { EligibilityNotice } from './JobEligibilityDetails'
 import { jobRoleLabel } from '../../shared/job-roles'
+import { jobLocationSearchText } from '../../shared/job-location'
+import { JobLocationNotice } from './JobLocationDetails'
 import { JobOccupationNotice } from './JobRoleDetails'
 import type { SavedJobsController } from '../hooks/useSavedJobs'
 import { SavedStorageNotice } from './SavedStorageNotice'
@@ -36,7 +38,7 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
         : postingFilter === 'unknown' ? observation?.state === 'unknown' || observation?.state === 'unchecked'
           : observation?.state === postingFilter)
     return postingMatches && (status === 'all' || item.status === status)
-      && `${item.company.name} ${item.job.title} ${jobRoleLabel(item.job)} ${item.job.locationLabel} ${item.note}`.toLowerCase().includes(query.toLowerCase())
+      && `${item.company.name} ${item.job.title} ${jobRoleLabel(item.job)} ${jobLocationSearchText(item.job)} ${item.note}`.toLowerCase().includes(query.toLowerCase())
   }), [saved, status, query, postingFilter, observations, publicCount])
   return <main id="main-content" className="collection-page" tabIndex={-1}>
     <div className="page-heading"><div><p className="eyebrow">YOUR COLLECTION OF POSSIBILITIES</p><h1>가능성을 모아두는 곳<span className="accent-dot">.</span></h1><p>마음이 움직인 기회들. 이제 하나씩 다음 단계로 이어가 보세요.</p></div><div className="collection-file-actions"><button className="button secondary" onClick={onManage}>기록 백업·복원</button><button className="button secondary" disabled={!saved.length} onClick={() => exportSavedCsv(saved, observations)}><Download size={16} />CSV 내보내기</button></div></div>
@@ -54,6 +56,7 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
         <button className="saved-title" onClick={() => onOpen(match)}>{item.job.title}<ArrowUpRight size={17} /></button>
         {item.job.source !== 'sample' && <p className="saved-role">{jobRoleLabel(item.job)}</p>}
         <p className="saved-location"><MapPin size={13} />{item.job.locationLabel}</p>
+        <JobLocationNotice job={item.job} />
         <div className="saved-card-tags"><span>{formatJobSalary(item.job)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
         <JobFreshnessNotice job={item.job} compact />
         <SavedPostingNotice observation={observations.get(item.job.id)} job={item.job} compact />

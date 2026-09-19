@@ -1,6 +1,6 @@
 import { CITY_BY_ID } from './cities'
 import { matchingSkills } from './qualification-matching'
-import { isUnmappedJob } from './job-location'
+import { isUnmappedJob, jobLocationSearchText, upgradeJobLocation } from './job-location'
 import { jobRoleLabel, matchesJobRole, upgradeJobRole } from './job-roles'
 import { isTechnicalJob, upgradeJobOccupation } from './job-occupation'
 import { MODE_LABELS, USD_RATES } from './types'
@@ -27,7 +27,7 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
   const cities = new Map(catalog.cities.map(city => [city.id, city]))
   const profileSkills = new Set(profile.skills.map(skill => skill.toLowerCase()))
   return { entries: catalog.jobs.flatMap(previous => {
-    const job = upgradeJobRole(upgradeJobOccupation(previous))
+    const job = upgradeJobLocation(upgradeJobRole(upgradeJobOccupation(previous)))
     if (!isTechnicalJob(job)) return []
     const company = companies.get(job.companyId)
     if (!company) return []
@@ -41,7 +41,7 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
       : job.cityIds.flatMap(id => CITY_BY_ID.get(id)?.region ?? [])
     return [{
       job, company,
-      text: [company.name, company.industry, job.title, jobRoleLabel(job), MODE_LABELS[job.workMode], ...job.skills, ...locations, job.locationLabel].join(' ').toLowerCase(),
+      text: [company.name, company.industry, job.title, jobRoleLabel(job), MODE_LABELS[job.workMode], ...job.skills, ...locations, jobLocationSearchText(job)].join(' ').toLowerCase(),
       profileMatches: !skills.length || !profileSkills.size || skills.some(skill => profileSkills.has(skill.toLowerCase())),
       residenceMatches: job.remoteWorldwide || job.remoteCountries.includes(profile.residence),
       salaryMax: job.salary ? job.salary.max * USD_RATES[job.salary.currency] : null,

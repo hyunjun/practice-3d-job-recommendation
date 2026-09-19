@@ -32,6 +32,15 @@ export const JobSchema = z.object({
     }).optional(),
   }).optional(),
   cityIds: z.array(z.string()).max(50), locationLabel: z.string().max(2000),
+  locationResolution: z.object({
+    version: z.literal(1), status: z.enum(['relocation', 'conflict']),
+    listedCityIds: z.array(z.string()).min(1).max(50), listedLabel: z.string().max(2000),
+    statedCityIds: z.array(z.string()).min(1).max(50), statedLabel: z.string().min(1).max(2000),
+    evidence: z.array(EvidenceSchema).min(1).max(9),
+  }).refine(value => value.evidence.some(item => item.source === 'description')
+    && (value.status !== 'relocation' || value.evidence.some(item => item.source === 'title'))
+    && new Set(value.listedCityIds).size === value.listedCityIds.length
+    && new Set(value.statedCityIds).size === value.statedCityIds.length).optional(),
   workMode: z.enum(['remote', 'hybrid', 'onsite', 'unknown']),
   employment: z.enum(['fulltime', 'parttime', 'permanent', 'contract', 'intern', 'temporary', 'unknown']),
   minExperience: z.number().min(0).max(50).nullable(), skills: z.array(z.string()).max(100),

@@ -340,6 +340,22 @@ select option { background: #1e271c; color: var(--text); }
 .unmapped-job-notice > svg { flex-shrink: 0; color: #c8d8b5; }
 .unmapped-job-notice strong { font-size: 12px; font-weight: 500; color: #d6e5c2; }
 .unmapped-job-notice p { font-size: 11px; line-height: 1.8; margin: 8px 0 0; color: #bcccad; }
+.job-location-note { display: flex; align-items: flex-start; gap: 6px; margin: 8px 0; color: #c8dfb3; font-size: 10px; line-height: 1.7; overflow-wrap: anywhere; }
+.job-location-note > svg { flex-shrink: 0; margin-top: 2px; }
+.job-location-note.conflict { color: #ecd2a3; }
+.job-location-details { margin: 18px 0; padding: 16px; border: 1px solid #536948; border-radius: 6px; background: #25311f; overflow-wrap: anywhere; }
+.job-location-details.conflict { border-color: #756341; background: #302c20; }
+.job-location-details h4 { color: #e0edcf; font-size: 13px; font-weight: 500; }
+.job-location-details.conflict h4 { color: #efdaad; }
+.job-location-details > p { color: #c6cfbc; font-size: 11px; line-height: 1.8; margin: 8px 0 14px; }
+.job-location-details dl { margin: 0; display: grid; gap: 10px; }
+.job-location-details dt { color: #b3c3a5; font-size: 10px; margin-bottom: 3px; }
+.job-location-details dd { color: #e0e8d6; margin: 0; font-size: 12px; line-height: 1.7; }
+.job-location-details details { margin-top: 14px; border-top: 1px solid #546147; padding-top: 12px; }
+.job-location-details summary { cursor: pointer; color: #d5e8bf; font-size: 11px; line-height: 1.8; }
+.location-evidence { margin-top: 14px; }
+.location-evidence > strong { color: #bbceb0; font-weight: 400; font-size: 10px; }
+.location-evidence blockquote { margin: 6px 0 0; border-left: 2px solid #7d9066; padding-left: 12px; color: #d9e2cf; font-size: 11px; line-height: 1.8; white-space: pre-wrap; }
 .city-image-fallback { background: radial-gradient(ellipse at 70% 20%, #7b916748, transparent 65%), linear-gradient(30deg, #283b29, #26352c); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #a9bf9190; overflow: hidden; }
 .city-image-fallback > svg { width: 28px; height: 28px; stroke-width: .8; }
 .city-image-fallback > span { font-family: var(--mono); font-size: 8px; letter-spacing: 2px; }

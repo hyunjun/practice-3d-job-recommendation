@@ -5,6 +5,7 @@ import { catalogNeedsAttention, collectionHealth } from '../../shared/catalog-he
 import { createSampleCatalog } from '../../shared/sample'
 import { upgradeJobRole } from '../../shared/job-roles'
 import { upgradeCatalogOccupations } from '../../shared/job-occupation'
+import { upgradeJobLocations } from '../../shared/job-location'
 import { upgradeJobCompensation } from '../../shared/job-compensation'
 import type { Catalog, Source } from '../../shared/types'
 import type { CatalogProgress } from '../../shared/catalog-progress'
@@ -44,7 +45,7 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
       let current: Catalog | undefined
       await requestPublicCatalog({ refresh, signal: controller.signal, onUpdate(result, latest) {
         if (controller.signal.aborted) return
-        current = upgradeCatalogOccupations(result)
+        current = upgradeJobLocations(upgradeCatalogOccupations(result))
         current.jobs = current.jobs.map(job => upgradeJobRole(upgradeJobCompensation(job)))
         setCatalog(current)
         setProgress(latest)

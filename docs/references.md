@@ -265,3 +265,17 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 2026-09-20 원문을 확인했습니다. HAX는 AI 시스템에 대한 지침이며, 여기서는 규칙 기반 분류·조건 비교의 설명을 검토하는 데 참고했습니다.
 
 현재 직군에 적용하지 않는 이전 세부 분류는 원본 스냅샷과 JSON 백업에 보존합니다. 화면과 CSV의 분류 근거에는 현재 적용하는 정보만 사용하고, 상세에서 공고의 제목과 공개 부서를 확인할 수 있게 했습니다. 입력 기술·경력과 일치하는 실제 조건은 계속 보여주되 범위 밖 공고에 개발 직무 가산점이나 희망 직무 일치를 부여하지 않습니다.
+
+## 현재 근무지와 공고의 게시 위치
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [Google: JobPosting의 jobLocation](https://developers.google.com/search/docs/appearance/structured-data/job-posting?hl=en) | 직원이 실제로 출근할 장소를 사용하며 공고를 게시한 위치와 구분. 복수 근무지와 원격근무의 지역 조건도 별도로 설명 | 현재 근무지·지원자 거주지·향후 전환 장소를 구분하고 실제 업무 장소를 지도에 연결 |
+| [Ashby: Public Job Posting API](https://developers.ashbyhq.com/docs/public-job-posting-api) | `location`, `secondaryLocations`, 주소, `workplaceType`, 공개 본문을 제공하며 원천의 누락 값도 누락 상태로 반환 | 게시 위치를 보존하면서 해당 직무의 명시적인 본문과 제목을 대조 |
+| [Mistral: Applied Scientist, Internship in Paris or London](https://jobs.ashbyhq.com/mistral.ai/60ab6a5e-9b02-4ae7-a0fb-4c7d9ec0fdf8) | 게시 위치는 Seoul. 본문은 Paris/London에서 6개월 인턴십, 한국 거주 지원자, 이후 조건부 Seoul 정규직 전환을 각각 명시 | 현재 인턴십은 Paris/London에 표시하고 전체 조건 문단과 원래 Seoul 표기를 함께 보존 |
+| [Canva: Sydney 이전 프런트엔드 공고, New York 게시](https://api.smartrecruiters.com/v1/companies/Canva/postings/6000000001257703) · [San Francisco 게시](https://api.smartrecruiters.com/v1/companies/Canva/postings/6000000001240659) | 제목은 `RELOCATE to Sydney`, 직무 본문도 Sydney 근무를 명시하지만 두 게시 ID의 등록 위치는 미국 | 서로 다른 공개 ID를 유지하며 두 공고를 Sydney에 연결 |
+| [Canva: Security Engineer, Investigations](https://api.smartrecruiters.com/v1/companies/Canva/postings/6000000001275038) · [Developer Tooling Engineer](https://api.smartrecruiters.com/v1/companies/Canva/postings/6000000001389069) | Sydney/Melbourne 게시 위치와 본문의 Melbourne/Sydney 근무지가 각각 충돌하며 제목에서 이전 목적지를 확인할 수 없음 | 어느 쪽이 정확하다고 단정하지 않고 기타 근무지에 보관하며 두 위치와 근거를 표시 |
+
+2026-09-20 Google·Ashby 문서, Mistral의 공식 페이지·공개 API, Canva의 네 공고 상세 API를 확인했습니다. 이 문서들이 자동 위치 판별의 정확도를 보증하는 것은 아닙니다.
+
+명시적인 영어 직무 문장과 제공 도시 이름을 확인하는 제한된 규칙입니다. 근무 문장 전체의 도시 목록을 확인할 수 없는 경우, 일부 도시가 겹치는 복수 위치, 원격근무의 지역 조건은 기존 처리를 유지합니다. 회사 소개·담당자 위치·출장·지원자 거주지·조건부 이후 근무지를 현재 직무의 위치로 추론하지 않습니다. 해석에 사용한 제목·문단은 표시 본문의 길이 제한과 별도로 보관하고, 캐시·저장·검색·게시 내용 비교·백업에서 같은 판단을 사용합니다.
