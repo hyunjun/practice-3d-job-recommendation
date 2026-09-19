@@ -2,10 +2,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import express from 'express'
 import { brotliDecompressSync, gunzipSync } from 'node:zlib'
 import { createApiRouter } from '../../server/http'
-import { BoardFetchError, CATALOG_POLICY, CatalogUnavailableError, createCatalogService } from '../../server/catalog-service'
+import { BoardFetchError, CATALOG_POLICY, CatalogProgressGoneError, CatalogUnavailableError, createCatalogService } from '../../server/catalog-service'
 import type { PostingStatusIndex } from '../../shared/posting-status'
 import { SEARCH_COMPANIES, SEARCH_TIME, searchCatalog, searchJob } from '../fixtures/search-catalog'
 import { requestBytes, serveHttp } from '../fixtures/http-server'
+import { COLLECTION_ID, progressSnapshot, progressUpdate } from '../fixtures/catalog-progress'
+import type { CatalogCollectionUpdate } from '../../shared/catalog-progress'
 
 const servers: Awaited<ReturnType<typeof serveHttp>>[] = []
 afterEach(async () => { await Promise.all(servers.splice(0).map(server => server.close())); vi.restoreAllMocks() })
@@ -173,5 +175,83 @@ describe('public HTTP transfer and revalidation', () => {
     expect(result.headers['cache-control']).toBe('no-store')
     expect(Number(result.headers['retry-after'])).toBeGreaterThan(0)
     expect(JSON.parse(result.body.toString())).toMatchObject({ code: 'CATALOG_UNAVAILABLE', retryAt })
+  })
+})
+
+describe('opt-in asynchronous catalog HTTP contract', () => {
+  it('returns an immediate snapshot, empty unchanged progress and compressed company deltas without invoking the blocking collector', async () => {
+    const getCatalog = vi.fn(async () => progressSnapshot(2).catalog)
+    const getProgressiveCatalog = vi.fn(async () => ({ ...progressSnapshot() }))
+    const getCatalogProgress = vi.fn<() => CatalogCollectionUpdate | null>()
+      .mockReturnValueOnce(null).mockReturnValueOnce(progressUpdate(1)).mockReturnValueOnce(progressUpdate(2))
+    const origin = await start({ getCatalog, getPostingStatus: async () => index, getProgressiveCatalog, getCatalogProgress })
+    const initial = await requestBytes(origin, '/api/catalog?source=public&refresh=1', { Prefer: 'respond-async', 'Accept-Encoding': 'identity' })
+    expect(initial.status).toBe(202)
+    expect(JSON.parse(initial.body.toString())).toEqual(progressSnapshot())
+    expect(initial.headers['cache-control']).toBe('no-store')
+    expect(initial.headers.vary).toBe('Accept-Encoding, Prefer')
+    expect(initial.headers['preference-applied']).toBe('respond-async')
+    expect(initial.headers['retry-after']).toBe('1')
+    expect(initial.headers.location).toBe(`/api/catalog/progress?id=${COLLECTION_ID}&after=0`)
+    expect(getProgressiveCatalog).toHaveBeenCalledWith(true)
+    const unchanged = await requestBytes(origin, initial.headers.location!)
+    expect(unchanged.status).toBe(204)
+    expect(unchanged.body.length).toBe(0)
+    expect(unchanged.headers['cache-control']).toBe('no-store')
+    expect(unchanged.headers['retry-after']).toBe('1')
+    const first = await requestBytes(origin, initial.headers.location!, { 'Accept-Encoding': 'gzip' })
+    expect(first.status).toBe(200)
+    const body = first.headers['content-encoding'] ? gunzipSync(first.body) : first.body
+    expect(JSON.parse(body.toString())).toEqual(progressUpdate(1))
+    const last = await requestBytes(origin, `/api/catalog/progress?id=${COLLECTION_ID}&after=1`)
+    expect(JSON.parse(last.body.toString())).toEqual(progressUpdate(2))
+    expect(last.headers['retry-after']).toBeUndefined()
+    expect(getCatalog).not.toHaveBeenCalled()
+    expect(getProgressiveCatalog).toHaveBeenCalledOnce()
+    expect(getCatalogProgress.mock.calls).toEqual([[COLLECTION_ID, 0], [COLLECTION_ID, 0], [COLLECTION_ID, 1]])
+  })
+
+  it('preserves normal JSON and conditional cache validation when a preferred response is already available', async () => {
+    const complete = progressSnapshot(2).catalog
+    const getProgressiveCatalog = vi.fn(async () => ({ catalog: complete, progress: null }))
+    const getCatalog = vi.fn(async () => complete)
+    const origin = await start({ getCatalog, getPostingStatus: async () => index, getProgressiveCatalog, getCatalogProgress: () => null })
+    const first = await requestBytes(origin, '/api/catalog?source=public', { Prefer: 'respond-async' })
+    expect(first.status).toBe(200)
+    expect(JSON.parse(first.body.toString())).toEqual(complete)
+    expect(first.headers['cache-control']).toBe('private, no-cache, must-revalidate')
+    const second = await requestBytes(origin, '/api/catalog?source=public', { Prefer: 'respond-async', 'If-None-Match': first.headers.etag })
+    expect(second.status).toBe(304)
+    expect(getProgressiveCatalog).toHaveBeenCalledTimes(2)
+    const classic = await requestBytes(origin, '/api/catalog?source=public')
+    expect(JSON.parse(classic.body.toString())).toEqual(complete)
+    expect(classic.headers.vary).toBe(first.headers.vary)
+    expect(getCatalog).toHaveBeenCalledOnce()
+  })
+
+  it('validates monitor requests and preserves restart/expiry errors without scheduling a new collection', async () => {
+    const getProgressiveCatalog = vi.fn(async () => ({ ...progressSnapshot() }))
+    const getCatalog = vi.fn(async () => catalog)
+    const getCatalogProgress = vi.fn<() => CatalogCollectionUpdate | null>()
+    const origin = await start({ getCatalog, getPostingStatus: async () => index, getProgressiveCatalog, getCatalogProgress })
+    for (const query of ['', `id=${COLLECTION_ID}`, `id=${COLLECTION_ID}&after=-1`, `id=${COLLECTION_ID}&after=0&after=1`, 'id=https://example.com&after=0']) {
+      expect((await requestBytes(origin, `/api/catalog/progress?${query}`)).status).toBe(400)
+    }
+    expect(getCatalogProgress).not.toHaveBeenCalled()
+    getCatalogProgress.mockImplementationOnce(() => { throw new CatalogProgressGoneError() })
+    const gone = await requestBytes(origin, `/api/catalog/progress?id=${COLLECTION_ID}&after=0`)
+    expect(gone.status).toBe(410)
+    expect(JSON.parse(gone.body.toString()).code).toBe('CATALOG_PROGRESS_GONE')
+    getCatalogProgress.mockImplementationOnce(() => { throw new RangeError('잘못된 진행 번호') })
+    expect((await requestBytes(origin, `/api/catalog/progress?id=${COLLECTION_ID}&after=99`)).status).toBe(400)
+    const retryAt = new Date(Date.now() + 120000).toISOString()
+    getCatalogProgress.mockImplementationOnce(() => { throw new CatalogUnavailableError('만료됨', retryAt, 'CATALOG_EXPIRED') })
+    const expired = await requestBytes(origin, `/api/catalog/progress?id=${COLLECTION_ID}&after=0`)
+    expect(expired.status).toBe(503)
+    expect(expired.headers['cache-control']).toBe('no-store')
+    expect(Number(expired.headers['retry-after'])).toBeGreaterThan(0)
+    expect(JSON.parse(expired.body.toString())).toEqual({ error: '만료됨', retryAt, code: 'CATALOG_EXPIRED' })
+    expect(getCatalog).not.toHaveBeenCalled()
+    expect(getProgressiveCatalog).not.toHaveBeenCalled()
   })
 })

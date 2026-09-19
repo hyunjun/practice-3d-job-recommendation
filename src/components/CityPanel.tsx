@@ -101,7 +101,7 @@ export function CityPanel(props: Props) {
         <div className="company-list">{unmappedCompanies.length ? unmappedCompanies.map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} onOpen={onOpenJob} onSave={onSave} />) : emptyState}</div>
       </>)}
     </div>
-    <button className="panel-data-footer" onClick={onData}><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>{catalog.source === 'sample' ? '샘플 데이터로 탐색 중' : !catalog.fetchedAt ? '공개 공고 연결 확인' : catalogNeedsAttention(catalog) ? '일부 게시판 · 조회 상태 확인' : '회사별 공개 채용공고'}</span><CircleHelp size={14} /></button>
+    <button className="panel-data-footer" onClick={onData}><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>{catalog.source === 'sample' ? '샘플 데이터로 탐색 중' : catalog.boards.some(board => board.status === 'pending') ? '회사별 수집 진행 확인' : !catalog.fetchedAt ? '공개 공고 연결 확인' : catalogNeedsAttention(catalog) ? '일부 게시판 · 조회 상태 확인' : '회사별 공개 채용공고'}</span><CircleHelp size={14} /></button>
   </aside>
 }
 

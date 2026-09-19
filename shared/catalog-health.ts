@@ -1,14 +1,15 @@
 import type { Catalog } from './types'
 
 export function catalogNeedsAttention(catalog: Catalog): boolean {
-  return catalog.source !== 'sample' && (catalog.stale || catalog.boards.some(board => board.status === 'error' || board.dataStatus === 'unavailable'))
+  return catalog.source !== 'sample' && (catalog.stale || catalog.boards.some(board => board.status === 'error' || board.status !== 'pending' && board.dataStatus === 'unavailable'))
 }
 
 export function collectionHealth(catalog: Catalog) {
   const retained = catalog.jobs.filter(job => job.stale ?? catalog.stale).length
-  const unavailable = catalog.boards.filter(board => board.dataStatus === 'unavailable'
-    || (!board.dataStatus && board.status === 'error' && !catalog.jobs.some(job => job.companyId === board.companyId))).length
-  return { retained, recent: catalog.jobs.length - retained, unavailable, failed: catalog.boards.filter(board => board.status === 'error').length }
+  const unavailable = catalog.boards.filter(board => board.status !== 'pending' && (board.dataStatus === 'unavailable'
+    || (!board.dataStatus && board.status === 'error' && !catalog.jobs.some(job => job.companyId === board.companyId)))).length
+  return { retained, recent: catalog.jobs.length - retained, unavailable, failed: catalog.boards.filter(board => board.status === 'error').length,
+    pending: catalog.boards.filter(board => board.status === 'pending').length }
 }
 
 export function formatCollectionTime(value?: string | null): string {

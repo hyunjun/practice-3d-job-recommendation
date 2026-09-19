@@ -26,4 +26,6 @@ const service = createCatalogService({
 })
 
 export const getPublicCatalog = (refresh = false) => service.get(refresh)
+export const getProgressivePublicCatalog = (refresh = false) => service.getProgressive(refresh)
+export const getPublicCatalogProgress = (id: string, after: number) => service.readProgress(id, after)
 export const getPublicPostingStatus = (refresh = false) => service.getPostingStatus(refresh)

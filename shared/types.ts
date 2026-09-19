@@ -163,7 +163,7 @@ export interface BoardStatus {
   companyId: string
   board: string
   provider?: JobProvider
-  status: 'ok' | 'error'
+  status: 'ok' | 'error' | 'pending'
   total: number
   included: number
   message?: string

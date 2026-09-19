@@ -70,7 +70,7 @@ export default function App() {
   const closeNotice = useCallback(() => setNotice(null), [])
   const notify = useCallback((message: string, action?: Notice['action'], tone?: Notice['tone']) => setNotice({ message, action, tone }), [])
   const notifyCatalog = useCallback((message: string, tone?: Notice['tone']) => notify(message, undefined, tone), [notify])
-  const { catalog: receivedCatalog, loading, error: dataError, changeSource, retryAt } = useCatalog(initial.exploration.source, notifyCatalog)
+  const { catalog: receivedCatalog, loading, progress, error: dataError, changeSource, retryAt } = useCatalog(initial.exploration.source, notifyCatalog)
   const catalogTimes = useMemo(() => catalogDeadlines(receivedCatalog), [receivedCatalog])
   const deadlines = useMemo(() => [
     ...catalogTimes,
@@ -95,8 +95,8 @@ export default function App() {
   const savedOpenJob = saved.find(item => item.job.id === openJob?.job.id)
   const searchScope = useMemo<SearchScope>(() => panelTab !== 'cities' ? { kind: panelTab }
     : selectedId && CITY_BY_ID.has(selectedId) ? { kind: 'city', cityId: selectedId } : { kind: 'cities' }, [panelTab, selectedId])
-  const recovery = useMemo(() => view === 'explore' && catalogReady && !loading
-    ? analyzeSearchRecovery(searchIndex, filters, searchScope) : null, [view, catalogReady, loading, searchIndex, filters, searchScope])
+  const recovery = useMemo(() => view === 'explore' && catalogReady && !loading && !catalog.boards.some(board => board.status === 'pending')
+    ? analyzeSearchRecovery(searchIndex, filters, searchScope) : null, [view, catalogReady, loading, catalog.boards, searchIndex, filters, searchScope])
 
   useEffect(() => {
     const onHash = () => setView(currentView())
@@ -237,7 +237,7 @@ export default function App() {
     if (document.fullscreenElement) void document.exitFullscreen()
     else void mapStageRef.current?.requestFullscreen().catch(() => notify('이 브라우저에서는 전체 화면을 사용할 수 없어요.'))
   }
-  const catalogStatus = <CatalogStatus catalog={catalog} expired={catalogExpired} loading={loading} error={dataError} retryAt={retryAt} onRetry={retryCatalog} onData={showData} />
+  const catalogStatus = <CatalogStatus catalog={catalog} expired={catalogExpired} loading={loading} progress={progress} error={dataError} retryAt={retryAt} onRetry={retryCatalog} onData={showData} />
 
   return <FreshnessTimeContext.Provider value={freshnessNow}><div className="app-shell">
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus() }}>본문으로 건너뛰기</a>
@@ -282,7 +282,7 @@ export default function App() {
     <footer className="app-footer"><span><OrbitLogo small />A WORLD OF POSSIBILITIES.</span><span>{catalog.source === 'sample' ? 'DEMO WORKSPACE' : 'PUBLIC JOB BOARDS'}<span className="footer-dot">·</span>LOCAL FIRST<button onClick={() => setModal('data')}><Database size={11} />데이터와 추천 방식</button></span></footer>
     {modal === 'profile' && <ProfileDialog profile={profile} filters={filters} remember={rememberProfile} onApply={applyProfile} onDelete={() => { deleteProfile(); setProfile(SAMPLE_PROFILE); setRememberProfile(true); setFilters({ ...DEFAULT_FILTERS }); setPanelTab('cities'); setSelectedId(null); setModal(null); notify('저장된 프로필을 삭제하고 샘플로 돌아왔어요.') }} onClose={() => setModal(null)} />}
     {modal === 'filters' && <FiltersDialog filters={filters} catalog={catalog} profile={profile} onApply={updateFilters} onClose={() => setModal(null)} />}
-    {modal === 'data' && <DataDialog catalog={catalog} expired={catalogExpired} loading={loading} error={dataError} retryAt={retryAt} onSource={source => void changeSource(source, { announce: catalogReady })} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
+    {modal === 'data' && <DataDialog catalog={catalog} expired={catalogExpired} loading={loading} progress={progress} error={dataError} retryAt={retryAt} onSource={source => void changeSource(source, { announce: catalogReady })} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
     {openJob && <JobDialog match={{ ...openJob, ...matchJob(openJob.job, profile) }} saved={savedOpenJob} postingObservation={savedOpenJob ? postingStatus.observations.get(savedOpenJob.job.id) : undefined} onToggleSave={() => toggleSave(openJob)} onUpdateSaved={update => setSaved(current => current.map(item => item.job.id === openJob.job.id ? { ...item, ...update } : item))} onClose={() => setOpenJob(null)} />}
     {notice && <Toast message={notice.message} action={notice.action} tone={notice.tone} onDismiss={closeNotice} />}
   </div></FreshnessTimeContext.Provider>

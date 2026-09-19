@@ -602,6 +602,19 @@ select option { background: #1e271c; color: var(--text); }
 .catalog-notice p { flex: 1; font-size: 11px; line-height: 1.8; color: #d0debd; overflow-wrap: anywhere; }
 .catalog-notice p span { display: block; color: #aebf98; }
 .catalog-notice > button { flex-shrink: 0; margin-top: 3px; }
+.catalog-collecting { flex-direction: column; gap: 10px; }
+.collection-progress { width: 100%; min-width: 0; text-align: left; }
+.data-dialog .dialog-body > .collection-progress { margin-top: 22px; }
+.collection-progress-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; color: #d8edc1; font-size: 11px; }
+.collection-progress-heading strong { font-family: var(--mono); font-size: 16px; font-weight: 500; }
+.collection-progress-heading strong span { font-size: 11px; color: #b6c99e; }
+.collection-progress progress { display: block; width: 100%; height: 5px; margin: 10px 0; border: 0; border-radius: 3px; overflow: hidden; background: #485b36; appearance: none; }
+.collection-progress progress::-webkit-progress-bar { background: #485b36; }
+.collection-progress progress::-webkit-progress-value { background: #c2e993; border-radius: 3px; }
+.collection-progress progress::-moz-progress-bar { background: #c2e993; border-radius: 3px; }
+.collection-progress p { margin: 0; color: #d0debd; font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
+.collection-progress .collection-progress-remaining { margin-top: 5px; color: #b9caa5; font-size: 10px; }
+.collection-progress .collection-progress-failed { margin-top: 5px; color: #e0c394; }
 .collection-page > .catalog-notice { margin: 0 0 24px; }
 .retry-note { margin-top: 16px; font-size: 11px; line-height: 1.9; color: #c4c5a9; overflow-wrap: anywhere; }
 .coverage-stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 22px 0; border-bottom: 1px solid #4a6235; margin-bottom: 26px; }
@@ -647,6 +660,7 @@ select option { background: #1e271c; color: var(--text); }
 .board-list a { color: #b6ca9e; display: flex; padding: 5px; margin: -2px -5px 0 0; flex-shrink: 0; }
 .board-ok { color: #badf93; }
 .board-error { color: #d0b786; }
+.board-pending { color: #b1d4df; }
 .collection-page { flex: 1; padding: 47px 5.5vw 30px; max-width: 1550px; width: 100%; align-self: center; }
 .page-heading { display: flex; align-items: center; justify-content: space-between; gap: 30px; margin-bottom: 38px; }
 .page-heading .eyebrow { font-size: 8px; color: #9cba81; letter-spacing: 2px; margin-bottom: 15px; }

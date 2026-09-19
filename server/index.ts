@@ -1,6 +1,6 @@
 import express from 'express'
 import path from 'node:path'
-import { getPublicCatalog, getPublicPostingStatus } from './catalog'
+import { getProgressivePublicCatalog, getPublicCatalog, getPublicCatalogProgress, getPublicPostingStatus } from './catalog'
 import { compressResponses, createApiRouter } from './http'
 
 const app = express()
@@ -20,7 +20,10 @@ app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok', app: 'orbit', mode: production ? 'production' : 'development' })
 })
 
-app.use('/api', createApiRouter({ getCatalog: getPublicCatalog, getPostingStatus: getPublicPostingStatus }))
+app.use('/api', createApiRouter({
+  getCatalog: getPublicCatalog, getPostingStatus: getPublicPostingStatus,
+  getProgressiveCatalog: getProgressivePublicCatalog, getCatalogProgress: getPublicCatalogProgress,
+}))
 
 if (production) {
   app.use(compressResponses)

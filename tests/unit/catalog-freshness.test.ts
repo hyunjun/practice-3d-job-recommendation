@@ -45,7 +45,7 @@ describe('the age of displayed public snapshots', () => {
     expect(catalog.unmappedCount).toBe(1)
     expect(catalog.boards[0]).toMatchObject({ status: 'ok', dataStatus: 'unavailable', included: 0, total: 0, lastSuccessAt: SEARCH_TIME, checkedAt: newer })
     expect(catalog.boards[1]).toMatchObject({ status: 'ok', dataStatus: 'stale', included: 1 })
-    expect(collectionHealth(catalog)).toEqual({ recent: 0, retained: 1, unavailable: 1, failed: 0 })
+    expect(collectionHealth(catalog)).toEqual({ recent: 0, retained: 1, unavailable: 1, failed: 0, pending: 0 })
   })
 
   it('clears the completed-result marker when every snapshot expires but preserves board history', () => {

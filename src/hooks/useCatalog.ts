@@ -6,6 +6,8 @@ import { createSampleCatalog } from '../../shared/sample'
 import { upgradeJobRole } from '../../shared/job-roles'
 import { upgradeCatalogOccupations } from '../../shared/job-occupation'
 import type { Catalog, Source } from '../../shared/types'
+import type { CatalogProgress } from '../../shared/catalog-progress'
+import { CatalogRequestError, requestPublicCatalog } from '../lib/catalog-request'
 
 function initialCatalog(source: Source): Catalog {
   // A blank timestamp marks a client-only placeholder, never a completed empty collection.
@@ -18,6 +20,7 @@ function initialCatalog(source: Source): Catalog {
 export function useCatalog(initialSource: Source, notify: (message: string, tone?: 'error') => void) {
   const [catalog, setCatalog] = useState<Catalog>(() => initialCatalog(initialSource))
   const [loading, setLoading] = useState(initialSource !== 'sample')
+  const [progress, setProgress] = useState<CatalogProgress | null>(null)
   const [error, setError] = useState('')
   const [errorRetryAt, setErrorRetryAt] = useState<string>()
   const requestRef = useRef<AbortController | null>(null)
@@ -27,6 +30,7 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
     requestRef.current = null
     setError('')
     setErrorRetryAt(undefined)
+    setProgress(null)
     if (source === 'sample') {
       setCatalog(createSampleCatalog())
       setLoading(false)
@@ -36,26 +40,15 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
     requestRef.current = controller
     setLoading(true)
     try {
-      const response = await fetch(`/api/catalog?source=public${refresh ? '&refresh=1' : ''}`, { signal: controller.signal })
-      const result = await response.json()
-      if (!response.ok) {
-        if (!controller.signal.aborted) {
-          if (typeof result?.retryAt === 'string' && Number.isFinite(Date.parse(result.retryAt))) setErrorRetryAt(result.retryAt)
-          if (response.status === 503 && result?.code === 'CATALOG_EXPIRED') {
-            setCatalog(previous => previous.source === 'public' ? initialCatalog('public') : previous)
-          }
-        }
-        throw new Error(result?.error ?? '공개 공고를 불러오지 못했어요.')
-      }
-      if (!result || result.source !== 'public'
-        || !['jobs', 'companies', 'cities', 'boards'].every(key => Array.isArray(result[key]))
-        || typeof result.fetchedAt !== 'string' || !Number.isFinite(Date.parse(result.fetchedAt))) {
-        throw new Error('공고 데이터 형식을 확인하지 못했어요.')
-      }
-      if (!controller.signal.aborted) {
-        const current = upgradeCatalogOccupations(result as Catalog)
+      let current: Catalog | undefined
+      await requestPublicCatalog({ refresh, signal: controller.signal, onUpdate(result, latest) {
+        if (controller.signal.aborted) return
+        current = upgradeCatalogOccupations(result)
         current.jobs = current.jobs.map(upgradeJobRole)
         setCatalog(current)
+        setProgress(latest)
+      } })
+      if (!controller.signal.aborted && current) {
         const health = collectionHealth(current)
         const attention = catalogNeedsAttention(current)
         if (announce) notify(attention
@@ -64,6 +57,10 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
       }
     } catch (cause) {
       if (!controller.signal.aborted) {
+        if (cause instanceof CatalogRequestError) {
+          setErrorRetryAt(cause.retryAt)
+          if (cause.code === 'CATALOG_EXPIRED') setCatalog(previous => previous.source === 'public' ? initialCatalog('public') : previous)
+        }
         const message = cause instanceof Error ? cause.message : '공고를 불러오지 못했어요.'
         setError(message)
         if (announce) notify(message, 'error')
@@ -81,5 +78,6 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
     return () => requestRef.current?.abort()
   }, [initialSource, changeSource])
 
-  return { catalog, loading, error, changeSource, ready: Boolean(catalog.fetchedAt), retryAt: errorRetryAt ?? catalog.refreshAfter }
+  return { catalog, loading, progress, error, changeSource, ready: Boolean(catalog.fetchedAt),
+    retryAt: errorRetryAt ?? (error && progress && !progress.done ? undefined : catalog.refreshAfter) }
 }

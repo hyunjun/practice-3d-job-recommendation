@@ -1,5 +1,7 @@
 import { CITIES } from '../shared/cities'
 import { CATALOG_LIFETIME } from '../shared/catalog-freshness'
+import type { CatalogCollectionUpdate, CatalogProgress } from '../shared/catalog-progress'
+import { randomUUID } from 'node:crypto'
 import { createJobRevision } from '../shared/posting-status'
 import type { PostingBoard, PostingStatusIndex } from '../shared/posting-status'
 import { PUBLIC_PROVIDERS } from '../shared/types'
@@ -20,6 +22,10 @@ export class BoardFetchError extends Error {
 
 export class CatalogUnavailableError extends Error {
   constructor(message: string, readonly retryAt: string, readonly code: 'CATALOG_UNAVAILABLE' | 'CATALOG_EXPIRED' = 'CATALOG_UNAVAILABLE') { super(message) }
+}
+
+export class CatalogProgressGoneError extends Error {
+  constructor() { super('수집 진행 정보를 다시 연결해야 해요. 다시 조회하면 현재 공고부터 이어서 확인합니다.') }
 }
 
 export function parseRetryAfter(value: string | null, now: number): number | undefined {
@@ -54,6 +60,21 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
   const boards = new Map<string, CachedBoard>()
   let initialized: Promise<void> | null = null
   let pending: Promise<void> | null = null
+  interface Collection {
+    id: string
+    revision: number
+    total: number
+    waiting: Set<string>
+    settled: Map<string, number>
+    done: boolean
+  }
+  // One shared collection and at most one revision number per company, not a
+  // history of large catalog snapshots. Monitoring never schedules providers.
+  let collection: Collection | null = null
+  const progress = (run: Collection): CatalogProgress => ({
+    id: run.id, revision: run.revision, total: run.total,
+    completed: run.total - run.waiting.size, done: run.done,
+  })
   const revisions = new WeakMap<BoardSnapshot, Promise<NonNullable<PostingBoard['listing']>['jobs']>>()
   const iso = (time: number) => new Date(time).toISOString()
   const refreshAt = (entry: CachedBoard) => Math.max(
@@ -72,40 +93,42 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
     }
   }
 
-  function compose(): Catalog {
+  function compose(partial = false): Catalog {
     const current = now()
     const jobs: Job[] = []
     const statuses: BoardStatus[] = []
     const successfulDates: number[] = []
     let unmappedCount: number | null = 0
     for (const company of companies) {
-      const entry = boards.get(company.id)!
-      const snapshot = entry.snapshot
+      const entry = boards.get(company.id)
+      const snapshot = entry?.snapshot
+      const waiting = partial && collection?.waiting.has(company.id)
       const usable = snapshot && current - Date.parse(snapshot.fetchedAt) <= CATALOG_POLICY.maxFallbackAge
-      const dataStatus = !usable ? 'unavailable' : entry.error || current - Date.parse(snapshot.fetchedAt) >= CATALOG_POLICY.freshFor ? 'stale' : 'fresh'
+      const dataStatus = !usable ? 'unavailable' : entry?.error || current - Date.parse(snapshot.fetchedAt) >= CATALOG_POLICY.freshFor ? 'stale' : 'fresh'
       if (usable) {
         successfulDates.push(Date.parse(snapshot.fetchedAt))
         jobs.push(...snapshot.jobs.map(job => ({ ...job, stale: dataStatus === 'stale' })))
         unmappedCount = unmappedCount === null || snapshot.unmappedCount === null ? null : unmappedCount + snapshot.unmappedCount
       }
       statuses.push({
-        companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', status: entry.error ? 'error' : 'ok',
+        companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', status: waiting ? 'pending' : entry?.error ? 'error' : 'ok',
         dataStatus, total: usable ? snapshot.total : 0, included: usable ? snapshot.jobs.length : 0,
-        checkedAt: entry.checkedAt, lastSuccessAt: snapshot?.fetchedAt ?? null,
-        retryAt: entry.error ? iso(refreshAt(entry)) : null,
-        ...(entry.error ? { message: entry.error } : {}),
+        checkedAt: entry?.checkedAt, lastSuccessAt: snapshot?.fetchedAt ?? null,
+        retryAt: !waiting && entry?.error ? iso(refreshAt(entry)) : null,
+        ...(entry?.error ? { message: entry.error } : {}),
       })
     }
-    const refreshAfter = iso(Math.min(...[...boards.values()].map(refreshAt)))
-    if (!successfulDates.length) {
+    const entries = [...boards.values()]
+    const refreshAfter = iso(entries.length ? Math.min(...entries.map(refreshAt)) : current + CATALOG_POLICY.minRefreshInterval)
+    if (!successfulDates.length && !partial) {
       const expired = [...boards.values()].some(entry => entry.snapshot)
       throw new CatalogUnavailableError(expired
         ? '게시판에 연결하지 못했어요. 마지막 정상 조회가 24시간을 지나 이전 공고를 표시하지 않습니다.'
         : '공개 채용 게시판에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.', refreshAfter, expired ? 'CATALOG_EXPIRED' : 'CATALOG_UNAVAILABLE')
     }
     return {
-      source: 'public', fetchedAt: iso(Math.max(...successfulDates)),
-      checkedAt: iso(Math.max(...[...boards.values()].map(entry => Date.parse(entry.checkedAt)))),
+      source: 'public', fetchedAt: successfulDates.length ? iso(Math.max(...successfulDates)) : '',
+      ...(entries.length ? { checkedAt: iso(Math.max(...entries.map(entry => Date.parse(entry.checkedAt)))) } : {}),
       refreshAfter, stale: statuses.some(board => board.dataStatus === 'stale'),
       companies, cities: CITIES, jobs, boards: statuses, unmappedCount,
     }
@@ -182,17 +205,22 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
     }
   }
 
-  async function refresh(due: Company[]): Promise<void> {
+  async function refresh(due: Company[], run: Collection): Promise<void> {
     let cursor = 0
     await Promise.all(Array.from({ length: Math.min(CATALOG_POLICY.concurrency, due.length) }, async () => {
-      while (cursor < due.length) await collect(due[cursor++])
+      while (cursor < due.length) {
+        const company = due[cursor++]
+        await collect(company)
+        run.waiting.delete(company.id)
+        run.settled.set(company.id, ++run.revision)
+      }
     }))
     try { await cache.save([...boards.values()]) } catch (error) { onCacheError(error) }
   }
 
-  async function ensureFresh(force: boolean): Promise<void> {
+  async function startCollection(force: boolean): Promise<void> {
     await (initialized ??= initialize())
-    if (pending) return pending
+    if (pending) return
     const current = now()
     const due = companies.filter(company => {
       const entry = boards.get(company.id)
@@ -201,14 +229,45 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
       return current - Date.parse(entry.checkedAt) >= (force ? CATALOG_POLICY.minRefreshInterval : CATALOG_POLICY.freshFor)
     })
     if (!due.length) return
-    pending = refresh(due)
-    try { await pending } finally { pending = null }
+    const run: Collection = {
+      id: randomUUID(), revision: 0, total: due.length,
+      waiting: new Set(due.map(company => company.id)), settled: new Map(), done: false,
+    }
+    collection = run
+    pending = refresh(due, run).finally(() => {
+      run.done = true
+      run.revision++
+      pending = null
+    })
+    // Provider failures are recorded per board. Do not leave a rejected
+    // background promise unobserved if persistence/error reporting itself fails.
+    void pending.catch(onCacheError)
+  }
+
+  async function ensureFresh(force: boolean): Promise<void> {
+    await startCollection(force)
+    await pending
   }
 
   return {
     async get(force = false): Promise<Catalog> {
       await ensureFresh(force)
       return compose()
+    },
+    async getProgressive(force = false): Promise<{ catalog: Catalog; progress: CatalogProgress | null }> {
+      await startCollection(force)
+      const running = collection && !collection.done
+      return { catalog: compose(Boolean(running)), progress: running ? progress(collection!) : null }
+    },
+    readProgress(id: string, after: number): CatalogCollectionUpdate | null {
+      const run = collection
+      if (!run || run.id !== id) throw new CatalogProgressGoneError()
+      if (!Number.isSafeInteger(after) || after < 0 || after > run.revision) throw new RangeError('잘못된 수집 진행 번호입니다.')
+      if (after === run.revision && !run.done) return null
+      const companyIds = [...run.settled].filter(([, revision]) => revision > after).map(([companyId]) => companyId)
+      const changed = new Set(companyIds)
+      const { jobs, companies: _companies, cities: _cities, ...catalog } = compose(!run.done)
+      return { progress: progress(run), companyIds, jobs: jobs.filter(job => changed.has(job.companyId)), catalog }
     },
     async getPostingStatus(force = false): Promise<PostingStatusIndex> {
       await ensureFresh(force)

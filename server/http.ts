@@ -4,8 +4,9 @@ import type { RequestHandler } from 'express'
 import { constants } from 'node:zlib'
 import { createSampleCatalog } from '../shared/sample'
 import type { Catalog } from '../shared/types'
+import type { CatalogCollectionUpdate, CatalogProgress } from '../shared/catalog-progress'
 import type { PostingStatusIndex } from '../shared/posting-status'
-import { CatalogUnavailableError } from './catalog-service'
+import { CatalogProgressGoneError, CatalogUnavailableError } from './catalog-service'
 
 const compress = compression({
   threshold: 1024,
@@ -23,9 +24,11 @@ export const compressResponses: RequestHandler = (request, response, next) => {
 interface PublicSources {
   getCatalog: (refresh: boolean) => Promise<Catalog>
   getPostingStatus: (refresh: boolean) => Promise<PostingStatusIndex>
+  getProgressiveCatalog?: (refresh: boolean) => Promise<{ catalog: Catalog; progress: CatalogProgress | null }>
+  getCatalogProgress?: (id: string, after: number) => CatalogCollectionUpdate | null
 }
 
-export function createApiRouter({ getCatalog, getPostingStatus }: PublicSources): Router {
+export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCatalog, getCatalogProgress }: PublicSources): Router {
   const router = Router()
   router.use(compressResponses)
   router.use((_request, response, next) => {
@@ -34,12 +37,29 @@ export function createApiRouter({ getCatalog, getPostingStatus }: PublicSources)
   })
 
   router.get('/catalog', async (request, response) => {
+    if (getProgressiveCatalog) response.vary('Prefer')
     const source = request.query.source ?? 'sample'
     if (source !== 'sample' && source !== 'public' && source !== 'greenhouse') {
       response.status(400).json({ error: '지원하지 않는 데이터 소스입니다.' })
       return
     }
     try {
+      // Existing clients retain the blocking JSON/ETag contract. The browser
+      // opts into an immediate snapshot and a read-only progress resource.
+      if (source !== 'sample' && getProgressiveCatalog && getCatalogProgress
+        && request.get('Prefer')?.split(',').some(value => /^respond-async(?:\s*;|$)/i.test(value.trim()))) {
+        const result = await getProgressiveCatalog(request.query.refresh === '1')
+        if (result.progress) {
+          response.setHeader('Preference-Applied', 'respond-async')
+          response.setHeader('Location', `/api/catalog/progress?id=${encodeURIComponent(result.progress.id)}&after=${result.progress.revision}`)
+          response.setHeader('Retry-After', '1')
+          response.status(202).json(result)
+          return
+        }
+        response.setHeader('Cache-Control', 'private, no-cache, must-revalidate')
+        response.json(result.catalog)
+        return
+      }
       // Always run the collector's refresh/failure/expiry policy before Express
       // compares ETags. A conditional request is never a shortcut around it.
       const catalog = source === 'sample' ? createSampleCatalog() : await getCatalog(request.query.refresh === '1')
@@ -53,6 +73,42 @@ export function createApiRouter({ getCatalog, getPostingStatus }: PublicSources)
         error: error instanceof Error ? error.message : '공고를 불러오지 못했습니다.',
         ...(error instanceof CatalogUnavailableError ? { retryAt, code: error.code } : {}),
       })
+    }
+  })
+
+  router.get('/catalog/progress', (request, response) => {
+    if (!getCatalogProgress) {
+      response.status(404).json({ error: '수집 진행 정보를 지원하지 않는 서버입니다.' })
+      return
+    }
+    const { id, after } = request.query
+    if (typeof id !== 'string' || !/^[a-f0-9-]{36}$/i.test(id)
+      || typeof after !== 'string' || !/^\d{1,10}$/.test(after)) {
+      response.status(400).json({ error: '잘못된 수집 진행 요청입니다.' })
+      return
+    }
+    try {
+      const update = getCatalogProgress(id, Number(after))
+      if (!update) {
+        response.setHeader('Retry-After', '1')
+        response.status(204).end()
+        return
+      }
+      if (!update.progress.done) response.setHeader('Retry-After', '1')
+      response.json(update)
+    } catch (error) {
+      if (error instanceof CatalogProgressGoneError) {
+        response.status(410).json({ code: 'CATALOG_PROGRESS_GONE', error: error.message })
+      } else if (error instanceof RangeError) {
+        response.status(400).json({ error: error.message })
+      } else {
+        const retryAt = error instanceof CatalogUnavailableError ? error.retryAt : undefined
+        if (retryAt) response.setHeader('Retry-After', Math.max(0, Math.ceil((Date.parse(retryAt) - Date.now()) / 1000)))
+        response.status(503).json({
+          error: error instanceof Error ? error.message : '수집 진행 정보를 불러오지 못했습니다.',
+          ...(error instanceof CatalogUnavailableError ? { code: error.code, retryAt } : {}),
+        })
+      }
     }
   })
 
