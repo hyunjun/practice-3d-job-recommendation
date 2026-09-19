@@ -5,7 +5,7 @@ export interface BoardMetadata {
   value?: unknown
 }
 
-interface Fact<T> {
+export interface Fact<T> {
   value: T
   evidence?: FactEvidence
 }
@@ -91,6 +91,8 @@ export function workModeFact(location: string, metadata: BoardMetadata[], text: 
 }
 
 function employmentValue(text: string): Employment {
+  // A board's exact contract-duration category does not establish working hours.
+  if (/^permanent$/i.test(text.trim())) return 'permanent'
   if (/\bintern(?:ship)?\b/i.test(text)) return 'intern'
   if (/\bcontract(?:or)?\b|\bfreelance\b/i.test(text)) return 'contract'
   if (/\btemporary\b|\bfixed[- ]term\b/i.test(text)) return 'temporary'

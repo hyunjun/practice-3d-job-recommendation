@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronDown, CircleHelp, Globe2, MapPin, Plus, SearchX, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import { CITY_BY_ID } from '../../shared/cities'
 import { catalogNeedsAttention } from '../../shared/catalog-health'
-import { formatSalary, groupCompanies, medianSalary } from '../../shared/matching'
+import { formatJobSalary, groupCompanies, medianSalary } from '../../shared/matching'
 import { COUNTRIES, MODE_LABELS, VISA_LABELS } from '../../shared/types'
 import type { Catalog, CityResult, MatchedJob, Profile } from '../../shared/types'
 import type { ExplorationState } from '../lib/storage'
@@ -80,7 +80,7 @@ export function CityPanel(props: Props) {
         <div className="company-list">{remoteCompanies.length ? remoteCompanies.map(group => <CompanyCard key={group.company.id} matches={group.matches} savedIds={savedIds} onOpen={onOpenJob} onSave={onSave} />) : <EmptyState icon={<Globe2 size={27} />} title="지금 조건에 맞는 원격 기회가 없어요" text="거주 국가, 직무, 비자 필터를 확인해 주세요. 지원 지역이 미확인인 공고는 기본적으로 제외돼요."><button className="button secondary" onClick={onFilters}>원격 조건 확인</button><button className="text-button" onClick={onProfile}>거주 국가 변경</button></EmptyState>}</div>
       </>)}
     </div>
-    <button className="panel-data-footer" onClick={onData}><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>{catalog.source === 'sample' ? '샘플 데이터로 탐색 중' : !catalog.fetchedAt ? '공개 공고 연결 확인' : catalogNeedsAttention(catalog) ? '일부 게시판 · 조회 상태 확인' : 'Greenhouse 공개 채용공고'}</span><CircleHelp size={14} /></button>
+    <button className="panel-data-footer" onClick={onData}><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>{catalog.source === 'sample' ? '샘플 데이터로 탐색 중' : !catalog.fetchedAt ? '공개 공고 연결 확인' : catalogNeedsAttention(catalog) ? '일부 게시판 · 조회 상태 확인' : '회사별 공개 채용공고'}</span><CircleHelp size={14} /></button>
   </aside>
 }
 
@@ -92,7 +92,7 @@ export function CompanyCard({ matches, savedIds, onOpen, onSave }: { matches: Ma
     <header><CompanyLogo company={company} /><div><h3>{company.name}</h3><p>{company.industry}</p></div>{matches[0].job.source === 'sample' && <span className="sample-label">샘플</span>}</header>
     {visible.map(match => <div key={match.job.id} className="mini-job">
       <button className="mini-job-title" onClick={() => onOpen(match)}>{match.job.title}<ArrowUpRight size={14} /></button>
-      <div className="mini-job-meta"><span>{formatSalary(match.job.salary)}</span><span>·</span><span>{MODE_LABELS[match.job.workMode]}</span></div>
+      <div className="mini-job-meta"><span>{formatJobSalary(match.job)}</span><span>·</span><span>{MODE_LABELS[match.job.workMode]}</span></div>
       <JobFreshnessNotice job={match.job} compact />
       <div className="mini-job-reason">{match.matchedSkills.length ? <><Check size={12} /><span>{match.matchedSkills.slice(0, 2).join(' · ')} 경험 일치</span></> : <><CircleHelp size={12} /><span>기술 요구사항 확인 필요</span></>}</div>
       <div className="mini-job-footer"><span className={`visa-tag ${match.job.visa === 'yes' ? 'confirmed' : match.job.visa === 'conditional' ? 'conditional' : ''}`}>{match.job.visa === 'yes' ? <ShieldCheck size={12} /> : <CircleHelp size={12} />}비자 {VISA_LABELS[match.job.visa]}</span><button className={`icon-button bookmark-button ${savedIds.has(match.job.id) ? 'is-saved' : ''}`} aria-label={`${company.name} ${match.job.title} ${savedIds.has(match.job.id) ? '저장 취소' : '저장'}`} onClick={() => onSave(match)}>{savedIds.has(match.job.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button></div>

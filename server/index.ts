@@ -24,12 +24,13 @@ app.get('/api/health', (_request, response) => {
 app.get('/api/catalog', async (request, response) => {
   response.setHeader('Cache-Control', 'no-store')
   const source = request.query.source ?? 'sample'
-  if (source !== 'sample' && source !== 'greenhouse') {
+  if (source !== 'sample' && source !== 'public' && source !== 'greenhouse') {
     response.status(400).json({ error: '지원하지 않는 데이터 소스입니다.' })
     return
   }
   try {
-    const catalog = source === 'greenhouse' ? await getPublicCatalog(request.query.refresh === '1') : createSampleCatalog()
+    // The legacy query is accepted while clients migrate to provider-independent public mode.
+    const catalog = source !== 'sample' ? await getPublicCatalog(request.query.refresh === '1') : createSampleCatalog()
     response.json(catalog)
   } catch (error) {
     const retryAt = error instanceof CatalogUnavailableError ? error.retryAt : undefined

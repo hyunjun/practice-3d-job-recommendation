@@ -22,6 +22,17 @@ export function isRemoteEligible(job: Job, country: string): boolean {
   return job.remoteWorldwide || job.remoteCountries.includes(country)
 }
 
+export function formatJobSalary(job: Job): string {
+  return job.salary ? formatSalary(job.salary) : job.compensationRanges?.length
+    ? '별도 보상 조건' : job.compensationNote ? '보상 확인 필요' : '연봉 미공개'
+}
+
+export function formatCompensation(range: NonNullable<Job['compensationRanges']>[number]): string {
+  const amount = (value: number) => value.toLocaleString('ko-KR', { maximumFractionDigits: 2 })
+  const period = { year: '년', month: '월', week: '주', day: '일', hour: '시간', unknown: '기간 미확인' }[range.period]
+  return `${range.currency} ${amount(range.min)}–${amount(range.max)} / ${period}`
+}
+
 export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company' | 'job'> {
   const profileSkills = new Set(profile.skills.map(skill => skill.toLowerCase()))
   const matchedSkills = job.skills.filter(skill => profileSkills.has(skill.toLowerCase()))
@@ -43,7 +54,8 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
   if (job.minExperience === null) cautions.push('최소 경력 연수가 확인되지 않았어요')
   if (job.visa === 'unknown') cautions.push('비자 지원 여부는 회사에 확인이 필요해요')
   if (job.visa === 'no') cautions.push('비자 지원이 없는 공고예요')
-  if (!job.salary) cautions.push('보상 범위가 공개되지 않았어요')
+  if (!job.salary) cautions.push(job.compensationRanges?.length || job.compensationNote
+    ? '급여 구간·통화·지급 기간을 보상 조건에서 확인해 주세요' : '보상 범위가 공개되지 않았어요')
   if (job.workMode === 'unknown') cautions.push('출근·원격 근무 형태를 확인해 주세요')
   if (job.workMode === 'remote' && !isRemoteEligible(job, profile.residence)) cautions.push(job.remoteScopeUnknown ? '지원 가능한 거주 국가가 확인되지 않았어요' : '현재 선택한 거주 국가는 원격 지원 대상에 포함되지 않아요')
   if (job.workMode === 'remote') cautions.push('원격근무 시간대와 현지 고용 가능 여부를 최종 확인해 주세요')
@@ -68,7 +80,8 @@ export function filterJobs(catalog: Catalog, profile: Profile, filters: Filters)
     if (job.workMode === 'remote' && filters.remoteEligibleOnly && !isRemoteEligible(job, profile.residence)) return []
     if (filters.region !== 'all') {
       if (job.workMode === 'remote') {
-        if (!job.remoteWorldwide && !catalog.cities.some(city => city.region === filters.region && job.remoteCountries.includes(city.countryCode))) return []
+        if (!job.remoteWorldwide && !job.remoteRegions?.includes(filters.region)
+          && !catalog.cities.some(city => city.region === filters.region && job.remoteCountries.includes(city.countryCode))) return []
       } else if (!job.cityIds.some(id => CITY_BY_ID.get(id)?.region === filters.region)) return []
     }
     if (query.length) {

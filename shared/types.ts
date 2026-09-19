@@ -2,8 +2,15 @@ export type Region = 'all' | 'americas' | 'europe' | 'asia-pacific'
 export type Role = 'all' | 'backend' | 'frontend' | 'fullstack' | 'ml' | 'data' | 'devops' | 'mobile' | 'security'
 export type WorkMode = 'remote' | 'hybrid' | 'onsite' | 'unknown'
 export type Visa = 'yes' | 'conditional' | 'no' | 'unknown'
-export type Source = 'sample' | 'greenhouse'
-export type Employment = 'fulltime' | 'parttime' | 'contract' | 'intern' | 'temporary' | 'unknown'
+export const PUBLIC_PROVIDERS = ['greenhouse', 'ashby', 'lever'] as const
+export type JobProvider = typeof PUBLIC_PROVIDERS[number]
+export type JobSource = 'sample' | JobProvider
+export type Source = 'sample' | 'public'
+export type Employment = 'fulltime' | 'parttime' | 'permanent' | 'contract' | 'intern' | 'temporary' | 'unknown'
+
+export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
+  sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever',
+}
 
 export interface FactEvidence {
   source: 'board' | 'description' | 'title'
@@ -34,12 +41,22 @@ export interface Company {
   industry: string
   careerUrl: string
   board?: string
+  provider?: JobProvider
+  boardRegion?: 'eu'
 }
 
 export interface Salary {
   min: number
   max: number
   currency: 'USD' | 'EUR' | 'GBP' | 'CAD' | 'SGD' | 'AUD' | 'KRW' | 'JPY' | 'CHF'
+}
+
+export interface CompensationRange {
+  label: string
+  min: number
+  max: number
+  currency: string
+  period: 'year' | 'month' | 'week' | 'day' | 'hour' | 'unknown'
 }
 
 export interface Job {
@@ -54,14 +71,17 @@ export interface Job {
   minExperience: number | null
   skills: string[]
   salary: Salary | null
+  compensationRanges?: CompensationRange[]
+  compensationNote?: string
   visa: Visa
   remoteCountries: string[]
   remoteWorldwide: boolean
   remoteScopeUnknown: boolean
+  remoteRegions?: Exclude<Region, 'all'>[]
   description: string
   requirements: string[]
   url: string
-  source: Source
+  source: JobSource
   updatedAt: string | null
   fetchedAt: string
   evidence?: JobEvidence
@@ -71,6 +91,7 @@ export interface Job {
 export interface BoardStatus {
   companyId: string
   board: string
+  provider?: JobProvider
   status: 'ok' | 'error'
   total: number
   included: number
@@ -165,7 +186,7 @@ export const MODE_LABELS: Record<WorkMode | 'all', string> = {
 
 export const REGION_LABELS: Record<Region, string> = {
   all: '전 세계',
-  americas: '북미',
+  americas: '미주',
   europe: '유럽',
   'asia-pacific': '아시아 · 태평양',
 }
@@ -174,6 +195,7 @@ export const EMPLOYMENT_LABELS: Record<Employment | 'all', string> = {
   all: '모든 고용 형태',
   fulltime: '풀타임',
   parttime: '파트타임',
+  permanent: '기간 제한 없음',
   contract: '계약직',
   intern: '인턴',
   temporary: '임시직',

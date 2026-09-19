@@ -1,7 +1,8 @@
 import { CITY_BY_ID, LOCATION_ALIASES } from '../shared/cities'
 import { extractSkills, extractYears, inferRole } from '../shared/profile'
-import type { Job, Salary, Visa } from '../shared/types'
+import type { Employment, Job, JobProvider, Salary, Visa, WorkMode } from '../shared/types'
 import { employmentFact, visaFact, workModeFact } from './job-facts'
+import type { Fact } from './job-facts'
 
 export interface GreenhouseJob {
   id: number
@@ -52,23 +53,84 @@ export function detectVisa(text: string): Visa {
 }
 
 const COUNTRY_TERMS: Record<string, RegExp> = {
-  US: /\b(?:united states|usa|u\.s\.a?\.?|us)\b/i, CA: /\bcanada\b/i,
-  GB: /\b(?:united kingdom|uk|great britain)\b/i, DE: /\bgermany\b/i,
-  NL: /\bnetherlands\b/i, FR: /\bfrance\b/i, IE: /\bireland\b/i,
-  SE: /\bsweden\b/i, CH: /\bswitzerland\b/i, ES: /\bspain\b/i,
-  PT: /\bportugal\b/i, SG: /\bsingapore\b/i, KR: /\b(?:south korea|korea)\b|대한민국/i,
-  JP: /\bjapan\b/i, AU: /\baustralia\b/i, IN: /\bindia\b/i,
+  US: /\b(?:united states(?: of america)?|usa|u\.s\.a?\.?|us)\b/i, CA: /\bcanada\b/i,
+  GB: /\b(?:united kingdom|uk|gbr|great britain)\b/i, DE: /\b(?:germany|deu)\b/i,
+  NL: /\b(?:netherlands|nld)\b/i, FR: /\b(?:france|fra)\b/i, IE: /\b(?:ireland|irl)\b/i,
+  SE: /\b(?:sweden|swe)\b/i, CH: /\b(?:switzerland|che)\b/i, ES: /\b(?:spain|esp)\b/i,
+  PT: /\b(?:portugal|prt)\b/i, SG: /\b(?:singapore|sgp)\b/i, KR: /\b(?:south korea|korea|kor)\b|대한민국/i,
+  JP: /\b(?:japan|jpn)\b/i, AU: /\b(?:australia|aus)\b/i, IN: /\b(?:india|ind)\b/i,
 }
 
-export function remoteScope(location: string): { remoteCountries: string[]; remoteWorldwide: boolean; remoteScopeUnknown: boolean } {
-  const remoteWorldwide = /\b(?:worldwide|anywhere in the world|global remote)\b/i.test(location)
+export function countryCode(value?: string | null): string | undefined {
+  if (!value) return undefined
+  const normalized = value.trim().toUpperCase().replaceAll('.', '')
+  if (Object.hasOwn(COUNTRY_TERMS, normalized)) return normalized
+  if (normalized === 'CAN') return 'CA'
+  return Object.entries(COUNTRY_TERMS).find(([, pattern]) => new RegExp(`^(?:${pattern.source})$`, 'i').test(normalized))?.[0]
+}
+
+export interface PostingLocation {
+  label: string
+  address?: { addressLocality?: string | null; addressRegion?: string | null; addressCountry?: string | null } | null
+}
+
+/** Unknown countries never resolve to a namesake city in the coverage area. */
+export function postingCities(locations: PostingLocation[]): string[] {
+  return [...new Set(locations.flatMap(location => {
+    const country = countryCode(location.address?.addressCountry)
+    if (location.address?.addressCountry && !country) return []
+    const text = location.address?.addressLocality
+      ? [location.address.addressLocality, location.address.addressRegion, location.address.addressCountry].filter(Boolean).join(', ')
+      : location.label
+    return locateCities(text).filter(id => !country || CITY_BY_ID.get(id)?.countryCode === country)
+  }))]
+}
+
+export function postingLocationLabel(locations: PostingLocation[], mode: WorkMode): string {
+  const names = [...new Set(locations.map(location => location.label || [
+    location.address?.addressLocality, location.address?.addressCountry,
+  ].filter(Boolean).join(', ')).filter(Boolean))]
+  const label = names.join(' · ') || '근무지 미확인'
+  const suffix = mode === 'remote' && !/\bremote\b/i.test(label) ? 'Remote' : mode === 'hybrid' && !/\bhybrid\b/i.test(label) ? 'Hybrid' : ''
+  return [label.length > 1800 ? `${label.slice(0, 1799)}…` : label, suffix].filter(Boolean).join(' · ')
+}
+
+export function remoteScope(location: string): Pick<Job, 'remoteCountries' | 'remoteWorldwide' | 'remoteScopeUnknown' | 'remoteRegions'> {
+  if (/\b(?:except|excluding|outside|not worldwide|not global)\b/i.test(location)) {
+    return { remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: true }
+  }
+  const remoteWorldwide = /\b(?:worldwide|anywhere in the world|global[\s,·(-]+remote|remote[\s,·(-]+global)\b/i.test(location) || /^global$/i.test(location.trim())
   const countries = new Set(Object.entries(COUNTRY_TERMS).filter(([, pattern]) => pattern.test(location)).map(([id]) => id))
+  // In free-form locations, distinguish the country code CAN from the verb "can".
+  if (/\bCAN\b/.test(location)) countries.add('CA')
   for (const id of locateCities(location)) {
     const city = CITY_BY_ID.get(id)
     if (city) countries.add(city.countryCode)
   }
+  const remoteRegions: NonNullable<Job['remoteRegions']> = []
+  if (/\b(?:americas?|north america|south america)\b/i.test(location) || /\bAMER\b/.test(location)) remoteRegions.push('americas')
+  if (/\beurope(?:an(?: union)?)?\b/i.test(location) || /\bEU\b/.test(location)) remoteRegions.push('europe')
+  if (/\b(?:asia[\s-]*(?:and |& )?pacific|APAC)\b/i.test(location)) remoteRegions.push('asia-pacific')
   // "Europe", "EMEA" and "APAC" do not establish legal country eligibility.
-  return { remoteCountries: [...countries], remoteWorldwide, remoteScopeUnknown: !remoteWorldwide && countries.size === 0 }
+  return {
+    remoteCountries: [...countries], remoteWorldwide, remoteScopeUnknown: !remoteWorldwide && countries.size === 0,
+    ...(remoteRegions.length ? { remoteRegions } : {}),
+  }
+}
+
+export function postingRemoteScope(locations: PostingLocation[]) {
+  const labels = locations.map(location => location.label).join(' · ')
+  const scope = remoteScope(labels)
+  if (/\b(?:except|excluding|outside|not worldwide|not global)\b/i.test(labels)) return scope
+  const countries = new Set(scope.remoteCountries)
+  for (const location of locations) {
+    // Country-only metadata can qualify a generic location; regional labels and office cities cannot.
+    if (/^(?:remote)?$/i.test(location.label.trim()) && !location.address?.addressLocality) {
+      const country = countryCode(location.address?.addressCountry)
+      if (country) countries.add(country)
+    }
+  }
+  return { ...scope, remoteCountries: [...countries], remoteScopeUnknown: !scope.remoteWorldwide && !countries.size }
 }
 
 export function parseSalary(text: string, cityIds: string[], ranges?: GreenhouseJob['pay_input_ranges']): Salary | null {
@@ -101,10 +163,45 @@ export function parseSalary(text: string, cityIds: string[], ranges?: Greenhouse
   return null
 }
 
+export function isDeveloperTitle(title: string): boolean {
+  return /engineer|developer|data scientist/i.test(title)
+    && !/manager|director|head of|vice president|sales|solutions engineer|support engineer|field engineer|customer engineer|mechanical|electrical|hardware|facilities|manufacturing|recruit/i.test(title)
+}
+
+interface PostingInput extends Pick<Job, 'companyId' | 'title' | 'cityIds' | 'locationLabel' | 'salary' | 'compensationRanges' | 'compensationNote' | 'url' | 'fetchedAt'> {
+  id: string | number
+  provider: JobProvider
+  text: string
+  workMode: Fact<WorkMode>
+  employment: Fact<Employment>
+  scope?: ReturnType<typeof remoteScope>
+  updatedAt?: string | null
+}
+
+export function normalizePosting(input: PostingInput): Job | null {
+  if (!input.id || !/^https:\/\//i.test(input.url) || !isDeveloperTitle(input.title)) return null
+  const { companyId, title, text, workMode, employment, salary, compensationRanges, compensationNote } = input
+  const visa = visaFact(text)
+  return {
+    id: `${input.provider}-${companyId}-${input.id}`, companyId, title, role: inferRole(title),
+    cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
+    employment: employment.value, minExperience: extractYears(text), skills: extractSkills(text), salary,
+    ...(compensationRanges?.length ? { compensationRanges } : {}),
+    ...(compensationNote ? { compensationNote } : {}),
+    visa: visa.value,
+    ...(input.scope ?? { remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false }),
+    evidence: {
+      ...(visa.evidence ? { visa: visa.evidence } : {}),
+      ...(workMode.evidence ? { workMode: workMode.evidence } : {}),
+      ...(employment.evidence ? { employment: employment.evidence } : {}),
+    },
+    description: text.slice(0, 26000), requirements: [], url: input.url,
+    source: input.provider, updatedAt: input.updatedAt ?? null, fetchedAt: input.fetchedAt,
+  }
+}
+
 export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: string): Job | null {
-  if (!raw.id || typeof raw.title !== 'string' || !/^https:\/\//i.test(raw.absolute_url ?? '')) return null
-  if (!/engineer|developer|data scientist/i.test(raw.title)) return null
-  if (/manager|director|head of|vice president|sales|solutions engineer|support engineer|field engineer|customer engineer|mechanical|electrical|hardware|facilities|manufacturing|recruit/i.test(raw.title)) return null
+  if (!raw.id || typeof raw.title !== 'string' || !isDeveloperTitle(raw.title) || !/^https:\/\//i.test(raw.absolute_url ?? '')) return null
   const text = plainText(raw.content ?? '')
   const locationName = raw.location?.name?.trim() || ''
   const postingLocation = raw.metadata?.find(item => /^job posting location$|^job location$/i.test(item.name ?? ''))?.value
@@ -118,28 +215,16 @@ export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: s
   const mode = workMode.value
   const isRemote = mode === 'remote'
   const cityIds = isRemote ? [] : locateCities(locationDetails)
-  const role = inferRole(raw.title)
   // A remote post's own location establishes eligibility; office tags do not.
   const remoteLocation = explicitLocations.length ? explicitLocations.join(' · ') : locationName
   const displayLocation = isRemote ? remoteLocation : locationDetails
   const location = [displayLocation || '근무지 미확인', mode === 'remote' && !/\bremote\b/i.test(displayLocation) ? 'Remote' : mode === 'hybrid' && !/\bhybrid\b/i.test(displayLocation) ? 'Hybrid' : ''].filter(Boolean).join(' · ')
   const scope = isRemote ? remoteScope(remoteLocation) : { remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false }
-  const experience = extractYears(text)
   const employment = employmentFact(raw.title, raw.metadata ?? [], text)
-  const visa = visaFact(text)
-  return {
-    id: `greenhouse-${companyId}-${raw.id}`, companyId, title: raw.title, role, cityIds,
-    locationLabel: location, workMode: mode, employment: employment.value, minExperience: experience,
-    skills: extractSkills(text), salary: parseSalary(text, isRemote ? locateCities(remoteLocation) : cityIds, raw.pay_input_ranges),
-    visa: visa.value, ...scope,
-    evidence: {
-      ...(visa.evidence ? { visa: visa.evidence } : {}),
-      ...(workMode.evidence ? { workMode: workMode.evidence } : {}),
-      ...(employment.evidence ? { employment: employment.evidence } : {}),
-    },
-    description: text.slice(0, 26000),
-    requirements: [],
-    url: raw.absolute_url,
-    source: 'greenhouse', updatedAt: raw.updated_at ?? null, fetchedAt,
-  }
+  return normalizePosting({
+    provider: 'greenhouse', id: raw.id, companyId, title: raw.title, text, fetchedAt,
+    cityIds, locationLabel: location, workMode, employment, scope,
+    salary: parseSalary(text, isRemote ? locateCities(remoteLocation) : cityIds, raw.pay_input_ranges),
+    url: raw.absolute_url, updatedAt: raw.updated_at,
+  })
 }

@@ -2,13 +2,13 @@ import { randomUUID } from 'node:crypto'
 import { mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { z } from 'zod'
-import { JobSchema } from '../shared/schemas'
+import { JobProviderSchema, JobSchema } from '../shared/schemas'
 import type { Company } from '../shared/types'
 
 const Timestamp = z.iso.datetime({ offset: true })
 export const BoardSnapshotSchema = z.object({
   fetchedAt: Timestamp,
-  jobs: z.array(JobSchema.extend({ source: z.literal('greenhouse'), fetchedAt: Timestamp })).max(20000),
+  jobs: z.array(JobSchema.extend({ source: JobProviderSchema, fetchedAt: Timestamp })).max(20000),
   total: z.number().int().nonnegative(),
   unmappedCount: z.number().int().nonnegative().nullable(),
 }).refine(snapshot => snapshot.total >= snapshot.jobs.length + (snapshot.unmappedCount ?? 0))
@@ -16,6 +16,8 @@ export const BoardSnapshotSchema = z.object({
 const CachedBoardSchema = z.object({
   companyId: z.string().min(1).max(100),
   board: z.string().min(1).max(200),
+  provider: JobProviderSchema.default('greenhouse'),
+  boardRegion: z.literal('eu').optional(),
   checkedAt: Timestamp,
   failures: z.number().int().min(0).max(1000),
   retryAt: Timestamp.nullable(),
@@ -38,11 +40,11 @@ async function readJson(file: string): Promise<unknown> {
 }
 
 export function parseCachedBoards(input: unknown): CachedBoard[] {
-  if (!input || typeof input !== 'object' || !('version' in input) || input.version !== 4
+  if (!input || typeof input !== 'object' || !('version' in input) || ![4, 5].includes(input.version as number)
     || !('boards' in input) || !Array.isArray(input.boards) || input.boards.length > 1000) return []
   return input.boards.flatMap(value => {
     const parsed = CachedBoardSchema.safeParse(value)
-    return parsed.success ? [parsed.data] : []
+    return parsed.success && (input.version !== 4 || parsed.data.provider === 'greenhouse') ? [parsed.data] : []
   })
 }
 
@@ -57,11 +59,12 @@ function migrateLegacy(input: unknown, companies: Company[]): CachedBoard[] {
   }).safeParse(input)
   if (!legacy.success) return []
   return companies.flatMap(company => {
+    if (company.provider && company.provider !== 'greenhouse') return []
     const board = legacy.data.boards.find(item => item.companyId === company.id && item.board === company.board)
     if (!board) return []
     const failed = board.status === 'error'
     return [{
-      companyId: company.id, board: board.board, checkedAt: legacy.data.fetchedAt,
+      companyId: company.id, board: board.board, provider: 'greenhouse' as const, checkedAt: legacy.data.fetchedAt,
       failures: failed ? 1 : 0, retryAt: null,
       ...(failed ? { error: (board.message || '이전 조회에 실패했어요.').slice(0, 500) } : {
         snapshot: {
@@ -76,21 +79,30 @@ function migrateLegacy(input: unknown, companies: Company[]): CachedBoard[] {
   })
 }
 
-export function createFileBoardCache(file: string, legacyFile: string | undefined, companies: Company[]): BoardCache {
+export function createFileBoardCache(file: string, legacyFiles: string | string[] | undefined, companies: Company[]): BoardCache {
   return {
     async load() {
       try { return parseCachedBoards(await readJson(file)) }
       catch (error) {
         // Only migrate a missing cache. A corrupt newer cache must not resurrect older closed jobs.
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT' || !legacyFile) return []
-        try { return migrateLegacy(await readJson(legacyFile), companies) } catch { return [] }
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') return []
+        for (const legacyFile of typeof legacyFiles === 'string' ? [legacyFiles] : legacyFiles ?? []) {
+          try {
+            const input = await readJson(legacyFile)
+            return input && typeof input === 'object' && 'version' in input
+              ? parseCachedBoards(input) : migrateLegacy(input, companies)
+          } catch (legacyError) {
+            if ((legacyError as NodeJS.ErrnoException).code !== 'ENOENT') return []
+          }
+        }
+        return []
       }
     },
     async save(boards) {
       await mkdir(path.dirname(file), { recursive: true })
       const temporary = `${file}.${process.pid}.${randomUUID()}.tmp`
       try {
-        await writeFile(temporary, JSON.stringify({ version: 4, boards }), 'utf8')
+        await writeFile(temporary, JSON.stringify({ version: 5, boards }), 'utf8')
         await rename(temporary, file)
       } finally {
         await rm(temporary, { force: true })

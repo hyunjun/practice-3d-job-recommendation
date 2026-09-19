@@ -61,7 +61,7 @@ export default function App() {
   const notify = useCallback((message: string, action?: Notice['action'], tone?: Notice['tone']) => setNotice({ message, action, tone }), [])
   const notifyCatalog = useCallback((message: string, tone?: Notice['tone']) => notify(message, undefined, tone), [notify])
   const { catalog, loading, error: dataError, changeSource, ready: catalogReady, retryAt } = useCatalog(initial.exploration.source, notifyCatalog)
-  const retryCatalog = () => void changeSource('greenhouse', { refresh: true, announce: catalogReady })
+  const retryCatalog = () => void changeSource('public', { refresh: true, announce: catalogReady })
   const showData = () => setModal('data')
 
   const matches = useMemo(() => filterJobs(catalog, profile, filters), [catalog, profile, filters])

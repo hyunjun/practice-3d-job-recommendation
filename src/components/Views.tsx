@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, CheckCircle2, Download, GitCompareArrows, MapPin, Plus, Search, Trash2, X } from 'lucide-react'
 import { CITY_BY_ID } from '../../shared/cities'
-import { formatSalary, groupCompanies, matchJob, medianSalary } from '../../shared/matching'
+import { formatJobSalary, groupCompanies, matchJob, medianSalary } from '../../shared/matching'
 import { MODE_LABELS } from '../../shared/types'
 import { catalogNeedsAttention } from '../../shared/catalog-health'
 import type { Catalog, CityResult, MatchedJob, Profile, SavedJob } from '../../shared/types'
@@ -22,7 +22,7 @@ export function SavedView({ saved, profile, onOpen, onRemove, onExplore }: { sav
         <header><CompanyLogo company={item.company} /><div><h2>{item.company.name}</h2><span>{item.company.industry}</span></div><button className="icon-button" aria-label={`${item.company.name} 저장 취소`} onClick={() => onRemove(match)}><BookmarkCheck size={18} /></button></header>
         <button className="saved-title" onClick={() => onOpen(match)}>{item.job.title}<ArrowUpRight size={17} /></button>
         <p className="saved-location"><MapPin size={13} />{item.job.locationLabel}</p>
-        <div className="saved-card-tags"><span>{formatSalary(item.job.salary)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
+        <div className="saved-card-tags"><span>{formatJobSalary(item.job)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
         <JobFreshnessNotice job={item.job} compact />
         <div className="saved-card-match"><CheckCircle2 size={13} />{match.matchedSkills.length ? `${match.matchedSkills.slice(0, 3).join(' · ')} 경험 일치` : '공고 조건을 확인해 보세요'}</div>
         {item.note && <p className="saved-note-preview">{item.note}</p>}
@@ -50,7 +50,7 @@ export function CompareView({ catalog, results, compareIds, status, onToggle, on
     { label: '공개 연봉의 중앙값', note: '세전 연간 USD · 고정 참고 환율', render: (result?: CityResult) => {
       const median = result ? medianSalary(result.matches) : null
       const count = result?.matches.filter(match => match.job.salary).length ?? 0
-      return <><strong>{median === null ? '미확인' : `$${Math.round(median / 1000)}k`}</strong><small>{count ? `연봉 공개 ${count}개 공고 기준` : '공개된 보상 데이터 없음'}</small></>
+      return <><strong>{median === null ? '미확인' : `$${Math.round(median / 1000)}k`}</strong><small>{count ? `연봉 공개 ${count}개 공고 기준` : '비교 가능한 연봉 데이터 없음'}</small></>
     } },
     { label: '비자 지원 명시', note: '조건부 지원을 포함한 공고', render: (result?: CityResult) => <><strong>{result?.matches.filter(match => ['yes', 'conditional'].includes(match.job.visa)).length ?? 0}<small>개 공고</small></strong><small>이 중 조건부 {result?.matches.filter(match => match.job.visa === 'conditional').length ?? 0}개 · 미확인 {result?.matches.filter(match => match.job.visa === 'unknown').length ?? 0}개</small></> },
     { label: '하이브리드 근무', note: '미확인 근무 형태는 제외', render: (result?: CityResult) => <><strong>{result?.matches.filter(match => match.job.workMode === 'hybrid').length ?? 0}<small>개 공고</small></strong><small>근무 형태 미확인 {result?.matches.filter(match => match.job.workMode === 'unknown').length ?? 0}개</small></> },

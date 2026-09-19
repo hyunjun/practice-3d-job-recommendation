@@ -1,7 +1,8 @@
 import { CITIES } from '../shared/cities'
+import { PUBLIC_PROVIDERS } from '../shared/types'
 import type { BoardStatus, Catalog, Company, Job } from '../shared/types'
 import { BoardSnapshotSchema } from './board-cache'
-import type { BoardCache, CachedBoard } from './board-cache'
+import type { BoardCache, BoardSnapshot, CachedBoard } from './board-cache'
 
 export const CATALOG_POLICY = {
   freshFor: 30 * 60 * 1000,
@@ -42,7 +43,8 @@ interface Options {
 }
 
 export function createCatalogService({ companies, cache, fetchBoard, now = Date.now, random = Math.random, onCacheError = console.warn }: Options) {
-  if (!companies.length || companies.some(company => !company.board) || new Set(companies.map(company => company.id)).size !== companies.length) {
+  if (!companies.length || companies.some(company => !company.board || !PUBLIC_PROVIDERS.includes(company.provider ?? 'greenhouse')
+    || (company.boardRegion && company.provider !== 'lever')) || new Set(companies.map(company => company.id)).size !== companies.length) {
     throw new Error('Each configured job board must have a unique company and board name')
   }
   const boards = new Map<string, CachedBoard>()
@@ -53,15 +55,19 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
     Date.parse(entry.checkedAt) + CATALOG_POLICY.minRefreshInterval,
     entry.error && entry.retryAt ? Date.parse(entry.retryAt) : 0,
   )
+  const belongsToBoard = (snapshot: BoardSnapshot, company: Company) => snapshot.jobs.every(job =>
+    job.companyId === company.id && job.source === (company.provider ?? 'greenhouse')
+    && job.id.startsWith(`${job.source}-${company.id}-`) && job.fetchedAt === snapshot.fetchedAt,
+  )
 
   async function initialize() {
     const loaded = await cache.load().catch(error => { onCacheError(error); return [] })
     for (const company of companies) {
-      const entry = loaded.find(item => item.companyId === company.id && item.board === company.board)
+      const entry = loaded.find(item => item.companyId === company.id && item.board === company.board
+        && item.provider === (company.provider ?? 'greenhouse') && item.boardRegion === company.boardRegion)
       if (!entry || Date.parse(entry.checkedAt) > now() + 5 * 60 * 1000) continue
       if (entry.snapshot && (Date.parse(entry.snapshot.fetchedAt) > Date.parse(entry.checkedAt)
-        || entry.snapshot.jobs.some(job => job.companyId !== company.id || job.source !== 'greenhouse'
-          || job.fetchedAt !== entry.snapshot!.fetchedAt))) continue
+        || !belongsToBoard(entry.snapshot, company))) continue
       boards.set(company.id, entry)
     }
   }
@@ -83,7 +89,7 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
         unmappedCount = unmappedCount === null || snapshot.unmappedCount === null ? null : unmappedCount + snapshot.unmappedCount
       }
       statuses.push({
-        companyId: company.id, board: company.board!, status: entry.error ? 'error' : 'ok',
+        companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', status: entry.error ? 'error' : 'ok',
         dataStatus, total: usable ? snapshot.total : 0, included: usable ? snapshot.jobs.length : 0,
         checkedAt: entry.checkedAt, lastSuccessAt: snapshot?.fetchedAt ?? null,
         retryAt: entry.error ? iso(refreshAt(entry)) : null,
@@ -98,7 +104,7 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
         : '공개 채용 게시판에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.', refreshAfter, expired ? 'CATALOG_EXPIRED' : 'CATALOG_UNAVAILABLE')
     }
     return {
-      source: 'greenhouse', fetchedAt: iso(Math.max(...successfulDates)),
+      source: 'public', fetchedAt: iso(Math.max(...successfulDates)),
       checkedAt: iso(Math.max(...[...boards.values()].map(entry => Date.parse(entry.checkedAt)))),
       refreshAfter, stale: statuses.some(board => board.dataStatus === 'stale'),
       companies, cities: CITIES, jobs, boards: statuses, unmappedCount,
@@ -116,17 +122,21 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
       })
       if (!parsed.success) throw new BoardFetchError('공고 정보를 확인하지 못했어요.')
       const snapshot = parsed.data
-      if (snapshot.jobs.some(job => job.companyId !== company.id || job.fetchedAt !== checkedAt)) {
-        throw new Error('공고의 회사 또는 조회 시각이 게시판과 일치하지 않아요.')
+      if (!belongsToBoard(snapshot, company)) {
+        throw new Error('공고의 회사·출처 또는 조회 시각이 게시판과 일치하지 않아요.')
       }
-      boards.set(company.id, { companyId: company.id, board: company.board!, checkedAt, failures: 0, retryAt: null, snapshot })
+      boards.set(company.id, {
+        companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', boardRegion: company.boardRegion,
+        checkedAt, failures: 0, retryAt: null, snapshot,
+      })
     } catch (cause) {
       const failures = Math.min((previous?.failures ?? 0) + 1, 1000)
       const backoff = Math.min(CATALOG_POLICY.minRefreshInterval * 2 ** Math.min(failures - 1, 10), CATALOG_POLICY.maxBackoff)
       const delay = Math.min(CATALOG_POLICY.maxBackoff, backoff + Math.floor(backoff * 0.2 * random()))
       const retryAt = Math.max(now() + delay, cause instanceof BoardFetchError ? cause.retryAfter ?? 0 : 0)
       boards.set(company.id, {
-        companyId: company.id, board: company.board!, checkedAt, failures, retryAt: iso(retryAt),
+        companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', boardRegion: company.boardRegion,
+        checkedAt, failures, retryAt: iso(retryAt),
         error: (cause instanceof Error ? cause.message : '조회 실패').slice(0, 500) || '조회 실패',
         ...(previous?.snapshot ? { snapshot: previous.snapshot } : {}),
       })

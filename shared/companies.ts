@@ -1,4 +1,4 @@
-import type { Company } from './types'
+import type { Company, JobProvider } from './types'
 
 export const COMPANIES: Company[] = [
   { id: 'stripe', name: 'Stripe', initials: 'S', color: '#a79aff', industry: '핀테크 · 결제 인프라', careerUrl: 'https://stripe.com/jobs', board: 'stripe' },
@@ -35,6 +35,21 @@ export const COMPANIES: Company[] = [
   { id: 'intercom', name: 'Intercom', initials: 'I', color: '#91bafd', industry: 'AI · 고객 경험', careerUrl: 'https://www.intercom.com/careers', board: 'intercom' },
 ]
 
-export const PUBLIC_COMPANIES = COMPANIES.filter(company =>
-  ['stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'gitlab', 'anthropic', 'intercom', 'airbnb'].includes(company.id),
-)
+function publicCompany(id: string, provider: JobProvider, board: string): Company {
+  const company = COMPANIES.find(item => item.id === id)
+  if (!company) throw new Error(`Unknown configured company: ${id}`)
+  return { ...company, provider, board }
+}
+
+// Public coverage is independent of the 32 hand-authored sample scenarios.
+export const PUBLIC_COMPANIES: Company[] = [
+  ...['stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'airbnb', 'gitlab', 'anthropic', 'intercom']
+    .map(id => publicCompany(id, 'greenhouse', id)),
+  publicCompany('linear', 'ashby', 'Linear'),
+  publicCompany('deepl', 'ashby', 'DeepL'),
+  { id: 'n8n', name: 'n8n', initials: 'n', color: '#f5a193', industry: '자동화 · 개발자 도구', careerUrl: 'https://n8n.io/careers/', provider: 'ashby', board: 'n8n' },
+  { id: 'supabase', name: 'Supabase', initials: 'S', color: '#90deb8', industry: '데이터베이스 · 개발자 도구', careerUrl: 'https://supabase.com/careers', provider: 'ashby', board: 'supabase' },
+  { id: 'mistral', name: 'Mistral AI', initials: 'M', color: '#f0ad7f', industry: 'AI · 언어 모델', careerUrl: 'https://mistral.ai/careers/', provider: 'ashby', board: 'mistral.ai' },
+  publicCompany('spotify', 'lever', 'spotify'),
+  { id: 'contentsquare', name: 'Contentsquare', initials: 'C', color: '#f5bd83', industry: '디지털 경험 · 제품 분석', careerUrl: 'https://contentsquare.com/careers/', provider: 'lever', board: 'contentsquare' },
+]

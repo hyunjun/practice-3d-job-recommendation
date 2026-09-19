@@ -8,7 +8,7 @@ import { DEFAULT_FILTERS } from '../../shared/types'
 const demo = createSampleCatalog()
 const fetchedAt = '2026-09-19T06:00:00.000Z'
 const publicCatalog = {
-  ...demo, source: 'greenhouse', fetchedAt,
+  ...demo, source: 'public', fetchedAt,
   companies: demo.companies.filter(company => company.id === 'stripe'),
   jobs: ['London, UK', 'Berlin, Germany'].map((location, index) => normalizeJob({
     id: 800 + index, title: `Backend Engineer — restore fixture ${index}`,
@@ -28,7 +28,7 @@ async function choosePublic(page: Page) {
 }
 
 test('public data, every search condition, city selection and map preferences survive reload and a new visit', async ({ page, context }) => {
-  await context.route('**/api/catalog?source=greenhouse*', route => route.fulfill({ json: publicCatalog }))
+  await context.route('**/api/catalog?source=public*', route => route.fulfill({ json: publicCatalog }))
   await page.goto('/')
   await choosePublic(page)
   await page.getByRole('button', { name: '주간 지구로 전환', exact: true }).click()
@@ -42,7 +42,7 @@ test('public data, every search condition, city selection and map preferences su
   await page.getByLabel('고용 형태', { exact: true }).selectOption('fulltime')
   await page.getByLabel('희망 연봉').press('Home')
   for (let step = 0; step < 12; step++) await page.getByLabel('희망 연봉').press('ArrowRight')
-  await page.getByRole('checkbox', { name: /연봉 미공개 공고도 포함/ }).uncheck()
+  await page.getByRole('checkbox', { name: /연봉 미공개·별도 보상 공고도 포함/ }).uncheck()
   await page.getByRole('checkbox', { name: /거주 국가에서 가능한 원격근무만/ }).uncheck()
   await page.getByRole('button', { name: /개 공고 보기$/ }).click()
   await page.getByLabel('도시, 회사 또는 포지션 검색').fill('런던 Stripe')
@@ -62,7 +62,7 @@ test('public data, every search condition, city selection and map preferences su
   await page.getByRole('button', { name: /^모든 필터/ }).click()
   await expect(page.getByLabel('고용 형태', { exact: true })).toHaveValue('fulltime')
   await expect(page.getByLabel('희망 연봉')).toHaveValue('120000')
-  await expect(page.getByRole('checkbox', { name: /연봉 미공개 공고도 포함/ })).not.toBeChecked()
+  await expect(page.getByRole('checkbox', { name: /연봉 미공개·별도 보상 공고도 포함/ })).not.toBeChecked()
   await expect(page.getByRole('checkbox', { name: /거주 국가에서 가능한 원격근무만/ })).not.toBeChecked()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
 
@@ -82,11 +82,11 @@ test('public data, every search condition, city selection and map preferences su
 test('a failed restored feed keeps public mode and search context, distinguishes missing data, and can retry', async ({ page }) => {
   let available = false
   let empty = false
-  await page.route('**/api/catalog?source=greenhouse*', route => available
+  await page.route('**/api/catalog?source=public*', route => available
     ? route.fulfill({ json: { ...publicCatalog, jobs: empty ? [] : publicCatalog.jobs } })
     : route.fulfill({ status: 503, json: { error: '게시판 연결을 확인해 주세요.' } }))
   await page.addInitScript(() => localStorage.setItem('orbit.v1.exploration', JSON.stringify({
-    source: 'greenhouse', filters: { query: '런던' }, selectedId: 'london', mapMode: 'flat',
+    source: 'public', filters: { query: '런던' }, selectedId: 'london', mapMode: 'flat',
   })))
   await page.goto('/')
   await expect(page.getByRole('heading', { name: '공개 공고에 연결하지 못했어요' })).toBeVisible()
@@ -96,7 +96,7 @@ test('a failed restored feed keeps public mode and search context, distinguishes
   await expect(page.getByRole('heading', { name: '조건에 맞는 도시가 아직 없어요' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toHaveCount(0)
   await expect(page.locator('.toast')).toHaveCount(0)
-  expect(JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.exploration')) || '{}').source).toBe('greenhouse')
+  expect(JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.exploration')) || '{}').source).toBe('public')
   const accessibility = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
   expect(accessibility.violations).toEqual([])
 
@@ -120,11 +120,11 @@ test('a failed restored feed keeps public mode and search context, distinguishes
 test('restored loading state shows no sample jobs and switching to sample cancels the pending response', async ({ page, context }) => {
   let release!: () => void
   const gate = new Promise<void>(resolve => { release = resolve })
-  await context.route('**/api/catalog?source=greenhouse*', async route => {
+  await context.route('**/api/catalog?source=public*', async route => {
     await gate
     await route.fulfill({ json: publicCatalog })
   })
-  await page.addInitScript(() => localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'greenhouse', mapMode: 'flat' })))
+  await page.addInitScript(() => localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'public', mapMode: 'flat' })))
   try {
     await page.goto('/')
     await expect(page.getByRole('heading', { name: '공개 공고를 불러오고 있어요' })).toBeVisible()

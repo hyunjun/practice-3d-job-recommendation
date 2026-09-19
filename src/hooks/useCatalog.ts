@@ -34,18 +34,18 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
     requestRef.current = controller
     setLoading(true)
     try {
-      const response = await fetch(`/api/catalog?source=greenhouse${refresh ? '&refresh=1' : ''}`, { signal: controller.signal })
+      const response = await fetch(`/api/catalog?source=public${refresh ? '&refresh=1' : ''}`, { signal: controller.signal })
       const result = await response.json()
       if (!response.ok) {
         if (!controller.signal.aborted) {
           if (typeof result?.retryAt === 'string' && Number.isFinite(Date.parse(result.retryAt))) setErrorRetryAt(result.retryAt)
           if (response.status === 503 && result?.code === 'CATALOG_EXPIRED') {
-            setCatalog(previous => previous.source === 'greenhouse' ? initialCatalog('greenhouse') : previous)
+            setCatalog(previous => previous.source === 'public' ? initialCatalog('public') : previous)
           }
         }
         throw new Error(result?.error ?? '공개 공고를 불러오지 못했어요.')
       }
-      if (!result || result.source !== 'greenhouse'
+      if (!result || result.source !== 'public'
         || !['jobs', 'companies', 'cities', 'boards'].every(key => Array.isArray(result[key]))
         || typeof result.fetchedAt !== 'string' || !Number.isFinite(Date.parse(result.fetchedAt))) {
         throw new Error('공고 데이터 형식을 확인하지 못했어요.')

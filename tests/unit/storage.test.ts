@@ -9,7 +9,7 @@ const personal: Profile = {
   preferences: { workMode: 'remote', visa: 'supported', salaryMin: 130000 },
 }
 const exploration: ExplorationState = {
-  source: 'greenhouse',
+  source: 'public',
   filters: { ...DEFAULT_FILTERS, query: '런던 Stripe', region: 'europe', role: 'backend', visa: 'supported', salaryMin: 120000 },
   selectedId: 'london', panelTab: 'cities', mapMode: 'flat', light: true, citySort: 'salary',
 }
@@ -26,6 +26,11 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('restoring exploration without changing profile preferences', () => {
+  it('migrates Greenhouse mode to public mode without resetting search and display preferences', () => {
+    values.set(STORAGE_KEYS.exploration, JSON.stringify({ ...exploration, source: 'greenhouse' }))
+    expect(loadExploration(personal)).toEqual(exploration)
+  })
+
   it('uses legacy profile preferences until the user has saved an exploration state', () => {
     values.set(STORAGE_KEYS.profile, JSON.stringify(personal))
     const restored = loadExploration(loadProfile())
@@ -49,7 +54,7 @@ describe('restoring exploration without changing profile preferences', () => {
       selectedId: 'removed-city', citySort: 'obsolete', mapMode: 'flat', rawResume: 'do not restore',
     }))
     const restored = loadExploration(SAMPLE_PROFILE)
-    expect(restored.source).toBe('greenhouse')
+    expect(restored.source).toBe('public')
     expect(restored.mapMode).toBe('flat')
     expect(restored.filters).toMatchObject({ region: 'europe', role: 'backend', salaryMin: 0, visa: 'all', query: '' })
     expect(restored.selectedId).toBeNull()
@@ -70,7 +75,7 @@ describe('storage boundaries and opting out', () => {
   it('omits personal exploration conditions when profile remembering is disabled', () => {
     persistExploration(exploration, false)
     const restored = loadExploration(SAMPLE_PROFILE)
-    expect(restored).toMatchObject({ source: 'greenhouse', mapMode: 'flat', light: true, selectedId: null, panelTab: 'cities' })
+    expect(restored).toMatchObject({ source: 'public', mapMode: 'flat', light: true, selectedId: null, panelTab: 'cities' })
     expect(restored.filters).toEqual(DEFAULT_FILTERS)
     expect(values.get(STORAGE_KEYS.exploration)).not.toContain('런던 Stripe')
   })
@@ -83,7 +88,7 @@ describe('storage boundaries and opting out', () => {
     deleteProfile()
     expect(loadProfile()).toEqual(SAMPLE_PROFILE)
     expect(loadExploration(SAMPLE_PROFILE).filters).toEqual(DEFAULT_FILTERS)
-    expect(loadExploration(SAMPLE_PROFILE).source).toBe('greenhouse')
+    expect(loadExploration(SAMPLE_PROFILE).source).toBe('public')
     expect(values.get(STORAGE_KEYS.saved)).toBe('saved fixture')
     expect(values.get(STORAGE_KEYS.compare)).toBe('comparison fixture')
   })

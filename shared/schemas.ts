@@ -1,4 +1,7 @@
 import { z } from 'zod'
+import { PUBLIC_PROVIDERS } from './types'
+
+export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 
 const EvidenceSchema = z.object({
   source: z.enum(['board', 'description', 'title']),
@@ -11,16 +14,24 @@ export const JobSchema = z.object({
   role: z.enum(['backend', 'frontend', 'fullstack', 'ml', 'data', 'devops', 'mobile', 'security']),
   cityIds: z.array(z.string()).max(50), locationLabel: z.string().max(2000),
   workMode: z.enum(['remote', 'hybrid', 'onsite', 'unknown']),
-  employment: z.enum(['fulltime', 'parttime', 'contract', 'intern', 'temporary', 'unknown']),
+  employment: z.enum(['fulltime', 'parttime', 'permanent', 'contract', 'intern', 'temporary', 'unknown']),
   minExperience: z.number().min(0).max(50).nullable(), skills: z.array(z.string()).max(100),
   salary: z.object({
     min: z.number().nonnegative(), max: z.number().nonnegative(),
     currency: z.enum(['USD', 'EUR', 'GBP', 'CAD', 'SGD', 'AUD', 'KRW', 'JPY', 'CHF']),
   }).nullable(),
+  compensationRanges: z.array(z.object({
+    label: z.string().max(500),
+    min: z.number().nonnegative(), max: z.number().nonnegative(),
+    currency: z.string().regex(/^[A-Z]{3}$/),
+    period: z.enum(['year', 'month', 'week', 'day', 'hour', 'unknown']),
+  })).max(100).optional(),
+  compensationNote: z.string().max(1000).optional(),
   visa: z.enum(['yes', 'conditional', 'no', 'unknown']), remoteCountries: z.array(z.string()).max(300),
   remoteWorldwide: z.boolean(), remoteScopeUnknown: z.boolean(),
+  remoteRegions: z.array(z.enum(['americas', 'europe', 'asia-pacific'])).max(3).optional(),
   description: z.string().max(30000), requirements: z.array(z.string()).max(50),
-  url: z.string().max(2000), source: z.enum(['sample', 'greenhouse']),
+  url: z.string().max(2000), source: z.enum(['sample', ...PUBLIC_PROVIDERS]),
   updatedAt: z.string().nullable(), fetchedAt: z.string(),
   evidence: z.object({
     visa: EvidenceSchema.optional(), workMode: EvidenceSchema.optional(), employment: EvidenceSchema.optional(),

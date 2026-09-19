@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { CITY_BY_ID } from '../../shared/cities'
-import { JobSchema } from '../../shared/schemas'
-import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
+import { JobProviderSchema, JobSchema } from '../../shared/schemas'
+import { DEFAULT_FILTERS, JOB_SOURCE_LABELS, SAMPLE_PROFILE } from '../../shared/types'
+import { formatCompensation, formatJobSalary } from '../../shared/matching'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
 
 export const STORAGE_KEYS = {
@@ -42,7 +43,7 @@ const SavedSchema = z.array(z.object({
   company: z.object({
     id: z.string(), name: z.string().max(200), color: z.string().regex(/^#[0-9a-f]{6}$/i),
     initials: z.string().max(8), industry: z.string().max(200), careerUrl: z.string().max(2000),
-    board: z.string().optional(),
+    board: z.string().optional(), provider: JobProviderSchema.optional(), boardRegion: z.literal('eu').optional(),
   }),
   savedAt: z.string(),
   status: z.enum(['saved', 'applied']),
@@ -79,14 +80,14 @@ export function loadExploration(profile: Profile): ExplorationState {
   }
   // Recover fields independently so an obsolete option does not discard a valid data source.
   const schema = z.object({
-    source: z.enum(['sample', 'greenhouse']).catch(fallback.source),
+    source: z.enum(['sample', 'public', 'greenhouse']).transform(source => source === 'greenhouse' ? 'public' as const : source).catch(fallback.source),
     filters: z.object({
       query: z.string().max(500).catch(filters.query),
       region: z.enum(['all', 'americas', 'europe', 'asia-pacific']).catch(filters.region),
       role: z.enum(['all', 'backend', 'frontend', 'fullstack', 'ml', 'data', 'devops', 'mobile', 'security']).catch(filters.role),
       workMode: z.enum(['all', 'remote', 'hybrid', 'onsite', 'unknown']).catch(filters.workMode),
       visa: z.enum(['all', 'yes', 'supported', 'possible']).catch(filters.visa),
-      employment: z.enum(['all', 'fulltime', 'parttime', 'contract', 'intern', 'temporary', 'unknown']).catch(filters.employment),
+      employment: z.enum(['all', 'fulltime', 'parttime', 'permanent', 'contract', 'intern', 'temporary', 'unknown']).catch(filters.employment),
       salaryMin: z.number().int().min(0).max(250000).catch(filters.salaryMin),
       includeUnknownSalary: z.boolean().catch(filters.includeUnknownSalary),
       remoteEligibleOnly: z.boolean().catch(filters.remoteEligibleOnly),
@@ -128,8 +129,13 @@ export function exportSavedCsv(saved: SavedJob[]): void {
     return `"${safe.replace(/"/g, '""')}"`
   }
   const rows = [
-    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크'],
-    ...saved.map(item => [item.company.name, item.job.title, item.job.locationLabel, item.job.source === 'sample' ? '샘플' : 'Greenhouse', item.status === 'applied' ? '지원 완료' : '저장됨', item.savedAt, item.note, item.job.url]),
+    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건'],
+    ...saved.map(item => [
+      item.company.name, item.job.title, item.job.locationLabel, JOB_SOURCE_LABELS[item.job.source],
+      item.status === 'applied' ? '지원 완료' : '저장됨', item.savedAt, item.note, item.job.url,
+      formatJobSalary(item.job),
+      [item.job.compensationNote, ...(item.job.compensationRanges?.map(range => `${range.label}: ${formatCompensation(range)}`) ?? [])].filter(Boolean).join('\n'),
+    ]),
   ]
   const blob = new Blob(['\ufeff', rows.map(row => row.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)

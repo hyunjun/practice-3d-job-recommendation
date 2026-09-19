@@ -25,7 +25,7 @@ export function FiltersDialog({ filters, catalog, profile, onApply, onClose }: {
         <div className="range-labels"><span>제한 없음</span><span>$250k</span></div>
         <p className="field-description">세전 연간 보상 · 표시 범위의 상한이 희망 금액 이상인 공고를 보여줘요. 고정 환율로 USD 환산하며 실제 제안 금액은 다를 수 있어요.</p>
       </div>
-      <Toggle checked={draft.includeUnknownSalary} onChange={value => update('includeUnknownSalary', value)} label="연봉 미공개 공고도 포함" description="보상이 공개되지 않아도 다른 조건에 맞는 기회를 찾아요." />
+      <Toggle checked={draft.includeUnknownSalary} onChange={value => update('includeUnknownSalary', value)} label="연봉 미공개·별도 보상 공고도 포함" description="지역별 구간이나 다른 지급 기간 때문에 연봉을 함께 비교할 수 없는 공고도 찾아요." />
       <Toggle checked={draft.remoteEligibleOnly} onChange={value => update('remoteEligibleOnly', value)} label="거주 국가에서 가능한 원격근무만" description="프로필의 거주 국가를 기준으로, 지원 지역이 확인된 공고만 포함해요." />
     </div>
     <footer className="dialog-footer"><button className="text-button muted" onClick={() => setDraft({ ...DEFAULT_FILTERS, query: filters.query, region: filters.region })}><RotateCcw size={15} />조건 초기화</button><button className="button primary" onClick={() => onApply(draft)}><SlidersHorizontal size={16} />{matches.length}개 공고 보기<ArrowRight size={16} /></button></footer>

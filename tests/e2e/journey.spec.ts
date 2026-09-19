@@ -149,7 +149,7 @@ test('city comparison is limited to three cities and survives navigation', async
 })
 
 test('a failed public feed never relabels sample data as real jobs', async ({ page }) => {
-  await page.route('**/api/catalog?source=greenhouse*', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: '게시판 연결을 확인해 주세요.' }) }))
+  await page.route('**/api/catalog?source=public*', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: '게시판 연결을 확인해 주세요.' }) }))
   await page.goto('/')
   await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
   await page.getByRole('button', { name: /공개 채용공고/ }).click()
@@ -177,11 +177,11 @@ test('public conditions expose their evidence, preserve visa distinctions and su
     metadata: [{ name: 'Location Type', value: 'On-Site' }, { name: 'Time Type', value: 'Full time' }],
   }, 'stripe', fetchedAt)!)
   const catalog = {
-    ...demo, source: 'greenhouse', fetchedAt, jobs,
+    ...demo, source: 'public', fetchedAt, jobs,
     companies: demo.companies.filter(company => company.id === 'stripe'),
     boards: [{ companyId: 'stripe', board: 'stripe', status: 'ok', total: 4, included: 4 }],
   }
-  await page.route('**/api/catalog?source=greenhouse*', route => route.fulfill({ json: catalog }))
+  await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: catalog }))
   await page.goto('/')
   await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
   await page.getByRole('button', { name: /공개 채용공고/ }).click()

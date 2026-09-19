@@ -18,7 +18,7 @@ const jobs = companies.slice(0, 2).map((company, index) => normalizeJob({
 
 function catalog(degraded: boolean): Catalog {
   return {
-    source: 'greenhouse', fetchedAt: current, checkedAt: current, stale: degraded,
+    source: 'public', fetchedAt: current, checkedAt: current, stale: degraded,
     cities: CITIES, companies, unmappedCount: 0,
     jobs: jobs.map((job, index) => ({ ...job, stale: degraded && index === 0, fetchedAt: degraded && index === 0 ? previous : current })),
     boards: companies.map((company, index) => ({
@@ -33,14 +33,14 @@ function catalog(degraded: boolean): Catalog {
 
 async function restorePublic(page: Page) {
   await page.addInitScript(() => localStorage.setItem('orbit.v1.exploration', JSON.stringify({
-    source: 'greenhouse', selectedId: 'london', mapMode: 'flat',
+    source: 'public', selectedId: 'london', mapMode: 'flat',
   })))
   await page.goto('/')
 }
 
 test('partial feed failures preserve dated jobs across exploration, comparison and saving, then recover visibly', async ({ page }) => {
   let degraded = true
-  await page.route('**/api/catalog?source=greenhouse*', route => route.fulfill({ json: catalog(degraded) }))
+  await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: catalog(degraded) }))
   await restorePublic(page)
   await expect(page.locator('.company-card')).toHaveCount(2)
   await expect(page.locator('.stale-job-badge')).toHaveCount(1)
@@ -89,7 +89,7 @@ test('retry deadlines disable repeated requests, expire without a reload and sti
   await page.clock.install({ time: new Date(start) })
   let available = false
   let requests = 0
-  await page.route('**/api/catalog?source=greenhouse*', route => {
+  await page.route('**/api/catalog?source=public*', route => {
     requests++
     return available
       ? route.fulfill({ json: { ...catalog(false), refreshAfter: new Date(start + 181000).toISOString() } })
@@ -123,7 +123,7 @@ test('retry deadlines disable repeated requests, expire without a reload and sti
 
 test('an expired server snapshot removes previously displayed jobs instead of retaining them after a failed refresh', async ({ page }) => {
   let expired = false
-  await page.route('**/api/catalog?source=greenhouse*', route => expired
+  await page.route('**/api/catalog?source=public*', route => expired
     ? route.fulfill({ status: 503, json: { code: 'CATALOG_EXPIRED', error: '마지막 정상 조회가 24시간을 지나 이전 공고를 표시하지 않습니다.' } })
     : route.fulfill({ json: catalog(false) }))
   await restorePublic(page)
@@ -144,7 +144,7 @@ test('an expired server snapshot removes previously displayed jobs instead of re
 test.describe('mobile feed status', () => {
   test.use({ viewport: { width: 320, height: 780 }, isMobile: true, hasTouch: true })
   test('company history and retained-job details remain readable at 320px', async ({ page }) => {
-    await page.route('**/api/catalog?source=greenhouse*', route => route.fulfill({ json: catalog(true) }))
+    await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: catalog(true) }))
     await restorePublic(page)
     await page.getByRole('button', { name: '공개 채용', exact: true }).click()
     const stripe = page.locator('.board-row').filter({ hasText: 'Stripe' })

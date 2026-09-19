@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { createSampleCatalog } from '../../shared/sample'
-import type { Company, Job } from '../../shared/types'
+import type { Company, Job, JobProvider } from '../../shared/types'
 import { createFileBoardCache, parseCachedBoards } from '../../server/board-cache'
 import type { BoardCache, CachedBoard } from '../../server/board-cache'
 import { BoardFetchError, CATALOG_POLICY, CatalogUnavailableError, createCatalogService, parseRetryAfter } from '../../server/catalog-service'
@@ -14,11 +14,11 @@ const BASE = Date.parse('2026-09-19T06:00:00.000Z')
 const companies = PUBLIC_COMPANIES.slice(0, 2)
 const demoJob = createSampleCatalog().jobs[0]
 const iso = (value: number) => new Date(value).toISOString()
-const job = (company: Company, fetchedAt: string, suffix = 'one'): Job & { source: 'greenhouse' } => ({
-  ...demoJob, id: `${company.id}-${suffix}`, companyId: company.id, source: 'greenhouse', fetchedAt,
+const job = (company: Company, fetchedAt: string, suffix = 'one'): Job & { source: JobProvider } => ({
+  ...demoJob, id: `${company.provider ?? 'greenhouse'}-${company.id}-${suffix}`, companyId: company.id, source: company.provider ?? 'greenhouse', fetchedAt,
 })
 const snapshot = (company: Company, time = BASE): CachedBoard => ({
-  companyId: company.id, board: company.board!, checkedAt: iso(time), failures: 0, retryAt: null,
+  companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', boardRegion: company.boardRegion, checkedAt: iso(time), failures: 0, retryAt: null,
   snapshot: { fetchedAt: iso(time), jobs: [job(company, iso(time))], total: 2, unmappedCount: 1 },
 })
 function memoryCache(initial: CachedBoard[] = []) {
@@ -44,8 +44,8 @@ describe('per-board last successful results', () => {
     })
     const result = await service.get()
     expect(result.jobs).toEqual([
-      expect.objectContaining({ id: `${companies[0].id}-one`, fetchedAt: iso(BASE), stale: true }),
-      expect.objectContaining({ id: `${companies[1].id}-new`, fetchedAt: iso(current), stale: false }),
+      expect.objectContaining({ id: `greenhouse-${companies[0].id}-one`, fetchedAt: iso(BASE), stale: true }),
+      expect.objectContaining({ id: `greenhouse-${companies[1].id}-new`, fetchedAt: iso(current), stale: false }),
     ])
     expect(result.boards[0]).toMatchObject({ status: 'error', dataStatus: 'stale', included: 1, lastSuccessAt: iso(BASE), checkedAt: iso(current) })
     expect(result.boards[1]).toMatchObject({ status: 'ok', dataStatus: 'fresh', included: 1 })
@@ -215,6 +215,75 @@ describe('request scheduling and retries', () => {
 })
 
 describe('cache validation and migration', () => {
+  it('keeps a fresh v4 Greenhouse snapshot when migrating to a provider-aware cache', async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'orbit-v4-migration-test-'))
+    const currentFile = path.join(directory, 'v5.json')
+    const previousFile = path.join(directory, 'v4.json')
+    try {
+      const { provider: _provider, boardRegion: _region, ...previous } = snapshot(companies[0])
+      await writeFile(previousFile, JSON.stringify({ version: 4, boards: [previous] }))
+      const cache = createFileBoardCache(currentFile, [previousFile, path.join(directory, 'v3.json')], companies)
+      const loaded = await cache.load()
+      expect(loaded[0]).toMatchObject({ provider: 'greenhouse', snapshot: { jobs: [{ id: previous.snapshot!.jobs[0].id }], unmappedCount: 1 } })
+      const fetchBoard = vi.fn(async () => ({ jobs: [], total: 0, unmappedCount: 0 }))
+      const service = createCatalogService({ companies: [companies[0]], cache, fetchBoard, now: () => BASE + 1000 })
+      const result = await service.get()
+      expect(result).toMatchObject({ source: 'public', jobs: [{ source: 'greenhouse', fetchedAt: iso(BASE) }] })
+      expect(fetchBoard).not.toHaveBeenCalled()
+      await cache.save(loaded)
+      expect(JSON.parse(await readFile(currentFile, 'utf8')).version).toBe(5)
+      expect((await cache.load())[0].snapshot).toEqual(previous.snapshot)
+      await rm(currentFile)
+      await writeFile(previousFile, '{invalid-json')
+      await writeFile(path.join(directory, 'v3.json'), JSON.stringify({
+        source: 'greenhouse', fetchedAt: iso(BASE), jobs: previous.snapshot!.jobs,
+        boards: [{ companyId: companies[0].id, board: companies[0].board, status: 'ok', total: 2 }],
+      }))
+      expect(await cache.load()).toEqual([])
+    } finally { await rm(directory, { recursive: true, force: true }) }
+  })
+
+  it('does not reuse a snapshot after the provider, board name or Lever region changes', async () => {
+    const original = companies[0]
+    const lever = { ...original, provider: 'lever' as const }
+    const cases: [Company, Company][] = [
+      [original, { ...original, provider: 'ashby' }],
+      [original, { ...original, board: 'new-board' }],
+      [lever, { ...lever, boardRegion: 'eu' }],
+    ]
+    for (const [before, after] of cases) {
+      const fetchBoard = vi.fn(async (company: Company, fetchedAt: string) => ({ jobs: [job(company, fetchedAt, 'new-source')], total: 1, unmappedCount: 0 }))
+      const result = await createCatalogService({
+        companies: [after], cache: memoryCache([snapshot(before)]), fetchBoard, now: () => BASE + 1000,
+      }).get()
+      expect(fetchBoard).toHaveBeenCalledOnce()
+      expect(result.jobs).toEqual([expect.objectContaining({ id: `${after.provider}-${after.id}-new-source`, source: after.provider })])
+      expect(result.boards[0].provider).toBe(after.provider)
+    }
+  })
+
+  it('rejects mismatched source and native ID prefixes in both restored and newly collected jobs', async () => {
+    const company = PUBLIC_COMPANIES.find(item => item.provider === 'ashby')!
+    const invalidJobs = [
+      { ...job(company, iso(BASE)), source: 'lever' as const },
+      { ...job(company, iso(BASE)), id: `lever-${company.id}-one` },
+    ]
+    for (const invalid of invalidJobs) {
+      const saved = snapshot(company)
+      saved.snapshot!.jobs = [invalid]
+      const fetchBoard = vi.fn(async (_company: Company, fetchedAt: string) => ({ jobs: [job(company, fetchedAt, 'verified')], total: 1, unmappedCount: 0 }))
+      const restored = await createCatalogService({ companies: [company], cache: memoryCache([saved]), fetchBoard, now: () => BASE }).get()
+      expect(restored.jobs[0].id).toBe(`ashby-${company.id}-verified`)
+      expect(fetchBoard).toHaveBeenCalledOnce()
+      const retained = await createCatalogService({
+        companies: [company], cache: memoryCache([snapshot(company)]), now: () => BASE + CATALOG_POLICY.freshFor, random: () => 0,
+        fetchBoard: async (_company, fetchedAt) => ({ jobs: [{ ...invalid, fetchedAt }], total: 1, unmappedCount: 0 }),
+      }).get()
+      expect(retained.jobs[0]).toMatchObject({ id: `ashby-${company.id}-one`, source: 'ashby', fetchedAt: iso(BASE), stale: true })
+      expect(retained.boards[0].status).toBe('error')
+    }
+  })
+
   it('discards only invalid cache records and never serves a foreign-company or future snapshot', async () => {
     expect(parseCachedBoards({ version: 4, boards: [snapshot(companies[0]), { invalid: true }] })).toHaveLength(1)
     const future = snapshot(companies[1], BASE + 24 * 60 * 60 * 1000)
@@ -250,7 +319,7 @@ describe('cache validation and migration', () => {
       await writeFile(legacyFile, JSON.stringify(legacy))
       expect((await cache.load())[0].snapshot).toMatchObject({ unmappedCount: null, fetchedAt: iso(BASE) })
       await cache.save([snapshot(companies[0])])
-      expect(JSON.parse(await readFile(currentFile, 'utf8')).version).toBe(4)
+      expect(JSON.parse(await readFile(currentFile, 'utf8')).version).toBe(5)
       expect((await cache.load())[0].snapshot?.unmappedCount).toBe(1)
       expect((await readdir(directory)).sort()).toEqual(['current.json', 'legacy.json'])
       await writeFile(currentFile, '{invalid-json')

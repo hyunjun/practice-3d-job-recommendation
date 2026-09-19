@@ -1,0 +1,148 @@
+import { expect, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
+import { readFile } from 'node:fs/promises'
+import { normalizeJob } from '../../server/normalize'
+import { normalizeAshbyJob } from '../../server/providers/ashby'
+import { normalizeLeverJob } from '../../server/providers/lever'
+import { CITIES } from '../../shared/cities'
+import { PUBLIC_COMPANIES } from '../../shared/companies'
+import { DEFAULT_FILTERS } from '../../shared/types'
+import type { Catalog, Job, SavedJob } from '../../shared/types'
+import { ashbyPosting, leverPosting, POSTING_TIME } from '../fixtures/public-postings'
+
+const ashby = PUBLIC_COMPANIES.find(company => company.id === 'supabase')!
+const lever = PUBLIC_COMPANIES.find(company => company.id === 'spotify')!
+const stripe = PUBLIC_COMPANIES.find(company => company.id === 'stripe')!
+const ashbyJob = normalizeAshbyJob(ashbyPosting({
+  compensation: { compensationTiers: [
+    { title: 'United Kingdom', components: [{ compensationType: 'Salary', interval: '1 YEAR', currencyCode: 'GBP', minValue: 100000, maxValue: 140000 }] },
+    { title: 'Europe', components: [{ compensationType: 'Salary', interval: '1 YEAR', currencyCode: 'EUR', minValue: 90000, maxValue: 130000 }] },
+  ] },
+}), ashby.id, POSTING_TIME)!
+const leverJob = normalizeLeverJob(leverPosting(), lever.id, POSTING_TIME)!
+const legacySaved: SavedJob = {
+  job: normalizeJob({
+    id: 940, title: 'Backend Engineer — saved Greenhouse fixture',
+    absolute_url: 'https://example.com/jobs/legacy-saved', location: { name: 'London, UK' },
+    content: '<p>5 years of software engineering with Python and AWS.</p>',
+  }, stripe.id, POSTING_TIME)!,
+  company: stripe, savedAt: POSTING_TIME, status: 'saved', note: 'Existing saved note',
+}
+
+function catalog(jobs: Job[] = [ashbyJob, leverJob]): Catalog {
+  const companies = [ashby, lever].filter(company => jobs.some(job => job.companyId === company.id))
+  return {
+    source: 'public', cities: CITIES, companies, jobs, stale: false, fetchedAt: POSTING_TIME, checkedAt: POSTING_TIME, unmappedCount: 0,
+    boards: companies.map(company => ({
+      companyId: company.id, board: company.board!, provider: company.provider,
+      total: jobs.filter(job => job.companyId === company.id).length,
+      included: jobs.filter(job => job.companyId === company.id).length,
+      status: 'ok', dataStatus: 'fresh', checkedAt: POSTING_TIME, lastSuccessAt: POSTING_TIME,
+    })),
+  }
+}
+
+async function restore(page: Page, data = catalog(), remote = false) {
+  await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: data }))
+  await page.addInitScript(({ remote, saved, filters }) => {
+    if (!localStorage.getItem('orbit.v1.exploration')) localStorage.setItem('orbit.v1.exploration', JSON.stringify({
+      source: 'greenhouse', mapMode: 'flat', selectedId: remote ? null : 'london',
+      panelTab: remote ? 'remote' : 'cities', filters: remote ? { ...filters, region: 'europe', workMode: 'remote' } : filters,
+    }))
+    if (!localStorage.getItem('orbit.v1.saved')) localStorage.setItem('orbit.v1.saved', JSON.stringify([saved]))
+    if (!localStorage.getItem('orbit.v1.compare')) localStorage.setItem('orbit.v1.compare', JSON.stringify(['london']))
+  }, { remote, saved: legacySaved, filters: DEFAULT_FILTERS })
+  await page.goto('/')
+  await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
+}
+
+test('mixed public sources preserve legacy exploration, saved jobs, conditional pay and CSV provenance', async ({ page }) => {
+  await restore(page)
+  await expect(page.locator('.company-card')).toHaveCount(2)
+  await expect(page.getByRole('button', { name: '2D 지도', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.exploration') || '{}').source)).toBe('public')
+  await page.getByRole('button', { name: '공개 채용', exact: true }).click()
+  await expect(page.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText(['Ashby1개 회사', 'Lever1개 회사'])
+  await page.locator('.board-details > summary').click()
+  await expect(page.locator('.board-row').filter({ hasText: 'Supabase' })).toContainText('Ashby')
+  await expect(page.locator('.board-row').filter({ hasText: 'Spotify' })).toContainText('Lever')
+  await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await page.locator('.mini-job-title').filter({ hasText: 'Ashby fixture' }).click()
+  await expect(page.locator('.job-key-facts')).toContainText('별도 보상 조건')
+  await expect(page.locator('.job-compensation')).toHaveAttribute('open', '')
+  await expect(page.locator('.job-compensation dd')).toHaveText(['GBP 100,000–140,000 / 년', 'EUR 90,000–130,000 / 년'])
+  await expect(page.locator('.source-line')).toContainText('Ashby 공개 게시판')
+  await expect(page.getByRole('link', { name: '원문에서 지원하기' })).toHaveAttribute('href', ashbyJob.url)
+  await page.getByRole('button', { name: '기회 저장', exact: true }).click()
+  await page.getByLabel('이 기회에 대한 나의 메모').fill('지역별 보상 조건 확인하기')
+  await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await page.reload()
+  await expect(page.locator('.saved-card')).toHaveCount(2)
+  await expect(page.locator('.saved-note-preview')).toContainText(['지역별 보상 조건 확인하기', 'Existing saved note'])
+  await page.locator('.saved-title').filter({ hasText: 'Ashby fixture' }).click()
+  await expect(page.locator('.job-compensation dd')).toHaveCount(2)
+  await expect(page.locator('.source-line')).toContainText('Ashby 공개 게시판')
+  await page.getByRole('button', { name: '닫기', exact: true }).click()
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
+  const csv = await readFile((await (await downloadPromise).path())!, 'utf8')
+  for (const value of ['Greenhouse', 'Ashby', '별도 보상 조건', 'United Kingdom: GBP 100,000–140,000 / 년', 'Europe: EUR 90,000–130,000 / 년']) expect(csv).toContain(value)
+  const saved = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
+  expect(saved.map((item: SavedJob) => item.job.source)).toEqual(['ashby', 'greenhouse'])
+  expect(saved[0].company.provider).toBe('ashby')
+})
+
+test('only comparable annual pay enters city statistics and permanent employment remains distinct from full-time', async ({ page }) => {
+  await restore(page)
+  await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /도시 비교/ }).click()
+  const pay = page.getByRole('row').filter({ hasText: '공개 연봉의 중앙값' })
+  await expect(pay).toContainText('연봉 공개 1개 공고 기준')
+  await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: '기회 탐색', exact: true }).click()
+  await page.getByRole('button', { name: /^모든 필터/ }).click()
+  await page.getByRole('checkbox', { name: /연봉 미공개·별도 보상 공고도 포함/ }).uncheck()
+  await page.getByLabel('고용 형태', { exact: true }).selectOption('fulltime')
+  await expect(page.getByRole('button', { name: /0개 공고 보기$/ })).toBeVisible()
+  await page.getByLabel('고용 형태', { exact: true }).selectOption('permanent')
+  await page.getByRole('button', { name: /1개 공고 보기$/ }).click()
+  await expect(page.locator('.mini-job-title')).toHaveCount(1)
+  await page.locator('.mini-job-title').click()
+  await expect(page.locator('.job-meta-pills')).toContainText('기간 제한 없음')
+  await expect(page.locator('.job-meta-pills')).not.toContainText('풀타임')
+  await expect(page.locator('.source-line')).toContainText('Lever 공개 게시판')
+})
+
+test('regional remote discovery never implies country eligibility from a local office address', async ({ page }) => {
+  const remote = normalizeAshbyJob(ashbyPosting({
+    location: 'Europe', workplaceType: 'Remote', isRemote: true, compensation: null,
+  }), ashby.id, POSTING_TIME)!
+  await restore(page, catalog([remote]), true)
+  await expect(page.locator('.mini-job-title')).toHaveCount(0)
+  await page.getByRole('button', { name: /^모든 필터/ }).click()
+  await page.getByRole('checkbox', { name: /거주 국가에서 가능한 원격근무만/ }).uncheck()
+  await page.getByRole('button', { name: /1개 공고 보기$/ }).click()
+  await expect(page.locator('.mini-job-title')).toHaveCount(1)
+  await expect(page.locator('.flat-marker')).toHaveCount(0)
+  await page.locator('.mini-job-title').click()
+  await expect(page.locator('.remote-scope')).toContainText('국가별 지원 가능 여부 미확인')
+  await expect(page.locator('.remote-scope')).not.toContainText('영국')
+  await expect(page.locator('.match-section.caution')).toContainText('지원 가능한 거주 국가가 확인되지 않았어요')
+})
+
+test.describe('mobile public sources', () => {
+  test.use({ viewport: { width: 320, height: 780 }, isMobile: true, hasTouch: true })
+  test('source coverage and multiple compensation ranges remain readable and accessible at 320px', async ({ page }) => {
+    await restore(page)
+    await page.getByRole('button', { name: '공개 채용', exact: true }).click()
+    await expect(page.locator('.provider-coverage')).toBeVisible()
+    expect(await page.locator('.dialog').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+    expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
+    await page.getByRole('button', { name: '닫기', exact: true }).click()
+    await page.locator('.mini-job-title').filter({ hasText: 'Ashby fixture' }).click()
+    await expect(page.locator('.job-compensation dd')).toHaveCount(2)
+    expect(await page.locator('.job-compensation').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
+  })
+})
