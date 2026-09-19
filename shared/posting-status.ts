@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { PUBLIC_PROVIDERS } from './types'
-import { jobRoles, upgradeJobRole } from './job-roles'
-import { upgradeJobOccupation } from './job-occupation'
+import { jobRoleEvidence, jobRoles, upgradeJobRole } from './job-roles'
+import { isTechnicalJob, upgradeJobOccupation } from './job-occupation'
 import type { Job, JobProvider, SavedJob } from './types'
 
 export const REVISION_FIELDS = ['title', 'location', 'conditions', 'compensation', 'qualifications', 'description', 'url'] as const
@@ -90,8 +90,12 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
   const current = upgradeJobRole(upgradeJobOccupation(job))
   const sections: Record<RevisionField, unknown> = {
     title: {
-      text: job.title, roles: jobRoles(current), evidence: current.roleClassification?.evidence ?? [],
-      occupation: current.occupation ? { category: current.occupation.category, evidence: current.occupation.evidence } : null,
+      text: job.title, roles: jobRoles(current), evidence: jobRoleEvidence(current),
+      occupation: current.occupation ? {
+        category: current.occupation.category, evidence: current.occupation.evidence,
+        // These source departments are shown in out-of-scope details.
+        ...(!isTechnicalJob(current) ? { departments: current.occupation.departments } : {}),
+      } : null,
     },
     location: { cities: job.cityIds, label: job.locationLabel },
     conditions: {

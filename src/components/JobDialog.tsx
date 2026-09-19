@@ -12,6 +12,7 @@ import type { PostingObservation } from '../../shared/posting-status'
 import { SavedPostingNotice } from './SavedPostingNotice'
 import { JobEligibilityDetails } from './JobEligibilityDetails'
 import { isUnmappedJob } from '../../shared/job-location'
+import { isTechnicalJob } from '../../shared/job-occupation'
 import { JobRoleDetails } from './JobRoleDetails'
 import type { SavedJobsController } from '../hooks/useSavedJobs'
 import { SavedStorageNotice } from './SavedStorageNotice'
@@ -29,6 +30,7 @@ interface Props {
 
 export function JobDialog({ match, saved, storage, onManageSaved, postingObservation, onToggleSave, onUpdateSaved, onClose }: Props) {
   const { job, company, matchedSkills, reasons, cautions } = match
+  const technical = isTechnicalJob(job)
   const url = safeExternalUrl(job.url)
   const date = new Date(job.fetchedAt).toLocaleDateString('ko-KR')
   const verifiedSalary = job.salary && (job.source === 'sample' || job.compensationVersion === COMPENSATION_VERSION)
@@ -47,7 +49,7 @@ export function JobDialog({ match, saved, storage, onManageSaved, postingObserva
       {isUnmappedJob(job) && <div className="unmapped-job-notice"><MapPin size={17} /><div><strong>지도에 표시되지 않은 근무지</strong><p>위에 적힌 공고의 위치를 확인해 주세요. 제공 도시 밖이거나 도시를 특정하기 어려워 지도에는 표시하지 않아요. 출근 장소와 근무 형태는 원문에서 다시 확인해 주세요.</p></div></div>}
       <JobEvidenceDetails evidence={job.evidence} />
       <JobEligibilityDetails job={job} />
-      <section className="match-section"><h4><span className="section-icon green"><Check size={15} /></span>이 기회와 연결되는 이유</h4>{reasons.length ? <ul>{reasons.map(reason => <li key={reason}><Check size={14} /><span>{reason}</span></li>)}</ul> : <p className="field-description">현재 탐색 조건에 포함된 공고예요. 담당 업무와 구체적인 기술 요구사항은 원문에서 확인해 주세요.</p>}{!job.qualifications && <div className="skill-list">{job.skills.map(skill => <span className={`skill-tag ${matchedSkills.includes(skill) ? 'matched' : ''}`} key={skill}>{matchedSkills.includes(skill) && <Check size={11} />}{skill}</span>)}</div>}</section>
+      <section className="match-section"><h4><span className={`section-icon ${technical ? 'green' : 'amber'}`}>{technical ? <Check size={15} /> : <CircleHelp size={15} />}</span>{technical ? '이 기회와 연결되는 이유' : '입력 정보와 공고의 조건'}</h4>{reasons.length ? <ul>{reasons.map(reason => <li key={reason}><Check size={14} /><span>{reason}</span></li>)}</ul> : <p className="field-description">현재 입력 정보에서 공고와 연결되는 조건을 확인하지 못했어요. 실제 업무와 자격 조건은 원문에서 확인해 주세요.</p>}{!job.qualifications && <div className="skill-list">{job.skills.map(skill => <span className={`skill-tag ${matchedSkills.includes(skill) ? 'matched' : ''}`} key={skill}>{matchedSkills.includes(skill) && <Check size={11} />}{skill}</span>)}</div>}</section>
       <JobQualificationDetails job={job} matchedSkills={matchedSkills} />
       {cautions.length > 0 && <section className="match-section caution"><h4><span className="section-icon amber"><CircleHelp size={15} /></span>함께 확인하면 좋을 것들</h4><ul>{cautions.map(caution => <li key={caution}><span className="caution-bullet" /><span>{caution}</span></li>)}</ul></section>}
       <p className="matching-footnote">입력한 기술·경력과 공고의 문구를 비교한 결과이며, 합격 가능성을 의미하지 않습니다.</p>

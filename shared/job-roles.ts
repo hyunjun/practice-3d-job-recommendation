@@ -1,5 +1,6 @@
 import { JOB_ROLES, ROLE_CLASSIFICATION_VERSION, ROLE_FILTER_LABELS } from './types'
 import type { Filters, Job, JobOccupation, JobRoleClassification, KnownJobRole } from './types'
+import { isTechnicalJob, jobOccupationLabel } from './job-occupation'
 
 // Titles take precedence over department/team labels. Only research vacancies may
 // also use the job-specific evidence already checked by the occupation classifier.
@@ -59,17 +60,25 @@ export function upgradeJobRole(job: Job): Job {
 }
 
 export function jobRoles(job: Job): KnownJobRole[] {
+  if (!isTechnicalJob(job)) return []
   const current = upgradeJobRole(job)
   return current.roleClassification?.roles ?? (current.role === 'unknown' ? [] : [current.role])
 }
 
+/** Preserve earlier inferences in the snapshot; only expose applicable specialties. */
+export function jobRoleEvidence(job: Job): JobRoleClassification['evidence'] {
+  return isTechnicalJob(job) ? upgradeJobRole(job).roleClassification?.evidence ?? [] : []
+}
+
 export function matchesJobRole(job: Job, role: Filters['role']): boolean {
+  if (!isTechnicalJob(job)) return false
   if (role === 'all') return true
   const roles = jobRoles(job)
   return role === 'unknown' ? roles.length === 0 : roles.includes(role)
 }
 
 export function jobRoleLabel(job: Job): string {
+  if (!isTechnicalJob(job)) return jobOccupationLabel(job)
   const roles = jobRoles(job)
   return roles.length ? roles.map(role => ROLE_FILTER_LABELS[role]).join(' · ') : ROLE_FILTER_LABELS.unknown
 }

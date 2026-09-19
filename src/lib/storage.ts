@@ -3,7 +3,7 @@ import { CITY_BY_ID } from '../../shared/cities'
 import { DEFAULT_FILTERS, ELIGIBILITY_LABELS, ELIGIBILITY_LEVEL_LABELS, JOB_ROLES, JOB_SOURCE_LABELS, QUALIFICATION_LABELS, ROLE_FILTER_LABELS, SAMPLE_PROFILE, VISA_LABELS } from '../../shared/types'
 import { formatCompensation, formatJobSalary } from '../../shared/matching'
 import { formatExperienceYears } from '../../shared/job-qualifications'
-import { jobRoleLabel, upgradeJobRole } from '../../shared/job-roles'
+import { jobRoleEvidence, jobRoleLabel } from '../../shared/job-roles'
 import { jobOccupationLabel, upgradeJobOccupation } from '../../shared/job-occupation'
 import { jobFreshness } from '../../shared/catalog-freshness'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
@@ -138,7 +138,7 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
       item.job.eligibility?.rules.map(rule => `${ELIGIBILITY_LABELS[rule.kind]}: ${ELIGIBILITY_LEVEL_LABELS[rule.level]}`).join('\n') ?? '',
       [...new Set(item.job.eligibility?.rules.map(rule => rule.evidence.text) ?? [])].join('\n\n'),
       jobRoleLabel(item.job),
-      upgradeJobRole(item.job).roleClassification?.evidence.map(evidence => `${ROLE_FILTER_LABELS[evidence.role]} · ${evidence.source === 'title' ? '공고 제목' : evidence.source === 'board' ? '공개 부서·팀' : '연구 업무·자격 원문'}\n${evidence.text}`).join('\n\n') ?? '',
+      jobRoleEvidence(item.job).map(evidence => `${ROLE_FILTER_LABELS[evidence.role]} · ${evidence.source === 'title' ? '공고 제목' : evidence.source === 'board' ? '공개 부서·팀' : '연구 업무·자격 원문'}\n${evidence.text}`).join('\n\n'),
       jobOccupationLabel(item.job),
       upgradeJobOccupation(item.job).occupation?.evidence.map(evidence => `${evidence.source === 'title' ? '공고 제목' : evidence.source === 'board' ? '공개 게시판 정보' : '업무·자격 원문'}\n${evidence.text}`).join('\n\n') ?? '',
       item.job.source === 'sample' ? '' : item.job.fetchedAt,
