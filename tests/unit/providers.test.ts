@@ -130,7 +130,7 @@ describe('public feed collection', () => {
     expect(result.jobs).toHaveLength(1)
     expect(fetcher.mock.calls[0][0]).toContain('includeCompensation=true')
     fetcher.mockResolvedValueOnce(Response.json({ apiVersion: '1', jobs: [] }))
-    expect(await fetchAshbyBoard(ashby, POSTING_TIME)).toEqual({ jobs: [], total: 0, unmappedCount: 0 })
+    expect(await fetchAshbyBoard(ashby, POSTING_TIME)).toEqual({ jobs: [], total: 0, unmappedCount: 0, publishedIds: [] })
     for (const payload of [{ apiVersion: '2', jobs: [] }, { apiVersion: '1', jobs: [{ id: 'missing-fields' }] }]) {
       fetcher.mockResolvedValueOnce(Response.json(payload))
       await expect(fetchAshbyBoard(ashby, POSTING_TIME)).rejects.toBeInstanceOf(BoardFetchError)
@@ -146,6 +146,8 @@ describe('public feed collection', () => {
     const result = await fetchLeverBoard({ ...lever, boardRegion: 'eu' }, POSTING_TIME)
     expect(result.total).toBe(51)
     expect(result.jobs).toHaveLength(51)
+    expect(result.publishedIds).toHaveLength(51)
+    expect(result.publishedIds).toContain(`lever-${lever.id}-last-page`)
     expect(fetcher.mock.calls[0][0]).toBe('https://api.eu.lever.co/v0/postings/spotify?mode=json&limit=50&skip=0')
     expect(fetcher.mock.calls[1][0]).toContain('skip=50')
     expect(fetcher.mock.calls[0][1].signal).toBe(fetcher.mock.calls[1][1].signal)
@@ -155,7 +157,7 @@ describe('public feed collection', () => {
     const oldJob = normalizeLeverJob(leverPosting({ id: 'previous' }), lever.id, POSTING_TIME)!
     let cached: CachedBoard[] = [{
       companyId: lever.id, board: lever.board!, provider: 'lever', checkedAt: POSTING_TIME, failures: 0, retryAt: null,
-      snapshot: { fetchedAt: POSTING_TIME, jobs: [{ ...oldJob, source: 'lever' }], total: 1, unmappedCount: 0 },
+      snapshot: { fetchedAt: POSTING_TIME, jobs: [{ ...oldJob, source: 'lever' }], total: 1, unmappedCount: 0, publishedIds: [oldJob.id] },
     }]
     const now = Date.parse(POSTING_TIME) + CATALOG_POLICY.freshFor
     vi.spyOn(Date, 'now').mockReturnValue(now)
@@ -172,8 +174,28 @@ describe('public feed collection', () => {
     expect(result.jobs[0]).toMatchObject({ id: oldJob.id, fetchedAt: POSTING_TIME, stale: true })
     expect(result.boards[0]).toMatchObject({ provider: 'lever', status: 'error', included: 1, retryAt: new Date(now + 600000).toISOString() })
     await service.get(true)
+    expect((await service.getPostingStatus(true)).boards[0]).toMatchObject({
+      status: 'error', lastSuccessAt: POSTING_TIME, listing: { publishedIds: [oldJob.id] },
+    })
     expect(fetcher).toHaveBeenCalledTimes(2)
     expect(cached[0].snapshot?.jobs).toEqual([oldJob])
+  })
+
+  it('keeps listed non-developer and unmapped IDs for status checks while excluding unlisted Ashby jobs', async () => {
+    const fetcher = vi.fn(async () => Response.json({ apiVersion: '1', jobs: [
+      ashbyPosting(), ashbyPosting(),
+      ashbyPosting({ id: 'non-developer', title: 'Account Executive' }),
+      ashbyPosting({ id: 'unmapped', location: 'Unknown Office', address: null, secondaryLocations: [], workplaceType: 'OnSite' }),
+      ashbyPosting({ id: 'unlisted', isListed: false }),
+    ] }))
+    vi.stubGlobal('fetch', fetcher)
+    const result = await fetchAshbyBoard(ashby, POSTING_TIME)
+    expect(result.total).toBe(3)
+    expect(result.jobs).toHaveLength(1)
+    expect(result.unmappedCount).toBe(1)
+    expect(result.publishedIds).toEqual([
+      `ashby-${ashby.id}-shared-fixture-id`, `ashby-${ashby.id}-non-developer`, `ashby-${ashby.id}-unmapped`,
+    ])
   })
 
   it('fails repeated or malformed pages instead of publishing a truncated Lever feed', async () => {

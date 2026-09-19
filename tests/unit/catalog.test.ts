@@ -380,6 +380,6 @@ describe('Greenhouse transport', () => {
       await expect(fetchGreenhouseBoard(companies[0], iso(BASE))).rejects.toBeInstanceOf(BoardFetchError)
     }
     fetcher.mockResolvedValueOnce(Response.json({ jobs: [] }))
-    expect(await fetchGreenhouseBoard(companies[0], iso(BASE))).toEqual({ jobs: [], total: 0, unmappedCount: 0 })
+    expect(await fetchGreenhouseBoard(companies[0], iso(BASE))).toEqual({ jobs: [], total: 0, unmappedCount: 0, publishedIds: [] })
   })
 })

@@ -67,7 +67,7 @@ export async function fetchLeverBoard(company: Company, fetchedAt: string) {
     parsed.data.forEach(job => jobs.set(job.id, job))
     if (jobs.size > MAX_POSTINGS) throw new BoardFetchError('한 번에 확인할 수 있는 게시판 크기를 초과했어요.')
     if (parsed.data.length && jobs.size === previousSize) throw new BoardFetchError('게시판의 다음 공고 페이지를 확인하지 못했어요.')
-    if (parsed.data.length < PAGE_SIZE) return includedJobs([...jobs.values()].map(job => normalizeLeverJob(job, company.id, fetchedAt)), jobs.size)
+    if (parsed.data.length < PAGE_SIZE) return includedJobs([...jobs.values()].map(job => normalizeLeverJob(job, company.id, fetchedAt)), jobs.size, [...jobs.keys()].map(id => `lever-${company.id}-${id}`))
   }
   // Never replace a complete snapshot with a truncated feed.
   throw new BoardFetchError('게시판의 전체 공고를 확인하지 못했어요.')

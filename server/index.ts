@@ -1,7 +1,7 @@
 import express from 'express'
 import path from 'node:path'
 import { createSampleCatalog } from '../shared/sample'
-import { getPublicCatalog } from './catalog'
+import { getPublicCatalog, getPublicPostingStatus } from './catalog'
 import { CatalogUnavailableError } from './catalog-service'
 
 const app = express()
@@ -38,6 +38,20 @@ app.get('/api/catalog', async (request, response) => {
     response.status(503).json({
       error: error instanceof Error ? error.message : '공고를 불러오지 못했습니다.',
       ...(error instanceof CatalogUnavailableError ? { retryAt, code: error.code } : {}),
+    })
+  }
+})
+
+// This fixed public-board index never receives saved job IDs, notes or profile data.
+app.get('/api/posting-status', async (request, response) => {
+  response.setHeader('Cache-Control', 'no-store')
+  try {
+    response.json(await getPublicPostingStatus(request.query.refresh === '1'))
+  } catch {
+    response.setHeader('Retry-After', '60')
+    response.status(503).json({
+      error: '게시 상태를 불러오지 못했어요. 잠시 후 다시 확인해 주세요.',
+      retryAt: new Date(Date.now() + 60_000).toISOString(),
     })
   }
 })

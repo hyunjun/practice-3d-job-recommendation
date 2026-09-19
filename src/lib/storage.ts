@@ -6,6 +6,8 @@ import { formatCompensation, formatJobSalary } from '../../shared/matching'
 import { upgradeJobCompensation } from '../../shared/job-compensation'
 import { formatExperienceYears, upgradeJobQualifications } from '../../shared/job-qualifications'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
+import { POSTING_STATE_LABELS, REVISION_LABELS } from '../../shared/posting-status'
+import type { PostingObservation } from '../../shared/posting-status'
 
 export const STORAGE_KEYS = {
   profile: 'orbit.v1.profile',
@@ -123,7 +125,7 @@ export function deleteProfile(): void {
   persistExploration(loadExploration(SAMPLE_PROFILE), false)
 }
 
-export function exportSavedCsv(saved: SavedJob[]): void {
+export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<string, PostingObservation>): void {
   // Neutralize spreadsheet formulas in imported job titles and user notes.
   const cell = (value: unknown) => {
     const text = String(value ?? '')
@@ -131,7 +133,7 @@ export function exportSavedCsv(saved: SavedJob[]): void {
     return `"${safe.replace(/"/g, '""')}"`
   }
   const rows = [
-    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거'],
+    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목'],
     ...saved.map(item => [
       item.company.name, item.job.title, item.job.locationLabel, JOB_SOURCE_LABELS[item.job.source],
       item.status === 'applied' ? '지원 완료' : '저장됨', item.savedAt, item.note, item.job.url,
@@ -141,6 +143,11 @@ export function exportSavedCsv(saved: SavedJob[]): void {
       item.job.qualifications?.skills.map(rule => `${QUALIFICATION_LABELS[rule.kind]}: ${rule.skills.join(rule.match === 'any' ? ' 또는 ' : ', ')}${rule.match === 'unspecified' ? ' · 선택 조건 원문 확인' : ''}`).join('\n') ?? '',
       [item.job.qualifications?.experienceNote, ...(item.job.qualifications?.experience.map(rule => `${QUALIFICATION_LABELS[rule.kind]}: ${formatExperienceYears(rule.minYears)}${rule.maxYears === undefined ? ' 이상' : `–${formatExperienceYears(rule.maxYears)}`}${rule.conditional ? ' · 적용 조건 확인' : ''}`) ?? [])].filter(Boolean).join('\n'),
       [...new Set([...(item.job.qualifications?.skills ?? []), ...(item.job.qualifications?.experience ?? [])].map(rule => rule.evidence.text))].join('\n\n'),
+      POSTING_STATE_LABELS[observations?.get(item.job.id)?.state ?? (item.job.source === 'sample' ? 'sample' : 'unchecked')],
+      observations?.get(item.job.id)?.checkedAt ?? '',
+      item.job.source === 'sample' ? '대상 아님' : observations?.get(item.job.id)?.changedFields
+        ? observations.get(item.job.id)!.changedFields!.length ? '차이 있음' : '표시 내용 일치' : '미확인',
+      observations?.get(item.job.id)?.changedFields?.map(field => REVISION_LABELS[field]).join(' · ') ?? '',
     ]),
   ]
   const blob = new Blob(['\ufeff', rows.map(row => row.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' })

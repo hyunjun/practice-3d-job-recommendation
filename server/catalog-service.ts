@@ -1,4 +1,6 @@
 import { CITIES } from '../shared/cities'
+import { createJobRevision } from '../shared/posting-status'
+import type { PostingBoard, PostingStatusIndex } from '../shared/posting-status'
 import { PUBLIC_PROVIDERS } from '../shared/types'
 import type { BoardStatus, Catalog, Company, Job } from '../shared/types'
 import { BoardSnapshotSchema } from './board-cache'
@@ -31,6 +33,8 @@ export interface BoardResult {
   jobs: Job[]
   total: number
   unmappedCount: number
+  /** Complete published feed, before role or location filtering. Absent for legacy snapshots. */
+  publishedIds?: string[]
 }
 
 interface Options {
@@ -49,16 +53,20 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
   }
   const boards = new Map<string, CachedBoard>()
   let initialized: Promise<void> | null = null
-  let pending: Promise<Catalog> | null = null
+  let pending: Promise<void> | null = null
+  const revisions = new WeakMap<BoardSnapshot, Promise<NonNullable<PostingBoard['listing']>['jobs']>>()
   const iso = (time: number) => new Date(time).toISOString()
   const refreshAt = (entry: CachedBoard) => Math.max(
     Date.parse(entry.checkedAt) + CATALOG_POLICY.minRefreshInterval,
     entry.error && entry.retryAt ? Date.parse(entry.retryAt) : 0,
   )
-  const belongsToBoard = (snapshot: BoardSnapshot, company: Company) => snapshot.jobs.every(job =>
-    job.companyId === company.id && job.source === (company.provider ?? 'greenhouse')
-    && job.id.startsWith(`${job.source}-${company.id}-`) && job.fetchedAt === snapshot.fetchedAt,
-  )
+  const belongsToBoard = (snapshot: BoardSnapshot, company: Company) => {
+    const prefix = `${company.provider ?? 'greenhouse'}-${company.id}-`
+    return snapshot.jobs.every(job =>
+      job.companyId === company.id && job.source === (company.provider ?? 'greenhouse')
+      && job.id.startsWith(prefix) && job.fetchedAt === snapshot.fetchedAt,
+    ) && (snapshot.publishedIds?.every(id => id.startsWith(prefix)) ?? true)
+  }
 
   async function initialize() {
     const loaded = await cache.load().catch(error => { onCacheError(error); return [] })
@@ -111,6 +119,45 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
     }
   }
 
+  async function composePostingStatus(): Promise<PostingStatusIndex> {
+    const current = now()
+    const statuses = await Promise.all(companies.map(async (company): Promise<PostingBoard> => {
+      const entry = boards.get(company.id)!
+      const snapshot = entry.snapshot
+      const usable = snapshot && current - Date.parse(snapshot.fetchedAt) <= CATALOG_POLICY.maxFallbackAge
+      let listing: PostingBoard['listing']
+      if (usable && snapshot.publishedIds !== undefined) {
+        let summaries = revisions.get(snapshot)
+        if (!summaries) {
+          summaries = Promise.all(snapshot.jobs.map(async job => ({
+            id: job.id, title: job.title, url: job.url, revision: await createJobRevision(job),
+          })))
+          revisions.set(snapshot, summaries)
+          void summaries.catch(() => revisions.delete(snapshot))
+        }
+        listing = {
+          validUntil: iso(Date.parse(snapshot.fetchedAt) + CATALOG_POLICY.freshFor),
+          publishedIds: snapshot.publishedIds,
+          jobs: await summaries,
+        }
+      }
+      return {
+        companyId: company.id, provider: company.provider ?? 'greenhouse',
+        board: company.board!, ...(company.boardRegion ? { boardRegion: company.boardRegion } : {}),
+        status: entry.error ? 'error' : 'ok', checkedAt: entry.checkedAt,
+        lastSuccessAt: snapshot?.fetchedAt ?? null,
+        retryAt: entry.error ? iso(refreshAt(entry)) : null,
+        ...(entry.error ? { message: entry.error } : {}), ...(listing ? { listing } : {}),
+      }
+    }))
+    return {
+      version: 1,
+      checkedAt: iso(Math.max(...statuses.map(board => Date.parse(board.checkedAt)))),
+      refreshAfter: iso(Math.min(...[...boards.values()].map(refreshAt))),
+      boards: statuses,
+    }
+  }
+
   async function collect(company: Company) {
     const previous = boards.get(company.id)
     const checkedAt = iso(now())
@@ -143,29 +190,37 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
     }
   }
 
-  async function refresh(due: Company[]): Promise<Catalog> {
+  async function refresh(due: Company[]): Promise<void> {
     let cursor = 0
     await Promise.all(Array.from({ length: Math.min(CATALOG_POLICY.concurrency, due.length) }, async () => {
       while (cursor < due.length) await collect(due[cursor++])
     }))
     try { await cache.save([...boards.values()]) } catch (error) { onCacheError(error) }
-    return compose()
+  }
+
+  async function ensureFresh(force: boolean): Promise<void> {
+    await (initialized ??= initialize())
+    if (pending) return pending
+    const current = now()
+    const due = companies.filter(company => {
+      const entry = boards.get(company.id)
+      if (!entry) return true
+      if (entry.error) return current >= refreshAt(entry)
+      return current - Date.parse(entry.checkedAt) >= (force ? CATALOG_POLICY.minRefreshInterval : CATALOG_POLICY.freshFor)
+    })
+    if (!due.length) return
+    pending = refresh(due)
+    try { await pending } finally { pending = null }
   }
 
   return {
     async get(force = false): Promise<Catalog> {
-      await (initialized ??= initialize())
-      if (pending) return pending
-      const current = now()
-      const due = companies.filter(company => {
-        const entry = boards.get(company.id)
-        if (!entry) return true
-        if (entry.error) return current >= refreshAt(entry)
-        return current - Date.parse(entry.checkedAt) >= (force ? CATALOG_POLICY.minRefreshInterval : CATALOG_POLICY.freshFor)
-      })
-      if (!due.length) return compose()
-      pending = refresh(due)
-      try { return await pending } finally { pending = null }
+      await ensureFresh(force)
+      return compose()
+    },
+    async getPostingStatus(force = false): Promise<PostingStatusIndex> {
+      await ensureFresh(force)
+      return composePostingStatus()
     },
   }
 }

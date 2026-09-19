@@ -70,6 +70,6 @@ export function normalizeAshbyJob(raw: AshbyJob, companyId: string, fetchedAt: s
 export async function fetchAshbyBoard(company: Company, fetchedAt: string) {
   const data = Feed.safeParse(await fetchBoardJson(`https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(company.board!)}?includeCompensation=true`, AbortSignal.timeout(BOARD_TIMEOUT)))
   if (!data.success) throw new BoardFetchError('Ashby 게시판의 공고 형식을 확인하지 못했어요.')
-  const listed = data.data.jobs.filter(job => job.isListed)
-  return includedJobs(listed.map(job => normalizeAshbyJob(job, company.id, fetchedAt)), listed.length)
+  const listed = [...new Map(data.data.jobs.filter(job => job.isListed).map(job => [job.id, job])).values()]
+  return includedJobs(listed.map(job => normalizeAshbyJob(job, company.id, fetchedAt)), listed.length, listed.map(job => `ashby-${company.id}-${job.id}`))
 }

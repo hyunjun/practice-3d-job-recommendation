@@ -24,3 +24,4 @@ const service = createCatalogService({
 })
 
 export const getPublicCatalog = (refresh = false) => service.get(refresh)
+export const getPublicPostingStatus = (refresh = false) => service.getPostingStatus(refresh)

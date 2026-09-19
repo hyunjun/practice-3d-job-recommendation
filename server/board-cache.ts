@@ -13,7 +13,14 @@ export const BoardSnapshotSchema = z.object({
   jobs: z.array(JobSchema.extend({ source: JobProviderSchema, fetchedAt: Timestamp }).transform(job => upgradeJobQualifications(upgradeJobCompensation(job)))).max(20000),
   total: z.number().int().nonnegative(),
   unmappedCount: z.number().int().nonnegative().nullable(),
+  publishedIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
 }).refine(snapshot => snapshot.total >= snapshot.jobs.length + (snapshot.unmappedCount ?? 0))
+  .refine(snapshot => {
+    if (!snapshot.publishedIds) return true
+    const ids = new Set(snapshot.publishedIds)
+    return snapshot.publishedIds.length === snapshot.total && ids.size === snapshot.publishedIds.length
+      && snapshot.jobs.every(job => ids.has(job.id))
+  })
 
 const CachedBoardSchema = z.object({
   companyId: z.string().min(1).max(100),

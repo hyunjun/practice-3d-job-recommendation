@@ -14,8 +14,8 @@ export async function fetchBoardJson(url: string, signal: AbortSignal): Promise<
   catch { throw new BoardFetchError('게시판 응답 형식을 확인하지 못했어요.') }
 }
 
-export function includedJobs(normalized: (Job | null)[], total: number): BoardResult {
+export function includedJobs(normalized: (Job | null)[], total: number, publishedIds?: string[]): BoardResult {
   const jobs = normalized.filter((job): job is Job => job !== null)
   const unmappedCount = jobs.filter(job => job.workMode !== 'remote' && !job.cityIds.length).length
-  return { jobs: jobs.filter(job => job.workMode === 'remote' || job.cityIds.length > 0), total, unmappedCount }
+  return { jobs: jobs.filter(job => job.workMode === 'remote' || job.cityIds.length > 0), total, unmappedCount, ...(publishedIds ? { publishedIds } : {}) }
 }
