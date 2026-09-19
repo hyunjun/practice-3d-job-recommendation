@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { ArrowUpRight, Check, Globe2, X } from 'lucide-react'
+import { ArrowUpRight, Check, CircleHelp, Globe2, X } from 'lucide-react'
 import type { City, Company } from '../../shared/types'
 
 export function OrbitLogo({ small = false }: { small?: boolean }) {
@@ -70,12 +70,12 @@ export function Spinner({ label }: { label?: string }) {
   return <span className="spinner-wrap" role="status"><span className="spinner" aria-hidden="true" />{label && <span>{label}</span>}</span>
 }
 
-export function Toast({ message, action, onDismiss }: { message: string; action?: { label: string; run: () => void }; onDismiss: () => void }) {
+export function Toast({ message, action, tone, onDismiss }: { message: string; action?: { label: string; run: () => void }; tone?: 'error'; onDismiss: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onDismiss, action ? 7000 : 4500)
     return () => clearTimeout(timer)
   }, [message, onDismiss, action])
-  return <div className="toast" role="status"><span className="toast-check"><Check size={15} /></span><span>{message}</span>{action && <button onClick={() => { action.run(); onDismiss() }}>{action.label}</button>}<button className="icon-button" onClick={onDismiss} aria-label="알림 닫기"><X size={15} /></button></div>
+  return <div className={`toast ${tone ?? ''}`} role="status"><span className="toast-check">{tone === 'error' ? <CircleHelp size={15} /> : <Check size={15} />}</span><span>{message}</span>{action && <button onClick={() => { action.run(); onDismiss() }}>{action.label}</button>}<button className="icon-button" onClick={onDismiss} aria-label="알림 닫기"><X size={15} /></button></div>
 }
 
 export function ExternalIcon() {

@@ -1,12 +1,24 @@
 import { z } from 'zod'
-import { SAMPLE_PROFILE } from '../../shared/types'
-import type { Profile, SavedJob } from '../../shared/types'
+import { CITY_BY_ID } from '../../shared/cities'
+import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
+import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
 
 export const STORAGE_KEYS = {
   profile: 'orbit.v1.profile',
   saved: 'orbit.v1.saved',
   compare: 'orbit.v1.compare',
+  exploration: 'orbit.v1.exploration',
 } as const
+
+export interface ExplorationState {
+  source: Source
+  filters: Filters
+  selectedId: string | null
+  panelTab: 'cities' | 'remote'
+  mapMode: 'globe' | 'flat'
+  light: boolean
+  citySort: 'companies' | 'match' | 'salary'
+}
 
 const ProfileSchema = z.object({
   kind: z.literal('personal'),
@@ -83,6 +95,46 @@ export function loadCompare(): string[] {
   return load(STORAGE_KEYS.compare, z.array(z.string().max(100)).max(3), [])
 }
 
+export function loadExploration(profile: Profile): ExplorationState {
+  const filters: Filters = { ...DEFAULT_FILTERS, ...profile.preferences, role: profile.desiredRole }
+  const fallback: ExplorationState = {
+    source: 'sample', filters, selectedId: null,
+    panelTab: filters.workMode === 'remote' ? 'remote' : 'cities',
+    mapMode: 'globe', light: false, citySort: 'companies',
+  }
+  // Recover fields independently so an obsolete option does not discard a valid data source.
+  const schema = z.object({
+    source: z.enum(['sample', 'greenhouse']).catch(fallback.source),
+    filters: z.object({
+      query: z.string().max(500).catch(filters.query),
+      region: z.enum(['all', 'americas', 'europe', 'asia-pacific']).catch(filters.region),
+      role: z.enum(['all', 'backend', 'frontend', 'fullstack', 'ml', 'data', 'devops', 'mobile', 'security']).catch(filters.role),
+      workMode: z.enum(['all', 'remote', 'hybrid', 'onsite', 'unknown']).catch(filters.workMode),
+      visa: z.enum(['all', 'yes', 'supported', 'possible']).catch(filters.visa),
+      employment: z.enum(['all', 'fulltime', 'parttime', 'contract', 'intern', 'temporary', 'unknown']).catch(filters.employment),
+      salaryMin: z.number().int().min(0).max(250000).catch(filters.salaryMin),
+      includeUnknownSalary: z.boolean().catch(filters.includeUnknownSalary),
+      remoteEligibleOnly: z.boolean().catch(filters.remoteEligibleOnly),
+    }).catch(filters),
+    selectedId: z.string().refine(id => CITY_BY_ID.has(id)).nullable().catch(null),
+    panelTab: z.enum(['cities', 'remote']).catch(fallback.panelTab),
+    mapMode: z.enum(['globe', 'flat']).catch(fallback.mapMode),
+    light: z.boolean().catch(fallback.light),
+    citySort: z.enum(['companies', 'match', 'salary']).catch(fallback.citySort),
+  })
+  const state = load<ExplorationState>(STORAGE_KEYS.exploration, schema, fallback)
+  if (state.selectedId && state.filters.region !== 'all' && CITY_BY_ID.get(state.selectedId)?.region !== state.filters.region) {
+    state.selectedId = null
+  }
+  return state
+}
+
+export function persistExploration(state: ExplorationState, rememberConditions: boolean): boolean {
+  return persist(STORAGE_KEYS.exploration, rememberConditions ? state : {
+    ...state, filters: { ...DEFAULT_FILTERS }, selectedId: null, panelTab: 'cities',
+  })
+}
+
 export function persist(key: string, value: unknown): boolean {
   try { localStorage.setItem(key, JSON.stringify(value)); return true }
   catch { return false }
@@ -90,6 +142,7 @@ export function persist(key: string, value: unknown): boolean {
 
 export function deleteProfile(): void {
   try { localStorage.removeItem(STORAGE_KEYS.profile) } catch { /* Session remains usable without storage. */ }
+  persistExploration(loadExploration(SAMPLE_PROFILE), false)
 }
 
 export function exportSavedCsv(saved: SavedJob[]): void {

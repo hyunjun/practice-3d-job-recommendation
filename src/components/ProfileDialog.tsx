@@ -11,12 +11,13 @@ const EXAMPLE_RESUME = `Alex Kim\nSoftware Engineer · 5 years of experience\n\n
 interface Props {
   profile: Profile
   filters: Filters
+  remember: boolean
   onApply: (profile: Profile, preferences: Partial<Filters>, remember: boolean) => void
   onDelete: () => void
   onClose: () => void
 }
 
-export function ProfileDialog({ profile, filters, onApply, onDelete, onClose }: Props) {
+export function ProfileDialog({ profile, filters, remember: initialRemember, onApply, onDelete, onClose }: Props) {
   const [step, setStep] = useState(profile.kind === 'personal' ? 2 : 1)
   const [tab, setTab] = useState<'text' | 'file' | 'linkedin'>('file')
   const [text, setText] = useState('')
@@ -29,7 +30,7 @@ export function ProfileDialog({ profile, filters, onApply, onDelete, onClose }: 
   const [fileName, setFileName] = useState('')
   const [dragging, setDragging] = useState(false)
   const [skill, setSkill] = useState('')
-  const [remember, setRemember] = useState(true)
+  const [remember, setRemember] = useState(initialRemember)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const importFile = async (file?: File) => {
@@ -140,7 +141,7 @@ export function ProfileDialog({ profile, filters, onApply, onDelete, onClose }: 
             <div className="field-group"><label htmlFor="profile-visa">비자 지원</label><select id="profile-visa" value={preferences.visa} onChange={event => setPreferences({ ...preferences, visa: event.target.value as Filters['visa'] })}>{Object.entries(VISA_FILTER_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
           </div>
           <div className="salary-field"><label htmlFor="profile-salary">희망 연봉 <strong>{preferences.salaryMin ? `$${preferences.salaryMin / 1000}k 이상` : '제한 없음'}</strong></label><input id="profile-salary" type="range" min={0} max={250000} step={10000} value={preferences.salaryMin} onChange={event => setPreferences({ ...preferences, salaryMin: Number(event.target.value) })} /><p className="field-description">세전 연간 USD 환산 · 공고의 연봉 상한 기준으로 탐색해요.</p></div>
-          <Toggle checked={remember} onChange={setRemember} label="이 브라우저에 프로필 기억하기" description="기술·경력·조건만 저장하고, 이력서 원문은 저장하지 않아요." />
+          <Toggle checked={remember} onChange={setRemember} label="이 브라우저에 프로필 기억하기" description="기술·경력·탐색 조건을 기억해요. 끄면 이번 화면에만 적용하며, 이력서 원문은 항상 저장하지 않아요." />
           {error && <p className="form-error" role="alert">{error}</p>}
           <div className="profile-form-actions"><button className="button secondary" onClick={() => { setStep(1); setError('') }}><ArrowLeft size={16} />다시 입력</button><button className="button primary" onClick={submit}>내 기회 지도 만들기<ArrowRight size={16} /></button></div>
           {profile.kind === 'personal' && <button className="delete-profile-button" onClick={onDelete}>저장된 프로필 삭제 · 샘플로 돌아가기</button>}

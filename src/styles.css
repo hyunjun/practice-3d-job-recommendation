@@ -302,6 +302,8 @@ select option { background: #1e271c; color: var(--text); }
 @keyframes spin { to { transform: rotate(360deg); } }
 .toast { position: fixed; left: 50%; bottom: 54px; transform: translateX(-50%); display: flex; align-items: center; gap: 11px; background: #2a3a22f5; border: 1px solid #779553; border-radius: 9px; color: #e0efcd; padding: 10px 12px 10px 15px; z-index: 100; box-shadow: 0 10px 50px #0008; backdrop-filter: blur(16px); font-size: 11px; max-width: calc(100vw - 32px); animation: toast-in .2s ease-out; }
 .toast-check { display: grid; place-items: center; height: 22px; width: 22px; background: #4c6934; color: var(--accent); border-radius: 50%; flex-shrink: 0; }
+.toast.error { border-color: #9b824b; background: #352f20f5; color: #f0dfb5; }
+.toast.error .toast-check { background: #574923; color: #efd58e; }
 .toast > span:nth-child(2) { line-height: 1.7; }
 .toast > button:not(.icon-button) { color: #d5fcae; font-size: 10px; padding: 7px 9px; background: #476234; border-radius: 5px; white-space: nowrap; }
 .toast > .icon-button { width: 24px; height: 24px; }
@@ -476,6 +478,14 @@ select option { background: #1e271c; color: var(--text); }
 .data-source-options small { font-size: 8px; color: #91aa79; }
 .data-option-check { position: absolute; right: 12px; top: 13px; color: #c1e996; }
 .data-loading { display: flex; align-items: center; justify-content: center; padding: 20px 10px 0; color: #c9e8aa; }
+.catalog-placeholder { padding: 25px 0; }
+.catalog-placeholder .empty-icon { width: auto; height: auto; padding: 15px; }
+.catalog-placeholder .spinner-wrap { font-size: 11px; color: #c9e8aa; }
+.catalog-notice { display: flex; align-items: flex-start; gap: 10px; margin: 16px 16px 0; padding: 14px; border: 1px solid #596a40; border-radius: 6px; background: #2a361f; }
+.catalog-notice > svg, .catalog-notice > .spinner-wrap { margin-top: 3px; color: #d6c58c; }
+.catalog-notice p { flex: 1; font-size: 11px; line-height: 1.8; color: #d0debd; overflow-wrap: anywhere; }
+.catalog-notice p span { display: block; color: #aebf98; }
+.catalog-notice > button { flex-shrink: 0; margin-top: 3px; }
 .coverage-stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 22px 0; border-bottom: 1px solid #4a6235; margin-bottom: 26px; }
 .coverage-stats > div { display: flex; flex-direction: column; align-items: center; gap: 7px; }
 .coverage-stats > div + div { border-left: 1px solid #476030; }
