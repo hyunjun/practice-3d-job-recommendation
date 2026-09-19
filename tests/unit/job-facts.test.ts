@@ -100,6 +100,6 @@ describe('Greenhouse adapter integration', () => {
   })
 
   it('reads the documented currency_type property in structured pay ranges', () => {
-    expect(parseSalary('', [], [{ min_cents: 15000000, max_cents: 20000000, currency_type: 'USD' }])).toEqual({ min: 150000, max: 200000, currency: 'USD' })
+    expect(parseSalary('', [], [{ title: 'Annual Base Salary Range', min_cents: 15000000, max_cents: 20000000, currency_type: 'USD' }])).toEqual({ min: 150000, max: 200000, currency: 'USD' })
   })
 })

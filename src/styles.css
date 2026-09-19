@@ -468,6 +468,13 @@ select option { background: #1e271c; color: var(--text); }
 .compensation-body dl > div + div { margin-top: 14px; padding-top: 14px; border-top: 1px solid #475533; }
 .compensation-body dt { font-size: 11px; color: #b4c69f; margin-bottom: 6px; overflow-wrap: anywhere; }
 .compensation-body dd { font-size: 12px; line-height: 1.8; color: #d5e5be; overflow-wrap: anywhere; }
+.compensation-scope { margin: 10px 0 0; color: #c3c9a6; font-size: 11px; line-height: 1.9; }
+.compensation-scope strong { display: block; font-weight: 500; color: #cdddba; }
+.compensation-evidence { margin-top: 10px; }
+.compensation-evidence > summary { display: flex; align-items: center; gap: 8px; min-height: 34px; font-size: 11px; color: #bdcda9; cursor: pointer; list-style: none; }
+.compensation-evidence > summary::-webkit-details-marker { display: none; }
+.compensation-evidence[open] > summary > svg { transform: rotate(180deg); }
+.compensation-evidence blockquote { margin: 6px 0 0; padding-left: 12px; border-left: 2px solid #6b8553; white-space: pre-wrap; overflow-wrap: anywhere; color: #c7d8b6; font-size: 11px; line-height: 1.9; }
 .job-description { font-size: 13px; line-height: 2; color: #bed0ad; padding-top: 18px; border-top: 1px solid #465e33; }
 .job-description h4 { font-size: 14px; color: #d9e8c8; font-weight: 500; margin-bottom: 10px; }
 .job-description p { white-space: pre-wrap; margin-bottom: 22px; word-break: break-word; }

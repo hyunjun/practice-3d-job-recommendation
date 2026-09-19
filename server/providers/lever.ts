@@ -1,9 +1,10 @@
 import { z } from 'zod'
 import type { Company, Job } from '../../shared/types'
 import { BoardFetchError } from '../catalog-service'
-import { normalizeCompensation } from '../compensation'
+import { normalizeCompensation } from '../../shared/compensation'
+import { parseTextCompensation, payBasis } from '../../shared/pay-text'
 import { employmentFact, workModeFact } from '../job-facts'
-import { normalizePosting, parseSalary, plainText, postingCities, postingLocationLabel, postingRemoteScope } from '../normalize'
+import { normalizePosting, plainText, postingCities, postingLocationLabel, postingRemoteScope } from '../normalize'
 import type { PostingLocation } from '../normalize'
 import { BOARD_TIMEOUT, MAX_POSTINGS, fetchBoardJson, includedJobs } from './http'
 
@@ -39,9 +40,14 @@ export function normalizeLeverJob(raw: LeverJob, companyId: string, fetchedAt: s
   const workMode = workModeFact(primary, [{ name: 'workplaceType', value: raw.workplaceType }], text)
   const employment = employmentFact(raw.text, [{ name: 'commitment', value: raw.categories?.commitment }], text)
   const cities = postingCities(locations)
+  const salaryDescription = raw.salaryDescriptionPlain?.trim() || plainText(raw.salaryDescription ?? '')
   const salary = raw.salaryRange
-    ? normalizeCompensation([{ ...raw.salaryRange, label: '기본 급여' }])
-    : { salary: parseSalary(text, cities) }
+    ? normalizeCompensation([{
+      ...raw.salaryRange, label: '게시판의 급여 범위',
+      basis: payBasis(salaryDescription) === 'total' ? 'total' : 'base',
+      evidence: { source: 'board', text: [raw.salaryRange.currency, raw.salaryRange.interval, salaryDescription].filter(Boolean).join('\n') },
+    }])
+    : parseTextCompensation(text)
   return normalizePosting({
     provider: 'lever', id: raw.id, companyId, title: raw.text, text, url: raw.hostedUrl, fetchedAt,
     cityIds: workMode.value === 'remote' ? [] : cities, locationLabel: postingLocationLabel(locations, workMode.value),

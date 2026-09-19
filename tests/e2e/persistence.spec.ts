@@ -15,7 +15,7 @@ const publicCatalog = {
     absolute_url: `https://example.com/jobs/restore-${index}`, location: { name: location },
     content: '<p>3 years of software engineering experience. Python and AWS.</p><p>We provide visa sponsorship.</p>',
     metadata: [{ name: 'Location Type', value: 'Hybrid' }, { name: 'Time Type', value: 'Full time' }],
-    pay_input_ranges: [{ min_cents: 15000000, max_cents: 18000000, currency_type: 'USD' }],
+    pay_input_ranges: [{ title: 'Annual Base Salary Range', min_cents: 15000000, max_cents: 18000000, currency_type: 'USD' }],
   }, 'stripe', fetchedAt)!),
   boards: [{ companyId: 'stripe', board: 'stripe', status: 'ok', total: 2, included: 2 }],
 }

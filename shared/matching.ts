@@ -23,14 +23,15 @@ export function isRemoteEligible(job: Job, country: string): boolean {
 }
 
 export function formatJobSalary(job: Job): string {
-  return job.salary ? formatSalary(job.salary) : job.compensationRanges?.length
+  return job.salary ? `${formatSalary(job.salary)}${job.source !== 'sample' && !job.compensationVersion ? ' · 이전 기록' : ''}` : job.compensationRanges?.length
     ? '별도 보상 조건' : job.compensationNote ? '보상 확인 필요' : '연봉 미공개'
 }
 
 export function formatCompensation(range: NonNullable<Job['compensationRanges']>[number]): string {
   const amount = (value: number) => value.toLocaleString('ko-KR', { maximumFractionDigits: 2 })
   const period = { year: '년', month: '월', week: '주', day: '일', hour: '시간', unknown: '기간 미확인' }[range.period]
-  return `${range.currency} ${amount(range.min)}–${amount(range.max)} / ${period}`
+  const basis = range.basis === 'total' ? ' · 총보상' : range.basis === 'unknown' ? ' · 구성 미확인' : ''
+  return `${range.currency ?? '통화 미확인'} ${amount(range.min)}–${amount(range.max)} / ${period}${basis}`
 }
 
 export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company' | 'job'> {

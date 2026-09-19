@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import type { Company, Job } from '../../shared/types'
 import { BoardFetchError } from '../catalog-service'
-import { normalizeCompensation } from '../compensation'
+import { normalizeCompensation } from '../../shared/compensation'
+import { parseTextCompensation } from '../../shared/pay-text'
 import { employmentFact, workModeFact } from '../job-facts'
 import type { Fact } from '../job-facts'
 import type { WorkMode } from '../../shared/types'
-import { normalizePosting, parseSalary, plainText, postingCities, postingLocationLabel, postingRemoteScope } from '../normalize'
+import { normalizePosting, plainText, postingCities, postingLocationLabel, postingRemoteScope } from '../normalize'
 import type { PostingLocation } from '../normalize'
 import { BOARD_TIMEOUT, MAX_POSTINGS, fetchBoardJson, includedJobs } from './http'
 
@@ -57,7 +58,8 @@ export function normalizeAshbyJob(raw: AshbyJob, companyId: string, fetchedAt: s
     : (compensation?.summaryComponents ?? []).filter(item => item.compensationType === 'Salary').map(item => ({ ...item, label: '기본 급여' }))
   const salary = components.length ? normalizeCompensation(components.map(item => ({
     label: item.label, min: item.minValue, max: item.maxValue, currency: item.currencyCode, interval: item.interval,
-  }))) : { salary: parseSalary(text, cities) }
+    evidence: { source: 'board', text: [item.label, item.compensationType, item.currencyCode, item.interval].filter(Boolean).join(' · ') },
+  }))) : parseTextCompensation(text)
   return normalizePosting({
     provider: 'ashby', id: raw.id, companyId, title: raw.title, text, url: raw.jobUrl, fetchedAt,
     cityIds: mode.value === 'remote' ? [] : cities, locationLabel: postingLocationLabel(locations, mode.value),

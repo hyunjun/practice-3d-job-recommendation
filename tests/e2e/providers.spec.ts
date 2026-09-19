@@ -71,7 +71,7 @@ test('mixed public sources preserve legacy exploration, saved jobs, conditional 
   await page.locator('.mini-job-title').filter({ hasText: 'Ashby fixture' }).click()
   await expect(page.locator('.job-key-facts')).toContainText('별도 보상 조건')
   await expect(page.locator('.job-compensation')).toHaveAttribute('open', '')
-  await expect(page.locator('.job-compensation dd')).toHaveText(['GBP 100,000–140,000 / 년', 'EUR 90,000–130,000 / 년'])
+  await expect(page.locator('.job-compensation dd > span')).toHaveText(['GBP 100,000–140,000 / 년', 'EUR 90,000–130,000 / 년'])
   await expect(page.locator('.source-line')).toContainText('Ashby 공개 게시판')
   await expect(page.getByRole('link', { name: '원문에서 지원하기' })).toHaveAttribute('href', ashbyJob.url)
   await page.getByRole('button', { name: '기회 저장', exact: true }).click()

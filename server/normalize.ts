@@ -1,8 +1,12 @@
 import { CITY_BY_ID, LOCATION_ALIASES } from '../shared/cities'
 import { extractSkills, extractYears, inferRole } from '../shared/profile'
+import { plainText } from '../shared/text'
+export { plainText } from '../shared/text'
+import { COMPENSATION_VERSION } from '../shared/types'
 import type { Employment, Job, JobProvider, Salary, Visa, WorkMode } from '../shared/types'
 import { employmentFact, visaFact, workModeFact } from './job-facts'
 import type { Fact } from './job-facts'
+import { greenhouseCompensation } from './greenhouse-compensation'
 
 export interface GreenhouseJob {
   id: number
@@ -13,25 +17,7 @@ export interface GreenhouseJob {
   content?: string
   offices?: { name?: string; location?: string | null }[]
   metadata?: { name?: string; value?: unknown }[]
-  pay_input_ranges?: { min_cents?: number; max_cents?: number; currency_type?: string; currency_code?: string }[]
-}
-
-export function plainText(html: string): string {
-  let result = html
-  const entities: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', ndash: '–', mdash: '—', rsquo: '’', lsquo: '‘' }
-  for (let pass = 0; pass < 2; pass++) {
-    result = result.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, code: string) => {
-      if (code.startsWith('#')) {
-        const n = code.toLowerCase().startsWith('#x') ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10)
-        return n >= 0 && n <= 0x10ffff ? String.fromCodePoint(n) : ''
-      }
-      return entities[code.toLowerCase()] ?? whole
-    })
-  }
-  return result.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<\/(?:p|div|li|h[1-6])>|<br\s*\/?>/gi, '\n')
-    .replace(/<[^>]*>/g, '').replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n\n').trim()
+  pay_input_ranges?: { min_cents?: number; max_cents?: number; currency_type?: string; currency_code?: string; title?: string; blurb?: string }[]
 }
 
 export function locateCities(location: string): string[] {
@@ -133,34 +119,8 @@ export function postingRemoteScope(locations: PostingLocation[]) {
   return { ...scope, remoteCountries: [...countries], remoteScopeUnknown: !scope.remoteWorldwide && !countries.size }
 }
 
-export function parseSalary(text: string, cityIds: string[], ranges?: GreenhouseJob['pay_input_ranges']): Salary | null {
-  const supported = ['USD', 'EUR', 'GBP', 'CAD', 'SGD', 'AUD', 'KRW', 'JPY', 'CHF']
-  const structured = ranges?.find(range => typeof range.min_cents === 'number' && typeof range.max_cents === 'number' && supported.includes(range.currency_type ?? range.currency_code ?? ''))
-  if (structured && structured.min_cents! >= 1000000 && structured.max_cents! >= structured.min_cents!) {
-    return { min: structured.min_cents! / 100, max: structured.max_cents! / 100, currency: (structured.currency_type ?? structured.currency_code) as Salary['currency'] }
-  }
-  const pattern = /([$€£])\s*([\d,]{2,9}(?:\.\d+)?)\s*(k)?\s*(?:-|–|—|to)\s*[$€£]?\s*([\d,]{2,9}(?:\.\d+)?)\s*(k)?(?:\s*(USD|EUR|GBP|CAD|SGD|AUD|CHF))?/gi
-  for (const match of text.matchAll(pattern)) {
-    const context = text.slice(Math.max(0, match.index! - 200), match.index! + match[0].length + 160)
-    if (!/salary|base pay|compensation|annual|pay range|per year|annum/i.test(context) || /per hour|hourly|\/hr\b/i.test(context)) continue
-    const min = Number(match[2].replace(/,/g, '')) * (match[3] ? 1000 : 1)
-    const max = Number(match[4].replace(/,/g, '')) * (match[5] ? 1000 : 1)
-    if (min < 10000 || max < min || max > 2000000) continue
-    let currency: Salary['currency'] | null = match[6]?.toUpperCase() as Salary['currency'] ?? null
-    if (match[1] === '€') currency = 'EUR'
-    if (match[1] === '£') currency = 'GBP'
-    if (!currency && match[1] === '$') {
-      if (/\bUSD\b|US dollars|U\.S\. dollars/i.test(context)) currency = 'USD'
-      else if (/\bCAD\b|Canadian dollars/i.test(context)) currency = 'CAD'
-      else {
-        const countries = [...new Set(cityIds.map(id => CITY_BY_ID.get(id)?.countryCode))]
-        if (countries.length === 1 && countries[0] === 'US') currency = 'USD'
-        if (countries.length === 1 && countries[0] === 'CA') currency = 'CAD'
-      }
-    }
-    if (currency) return { min, max, currency }
-  }
-  return null
+export function parseSalary(text: string, _cityIds: string[], ranges?: GreenhouseJob['pay_input_ranges']): Salary | null {
+  return greenhouseCompensation(text, ranges).salary
 }
 
 export function isDeveloperTitle(title: string): boolean {
@@ -168,7 +128,7 @@ export function isDeveloperTitle(title: string): boolean {
     && !/manager|director|head of|vice president|sales|solutions engineer|support engineer|field engineer|customer engineer|mechanical|electrical|hardware|facilities|manufacturing|recruit/i.test(title)
 }
 
-interface PostingInput extends Pick<Job, 'companyId' | 'title' | 'cityIds' | 'locationLabel' | 'salary' | 'compensationRanges' | 'compensationNote' | 'url' | 'fetchedAt'> {
+interface PostingInput extends Pick<Job, 'companyId' | 'title' | 'cityIds' | 'locationLabel' | 'salary' | 'compensationRanges' | 'compensationNote' | 'compensationEvidence' | 'url' | 'fetchedAt'> {
   id: string | number
   provider: JobProvider
   text: string
@@ -188,6 +148,8 @@ export function normalizePosting(input: PostingInput): Job | null {
     employment: employment.value, minExperience: extractYears(text), skills: extractSkills(text), salary,
     ...(compensationRanges?.length ? { compensationRanges } : {}),
     ...(compensationNote ? { compensationNote } : {}),
+    ...(input.compensationEvidence?.length ? { compensationEvidence: input.compensationEvidence } : {}),
+    compensationVersion: COMPENSATION_VERSION,
     visa: visa.value,
     ...(input.scope ?? { remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false }),
     evidence: {
@@ -224,7 +186,7 @@ export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: s
   return normalizePosting({
     provider: 'greenhouse', id: raw.id, companyId, title: raw.title, text, fetchedAt,
     cityIds, locationLabel: location, workMode, employment, scope,
-    salary: parseSalary(text, isRemote ? locateCities(remoteLocation) : cityIds, raw.pay_input_ranges),
+    ...greenhouseCompensation(text, raw.pay_input_ranges),
     url: raw.absolute_url, updatedAt: raw.updated_at,
   })
 }

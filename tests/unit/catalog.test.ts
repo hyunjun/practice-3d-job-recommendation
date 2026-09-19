@@ -15,7 +15,7 @@ const companies = PUBLIC_COMPANIES.slice(0, 2)
 const demoJob = createSampleCatalog().jobs[0]
 const iso = (value: number) => new Date(value).toISOString()
 const job = (company: Company, fetchedAt: string, suffix = 'one'): Job & { source: JobProvider } => ({
-  ...demoJob, id: `${company.provider ?? 'greenhouse'}-${company.id}-${suffix}`, companyId: company.id, source: company.provider ?? 'greenhouse', fetchedAt,
+  ...demoJob, id: `${company.provider ?? 'greenhouse'}-${company.id}-${suffix}`, companyId: company.id, source: company.provider ?? 'greenhouse', fetchedAt, compensationVersion: 1,
 })
 const snapshot = (company: Company, time = BASE): CachedBoard => ({
   companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', boardRegion: company.boardRegion, checkedAt: iso(time), failures: 0, retryAt: null,
@@ -215,6 +215,23 @@ describe('request scheduling and retries', () => {
 })
 
 describe('cache validation and migration', () => {
+  it('rechecks legacy pay without changing the age of a retained snapshot during an outage', async () => {
+    const cached = snapshot(companies[0])
+    const prior = cached.snapshot!.jobs[0]
+    delete prior.compensationVersion
+    prior.description = 'For Portugal based hires: Annual base salary EUR 54000–91000.\nFor United States based hires: Annual base salary USD 136000–187000.'
+    prior.salary = { min: 54000, max: 91000, currency: 'EUR' }
+    const migrated = parseCachedBoards({ version: 5, boards: [cached] })
+    expect(migrated[0].snapshot!.jobs[0]).toMatchObject({ salary: null, compensationVersion: 1, fetchedAt: iso(BASE) })
+    expect(migrated[0].snapshot!.jobs[0].compensationRanges).toHaveLength(2)
+    const result = await createCatalogService({
+      companies: [companies[0]], cache: memoryCache(migrated), now: () => BASE + CATALOG_POLICY.freshFor, random: () => 0,
+      fetchBoard: async () => { throw new BoardFetchError('HTTP 503') },
+    }).get()
+    expect(result.jobs[0]).toMatchObject({ id: prior.id, salary: null, stale: true, fetchedAt: iso(BASE) })
+    expect(result.boards[0]).toMatchObject({ status: 'error', lastSuccessAt: iso(BASE) })
+  })
+
   it('keeps a fresh v4 Greenhouse snapshot when migrating to a provider-aware cache', async () => {
     const directory = await mkdtemp(path.join(tmpdir(), 'orbit-v4-migration-test-'))
     const currentFile = path.join(directory, 'v5.json')
@@ -341,6 +358,7 @@ describe('Greenhouse transport', () => {
     vi.stubGlobal('fetch', fetcher)
     fetcher.mockResolvedValueOnce(new Response('', { status: 429, headers: { 'Retry-After': '120' } }))
     await expect(fetchGreenhouseBoard(companies[0], iso(BASE))).rejects.toMatchObject({ message: 'HTTP 429', retryAfter: BASE + 120000 })
+    expect(fetcher.mock.calls[0][0]).toContain('content=true&pay_transparency=true')
     for (const payload of [{ unexpected: [] }, { jobs: [{ id: 1 }] }]) {
       fetcher.mockResolvedValueOnce(Response.json(payload))
       await expect(fetchGreenhouseBoard(companies[0], iso(BASE))).rejects.toBeInstanceOf(BoardFetchError)

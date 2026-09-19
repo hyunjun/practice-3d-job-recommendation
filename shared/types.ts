@@ -7,6 +7,7 @@ export type JobProvider = typeof PUBLIC_PROVIDERS[number]
 export type JobSource = 'sample' | JobProvider
 export type Source = 'sample' | 'public'
 export type Employment = 'fulltime' | 'parttime' | 'permanent' | 'contract' | 'intern' | 'temporary' | 'unknown'
+export const COMPENSATION_VERSION = 1 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever',
@@ -55,8 +56,11 @@ export interface CompensationRange {
   label: string
   min: number
   max: number
-  currency: string
+  currency: string | null
   period: 'year' | 'month' | 'week' | 'day' | 'hour' | 'unknown'
+  basis?: 'base' | 'total' | 'unknown'
+  scope?: string
+  evidence?: FactEvidence
 }
 
 export interface Job {
@@ -73,6 +77,8 @@ export interface Job {
   salary: Salary | null
   compensationRanges?: CompensationRange[]
   compensationNote?: string
+  compensationEvidence?: FactEvidence[]
+  compensationVersion?: typeof COMPENSATION_VERSION
   visa: Visa
   remoteCountries: string[]
   remoteWorldwide: boolean

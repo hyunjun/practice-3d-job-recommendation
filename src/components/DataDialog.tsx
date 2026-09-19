@@ -40,6 +40,8 @@ export function DataDialog({ catalog, loading, error, retryAt, onSource, onRefre
           <div><dt>조건부 비자 지원</dt><dd>{catalog.jobs.filter(job => job.visa === 'conditional').length}<small>개</small></dd></div>
           <div><dt>근무 형태 확인</dt><dd>{catalog.jobs.filter(job => job.workMode !== 'unknown').length}<small> / {catalog.jobs.length}개</small></dd></div>
           <div><dt>고용 형태 확인</dt><dd>{catalog.jobs.filter(job => job.employment !== 'unknown').length}<small> / {catalog.jobs.length}개</small></dd></div>
+          <div><dt>비교 가능한 연봉</dt><dd>{catalog.jobs.filter(job => job.salary).length}<small> / {catalog.jobs.length}개</small></dd></div>
+          <div><dt>보상 조건 확인 필요</dt><dd>{catalog.jobs.filter(job => !job.salary && (job.compensationRanges?.length || job.compensationNote)).length}<small>개</small></dd></div>
         </dl>
         <p>전체 조회 공고 기준입니다. 조건부 지원과 미확인을 구분하며, 공고 상세에서 판단에 사용한 원문을 확인할 수 있어요.</p>
       </section>}

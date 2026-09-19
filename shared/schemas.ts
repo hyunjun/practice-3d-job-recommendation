@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PUBLIC_PROVIDERS } from './types'
+import { COMPENSATION_VERSION, PUBLIC_PROVIDERS } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 
@@ -23,10 +23,15 @@ export const JobSchema = z.object({
   compensationRanges: z.array(z.object({
     label: z.string().max(500),
     min: z.number().nonnegative(), max: z.number().nonnegative(),
-    currency: z.string().regex(/^[A-Z]{3}$/),
+    currency: z.string().regex(/^[A-Z]{3}$/).nullable(),
     period: z.enum(['year', 'month', 'week', 'day', 'hour', 'unknown']),
-  })).max(100).optional(),
+    basis: z.enum(['base', 'total', 'unknown']).optional(),
+    scope: z.string().max(500).optional(),
+    evidence: EvidenceSchema.optional(),
+  }).refine(range => range.max >= range.min)).max(100).optional(),
   compensationNote: z.string().max(1000).optional(),
+  compensationEvidence: z.array(EvidenceSchema).max(20).optional(),
+  compensationVersion: z.literal(COMPENSATION_VERSION).optional(),
   visa: z.enum(['yes', 'conditional', 'no', 'unknown']), remoteCountries: z.array(z.string()).max(300),
   remoteWorldwide: z.boolean(), remoteScopeUnknown: z.boolean(),
   remoteRegions: z.array(z.enum(['americas', 'europe', 'asia-pacific'])).max(3).optional(),
