@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, JOB_ROLES, OCCUPATION_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, ROLE_CLASSIFICATION_VERSION } from './types'
+import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, JOB_ROLES, OCCUPATION_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 const QualificationKindSchema = z.enum(['required', 'qualification', 'preferred', 'context'])
@@ -84,6 +84,7 @@ export const JobSchema = z.object({
   }).optional(),
   remoteWorldwide: z.boolean(), remoteScopeUnknown: z.boolean(),
   remoteRegions: z.array(z.enum(['americas', 'europe', 'asia-pacific'])).max(3).optional(),
+  remoteScopeVersion: z.literal(REMOTE_SCOPE_VERSION).optional(),
   description: z.string().max(30000), requirements: z.array(z.string()).max(50),
   url: z.string().max(2000), source: z.enum(['sample', ...PUBLIC_PROVIDERS]),
   updatedAt: z.string().nullable(), fetchedAt: z.string(),

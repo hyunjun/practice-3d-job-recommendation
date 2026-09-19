@@ -15,6 +15,7 @@ export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 2 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
 export const OCCUPATION_VERSION = 3 as const
+export const REMOTE_SCOPE_VERSION = 1 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever', smartrecruiters: 'SmartRecruiters',
@@ -160,6 +161,7 @@ export interface Job {
   remoteWorldwide: boolean
   remoteScopeUnknown: boolean
   remoteRegions?: Exclude<Region, 'all'>[]
+  remoteScopeVersion?: typeof REMOTE_SCOPE_VERSION
   description: string
   requirements: string[]
   url: string
@@ -327,12 +329,7 @@ export const ELIGIBILITY_LEVEL_LABELS: Record<EligibilityLevel, string> = {
   required: '필수로 명시', conditional: '적용 조건 확인', preferred: '우대 사항', unspecified: '원문 확인',
 }
 
-export const COUNTRIES = [
-  ['KR', '대한민국'], ['US', '미국'], ['CA', '캐나다'], ['GB', '영국'],
-  ['DE', '독일'], ['NL', '네덜란드'], ['FR', '프랑스'], ['IE', '아일랜드'],
-  ['SE', '스웨덴'], ['CH', '스위스'], ['ES', '스페인'], ['PT', '포르투갈'],
-  ['SG', '싱가포르'], ['JP', '일본'], ['AU', '호주'], ['IN', '인도'],
-] as const
+export { COUNTRY_OPTIONS as COUNTRIES } from './countries'
 
 // Indicative, fixed conversion factors. Never represented as live FX quotes.
 export const USD_RATES: Record<Salary['currency'], number> = {

@@ -13,6 +13,10 @@ import { employmentFact, managementFact, visaFact, workModeFact } from './job-fa
 import { eligibilityFacts } from '../shared/job-eligibility'
 import type { Fact } from './job-facts'
 import { greenhouseCompensation } from './greenhouse-compensation'
+import { countryCode } from '../shared/countries'
+import { remoteScope } from '../shared/job-remote'
+export { countryCode } from '../shared/countries'
+export { remoteScope } from '../shared/job-remote'
 
 export interface GreenhouseJob {
   id: number
@@ -29,23 +33,6 @@ export interface GreenhouseJob {
 
 export function detectVisa(text: string): Visa {
   return visaFact(text).value
-}
-
-const COUNTRY_TERMS: Record<string, RegExp> = {
-  US: /\b(?:united states(?: of america)?|usa|u\.s\.a?\.?|us)\b/i, CA: /\bcanada\b/i,
-  GB: /\b(?:united kingdom|uk|gbr|great britain)\b/i, DE: /\b(?:germany|deu)\b/i,
-  NL: /\b(?:netherlands|nld)\b/i, FR: /\b(?:france|fra)\b/i, IE: /\b(?:ireland|irl)\b/i,
-  SE: /\b(?:sweden|swe)\b/i, CH: /\b(?:switzerland|che)\b/i, ES: /\b(?:spain|esp)\b/i,
-  PT: /\b(?:portugal|prt)\b/i, SG: /\b(?:singapore|sgp)\b/i, KR: /\b(?:south korea|korea|kor)\b|대한민국/i,
-  JP: /\b(?:japan|jpn)\b/i, AU: /\b(?:australia|aus)\b/i, IN: /\b(?:india|ind)\b/i,
-}
-
-export function countryCode(value?: string | null): string | undefined {
-  if (!value) return undefined
-  const normalized = value.trim().toUpperCase().replaceAll('.', '')
-  if (Object.hasOwn(COUNTRY_TERMS, normalized)) return normalized
-  if (normalized === 'CAN') return 'CA'
-  return Object.entries(COUNTRY_TERMS).find(([, pattern]) => new RegExp(`^(?:${pattern.source})$`, 'i').test(normalized))?.[0]
 }
 
 export interface PostingLocation {
@@ -74,40 +61,20 @@ export function postingLocationLabel(locations: PostingLocation[], mode: WorkMod
   return [label.length > 1800 ? `${label.slice(0, 1799)}…` : label, suffix].filter(Boolean).join(' · ')
 }
 
-export function remoteScope(location: string): Pick<Job, 'remoteCountries' | 'remoteWorldwide' | 'remoteScopeUnknown' | 'remoteRegions'> {
-  if (/\b(?:except|excluding|outside|not worldwide|not global)\b/i.test(location)) {
-    return { remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: true }
-  }
-  const remoteWorldwide = /\b(?:worldwide|anywhere in the world|global[\s,·(-]+remote|remote[\s,·(-]+global)\b/i.test(location) || /^global$/i.test(location.trim())
-  const countries = new Set(Object.entries(COUNTRY_TERMS).filter(([, pattern]) => pattern.test(location)).map(([id]) => id))
-  // In free-form locations, distinguish the country code CAN from the verb "can".
-  if (/\bCAN\b/.test(location)) countries.add('CA')
-  for (const id of locateCities(location)) {
-    const city = CITY_BY_ID.get(id)
-    if (city) countries.add(city.countryCode)
-  }
-  const remoteRegions: NonNullable<Job['remoteRegions']> = []
-  if (/\b(?:americas?|north america|south america)\b/i.test(location) || /\bAMER\b/.test(location)) remoteRegions.push('americas')
-  if (/\beurope(?:an(?: union)?)?\b/i.test(location) || /\bEU\b/.test(location)) remoteRegions.push('europe')
-  if (/\b(?:asia[\s-]*(?:and |& )?pacific|APAC)\b/i.test(location)) remoteRegions.push('asia-pacific')
-  // "Europe", "EMEA" and "APAC" do not establish legal country eligibility.
-  return {
-    remoteCountries: [...countries], remoteWorldwide, remoteScopeUnknown: !remoteWorldwide && countries.size === 0,
-    ...(remoteRegions.length ? { remoteRegions } : {}),
-  }
-}
-
 export function postingRemoteScope(locations: PostingLocation[]) {
   const labels = locations.map(location => location.label).join(' · ')
   const scope = remoteScope(labels)
   if (/\b(?:except|excluding|outside|not worldwide|not global)\b/i.test(labels)) return scope
   const countries = new Set(scope.remoteCountries)
   for (const location of locations) {
-    // Country-only metadata can qualify a generic location; regional labels and office cities cannot.
-    if (/^(?:remote)?$/i.test(location.label.trim()) && !location.address?.addressLocality) {
-      const country = countryCode(location.address?.addressCountry)
-      if (country) countries.add(country)
-    }
+    // Structured country metadata can disambiguate a code in this posting's label.
+    // A country-only address may also qualify a generic label, but an office or
+    // regional label never borrows a country from its address.
+    const country = countryCode(location.address?.addressCountry)
+    const listedCountry = country && location.label.split(/[;,|·•/()]/).some(part =>
+      countryCode(part.trim().replace(/^remote[\s:–—-]*/i, '').replace(/[\s:–—-]*remote$/i, '')) === country)
+    if (country && (!location.address?.addressLocality && /^(?:remote)?$/i.test(location.label.trim())
+      || listedCountry)) countries.add(country)
   }
   return { ...scope, remoteCountries: [...countries], remoteScopeUnknown: !scope.remoteWorldwide && !countries.size }
 }

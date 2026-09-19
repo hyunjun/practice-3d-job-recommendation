@@ -5,6 +5,7 @@ import { eligibilitySummary, upgradeJobEligibility } from './job-eligibility'
 import { createSearchIndex, selectSearchJobs } from './job-search'
 import { jobRoles, matchesJobRole } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
+import { upgradeJobRemoteScope } from './job-remote'
 import type { SearchEntry } from './job-search'
 import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
 
@@ -26,6 +27,7 @@ export function formatSalary(salary: Salary | null, usd = false): string {
 
 export function isRemoteEligible(job: Job, country: string): boolean {
   // Geographic coverage only. Residence never establishes permission to work or citizenship.
+  job = upgradeJobRemoteScope(job)
   return job.remoteWorldwide || job.remoteCountries.includes(country)
 }
 
@@ -42,7 +44,7 @@ export function formatCompensation(range: NonNullable<Job['compensationRanges']>
 }
 
 export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company' | 'job'> {
-  job = upgradeJobEligibility(job)
+  job = upgradeJobRemoteScope(upgradeJobEligibility(job))
   const technical = isTechnicalJob(job)
   const profileSkills = new Set(profile.skills.map(skill => skill.toLowerCase()))
   const qualificationMatch = job.qualifications ? matchQualifications(job, profile) : undefined

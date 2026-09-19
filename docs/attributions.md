@@ -20,6 +20,13 @@
 
 출처를 고정한 리비전은 [`017a3a5d182b2413f403154d3eb3ed4af3e598ca`](https://github.com/vasturiano/three-globe/commit/017a3a5d182b2413f403154d3eb3ed4af3e598ca)입니다. 두 이미지가 이 리비전의 원본과 바이트 단위로 동일함을 확인했습니다.
 
+## 국가·지역 식별
+
+- 국가·지역 코드, 참고 이름과 지리 구분: [UN Statistics Division의 M49 전체 표](https://unstats.un.org/unsd/methodology/m49/overview/)를 2026-09-20 확인했습니다. 지도에 표시하는 도시 목록과 별도로 관리합니다.
+- `TW`와 사용자 할당 코드 `XK`의 코드 대응은 [Unicode CLDR의 고정 리비전](https://github.com/unicode-org/cldr/blob/7b1090ada749eb29d85d64bfb6c1952671d4b1f5/common/supplemental/supplementalData.xml)을 참고했습니다. `XK`를 ISO가 정식 할당한 코드로 표기하지 않습니다.
+- CLDR 데이터에는 Unicode-3.0이 적용됩니다. 같은 리비전의 [저작권·허가 고지 원문](licenses/unicode-cldr-Unicode-3.0.txt)을 그대로 포함했습니다. 이 고지는 코드 데이터 사용에 적용됩니다.
+- 화면의 한국어 이름은 실행 환경의 `Intl.DisplayNames`를 사용합니다. 지리 구분은 탐색용이며 국가별 고용·취업 허가 범위를 뜻하지 않습니다.
+
 ## 도시 사진
 
 [Unsplash License](https://unsplash.com/license)에 따라 받은 사진을 리사이즈해 로컬에 포함했습니다. 사진은 도시의 분위기를 보여주는 장식 이미지이며 회사 사무실 사진이 아닙니다.

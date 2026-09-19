@@ -88,8 +88,8 @@ describe('search recovery uses actual results in the visible scope', () => {
 
   it('never widens a region into countries or treats a residence change as a suggested fix', () => {
     const index = createSearchIndex(searchCatalog([
-      searchJob('us-only', { workMode: 'remote', cityIds: [], remoteCountries: ['US'] }),
-      searchJob('region-only', { workMode: 'remote', cityIds: [], remoteRegions: ['europe'], remoteScopeUnknown: true }),
+      searchJob('us-only', { workMode: 'remote', cityIds: [], locationLabel: 'Remote, United States', remoteCountries: ['US'] }),
+      searchJob('region-only', { workMode: 'remote', cityIds: [], locationLabel: 'Europe · Remote', remoteRegions: ['europe'], remoteScopeUnknown: true }),
     ]), SEARCH_PROFILE)
     const analysis = analyzeSearchRecovery(index, SEARCH_FILTERS, { kind: 'remote' })!
     expect(analysis.suggestions[0].changes).toEqual({ remoteEligibleOnly: false })

@@ -1,5 +1,6 @@
 import { CITY_BY_ID, LOCATION_ALIASES } from './cities'
 import { locateCities } from './city-location'
+import { upgradeJobRemoteScope } from './job-remote'
 import type { Catalog, FactEvidence, Job } from './types'
 
 const ROLE_LOCATION = /\b(?:this|the)\s+(?:internship|role|position|job)\s+(?:is|will be)\s+(?:based|located)\s+(?:in|at)\s+/gi
@@ -35,10 +36,12 @@ function paragraphEvidence(paragraph: string, position: number): FactEvidence {
 /**
  * Reconcile only explicit current-role statements with a disjoint listed city.
  * Applicant residence, company offices and future/conditional work are not workplaces.
- * Overlapping multi-location listings and remote scope remain authoritative here.
+ * Remote jobs use their own location fields; their scope never comes from role prose.
+ * Overlapping multi-location city listings remain authoritative.
  */
 export function upgradeJobLocation<T extends Job>(job: T, description = job.description): T {
-  if (job.source === 'sample' || job.workMode === 'remote' || !job.cityIds.length || job.locationResolution) return job
+  if (job.workMode === 'remote') return upgradeJobRemoteScope(job)
+  if (job.source === 'sample' || !job.cityIds.length || job.locationResolution) return job
   const roleLocation = new RegExp(ROLE_LOCATION)
   if (!roleLocation.test(description)) return job
   roleLocation.lastIndex = 0

@@ -10,7 +10,7 @@ import { createJobRevision } from '../../shared/posting-status'
 import { createSavedBackup, parseSavedImport } from '../../shared/saved-backup'
 import { SavedJobSchema, decodeSavedJobs } from '../../shared/saved-jobs'
 import { JobSchema } from '../../shared/schemas'
-import { DEFAULT_FILTERS } from '../../shared/types'
+import { DEFAULT_FILTERS, REMOTE_SCOPE_VERSION } from '../../shared/types'
 import type { SavedJob } from '../../shared/types'
 import { CONFLICT_BODY, legacyWorkplaceJob, RELOCATION_BODY, RELOCATION_TITLE, WORKPLACE_BODY, WORKPLACE_TITLE, workplacePosting } from '../fixtures/workplace'
 import { SEARCH_COMPANIES, SEARCH_PROFILE, SEARCH_TIME, searchCatalog, searchJob } from '../fixtures/search-catalog'
@@ -131,7 +131,7 @@ describe('current workplace and listing location', () => {
       { cityIds: ['paris'], locationLabel: 'Paris' },
       { cityIds: [], locationLabel: 'South Korea' },
       { source: 'sample' as const },
-      { workMode: 'remote' as const, cityIds: [], remoteCountries: ['KR'], remoteScopeUnknown: false },
+      { workMode: 'remote' as const, cityIds: [], remoteCountries: ['KR'], remoteScopeUnknown: false, remoteScopeVersion: REMOTE_SCOPE_VERSION },
     ]) {
       const job = { ...legacyWorkplaceJob(), ...override }
       expect(upgradeJobLocation(job)).toBe(job)

@@ -105,8 +105,8 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
     },
     conditions: {
       workMode: job.workMode, employment: job.employment, visa: current.visa,
-      remoteCountries: job.remoteCountries, remoteWorldwide: job.remoteWorldwide,
-      remoteScopeUnknown: job.remoteScopeUnknown, remoteRegions: job.remoteRegions ?? [],
+      remoteCountries: current.remoteCountries, remoteWorldwide: current.remoteWorldwide,
+      remoteScopeUnknown: current.remoteScopeUnknown, remoteRegions: current.remoteRegions ?? [],
       eligibility: current.eligibility ?? null,
       ...(current.evidence?.visa && !job.description.includes(current.evidence.visa.text) ? { visaEvidence: current.evidence.visa } : {}),
     },

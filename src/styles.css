@@ -509,9 +509,11 @@ select option { background: #1e271c; color: var(--text); }
 .job-key-facts strong { font-size: 19px; font-weight: 500; color: #d4e5be; letter-spacing: -.35px; }
 .job-key-facts small { font-size: 11px; line-height: 1.7; color: #92aa78; }
 .remote-scope { display: flex; align-items: flex-start; gap: 9px; margin: 20px 0; padding: 15px; border-radius: 6px; background: #263e275e; border: 1px solid #5579555c; color: #abd3a2; }
-.remote-scope strong { font-size: 10px; font-weight: 500; }
-.remote-scope p { font-size: 10px; color: #cfdfbd; margin: 6px 0; line-height: 1.7; }
-.remote-scope small { font-size: 8px; color: #9cb48e; }
+.remote-scope > svg { flex-shrink: 0; }
+.remote-scope > div { min-width: 0; }
+.remote-scope strong { font-size: 12px; font-weight: 500; }
+.remote-scope p { font-size: 12px; color: #cfdfbd; margin: 6px 0; line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
+.remote-scope small { display: block; font-size: 11px; line-height: 1.7; color: #9cb48e; word-break: keep-all; overflow-wrap: anywhere; }
 .job-freshness-notice { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 20px; padding: 15px; border: 1px solid #78673f; border-radius: 6px; background: #3c35254d; color: #e1ce9b; }
 .job-freshness-notice > svg { margin-top: 2px; flex-shrink: 0; }
 .job-freshness-notice strong { font-size: 12px; font-weight: 500; }

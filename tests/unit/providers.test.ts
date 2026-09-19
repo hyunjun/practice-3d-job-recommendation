@@ -60,7 +60,7 @@ describe('provider-specific facts and common job identity', () => {
     }))
     expect(normalizeAshbyJob(raw, ashby.id, POSTING_TIME)!.cityIds).toEqual(['london', 'berlin'])
     expect(postingCities([{ label: 'London', address: { addressLocality: 'London', addressCountry: 'Uganda' } }])).toEqual([])
-    expect(countryCode('North Korea')).toBeUndefined()
+    expect(countryCode('North Korea')).toBe('KP')
   })
 
   it('uses isRemote as a fallback while retaining ambiguity when structured facts contradict the label', () => {

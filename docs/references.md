@@ -306,3 +306,18 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 2026-09-20 각 원문을 확인했습니다. 24px 최소 기준과 44px 강화 기준을 구분하고, 앱의 핵심 모바일 조작에는 44px를 선택했습니다. 글자 크기는 이 앱의 목록 밀도와 실제 문구를 확인해 정한 값입니다.
 
 화면 안에 있다는 좌표 검사만으로는 하단 메뉴에 가린 버튼을 찾을 수 없었습니다. 실제 키보드 이동 후 요소 위의 여러 지점에서 어떤 요소가 보이는지 함께 확인합니다. Chrome의 안전 영역 에뮬레이션으로 하단 34px 조건도 검증하며, 기기별 검증 범위는 [개선 기록](improvements.md)에 정리합니다.
+
+## 지도 도시와 독립적인 원격근무 국가
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [UN M49](https://unstats.un.org/unsd/methodology/m49/) · [전체 표](https://unstats.un.org/unsd/methodology/m49/overview/) | 국가·지역별 이름, ISO alpha-2·alpha-3, 통계용 지리 구분. 지역 구분은 정치적 소속이나 고용 범위를 뜻하지 않음 | 국가 식별표를 지도 도시와 분리. 기존 지역 탭은 미주·유럽·아시아 및 오세아니아의 지리 구분을 사용 |
+| [Unicode CLDR 코드 대응](https://github.com/unicode-org/cldr/blob/7b1090ada749eb29d85d64bfb6c1952671d4b1f5/common/supplemental/supplementalData.xml) | `TW`·`TWN`, 사용자 할당 `XK`·`XKK` 대응 | M49의 248개 항목과 함께 국가·지역 250개를 제공. 추가 별칭 `XKX`도 같은 항목으로 처리 |
+| [MDN: Intl.DisplayNames](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames) | 언어·지역·문자 체계의 표시 이름을 실행 환경에서 제공 | 한국어 국가 선택과 공고 상세·검색·CSV의 국가 이름을 공유 |
+| [Ashby Public Job Posting API](https://developers.ashbyhq.com/docs/public-job-posting-api) | 공고 위치, 추가 위치와 국가 주소를 별도 필드로 제공 | 국가 필드의 코드를 읽고, 공고에 표시된 코드와 주소가 일치할 때 주 약어와 구분. 광역 지역이나 사무실 주소를 근무 허용 국가로 확장하지 않음 |
+
+2026-09-20 각 원문과 GitLab·Airbnb·Datadog·Canva·n8n의 공개 API 응답을 확인했습니다. 폴란드·뉴질랜드·브라질·이탈리아·이스라엘이 위치에 명시돼도 기존 16개 국가 목록 밖이라 누락되는 문제가 있었습니다.
+
+실제 자료에는 호주의 `SA`, 미국의 `New Jersey`, n8n의 `Georgia`도 함께 있었습니다. 마지막 항목의 주소는 `United States`였습니다. 자유 형식의 두 글자 약어와 동명 지역을 국가로 단정하지 않고, 명시적인 국가 필드로 확인 가능한 경우를 구분합니다. `Europe`·`EMEA`·`APAC`·`AMER`를 국가 목록으로 펼치지 않으며, 거주 국가 일치는 국적·취업 허가·주별 제한·협업 시간대의 충족을 뜻하지 않습니다.
+
+정적 국가 표의 기준일과 코드 출처는 [출처 고지](attributions.md)에 기록했습니다. 국가 파싱 규칙을 바꿀 때는 `REMOTE_SCOPE_VERSION`과 이전 캐시·저장 기록의 재해석도 함께 검토합니다.
