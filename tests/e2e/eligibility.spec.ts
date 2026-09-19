@@ -14,6 +14,7 @@ const n8n = PUBLIC_COMPANIES.find(company => company.id === 'n8n')!
 const supabase = PUBLIC_COMPANIES.find(company => company.id === 'supabase')!
 const anthropic = PUBLIC_COMPANIES.find(company => company.id === 'anthropic')!
 const fetchedAt = '2026-09-19T08:00:00.000Z'
+test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(fetchedAt)) })
 const countryPolicy = 'We can sponsor visas to Germany; for any other country, you need to have existing right to work.'
 const citizenPolicy = 'This position requires verification of U.S. citizenship due to citizenship-based legal restrictions. This position supports a government customer and is subject to citizenship-based restrictions where required or permitted by applicable law. Citizenship will be verified via a valid passport, other approved documents, or verified US government clearance.'
 const intro = 'Minimum requirements\n3 years of engineering experience.\nExperience with Python and AWS.'

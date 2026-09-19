@@ -10,6 +10,7 @@ import type { Catalog, SavedJob } from '../../shared/types'
 const company = PUBLIC_COMPANIES.find(item => item.id === 'stripe')!
 const figma = PUBLIC_COMPANIES.find(item => item.id === 'figma')!
 const fetchedAt = '2026-09-19T07:00:00.000Z'
+test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(fetchedAt)) })
 const text = [
   'Minimum requirements', '3 years of software engineering experience.', 'Experience with Python and AWS.',
   'Preferred qualifications', '8 years of software engineering experience.', 'Experience with Rust.',

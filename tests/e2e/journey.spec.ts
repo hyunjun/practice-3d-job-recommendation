@@ -170,6 +170,7 @@ test('public conditions expose their evidence, preserve visa distinctions and su
   ]
   const demo = createSampleCatalog()
   const fetchedAt = '2026-09-19T03:00:00.000Z'
+  await page.clock.setFixedTime(new Date(fetchedAt))
   const jobs = policies.map(([kind, policy], index) => normalizeJob({
     id: 900 + index, title: `Backend Engineer — ${kind} fixture`,
     absolute_url: `https://example.com/jobs/fixture-${index}`, location: { name: 'London, UK' },

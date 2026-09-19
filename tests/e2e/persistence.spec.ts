@@ -7,6 +7,7 @@ import { DEFAULT_FILTERS } from '../../shared/types'
 
 const demo = createSampleCatalog()
 const fetchedAt = '2026-09-19T06:00:00.000Z'
+test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(fetchedAt)) })
 const publicCatalog = {
   ...demo, source: 'public', fetchedAt,
   companies: demo.companies.filter(company => company.id === 'stripe'),
@@ -67,6 +68,7 @@ test('public data, every search condition, city selection and map preferences su
   await page.getByRole('button', { name: '닫기', exact: true }).click()
 
   const revisit = await context.newPage()
+  await revisit.clock.setFixedTime(new Date(fetchedAt))
   await revisit.goto('/')
   await expect(revisit.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
   await expect(revisit.locator('.city-hero-caption h2')).toContainText('런던')

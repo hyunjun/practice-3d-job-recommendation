@@ -8,6 +8,7 @@ import type { Catalog } from '../../shared/types'
 
 const previous = '2026-09-19T06:00:00.000Z'
 const current = '2026-09-19T07:00:00.000Z'
+test.beforeEach(async ({ page }) => { await page.clock.install({ time: new Date(current) }) })
 const companies = PUBLIC_COMPANIES.slice(0, 3)
 const jobs = companies.slice(0, 2).map((company, index) => normalizeJob({
   id: 700 + index, title: `Backend Engineer — ${company.name} feed fixture`,
@@ -86,7 +87,6 @@ test('partial feed failures preserve dated jobs across exploration, comparison a
 
 test('retry deadlines disable repeated requests, expire without a reload and still allow sample exploration', async ({ page }) => {
   const start = Date.parse(current)
-  await page.clock.install({ time: new Date(start) })
   let available = false
   let requests = 0
   await page.route('**/api/catalog?source=public*', route => {

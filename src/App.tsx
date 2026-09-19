@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { ArrowRight, ArrowUpRight, Bookmark, BriefcaseBusiness, Check, ChevronDown, CircleHelp, Compass, Database, GitCompareArrows, Globe2, Maximize, Minus, Moon, MousePointer2, Plus, RotateCcw, Search, SlidersHorizontal, Sparkles, Sun, X } from 'lucide-react'
 import { CITY_BY_ID } from '../shared/cities'
 import { catalogNeedsAttention } from '../shared/catalog-health'
+import { ageCatalog, catalogDeadlines, snapshotDeadlines } from '../shared/catalog-freshness'
 import { countFilters, groupCities, matchJob, rankSearchJobs } from '../shared/matching'
 import { createSearchIndex, selectSearchJobs } from '../shared/job-search'
 import { isUnmappedJob } from '../shared/job-location'
@@ -22,6 +23,7 @@ import { OrbitLogo, Spinner, Toast } from './components/ui'
 import type { GlobeHandle } from './components/Globe'
 import { useCatalog } from './hooks/useCatalog'
 import { usePostingStatus } from './hooks/usePostingStatus'
+import { FreshnessTimeContext, useDeadlineClock } from './hooks/useDeadlineClock'
 import { deleteProfile, loadCompare, loadExploration, loadProfile, loadSaved, persist, persistExploration, STORAGE_KEYS } from './lib/storage'
 import type { ExplorationState } from './lib/storage'
 
@@ -68,7 +70,18 @@ export default function App() {
   const closeNotice = useCallback(() => setNotice(null), [])
   const notify = useCallback((message: string, action?: Notice['action'], tone?: Notice['tone']) => setNotice({ message, action, tone }), [])
   const notifyCatalog = useCallback((message: string, tone?: Notice['tone']) => notify(message, undefined, tone), [notify])
-  const { catalog, loading, error: dataError, changeSource, ready: catalogReady, retryAt } = useCatalog(initial.exploration.source, notifyCatalog)
+  const { catalog: receivedCatalog, loading, error: dataError, changeSource, retryAt } = useCatalog(initial.exploration.source, notifyCatalog)
+  const catalogTimes = useMemo(() => catalogDeadlines(receivedCatalog), [receivedCatalog])
+  const deadlines = useMemo(() => [
+    ...catalogTimes,
+    ...saved.flatMap(item => item.job.source === 'sample' ? [] : snapshotDeadlines(item.job.fetchedAt)),
+    ...(openJob && openJob.job.source !== 'sample' ? snapshotDeadlines(openJob.job.fetchedAt) : []),
+  ], [catalogTimes, saved, openJob])
+  const freshnessNow = useDeadlineClock(deadlines)
+  // Resume events within the same age window should not rebuild the search index.
+  const catalogTime = catalogTimes.reduce((latest, time) => time <= freshnessNow ? Math.max(latest, time) : latest, 0)
+  const { catalog, expired: catalogExpired } = useMemo(() => ageCatalog(receivedCatalog, catalogTime), [receivedCatalog, catalogTime])
+  const catalogReady = Boolean(catalog.fetchedAt)
   const retryCatalog = () => void changeSource('public', { refresh: true, announce: catalogReady })
   const showData = () => setModal('data')
 
@@ -224,9 +237,9 @@ export default function App() {
     if (document.fullscreenElement) void document.exitFullscreen()
     else void mapStageRef.current?.requestFullscreen().catch(() => notify('이 브라우저에서는 전체 화면을 사용할 수 없어요.'))
   }
-  const catalogStatus = <CatalogStatus catalog={catalog} loading={loading} error={dataError} retryAt={retryAt} onRetry={retryCatalog} onData={showData} />
+  const catalogStatus = <CatalogStatus catalog={catalog} expired={catalogExpired} loading={loading} error={dataError} retryAt={retryAt} onRetry={retryCatalog} onData={showData} />
 
-  return <div className="app-shell">
+  return <FreshnessTimeContext.Provider value={freshnessNow}><div className="app-shell">
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus() }}>본문으로 건너뛰기</a>
     <header className="app-header">
       <button className="brand" onClick={() => navigate('explore')} aria-label="ORBIT 홈"><OrbitLogo /><span>orbit<span className="brand-period">.</span></span><span className="brand-caption">CAREER ATLAS</span></button>
@@ -235,7 +248,7 @@ export default function App() {
         <button className={view === 'saved' ? 'active' : ''} aria-current={view === 'saved' ? 'page' : undefined} onClick={() => navigate('saved')}><Bookmark size={15} />저장한 기회{saved.length > 0 && <span className="nav-count">{saved.length}</span>}</button>
         <button className={view === 'compare' ? 'active' : ''} aria-current={view === 'compare' ? 'page' : undefined} onClick={() => navigate('compare')}><GitCompareArrows size={16} />도시 비교{compareIds.length > 0 && <span className="nav-count">{compareIds.length}</span>}</button>
       </nav>
-      <div className="header-actions"><button className="data-status-button" onClick={showData}>{loading ? <Spinner /> : <span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : dataError || catalogNeedsAttention(catalog) ? 'attention' : ''}`} />}<span>{loading ? '공개 공고 조회 중' : catalog.source === 'sample' ? '샘플 탐색' : dataError ? '공개 공고 연결 필요' : '공개 채용'}</span><ChevronDown size={12} /></button><span className="header-divider" /><button className="profile-avatar" onClick={() => setModal('profile')} aria-label="내 프로필 편집" title="내 프로필">{initials}<span /></button></div>
+      <div className="header-actions"><button className="data-status-button" onClick={showData}>{loading ? <Spinner /> : <span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : dataError || catalogNeedsAttention(catalog) ? 'attention' : ''}`} />}<span>{loading ? '공개 공고 조회 중' : catalog.source === 'sample' ? '샘플 탐색' : dataError ? '공개 공고 연결 필요' : catalogExpired ? '공개 공고 확인 필요' : '공개 채용'}</span><ChevronDown size={12} /></button><span className="header-divider" /><button className="profile-avatar" onClick={() => setModal('profile')} aria-label="내 프로필 편집" title="내 프로필">{initials}<span /></button></div>
     </header>
     {view === 'explore' ? <>
       <div className="search-toolbar">
@@ -269,8 +282,8 @@ export default function App() {
     <footer className="app-footer"><span><OrbitLogo small />A WORLD OF POSSIBILITIES.</span><span>{catalog.source === 'sample' ? 'DEMO WORKSPACE' : 'PUBLIC JOB BOARDS'}<span className="footer-dot">·</span>LOCAL FIRST<button onClick={() => setModal('data')}><Database size={11} />데이터와 추천 방식</button></span></footer>
     {modal === 'profile' && <ProfileDialog profile={profile} filters={filters} remember={rememberProfile} onApply={applyProfile} onDelete={() => { deleteProfile(); setProfile(SAMPLE_PROFILE); setRememberProfile(true); setFilters({ ...DEFAULT_FILTERS }); setPanelTab('cities'); setSelectedId(null); setModal(null); notify('저장된 프로필을 삭제하고 샘플로 돌아왔어요.') }} onClose={() => setModal(null)} />}
     {modal === 'filters' && <FiltersDialog filters={filters} catalog={catalog} profile={profile} onApply={updateFilters} onClose={() => setModal(null)} />}
-    {modal === 'data' && <DataDialog catalog={catalog} loading={loading} error={dataError} retryAt={retryAt} onSource={source => void changeSource(source, { announce: catalogReady })} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
+    {modal === 'data' && <DataDialog catalog={catalog} expired={catalogExpired} loading={loading} error={dataError} retryAt={retryAt} onSource={source => void changeSource(source, { announce: catalogReady })} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
     {openJob && <JobDialog match={{ ...openJob, ...matchJob(openJob.job, profile) }} saved={savedOpenJob} postingObservation={savedOpenJob ? postingStatus.observations.get(savedOpenJob.job.id) : undefined} onToggleSave={() => toggleSave(openJob)} onUpdateSaved={update => setSaved(current => current.map(item => item.job.id === openJob.job.id ? { ...item, ...update } : item))} onClose={() => setOpenJob(null)} />}
     {notice && <Toast message={notice.message} action={notice.action} tone={notice.tone} onDismiss={closeNotice} />}
-  </div>
+  </div></FreshnessTimeContext.Provider>
 }

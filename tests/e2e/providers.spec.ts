@@ -11,6 +11,8 @@ import { DEFAULT_FILTERS } from '../../shared/types'
 import type { Catalog, Job, SavedJob } from '../../shared/types'
 import { ashbyPosting, leverPosting, POSTING_TIME } from '../fixtures/public-postings'
 
+test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(POSTING_TIME)) })
+
 const ashby = PUBLIC_COMPANIES.find(company => company.id === 'supabase')!
 const lever = PUBLIC_COMPANIES.find(company => company.id === 'spotify')!
 const stripe = PUBLIC_COMPANIES.find(company => company.id === 'stripe')!

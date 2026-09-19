@@ -3,13 +3,15 @@ import { createJobRevision, observeSavedPosting, PostingStatusIndexSchema } from
 import type { JobRevision, PostingStatusIndex } from '../../shared/posting-status'
 import type { Job, SavedJob } from '../../shared/types'
 import { useRetryCountdown } from './useRetryCountdown'
+import { useDeadlineClock } from './useDeadlineClock'
 
 export function usePostingStatus(saved: SavedJob[]) {
   const [index, setIndex] = useState<PostingStatusIndex | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [retryAt, setRetryAt] = useState<string>()
-  const [now, setNow] = useState(Date.now)
+  const deadlines = useMemo(() => index?.boards.flatMap(board => board.listing ? [Date.parse(board.listing.validUntil)] : []) ?? [], [index])
+  const now = useDeadlineClock(deadlines)
   const [localRevisions, setLocalRevisions] = useState(new Map<Job, JobRevision>())
   const revisionCache = useRef(new WeakMap<Job, Promise<JobRevision>>())
   const request = useRef<AbortController | null>(null)
@@ -25,7 +27,7 @@ export function usePostingStatus(saved: SavedJob[]) {
     setLoading(true)
     const timeout = window.setTimeout(() => controller.abort(), 150_000)
     try {
-      const response = await fetch('/api/posting-status?refresh=1', { signal: controller.signal, cache: 'no-store' })
+      const response = await fetch('/api/posting-status?refresh=1', { signal: controller.signal })
       const data: unknown = await response.json()
       if (request.current !== controller) return
       if (!response.ok) {
@@ -49,7 +51,6 @@ export function usePostingStatus(saved: SavedJob[]) {
       if (request.current === controller) {
         request.current = null
         setLoading(false)
-        setNow(Date.now())
       }
     }
   }, [retryAt])
@@ -71,21 +72,6 @@ export function usePostingStatus(saved: SavedJob[]) {
     })
     return () => { cancelled = true }
   }, [saved, index])
-
-  // An open tab must stop claiming a recent check when its evidence expires.
-  useEffect(() => {
-    const update = () => setNow(Date.now())
-    const deadlines = index?.boards.flatMap(board => board.listing ? [Date.parse(board.listing.validUntil)] : []) ?? []
-    const next = Math.min(...deadlines.filter(deadline => deadline > Date.now()))
-    const timer = Number.isFinite(next) ? window.setTimeout(update, Math.max(1, next - Date.now() + 20)) : undefined
-    window.addEventListener('focus', update)
-    document.addEventListener('visibilitychange', update)
-    return () => {
-      window.clearTimeout(timer)
-      window.removeEventListener('focus', update)
-      document.removeEventListener('visibilitychange', update)
-    }
-  }, [index, now])
 
   const observations = useMemo(() => new Map(saved.map(item => [
     item.job.id, observeSavedPosting(item, index, localRevisions.get(item.job), now, error),

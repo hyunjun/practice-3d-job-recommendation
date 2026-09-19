@@ -9,6 +9,7 @@ import type { Catalog, Job, SavedJob } from '../../shared/types'
 
 const company = PUBLIC_COMPANIES.find(item => item.id === 'stripe')!
 const fetchedAt = '2026-09-19T07:00:00.000Z'
+test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(fetchedAt)) })
 const regionalText = 'For United Kingdom based hires: Annual base salary GBP 90,000–120,000.\nFor United States based hires: Annual base salary USD 140,000–180,000.'
 const jobs = [
   { title: 'regional pay fixture', content: regionalText },

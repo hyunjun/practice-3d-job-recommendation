@@ -1,12 +1,13 @@
 import { ArrowUpRight, CheckCircle2, ChevronDown, CircleHelp, Database, Globe2, RefreshCw, ShieldCheck } from 'lucide-react'
 import { catalogNeedsAttention, collectionHealth, formatCollectionTime, formatRetryWait } from '../../shared/catalog-health'
+import { snapshotFreshness } from '../../shared/catalog-freshness'
 import { unmappedCoverage } from '../../shared/job-location'
 import type { Catalog, Source } from '../../shared/types'
 import { JOB_SOURCE_LABELS, PUBLIC_PROVIDERS } from '../../shared/types'
 import { useRetryCountdown } from '../hooks/useRetryCountdown'
 import { CompanyLogo, Dialog, Spinner } from './ui'
 
-export function DataDialog({ catalog, loading, error, retryAt, onSource, onRefresh, onClose }: { catalog: Catalog; loading: boolean; error: string; retryAt?: string; onSource: (source: Source) => void; onRefresh: () => void; onClose: () => void }) {
+export function DataDialog({ catalog, loading, error, expired, retryAt, onSource, onRefresh, onClose }: { catalog: Catalog; loading: boolean; error: string; expired?: boolean; retryAt?: string; onSource: (source: Source) => void; onRefresh: () => void; onClose: () => void }) {
   const isSample = catalog.source === 'sample'
   const ready = Boolean(catalog.fetchedAt)
   const health = collectionHealth(catalog)
@@ -24,6 +25,7 @@ export function DataDialog({ catalog, loading, error, retryAt, onSource, onRefre
       {!isSample && <ul className="provider-coverage" aria-label="공개 공고 출처">{providers.map(item => <li key={item.provider}><strong>{JOB_SOURCE_LABELS[item.provider]}</strong><span>{item.count}개 회사</span></li>)}</ul>}
       {loading && <div className="data-loading"><Spinner label="회사별 공개 채용공고를 가져오고 있어요…" /></div>}
       {error && <p className="form-error" role="alert">{error}</p>}
+      {expired && <p className="retry-note" role="status">마지막 정상 조회가 24시간을 지나 추천을 비웠어요. 검색 조건과 저장 기록은 유지하며, 다시 조회하면 현재 공고로 갱신됩니다.</p>}
       {retryIn > 0 && <p className="retry-note">다음 조회 가능 시각: <time dateTime={retryAt}>{formatCollectionTime(retryAt)}</time>. 게시판별 대기 시간을 지키며 다시 확인해요.</p>}
       {!isSample && !ready && !loading && <button className="button secondary" disabled={retryIn > 0} onClick={onRefresh}><RefreshCw size={14} />공개 공고 다시 조회{retryIn > 0 && <span aria-hidden="true"> · {formatRetryWait(retryIn)} 후</span>}</button>}
       <div className="coverage-stats"><div><strong>{catalog.cities.length}</strong><span>제공 도시</span></div><div><strong>{catalog.companies.length}</strong><span>대상 회사</span></div><div><strong>{ready ? catalog.jobs.length.toLocaleString() : '—'}</strong><span>{isSample ? '샘플 공고' : '조회된 개발 공고'}</span></div></div>
@@ -33,8 +35,8 @@ export function DataDialog({ catalog, loading, error, retryAt, onSource, onRefre
           <div><dt>이전 조회</dt><dd>{health.retained}<small>개 공고</small></dd></div>
           <div><dt>미확인 게시판</dt><dd>{health.unavailable}<small>개</small></dd></div>
         </dl>
-        <BoardHistory catalog={catalog} loading={loading} retryIn={retryIn} onRefresh={onRefresh} />
       </>}
+      {!isSample && catalog.boards.length > 0 && <BoardHistory catalog={catalog} loading={loading} retryIn={retryIn} onRefresh={onRefresh} />}
       {!isSample && ready && <section className="data-explanation">
         <h3><CheckCircle2 size={16} />수집된 조건 정보</h3>
         <dl className="data-quality-list">
@@ -68,7 +70,7 @@ export function DataDialog({ catalog, loading, error, retryAt, onSource, onRefre
 function BoardHistory({ catalog, loading, retryIn, onRefresh }: { catalog: Catalog; loading: boolean; retryIn: number; onRefresh: () => void }) {
   return <section className="board-section">
     <div className="board-heading"><h3>게시판 조회 상태</h3><button className="text-button" disabled={loading || retryIn > 0} onClick={onRefresh}><RefreshCw size={13} />새로고침{retryIn > 0 && <span aria-hidden="true"> · {formatRetryWait(retryIn)} 후</span>}</button></div>
-    <p className="field-description">최근 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />정상 결과는 30분간 사용해요. 연결 실패 시 마지막 정상 조회로부터 24시간 이내의 결과를 원래 조회 시각과 함께 유지합니다.</p>
+    <p className="field-description">최근 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />정상 확인 후 30분이 지나면 이전 조회로 표시하고, 24시간을 넘긴 공고는 추천에서 제외해요. 화면에 돌아왔을 때도 확인하며, 다시 조회하기 전까지 원래 조회 시각을 유지합니다.</p>
     <details className="board-details" open={catalogNeedsAttention(catalog)}>
       <summary>회사별 조회 기록<ChevronDown size={14} /></summary>
       <div className="board-list">{catalog.boards.map(board => {
@@ -76,10 +78,12 @@ function BoardHistory({ catalog, loading, retryIn, onRefresh }: { catalog: Catal
         if (!company) return null
         const lastSuccess = board.lastSuccessAt ?? (board.status === 'ok' ? catalog.fetchedAt : undefined)
         const retained = board.dataStatus === 'stale'
+        const unavailable = board.dataStatus === 'unavailable'
+        const expired = snapshotFreshness(lastSuccess, Date.now()) === 'expired'
         return <div className="board-row" key={`${board.companyId}-${board.board}`}>
           <CompanyLogo company={company} small />
           <div className="board-copy">
-            <div className="board-name"><strong>{company.name}</strong><small>{JOB_SOURCE_LABELS[board.provider ?? company.provider ?? 'greenhouse']}</small><span className={board.status === 'ok' && !retained ? 'board-ok' : 'board-error'}>{retained ? `이전 ${board.included}개 유지` : board.status === 'ok' ? `${board.included}개 반영` : '데이터 미확인'}</span></div>
+            <div className="board-name"><strong>{company.name}</strong><small>{JOB_SOURCE_LABELS[board.provider ?? company.provider ?? 'greenhouse']}</small><span className={board.status === 'ok' && !retained && !unavailable ? 'board-ok' : 'board-error'}>{unavailable ? expired ? '확인 기간 지남' : '데이터 미확인' : retained ? `이전 ${board.included}개 유지` : board.status === 'ok' ? `${board.included}개 반영` : '데이터 미확인'}</span></div>
             <p>마지막 정상 확인 · <time dateTime={lastSuccess ?? undefined}>{formatCollectionTime(lastSuccess)}</time></p>
             {board.status === 'error' && <p className="board-error-detail">재조회 실패{board.message ? ` · ${board.message}` : ''}{board.checkedAt && <span>조회 시도 · {formatCollectionTime(board.checkedAt)}</span>}{board.retryAt && <span><time dateTime={board.retryAt}>{formatCollectionTime(board.retryAt)}</time> 이후 재시도</span>}</p>}
           </div>

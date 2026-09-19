@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test'
 import type { Page, Route } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import type { Catalog, Filters } from '../../shared/types'
-import { SEARCH_COMPANIES, SEARCH_FILTERS, SEARCH_PROFILE, searchCatalog, searchJob } from '../fixtures/search-catalog'
+import { SEARCH_COMPANIES, SEARCH_FILTERS, SEARCH_PROFILE, SEARCH_TIME, searchCatalog, searchJob } from '../fixtures/search-catalog'
+
+test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(SEARCH_TIME)) })
 
 async function restore(page: Page, catalog: Catalog, filters = SEARCH_FILTERS, selectedId: string | null = null, response?: (route: Route) => Promise<unknown>) {
   await page.route('**/api/catalog?source=public*', route => response ? response(route) : route.fulfill({ json: catalog }))

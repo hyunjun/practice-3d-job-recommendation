@@ -1,4 +1,5 @@
 import { CITIES } from '../shared/cities'
+import { CATALOG_LIFETIME } from '../shared/catalog-freshness'
 import { createJobRevision } from '../shared/posting-status'
 import type { PostingBoard, PostingStatusIndex } from '../shared/posting-status'
 import { PUBLIC_PROVIDERS } from '../shared/types'
@@ -7,9 +8,8 @@ import { belongsToBoard, BoardSnapshotSchema, filterBoardSnapshot } from './boar
 import type { BoardCache, BoardSnapshot, CachedBoard } from './board-cache'
 
 export const CATALOG_POLICY = {
-  freshFor: 30 * 60 * 1000,
+  ...CATALOG_LIFETIME,
   minRefreshInterval: 60 * 1000,
-  maxFallbackAge: 24 * 60 * 60 * 1000,
   maxBackoff: 30 * 60 * 1000,
   concurrency: 4,
 } as const

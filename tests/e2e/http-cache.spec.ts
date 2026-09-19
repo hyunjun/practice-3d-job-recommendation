@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import express from 'express'
+import { request as proxyRequest } from 'node:http'
 import { createApiRouter } from '../../server/http'
 import { CatalogUnavailableError } from '../../server/catalog-service'
 import type { Catalog } from '../../shared/types'
@@ -10,7 +11,7 @@ import { SEARCH_COMPANIES, SEARCH_TIME, searchCatalog, searchJob } from '../fixt
 
 // Browser routing disables the HTTP cache. Use a real loopback server and record
 // its wire status; fetch exposes a revalidated 304 as a usable 200 response.
-async function fixture() {
+async function fixture(shellOrigin?: string) {
   let catalog: Catalog = searchCatalog([searchJob('http-cache', {
     description: '한국어 공고 원문과 software engineering requirements.\n'.repeat(100),
   })])
@@ -35,7 +36,7 @@ async function fixture() {
     }))
     next()
   })
-  app.get('/', (_request, response) => response.type('html').send('<!doctype html><html lang="ko"><title>HTTP cache verification</title><body>HTTP cache verification</body></html>'))
+  if (!shellOrigin) app.get('/', (_request, response) => response.type('html').send('<!doctype html><html lang="ko"><title>HTTP cache verification</title><body>HTTP cache verification</body></html>'))
   app.use('/api', createApiRouter({
     getCatalog: async refresh => {
       calls.catalog.push(refresh)
@@ -48,6 +49,17 @@ async function fixture() {
       return index
     },
   }))
+  // Serve the actual app shell from the running test server. API requests stay on
+  // this fixture's origin, so the real UI and hook use a real browser HTTP cache.
+  if (shellOrigin) app.use((request, response) => {
+    const proxy = proxyRequest(new URL(request.originalUrl, shellOrigin), upstream => {
+      response.writeHead(upstream.statusCode!, upstream.headers)
+      upstream.pipe(response)
+    })
+    proxy.on('error', () => response.status(502).end())
+    response.on('close', () => proxy.destroy())
+    proxy.end()
+  })
   return {
     ...await serveHttp(app), calls, responses,
     get catalog() { return catalog },
@@ -147,6 +159,41 @@ test('an offline browser cannot silently serve an unvalidated public response', 
     expect(server.responses.at(-1)!.status).toBe(304)
   } finally {
     await context.setOffline(false)
+    await server.close()
+  }
+})
+
+test('the actual saved-status button revalidates across visits and never renews the original evidence on 304', async ({ page, baseURL }) => {
+  const server = await fixture(baseURL!)
+  try {
+    await page.clock.install({ time: new Date(Date.parse(SEARCH_TIME) + 10_000) })
+    await page.addInitScript(({ job, company }) => {
+      localStorage.setItem('orbit.v1.saved', JSON.stringify([{ job, company, savedAt: job.fetchedAt, status: 'applied', note: 'Private cache fixture note' }]))
+      localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'sample', mapMode: 'flat' }))
+    }, { job: server.catalog.jobs[0], company: SEARCH_COMPANIES[0] })
+    await page.goto(`${server.origin}/#saved`)
+    const before = await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))
+    await page.getByRole('button', { name: '게시 상태 확인', exact: true }).click()
+    await expect(page.locator('.posting-notice.listed')).toHaveCount(1)
+    expect(server.responses.map(response => response.status)).toEqual([200])
+    await page.reload()
+    await expect(page.locator('.posting-notice.unchecked')).toHaveCount(1)
+    expect(server.calls.posting).toHaveLength(1)
+    await page.getByRole('button', { name: '게시 상태 확인', exact: true }).click()
+    await expect(page.locator('.posting-notice.listed')).toHaveCount(1)
+    expect(server.responses.map(response => response.status)).toEqual([200, 304])
+    expect(server.calls.posting).toEqual([true, true])
+    await page.clock.fastForward(30 * 60_000)
+    await expect(page.locator('.posting-notice.unknown')).toHaveCount(1)
+    expect(server.calls.posting).toHaveLength(2)
+    server.postingError = true
+    await page.getByRole('button', { name: '새로 확인', exact: true }).click()
+    await expect(page.locator('.posting-summary')).toContainText('불러오지 못했어요')
+    expect(server.responses.at(-1)).toMatchObject({ status: 503, cacheControl: 'no-store' })
+    expect(server.responses.every(response => response.path === '/api/posting-status?refresh=1')).toBe(true)
+    expect(await page.evaluate(() => localStorage.getItem('orbit.v1.saved'))).toBe(before)
+  } finally {
+    await page.goto('about:blank')
     await server.close()
   }
 })
