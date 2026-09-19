@@ -3,7 +3,7 @@ import { createJobRevision } from '../shared/posting-status'
 import type { PostingBoard, PostingStatusIndex } from '../shared/posting-status'
 import { PUBLIC_PROVIDERS } from '../shared/types'
 import type { BoardStatus, Catalog, Company, Job } from '../shared/types'
-import { BoardSnapshotSchema } from './board-cache'
+import { belongsToBoard, BoardSnapshotSchema, filterBoardSnapshot } from './board-cache'
 import type { BoardCache, BoardSnapshot, CachedBoard } from './board-cache'
 
 export const CATALOG_POLICY = {
@@ -33,7 +33,7 @@ export interface BoardResult {
   jobs: Job[]
   total: number
   unmappedCount: number
-  /** Complete published feed, before developer-role filtering. Absent for legacy snapshots. */
+  /** Complete published feed, before occupation filtering. Absent for legacy snapshots. */
   publishedIds?: string[]
 }
 
@@ -60,14 +60,6 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
     Date.parse(entry.checkedAt) + CATALOG_POLICY.minRefreshInterval,
     entry.error && entry.retryAt ? Date.parse(entry.retryAt) : 0,
   )
-  const belongsToBoard = (snapshot: BoardSnapshot, company: Company) => {
-    const prefix = `${company.provider ?? 'greenhouse'}-${company.id}-`
-    return snapshot.jobs.every(job =>
-      job.companyId === company.id && job.source === (company.provider ?? 'greenhouse')
-      && job.id.startsWith(prefix) && job.fetchedAt === snapshot.fetchedAt,
-    ) && (snapshot.publishedIds?.every(id => id.startsWith(prefix)) ?? true)
-  }
-
   async function initialize() {
     const loaded = await cache.load().catch(error => { onCacheError(error); return [] })
     for (const company of companies) {
@@ -76,7 +68,7 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
       if (!entry || Date.parse(entry.checkedAt) > now() + 5 * 60 * 1000) continue
       if (entry.snapshot && (Date.parse(entry.snapshot.fetchedAt) > Date.parse(entry.checkedAt)
         || !belongsToBoard(entry.snapshot, company))) continue
-      boards.set(company.id, entry)
+      boards.set(company.id, { ...entry, ...(entry.snapshot ? { snapshot: filterBoardSnapshot(entry.snapshot) } : {}) })
     }
   }
 
@@ -174,7 +166,7 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
       }
       boards.set(company.id, {
         companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', boardRegion: company.boardRegion,
-        checkedAt, failures: 0, retryAt: null, snapshot,
+        checkedAt, failures: 0, retryAt: null, snapshot: filterBoardSnapshot(snapshot),
       })
     } catch (cause) {
       const failures = Math.min((previous?.failures ?? 0) + 1, 1000)

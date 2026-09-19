@@ -1,11 +1,12 @@
 import { CITY_BY_ID, LOCATION_ALIASES } from '../shared/cities'
 import { classifyJobRoles } from '../shared/job-roles'
+import { isTechnicalOccupation, occupationFacts } from '../shared/job-occupation'
 import { qualificationFacts } from '../shared/job-qualifications'
 import { plainText } from '../shared/text'
 export { plainText } from '../shared/text'
 import { COMPENSATION_VERSION } from '../shared/types'
-import type { Employment, Job, JobProvider, Salary, Visa, WorkMode } from '../shared/types'
-import { employmentFact, visaFact, workModeFact } from './job-facts'
+import type { Employment, Job, JobManagement, JobProvider, Salary, Visa, WorkMode } from '../shared/types'
+import { employmentFact, managementFact, visaFact, workModeFact } from './job-facts'
 import { eligibilityFacts } from '../shared/job-eligibility'
 import type { Fact } from './job-facts'
 import { greenhouseCompensation } from './greenhouse-compensation'
@@ -126,11 +127,6 @@ export function parseSalary(text: string, _cityIds: string[], ranges?: Greenhous
   return greenhouseCompensation(text, ranges).salary
 }
 
-export function isDeveloperTitle(title: string): boolean {
-  return /engineer|developer|data scientist/i.test(title)
-    && !/manager|director|head of|vice president|sales|solutions engineer|support engineer|field engineer|customer engineer|mechanical|electrical|hardware|facilities|manufacturing|recruit/i.test(title)
-}
-
 interface PostingInput extends Pick<Job, 'companyId' | 'title' | 'cityIds' | 'locationLabel' | 'salary' | 'compensationRanges' | 'compensationNote' | 'compensationEvidence' | 'url' | 'fetchedAt'> {
   id: string | number
   provider: JobProvider
@@ -140,16 +136,19 @@ interface PostingInput extends Pick<Job, 'companyId' | 'title' | 'cityIds' | 'lo
   scope?: ReturnType<typeof remoteScope>
   updatedAt?: string | null
   departments?: string[]
+  management?: JobManagement
 }
 
 export function normalizePosting(input: PostingInput): Job | null {
-  if (!input.id || !/^https:\/\//i.test(input.url) || !isDeveloperTitle(input.title)) return null
+  if (!input.id || !/^https:\/\//i.test(input.url)) return null
   const { companyId, title, text, workMode, employment, salary, compensationRanges, compensationNote } = input
+  const occupation = occupationFacts({ title, description: text, departments: input.departments, management: input.management })
+  if (!isTechnicalOccupation(occupation)) return null
   const eligibility = eligibilityFacts(text)
-  const roleClassification = classifyJobRoles(title, input.departments)
+  const roleClassification = classifyJobRoles(title, input.departments, occupation)
   return {
     id: `${input.provider}-${companyId}-${input.id}`, companyId, title,
-    role: roleClassification.roles[0] ?? 'unknown', roleClassification,
+    role: roleClassification.roles[0] ?? 'unknown', roleClassification, occupation,
     cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
     employment: employment.value, ...qualificationFacts(text, companyId), salary,
     ...(compensationRanges?.length ? { compensationRanges } : {}),
@@ -169,7 +168,7 @@ export function normalizePosting(input: PostingInput): Job | null {
 }
 
 export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: string): Job | null {
-  if (!raw.id || typeof raw.title !== 'string' || !isDeveloperTitle(raw.title) || !/^https:\/\//i.test(raw.absolute_url ?? '')) return null
+  if (!raw.id || typeof raw.title !== 'string' || !/^https:\/\//i.test(raw.absolute_url ?? '')) return null
   const text = plainText(raw.content ?? '')
   const locationName = raw.location?.name?.trim() || ''
   const postingLocation = raw.metadata?.find(item => /^job posting location$|^job location$/i.test(item.name ?? ''))?.value
@@ -192,6 +191,7 @@ export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: s
   return normalizePosting({
     provider: 'greenhouse', id: raw.id, companyId, title: raw.title, text, fetchedAt,
     departments: Array.isArray(raw.departments) ? raw.departments.flatMap(department => typeof department?.name === 'string' ? [department.name] : []) : [],
+    management: managementFact(raw.metadata ?? []),
     cityIds, locationLabel: location, workMode, employment, scope,
     ...greenhouseCompensation(text, raw.pay_input_ranges),
     url: raw.absolute_url, updatedAt: raw.updated_at,

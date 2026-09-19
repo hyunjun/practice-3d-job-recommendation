@@ -7,6 +7,7 @@ import { upgradeJobCompensation } from '../../shared/job-compensation'
 import { formatExperienceYears, upgradeJobQualifications } from '../../shared/job-qualifications'
 import { upgradeJobEligibility } from '../../shared/job-eligibility'
 import { jobRoleLabel, upgradeJobRole } from '../../shared/job-roles'
+import { jobOccupationLabel, upgradeJobOccupation } from '../../shared/job-occupation'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
 import { POSTING_STATE_LABELS, REVISION_LABELS } from '../../shared/posting-status'
 import type { PostingObservation } from '../../shared/posting-status'
@@ -45,7 +46,7 @@ const ProfileSchema = z.object({
 })
 
 const SavedSchema = z.array(z.object({
-  job: JobSchema.transform(job => upgradeJobRole(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job, true))))),
+  job: JobSchema.transform(job => upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job, true)))))),
   company: z.object({
     id: z.string(), name: z.string().max(200), color: z.string().regex(/^#[0-9a-f]{6}$/i),
     initials: z.string().max(8), industry: z.string().max(200), careerUrl: z.string().max(2000),
@@ -135,7 +136,7 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
     return `"${safe.replace(/"/g, '""')}"`
   }
   const rows = [
-    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목', '비자 지원', '취업 자격 조건', '취업 자격 근거', '직무 분류', '직무 분류 근거'],
+    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목', '비자 지원', '취업 자격 조건', '취업 자격 근거', '직무 분류', '직무 분류 근거', '탐색 직군', '탐색 직군 근거'],
     ...saved.map(item => [
       item.company.name, item.job.title, item.job.locationLabel, JOB_SOURCE_LABELS[item.job.source],
       item.status === 'applied' ? '지원 완료' : '저장됨', item.savedAt, item.note, item.job.url,
@@ -154,7 +155,9 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
       item.job.eligibility?.rules.map(rule => `${ELIGIBILITY_LABELS[rule.kind]}: ${ELIGIBILITY_LEVEL_LABELS[rule.level]}`).join('\n') ?? '',
       [...new Set(item.job.eligibility?.rules.map(rule => rule.evidence.text) ?? [])].join('\n\n'),
       jobRoleLabel(item.job),
-      upgradeJobRole(item.job).roleClassification?.evidence.map(evidence => `${ROLE_FILTER_LABELS[evidence.role]} · ${evidence.source === 'title' ? '공고 제목' : '공개 부서·팀'}\n${evidence.text}`).join('\n\n') ?? '',
+      upgradeJobRole(item.job).roleClassification?.evidence.map(evidence => `${ROLE_FILTER_LABELS[evidence.role]} · ${evidence.source === 'title' ? '공고 제목' : evidence.source === 'board' ? '공개 부서·팀' : '연구 업무·자격 원문'}\n${evidence.text}`).join('\n\n') ?? '',
+      jobOccupationLabel(item.job),
+      upgradeJobOccupation(item.job).occupation?.evidence.map(evidence => `${evidence.source === 'title' ? '공고 제목' : evidence.source === 'board' ? '공개 게시판 정보' : '업무·자격 원문'}\n${evidence.text}`).join('\n\n') ?? '',
     ]),
   ]
   const blob = new Blob(['\ufeff', rows.map(row => row.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' })

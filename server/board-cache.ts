@@ -8,12 +8,13 @@ import { upgradeJobQualifications } from '../shared/job-qualifications'
 import { upgradeJobEligibility } from '../shared/job-eligibility'
 import { isUnmappedJob } from '../shared/job-location'
 import { upgradeJobRole } from '../shared/job-roles'
+import { filterTechnicalJobs, upgradeJobOccupation } from '../shared/job-occupation'
 import type { Company } from '../shared/types'
 
 const Timestamp = z.iso.datetime({ offset: true })
 export const BoardSnapshotSchema = z.object({
   fetchedAt: Timestamp,
-  jobs: z.array(JobSchema.extend({ source: JobProviderSchema, fetchedAt: Timestamp }).transform(job => upgradeJobRole(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job)))))).max(20000),
+  jobs: z.array(JobSchema.extend({ source: JobProviderSchema, fetchedAt: Timestamp }).transform(job => upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job))))))).max(20000),
   total: z.number().int().nonnegative(),
   unmappedCount: z.number().int().nonnegative().nullable(),
   publishedIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
@@ -45,6 +46,17 @@ const CachedBoardSchema = z.object({
 
 export type BoardSnapshot = z.infer<typeof BoardSnapshotSchema>
 export type CachedBoard = z.infer<typeof CachedBoardSchema>
+export function filterBoardSnapshot(snapshot: BoardSnapshot): BoardSnapshot {
+  return { ...snapshot, ...filterTechnicalJobs(snapshot.jobs, snapshot.unmappedCount) }
+}
+
+export function belongsToBoard(snapshot: BoardSnapshot, company: Pick<Company, 'id' | 'provider'>): boolean {
+  const provider = company.provider ?? 'greenhouse'
+  const prefix = `${provider}-${company.id}-`
+  return snapshot.jobs.every(job => job.companyId === company.id && job.source === provider
+    && job.id.startsWith(prefix) && job.fetchedAt === snapshot.fetchedAt)
+    && (snapshot.publishedIds?.every(id => id.startsWith(prefix)) ?? true)
+}
 export interface BoardCache {
   load: () => Promise<CachedBoard[]>
   save: (boards: CachedBoard[]) => Promise<void>
@@ -62,14 +74,17 @@ export function parseCachedBoards(input: unknown): CachedBoard[] {
     || !('boards' in input) || !Array.isArray(input.boards) || input.boards.length > 1000) return []
   return input.boards.flatMap(value => {
     const parsed = CachedBoardSchema.safeParse(value)
-    return parsed.success && (input.version !== 4 || parsed.data.provider === 'greenhouse') ? [parsed.data] : []
+    if (!parsed.success || input.version === 4 && parsed.data.provider !== 'greenhouse') return []
+    const entry = parsed.data
+    if (entry.snapshot && !belongsToBoard(entry.snapshot, { id: entry.companyId, provider: entry.provider })) return []
+    return [{ ...entry, ...(entry.snapshot ? { snapshot: filterBoardSnapshot(entry.snapshot) } : {}) }]
   })
 }
 
 function migrateLegacy(input: unknown, companies: Company[]): CachedBoard[] {
   const legacy = z.object({
     source: z.literal('greenhouse'), fetchedAt: Timestamp,
-    jobs: z.array(JobSchema.extend({ source: z.literal('greenhouse'), fetchedAt: Timestamp }).transform(job => upgradeJobRole(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job)))))).max(20000),
+    jobs: z.array(JobSchema.extend({ source: z.literal('greenhouse'), fetchedAt: Timestamp }).transform(job => upgradeJobRole(upgradeJobOccupation(upgradeJobEligibility(upgradeJobQualifications(upgradeJobCompensation(job))))))).max(20000),
     boards: z.array(z.object({
       companyId: z.string(), board: z.string(), status: z.enum(['ok', 'error']),
       total: z.number().int().nonnegative(), message: z.string().optional(),
@@ -81,13 +96,15 @@ function migrateLegacy(input: unknown, companies: Company[]): CachedBoard[] {
     const board = legacy.data.boards.find(item => item.companyId === company.id && item.board === company.board)
     if (!board) return []
     const failed = board.status === 'error'
+    const jobs = legacy.data.jobs.filter(job => job.companyId === company.id)
+    if (!failed && !belongsToBoard({ fetchedAt: legacy.data.fetchedAt, jobs, total: board.total, unmappedCount: null }, company)) return []
     return [{
       companyId: company.id, board: board.board, provider: 'greenhouse' as const, checkedAt: legacy.data.fetchedAt,
       failures: failed ? 1 : 0, retryAt: null,
       ...(failed ? { error: (board.message || '이전 조회에 실패했어요.').slice(0, 500) } : {
         snapshot: {
           fetchedAt: legacy.data.fetchedAt,
-          jobs: legacy.data.jobs.filter(job => job.companyId === company.id),
+          jobs: filterTechnicalJobs(jobs, null).jobs,
           total: board.total,
           // v3 recorded only a global total; a per-company count cannot be recovered.
           unmappedCount: null,

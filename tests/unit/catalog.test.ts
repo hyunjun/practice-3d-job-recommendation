@@ -329,6 +329,7 @@ describe('cache validation and migration', () => {
         jobs: previous.snapshot!.jobs.map(job => ({
           ...job, visa: 'unknown', eligibility: { version: 1, rules: [] }, evidence: {},
           roleClassification: { version: 1, roles: ['backend'], evidence: [{ role: 'backend', source: 'title', text: job.title }] },
+          occupation: { version: 1, category: 'engineering', departments: [], evidence: [{ source: 'title', text: job.title }] },
         })),
       })
       await rm(currentFile)

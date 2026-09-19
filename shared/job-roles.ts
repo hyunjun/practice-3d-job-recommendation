@@ -1,8 +1,9 @@
 import { JOB_ROLES, ROLE_CLASSIFICATION_VERSION, ROLE_FILTER_LABELS } from './types'
-import type { Filters, Job, JobRoleClassification, KnownJobRole } from './types'
+import type { Filters, Job, JobOccupation, JobRoleClassification, KnownJobRole } from './types'
 
-// Only the vacancy's title and published department/team labels are classification
-// inputs. Languages, company descriptions and industry names do not establish a role.
+// Titles take precedence over department/team labels. Only research vacancies may
+// also use the job-specific evidence already checked by the occupation classifier.
+// Languages, company descriptions and industry names do not establish a role.
 const PATTERNS: Record<KnownJobRole, RegExp> = {
   backend: /\b(?:back[\s-]?end|server[\s-]side)\b|백엔드/i,
   frontend: /\b(?:front[\s-]?end|client[\s-]side)\b|프론트엔드/i,
@@ -19,7 +20,7 @@ function rolesIn(text: string): KnownJobRole[] {
   return JOB_ROLES.filter(role => PATTERNS[role].test(normalized))
 }
 
-export function classifyJobRoles(title: string, departments: string[] = []): JobRoleClassification {
+export function classifyJobRoles(title: string, departments: string[] = [], occupation?: JobOccupation): JobRoleClassification {
   const titleEvidence = title.trim().slice(0, 1000)
   const titleRoles = rolesIn(titleEvidence)
   if (titleRoles.length) return {
@@ -28,12 +29,20 @@ export function classifyJobRoles(title: string, departments: string[] = []): Job
   }
   // A precise title takes precedence over a broader team. For generic titles, a
   // declared specialty such as "Data Engineering" is useful; plain "Engineering" is not.
-  const evidence = [...new Set(departments.map(value => value.trim().slice(0, 1000)).filter(Boolean))]
+  let evidence: JobRoleClassification['evidence'] = [...new Set(departments.map(value => value.trim().slice(0, 1000)).filter(Boolean))]
     .slice(0, 20).flatMap(text => {
       const roles = rolesIn(text)
       if (/^platforms?$/i.test(text) && !roles.includes('devops')) roles.push('devops')
       return roles.map(role => ({ role, source: 'board' as const, text }))
     })
+  if (!evidence.length && occupation?.category === 'research') {
+    evidence = occupation.evidence.filter(item => item.source === 'description').flatMap(item => {
+      const roles: KnownJobRole[] = []
+      if (PATTERNS.ml.test(item.text)
+        || /\b(?:llms?|(?:large )?language models?|neural networks?|model training|(?:pre|post)[- ]training)\b/i.test(item.text)) roles.push('ml')
+      return roles.map(role => ({ role, ...item }))
+    })
+  }
   const roles = JOB_ROLES.filter(role => evidence.some(item => item.role === role))
   return { version: ROLE_CLASSIFICATION_VERSION, roles, evidence }
 }
@@ -41,9 +50,12 @@ export function classifyJobRoles(title: string, departments: string[] = []): Job
 /** Reclassify legacy public records without changing their collection or save time. */
 export function upgradeJobRole(job: Job): Job {
   if (job.source === 'sample') return job
-  const roleClassification = job.roleClassification ?? classifyJobRoles(job.title)
+  const roleClassification = job.roleClassification?.roles.length ? job.roleClassification
+    : classifyJobRoles(job.title, job.occupation?.departments, job.occupation)
   const role = roleClassification.roles[0] ?? 'unknown'
-  return job.roleClassification && job.role === role ? job : { ...job, role, roleClassification }
+  return job.roleClassification && job.role === role
+    && (job.roleClassification.roles.length > 0 || !roleClassification.roles.length)
+    ? job : { ...job, role, roleClassification }
 }
 
 export function jobRoles(job: Job): KnownJobRole[] {

@@ -12,6 +12,7 @@ import { SavedPostingNotice } from './SavedPostingNotice'
 import type { PostingStatusController } from '../hooks/usePostingStatus'
 import { EligibilityNotice } from './JobEligibilityDetails'
 import { jobRoleLabel } from '../../shared/job-roles'
+import { JobOccupationNotice } from './JobRoleDetails'
 
 export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
   const [query, setQuery] = useState('')
@@ -53,6 +54,7 @@ export function SavedView({ saved, profile, postingStatus, onOpen, onRemove, onE
         <div className="saved-card-tags"><span>{formatJobSalary(item.job)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
         <JobFreshnessNotice job={item.job} compact />
         <SavedPostingNotice observation={observations.get(item.job.id)} job={item.job} compact />
+        <JobOccupationNotice job={item.job} compact />
         <EligibilityNotice job={item.job} />
         <div className="saved-card-match"><CheckCircle2 size={13} />{match.skillSummary}</div>
         {item.note && <p className="saved-note-preview">{item.note}</p>}

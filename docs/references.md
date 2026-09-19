@@ -68,6 +68,18 @@ Greenhouse 문서는 단일 공고 조회의 `pay_transparency=true`를 설명�
 
 O*NET 직업 코드를 공고에 자동 부여하거나 이 규칙의 정확도를 보증하는 자료로 사용하지 않았습니다. 일반 직업군·웹 개발 업무·게시판 필드의 의미를 구분하는 근거로 참고했으며, 제목·부서의 키워드 분류 자체는 ORBIT의 탐색 설계입니다. 실제 업무·직급·개발 직군 여부는 추가 검증이 필요합니다.
 
+## 개발·컴퓨터 연구와 다른 직군의 구분
+
+| 레퍼런스 | 확인한 의미 | 반영 |
+| --- | --- | --- |
+| [O*NET: Computer and Information Research Scientists, 15-1221.00](https://www.onetonline.org/link/summary/15-1221.00) | 컴퓨터·정보 과학의 연구와 컴퓨터 하드웨어·소프트웨어 문제 해결, Research Scientist 등 여러 직함 | `Engineer`가 없는 연구 직함도 확인하되 실제 공고의 컴퓨팅 업무·자격 근거 보존 |
+| [O*NET: Computer User Support Specialists, 15-1232.00](https://www.onetonline.org/link/summary/15-1232.00) | 사용자의 하드웨어·소프트웨어 문제에 기술적 도움을 제공하는 업무 | 기술지원 부서의 서비스·에스컬레이션 엔지니어와 지원 제품을 개발하는 엔지니어 구분 |
+| [O*NET: Computer and Information Systems Managers, 11-3021.00](https://www.onetonline.org/link/summary/11-3021.00) | 정보 시스템·프로그래밍 등의 활동을 계획·지휘·조정하는 관리 업무 | 공개 직급의 `People Manager`와 명시적인 관리 업무를 확인하고 Lead·멘토링만으로 관리자라고 판단하지 않음 |
+
+2026-09-19의 공개 응답에서 MongoDB의 `Technical Support` 부서와 `Job Level: People Manager`, Stripe의 지원 제품 개발직, Datadog·Mistral·Spotify 등의 연구 공고를 대조했습니다. Anthropic의 생명과학 공고에서도 컴퓨팅 파이프라인 개발과 화학 실험 업무가 서로 달랐습니다. 따라서 회사·부서에 AI가 있다는 이유로 모든 연구직을 개발·컴퓨터 연구로 취급하지 않습니다.
+
+위 자료는 직업의 업무 범위를 이해하는 참고 자료입니다. 국가별 직업 자격이나 관리직의 법적 지위를 판정하거나 O*NET 코드를 자동으로 부여하지 않습니다. ORBIT의 수집 범위와 근거 추출 규칙은 이 자료와 실제 공개 공고를 참고한 제품 설계이며 모든 직함을 검증한 분류 체계는 아닙니다. 연구직 포함 여부와 세부 AI·머신러닝 분류도 구분하며, 본문 보완에는 해당 공고의 업무·자격 근거만 사용합니다.
+
 ## 기술·경력의 추천 근거
 
 | 레퍼런스 | 확인한 의미 | 반영 |

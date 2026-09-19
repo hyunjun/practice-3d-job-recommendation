@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { PUBLIC_PROVIDERS } from './types'
 import { jobRoles, upgradeJobRole } from './job-roles'
+import { upgradeJobOccupation } from './job-occupation'
 import type { Job, JobProvider, SavedJob } from './types'
 
 export const REVISION_FIELDS = ['title', 'location', 'conditions', 'compensation', 'qualifications', 'description', 'url'] as const
@@ -86,8 +87,12 @@ function stable(value: unknown): unknown {
 }
 
 export async function createJobRevision(job: Job): Promise<JobRevision> {
+  const current = upgradeJobRole(upgradeJobOccupation(job))
   const sections: Record<RevisionField, unknown> = {
-    title: { text: job.title, roles: jobRoles(job), evidence: upgradeJobRole(job).roleClassification?.evidence ?? [] },
+    title: {
+      text: job.title, roles: jobRoles(current), evidence: current.roleClassification?.evidence ?? [],
+      occupation: current.occupation ? { category: current.occupation.category, evidence: current.occupation.evidence } : null,
+    },
     location: { cities: job.cityIds, label: job.locationLabel },
     conditions: {
       workMode: job.workMode, employment: job.employment, visa: job.visa,

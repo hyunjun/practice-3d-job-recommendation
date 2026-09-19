@@ -4,6 +4,7 @@ import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { catalogNeedsAttention, collectionHealth } from '../../shared/catalog-health'
 import { createSampleCatalog } from '../../shared/sample'
 import { upgradeJobRole } from '../../shared/job-roles'
+import { upgradeCatalogOccupations } from '../../shared/job-occupation'
 import type { Catalog, Source } from '../../shared/types'
 
 function initialCatalog(source: Source): Catalog {
@@ -52,12 +53,14 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
         throw new Error('공고 데이터 형식을 확인하지 못했어요.')
       }
       if (!controller.signal.aborted) {
-        setCatalog({ ...result as Catalog, jobs: (result as Catalog).jobs.map(upgradeJobRole) })
-        const health = collectionHealth(result as Catalog)
-        const attention = catalogNeedsAttention(result as Catalog)
+        const current = upgradeCatalogOccupations(result as Catalog)
+        current.jobs = current.jobs.map(upgradeJobRole)
+        setCatalog(current)
+        const health = collectionHealth(current)
+        const attention = catalogNeedsAttention(current)
         if (announce) notify(attention
           ? `${health.failed}개 게시판 연결 확인이 필요해요. 이전 조회 공고 ${health.retained}개를 유지했어요.`
-          : `${result.jobs.length.toLocaleString()}개 개발 공고를 가져왔어요.`, attention ? 'error' : undefined)
+          : `${current.jobs.length.toLocaleString()}개 개발·연구 공고를 가져왔어요.`, attention ? 'error' : undefined)
       }
     } catch (cause) {
       if (!controller.signal.aborted) {

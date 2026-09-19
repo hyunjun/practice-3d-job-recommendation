@@ -14,6 +14,7 @@ export const COMPENSATION_VERSION = 1 as const
 export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 1 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
+export const OCCUPATION_VERSION = 1 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever',
@@ -106,7 +107,20 @@ export interface JobEligibility {
 export interface JobRoleClassification {
   version: typeof ROLE_CLASSIFICATION_VERSION
   roles: KnownJobRole[]
-  evidence: { role: KnownJobRole; source: 'title' | 'board'; text: string }[]
+  evidence: { role: KnownJobRole; source: FactEvidence['source']; text: string }[]
+}
+
+export interface JobManagement {
+  value: 'individual' | 'management' | 'unknown'
+  evidence?: FactEvidence
+}
+
+export interface JobOccupation {
+  version: typeof OCCUPATION_VERSION
+  category: 'engineering' | 'research' | 'support' | 'management' | 'other' | 'unconfirmed'
+  evidence: FactEvidence[]
+  departments: string[]
+  management?: JobManagement
 }
 
 export interface Job {
@@ -115,6 +129,7 @@ export interface Job {
   title: string
   role: JobRole
   roleClassification?: JobRoleClassification
+  occupation?: JobOccupation
   cityIds: string[]
   locationLabel: string
   workMode: WorkMode

@@ -1,4 +1,4 @@
-import type { Employment, FactEvidence, WorkMode } from '../shared/types'
+import type { Employment, FactEvidence, JobManagement, WorkMode } from '../shared/types'
 
 export { visaFact } from '../shared/job-eligibility'
 
@@ -26,6 +26,15 @@ function metadataFacts<T extends string>(metadata: BoardMetadata[], names: RegEx
   if (!entries.length) return undefined
   const unique = [...new Set(entries.map(item => item.value))]
   return { value: unique.length === 1 ? unique[0] : 'unknown' as T, evidence: evidence('board', entries.map(item => item.text).join('\n')) }
+}
+
+export function managementFact(metadata: BoardMetadata[]): JobManagement | undefined {
+  return metadataFacts(metadata, /^(?:job[\s_-]*level|career[\s_-]*track|management[\s_-]*level)$/i, text => {
+    const value = text.trim()
+    if (/^(?:people manager|management|manager|executive)$/i.test(value)) return 'management'
+    if (/^(?:professional\s*-\s*)?(?:ic|individual contributor)$/i.test(value)) return 'individual'
+    return 'unknown'
+  })
 }
 
 function workModeValue(text: string): WorkMode {
