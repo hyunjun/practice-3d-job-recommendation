@@ -23,14 +23,16 @@ export function SearchRecovery({ analysis, filters, scope, sample, onApply, onNa
   return <section className="search-recovery" aria-labelledby={`${id}-title`}>
     <SearchX size={25} className="recovery-icon" />
     <h3 id={`${id}-title`}>{scope.kind === 'city' ? '이 도시에서 맞는 공고를 찾지 못했어요' : scope.kind === 'remote'
-      ? '지금 조건에 맞는 원격 기회가 없어요' : '조건에 맞는 도시가 아직 없어요'}</h3>
+      ? '지금 조건에 맞는 원격 기회가 없어요' : scope.kind === 'unmapped'
+        ? '다른 근무지에서도 맞는 공고를 찾지 못했어요' : '조건에 맞는 도시가 아직 없어요'}</h3>
     <p>{analysis.available
       ? `이 탐색 범위에서 조회한 ${analysis.available}개 공고에 현재 조건을 적용한 결과예요.`
       : '현재 불러온 자료에는 이 탐색 범위의 공고가 없어요. 수집되지 않은 채용 기회도 있을 수 있습니다.'}</p>
     {analysis.alternatives.length > 0 && <div className="recovery-alternatives">
       <h4>조건을 그대로 유지하고</h4>
       {analysis.alternatives.map(alternative => <button key={alternative.scope.kind} onClick={() => onNavigate(alternative.scope)}>
-        <span><strong>{alternative.scope.kind === 'remote' ? '원격 기회 보기' : scope.kind === 'city' ? '다른 도시 보기' : '도시 탐색으로 이동'}</strong>
+        <span><strong>{alternative.scope.kind === 'remote' ? '원격 기회 보기' : alternative.scope.kind === 'unmapped'
+          ? '기타 근무지 보기' : scope.kind === 'city' ? '다른 도시 보기' : '도시 탐색으로 이동'}</strong>
           <small>회사 {alternative.count.companies}곳 · 공고 {alternative.count.jobs}개{alternative.count.cities > 0 && ` · ${alternative.count.cities}개 도시`}</small></span><ArrowRight size={16} />
       </button>)}
     </div>}
@@ -54,6 +56,7 @@ export function SearchRecovery({ analysis, filters, scope, sample, onApply, onNa
                 : '국가·직무·지원자별 지원 조건을 원문에서 확인해야 합니다.'}</p>}
             {suggestion.changes.remoteEligibleOnly === false && <p className="recovery-warning">다른 국가만 허용하거나 지역이 미확인인 공고도 포함합니다. 선택한 거주 국가에서 근무할 수 있다는 뜻은 아닙니다.</p>}
             {suggestion.changes.includeUnknownSalary && <p className="recovery-warning">미공개·별도 보상은 희망 연봉을 충족하는지 확인되지 않았어요.</p>}
+            {scope.kind === 'unmapped' && suggestion.changes.region === 'all' && <p className="recovery-warning">지역을 구분하지 않고 표시합니다. 기존에 선택한 지역의 공고라는 뜻은 아니에요.</p>}
           </div>
           <button onClick={() => onApply(suggestion)} aria-describedby={optionId}>
             <span>회사 <strong>{suggestion.count.companies}</strong>곳 · 공고 <strong>{suggestion.count.jobs}</strong>개 보기</span><ArrowRight size={15} />

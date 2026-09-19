@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { createSampleCatalog } from '../../shared/sample'
+import { isUnmappedJob, unmappedCoverage } from '../../shared/job-location'
 import type { Company, Job, JobProvider } from '../../shared/types'
 import { createFileBoardCache, parseCachedBoards } from '../../server/board-cache'
 import type { BoardCache, CachedBoard } from '../../server/board-cache'
@@ -33,6 +34,64 @@ function memoryCache(initial: CachedBoard[] = []) {
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 describe('per-board last successful results', () => {
+  it('serves an entirely unmapped feed, persists its content and includes it in posting comparisons', async () => {
+    let current = BASE
+    const directory = await mkdtemp(path.join(tmpdir(), 'orbit-unmapped-cache-test-'))
+    const cache = createFileBoardCache(path.join(directory, 'v5.json'), undefined, [companies[0]])
+    const fetchBoard = vi.fn(async (company: Company, fetchedAt: string) => ({
+      jobs: [{ ...job(company, fetchedAt, 'outside'), cityIds: [], workMode: 'unknown' as const, locationLabel: 'Gurugram' }],
+      total: 1, unmappedCount: 1, publishedIds: [`greenhouse-${company.id}-outside`],
+    }))
+    const options = { companies: [companies[0]], cache, now: () => current, random: () => 0, fetchBoard }
+    try {
+      const result = await createCatalogService(options).get()
+      expect(result.boards[0]).toMatchObject({ status: 'ok', total: 1, included: 1 })
+      expect(result.jobs).toHaveLength(1)
+      expect(isUnmappedJob(result.jobs[0])).toBe(true)
+      expect(unmappedCoverage(result)).toEqual({ available: 1, unavailable: 0 })
+      expect((await cache.load())[0].snapshot).toMatchObject({ total: 1, unmappedCount: 1, jobs: [{ locationLabel: 'Gurugram' }] })
+      const restarted = createCatalogService(options)
+      const index = await restarted.getPostingStatus()
+      expect(index.boards[0].listing?.jobs).toEqual([expect.objectContaining({ id: result.jobs[0].id, revision: expect.any(Object) })])
+      expect(fetchBoard).toHaveBeenCalledOnce()
+      current += CATALOG_POLICY.freshFor
+      fetchBoard.mockRejectedValue(new BoardFetchError('HTTP 503'))
+      expect((await restarted.get()).jobs[0]).toMatchObject({ fetchedAt: iso(BASE), stale: true, cityIds: [], locationLabel: 'Gurugram' })
+      current = BASE + CATALOG_POLICY.maxFallbackAge + 1
+      await expect(restarted.get()).rejects.toMatchObject({ code: 'CATALOG_EXPIRED' })
+    } finally { await rm(directory, { recursive: true, force: true }) }
+  })
+
+  it('keeps old omitted counts honest until a scheduled or allowed refresh retrieves the contents', async () => {
+    let current = BASE + 1000
+    const cached = snapshot(companies[0])
+    const fetchBoard = vi.fn(async (company: Company, fetchedAt: string) => ({
+      jobs: [job(company, fetchedAt), { ...job(company, fetchedAt, 'outside'), cityIds: [], workMode: 'onsite' as const }],
+      total: 2, unmappedCount: 1,
+    }))
+    const service = createCatalogService({ companies: [companies[0]], cache: memoryCache([cached]), now: () => current, fetchBoard })
+    const old = await service.get()
+    expect(unmappedCoverage(old)).toEqual({ available: 0, unavailable: 1 })
+    expect(old.fetchedAt).toBe(iso(BASE))
+    expect(fetchBoard).not.toHaveBeenCalled()
+    current = BASE + CATALOG_POLICY.minRefreshInterval
+    const refreshed = await service.get(true)
+    expect(fetchBoard).toHaveBeenCalledOnce()
+    expect(refreshed.jobs).toHaveLength(2)
+    expect(unmappedCoverage(refreshed)).toEqual({ available: 1, unavailable: 0 })
+  })
+
+  it('rejects impossible unmapped totals while accepting both retained and legacy omitted records', () => {
+    const previous = snapshot(companies[0])
+    expect(parseCachedBoards({ version: 5, boards: [previous] })).toHaveLength(1)
+    const unmapped = { ...previous.snapshot!.jobs[0], cityIds: [], workMode: 'onsite' as const }
+    const entry = { ...previous, snapshot: { ...previous.snapshot!, jobs: [unmapped], total: 1 } }
+    expect(parseCachedBoards({ version: 5, boards: [entry] })).toHaveLength(1)
+    for (const unmappedCount of [0, 2]) {
+      expect(parseCachedBoards({ version: 5, boards: [{ ...entry, snapshot: { ...entry.snapshot, unmappedCount } }] })).toEqual([])
+    }
+  })
+
   it('retains only the failed company snapshot and its original timestamp during a partial outage', async () => {
     const current = BASE + CATALOG_POLICY.freshFor
     const cache = memoryCache(companies.map(company => snapshot(company)))

@@ -10,6 +10,7 @@ import { normalizeCompensation } from '../../shared/compensation'
 import { countryCode, postingCities, remoteScope } from '../../server/normalize'
 import { AshbyJobSchema, fetchAshbyBoard, normalizeAshbyJob } from '../../server/providers/ashby'
 import { fetchLeverBoard, normalizeLeverJob } from '../../server/providers/lever'
+import { fetchGreenhouseBoard } from '../../server/providers/greenhouse'
 import { ashbyPosting, leverPosting, POSTING_TIME } from '../fixtures/public-postings'
 
 const ashby = PUBLIC_COMPANIES.find(company => company.id === 'supabase')!
@@ -181,7 +182,7 @@ describe('public feed collection', () => {
     expect(cached[0].snapshot?.jobs).toEqual([oldJob])
   })
 
-  it('keeps listed non-developer and unmapped IDs for status checks while excluding unlisted Ashby jobs', async () => {
+  it('retains unmapped Ashby jobs and all published IDs while excluding non-developer and unlisted content', async () => {
     const fetcher = vi.fn(async () => Response.json({ apiVersion: '1', jobs: [
       ashbyPosting(), ashbyPosting(),
       ashbyPosting({ id: 'non-developer', title: 'Account Executive' }),
@@ -191,11 +192,46 @@ describe('public feed collection', () => {
     vi.stubGlobal('fetch', fetcher)
     const result = await fetchAshbyBoard(ashby, POSTING_TIME)
     expect(result.total).toBe(3)
-    expect(result.jobs).toHaveLength(1)
+    expect(result.jobs).toHaveLength(2)
+    expect(result.jobs[1]).toMatchObject({ id: `ashby-${ashby.id}-unmapped`, cityIds: [], locationLabel: 'Unknown Office', workMode: 'onsite' })
     expect(result.unmappedCount).toBe(1)
     expect(result.publishedIds).toEqual([
       `ashby-${ashby.id}-shared-fixture-id`, `ashby-${ashby.id}-non-developer`, `ashby-${ashby.id}-unmapped`,
     ])
+  })
+
+  it('retains Greenhouse city, country and placeholder locations without substituting attached offices', async () => {
+    const company = PUBLIC_COMPANIES.find(item => item.id === 'stripe')!
+    const locations = ['Gurugram', 'Ireland', 'N/A', 'Cork, Ireland']
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({
+      jobs: locations.map((location, index) => ({
+        id: 8000 + index, title: `Backend Engineer — location fixture ${index}`,
+        absolute_url: `https://example.com/jobs/location-${index}`, location: { name: location },
+        content: '<p>Build software with TypeScript.</p>',
+        offices: [{ name: 'Dublin', location: 'Dublin, Ireland' }],
+      })),
+      meta: { total: locations.length },
+    })))
+    const result = await fetchGreenhouseBoard(company, POSTING_TIME)
+    expect(result.jobs.map(job => job.locationLabel)).toEqual(locations)
+    expect(result.jobs.every(job => job.cityIds.length === 0 && job.workMode === 'unknown')).toBe(true)
+    expect(result).toMatchObject({ total: 4, unmappedCount: 4 })
+    expect(result.publishedIds).toEqual(result.jobs.map(job => job.id))
+  })
+
+  it('retains Lever country-only and unsupported cities separately from confirmed remote jobs', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json([
+      leverPosting({ id: 'country-only', country: 'IE', categories: { location: 'Ireland' }, workplaceType: null }),
+      leverPosting({ id: 'outside-map', country: 'RO', categories: { location: 'Bucharest' }, workplaceType: 'on-site' }),
+      leverPosting({ id: 'remote', country: 'US', categories: { location: 'Remote' }, workplaceType: 'remote' }),
+      leverPosting({ id: 'non-developer', text: 'Account Executive' }),
+    ])))
+    const result = await fetchLeverBoard(lever, POSTING_TIME)
+    expect(result).toMatchObject({ total: 4, unmappedCount: 2 })
+    expect(result.jobs).toHaveLength(3)
+    expect(result.jobs.map(job => job.workMode)).toEqual(['unknown', 'onsite', 'remote'])
+    expect(result.jobs.every(job => job.cityIds.length === 0)).toBe(true)
+    expect(result.publishedIds).toHaveLength(4)
   })
 
   it('fails repeated or malformed pages instead of publishing a truncated Lever feed', async () => {

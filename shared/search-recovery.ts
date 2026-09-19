@@ -45,8 +45,8 @@ function lessRestrictiveChangeExists(smaller: Partial<Filters>, larger: Partial<
 export function analyzeSearchRecovery(index: SearchIndex, filters: Filters, scope: SearchScope): RecoveryAnalysis | null {
   const current = selectSearchJobs(index, filters)
   if (countSearchJobs(current, scope, filters.region).jobs) return null
-  const scopes: SearchScope[] = scope.kind === 'remote' ? [{ kind: 'cities' }]
-    : scope.kind === 'city' ? [{ kind: 'cities' }, { kind: 'remote' }] : [{ kind: 'remote' }]
+  const scopes: SearchScope[] = ([{ kind: 'cities' }, { kind: 'remote' }, { kind: 'unmapped' }] as const)
+    .filter(next => next.kind !== scope.kind)
   const alternatives = scopes.map(next => ({ scope: next, count: countSearchJobs(current, next, filters.region) }))
     .filter(item => item.count.jobs > 0)
   const words = searchWords(filters.query)

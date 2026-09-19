@@ -6,6 +6,7 @@ import { JobProviderSchema, JobSchema } from '../shared/schemas'
 import { upgradeJobCompensation } from '../shared/job-compensation'
 import { upgradeJobQualifications } from '../shared/job-qualifications'
 import { upgradeJobEligibility } from '../shared/job-eligibility'
+import { isUnmappedJob } from '../shared/job-location'
 import type { Company } from '../shared/types'
 
 const Timestamp = z.iso.datetime({ offset: true })
@@ -15,7 +16,13 @@ export const BoardSnapshotSchema = z.object({
   total: z.number().int().nonnegative(),
   unmappedCount: z.number().int().nonnegative().nullable(),
   publishedIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
-}).refine(snapshot => snapshot.total >= snapshot.jobs.length + (snapshot.unmappedCount ?? 0))
+}).refine(snapshot => {
+  const retainedUnmapped = snapshot.jobs.filter(isUnmappedJob).length
+  // Legacy snapshots omitted unmapped jobs; new snapshots include them. Preserve
+  // both without double-counting retained jobs or inventing missing old records.
+  return (snapshot.unmappedCount === null || snapshot.unmappedCount >= retainedUnmapped)
+    && snapshot.total >= snapshot.jobs.length + Math.max(0, (snapshot.unmappedCount ?? 0) - retainedUnmapped)
+})
   .refine(snapshot => {
     if (!snapshot.publishedIds) return true
     const ids = new Set(snapshot.publishedIds)

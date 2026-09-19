@@ -128,7 +128,7 @@ describe('saved posting evidence', () => {
 })
 
 describe('complete listing collection and reuse', () => {
-  it('collects all Greenhouse published IDs before role and map filters, deduplicating repeated IDs', async () => {
+  it('collects all Greenhouse published IDs, retains unmapped developers and deduplicates repeated IDs', async () => {
     const posting = { id: 1, title: 'Backend Engineer', absolute_url: 'https://example.com/1', location: { name: 'London, UK' }, content: '' }
     const fetcher = vi.fn(async () => Response.json({ jobs: [
       posting, posting, { ...posting, id: 2, title: 'Account Executive' },
@@ -136,7 +136,8 @@ describe('complete listing collection and reuse', () => {
     ], meta: { total: 4 } }))
     vi.stubGlobal('fetch', fetcher)
     const result = await fetchGreenhouseBoard(company, iso(BASE))
-    expect(result.jobs).toHaveLength(1)
+    expect(result.jobs.map(job => job.id)).toEqual([1, 3].map(id => `greenhouse-${company.id}-${id}`))
+    expect(result.jobs[1]).toMatchObject({ cityIds: [], locationLabel: 'Unknown Office', workMode: 'unknown' })
     expect(result).toMatchObject({ total: 3, unmappedCount: 1, publishedIds: [1, 2, 3].map(id => `greenhouse-${company.id}-${id}`) })
     fetcher.mockImplementationOnce(async () => Response.json({ jobs: [posting], meta: { total: 2 } }))
     await expect(fetchGreenhouseBoard(company, iso(BASE))).rejects.toBeInstanceOf(BoardFetchError)

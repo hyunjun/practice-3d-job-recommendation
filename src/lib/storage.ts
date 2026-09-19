@@ -21,7 +21,7 @@ export interface ExplorationState {
   source: Source
   filters: Filters
   selectedId: string | null
-  panelTab: 'cities' | 'remote'
+  panelTab: 'cities' | 'remote' | 'unmapped'
   mapMode: 'globe' | 'flat'
   light: boolean
   citySort: 'companies' | 'match' | 'salary'
@@ -98,7 +98,7 @@ export function loadExploration(profile: Profile): ExplorationState {
       remoteEligibleOnly: z.boolean().catch(filters.remoteEligibleOnly),
     }).catch(filters),
     selectedId: z.string().refine(id => CITY_BY_ID.has(id)).nullable().catch(null),
-    panelTab: z.enum(['cities', 'remote']).catch(fallback.panelTab),
+    panelTab: z.enum(['cities', 'remote', 'unmapped']).catch(fallback.panelTab),
     mapMode: z.enum(['globe', 'flat']).catch(fallback.mapMode),
     light: z.boolean().catch(fallback.light),
     citySort: z.enum(['companies', 'match', 'salary']).catch(fallback.citySort),

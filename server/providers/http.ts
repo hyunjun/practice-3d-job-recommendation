@@ -1,4 +1,5 @@
 import type { Job } from '../../shared/types'
+import { isUnmappedJob } from '../../shared/job-location'
 import { BoardFetchError, parseRetryAfter } from '../catalog-service'
 import type { BoardResult } from '../catalog-service'
 
@@ -16,6 +17,6 @@ export async function fetchBoardJson(url: string, signal: AbortSignal): Promise<
 
 export function includedJobs(normalized: (Job | null)[], total: number, publishedIds?: string[]): BoardResult {
   const jobs = normalized.filter((job): job is Job => job !== null)
-  const unmappedCount = jobs.filter(job => job.workMode !== 'remote' && !job.cityIds.length).length
-  return { jobs: jobs.filter(job => job.workMode === 'remote' || job.cityIds.length > 0), total, unmappedCount, ...(publishedIds ? { publishedIds } : {}) }
+  const unmappedCount = jobs.filter(isUnmappedJob).length
+  return { jobs, total, unmappedCount, ...(publishedIds ? { publishedIds } : {}) }
 }

@@ -33,7 +33,7 @@ export interface BoardResult {
   jobs: Job[]
   total: number
   unmappedCount: number
-  /** Complete published feed, before role or location filtering. Absent for legacy snapshots. */
+  /** Complete published feed, before developer-role filtering. Absent for legacy snapshots. */
   publishedIds?: string[]
 }
 

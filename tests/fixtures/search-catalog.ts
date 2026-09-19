@@ -1,4 +1,5 @@
 import { createSampleCatalog } from '../../shared/sample'
+import { isUnmappedJob } from '../../shared/job-location'
 import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Catalog, Company, Filters, Job, Profile } from '../../shared/types'
 
@@ -36,7 +37,7 @@ export function searchJob(id: string, overrides: Partial<Job> = {}): Job {
 export function searchCatalog(jobs: Job[]): Catalog {
   return {
     source: 'public', fetchedAt: SEARCH_TIME, stale: false, cities: sample.cities,
-    companies: SEARCH_COMPANIES, jobs, unmappedCount: 0,
+    companies: SEARCH_COMPANIES, jobs, unmappedCount: jobs.filter(isUnmappedJob).length,
     boards: SEARCH_COMPANIES.map(company => ({
       companyId: company.id, provider: 'greenhouse', board: company.board!, status: 'ok', dataStatus: 'fresh',
       fetchedAt: SEARCH_TIME, total: jobs.filter(job => job.companyId === company.id).length,

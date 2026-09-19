@@ -154,6 +154,7 @@ export interface Catalog {
   cities: City[]
   jobs: Job[]
   boards: BoardStatus[]
+  /** Non-remote jobs without mapped cities, including records omitted by legacy snapshots. */
   unmappedCount: number | null
   checkedAt?: string
   refreshAfter?: string

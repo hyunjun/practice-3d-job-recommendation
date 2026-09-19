@@ -1,10 +1,11 @@
 import { CITY_BY_ID } from './cities'
 import { matchingSkills } from './qualification-matching'
+import { isUnmappedJob } from './job-location'
 import { MODE_LABELS, ROLE_LABELS, USD_RATES } from './types'
 import type { Catalog, City, Company, Filters, Job, Profile, Region } from './types'
 
 export type FilterFailure = keyof Filters | 'profile'
-export type SearchScope = { kind: 'cities' } | { kind: 'city'; cityId: string } | { kind: 'remote' }
+export type SearchScope = { kind: 'cities' } | { kind: 'city'; cityId: string } | { kind: 'remote' } | { kind: 'unmapped' }
 export interface SearchEntry {
   job: Job
   company: Company
@@ -75,6 +76,7 @@ export function selectSearchJobs(index: SearchIndex, filters: Filters): SearchEn
 
 export function inSearchScope(entry: SearchEntry, scope: SearchScope, region: Region = 'all'): boolean {
   if (scope.kind === 'remote') return entry.job.workMode === 'remote'
+  if (scope.kind === 'unmapped') return isUnmappedJob(entry.job) && region === 'all'
   return entry.job.workMode !== 'remote' && entry.cities.some(city =>
     (scope.kind !== 'city' || city.id === scope.cityId) && (region === 'all' || city.region === region),
   )

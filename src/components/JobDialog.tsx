@@ -11,6 +11,7 @@ import { formatExperienceYears } from '../../shared/job-qualifications'
 import type { PostingObservation } from '../../shared/posting-status'
 import { SavedPostingNotice } from './SavedPostingNotice'
 import { JobEligibilityDetails } from './JobEligibilityDetails'
+import { isUnmappedJob } from '../../shared/job-location'
 
 interface Props {
   match: MatchedJob
@@ -35,6 +36,7 @@ export function JobDialog({ match, saved, postingObservation, onToggleSave, onUp
       <div className="job-key-facts"><div><span>{job.salary && (job.source === 'sample' || job.compensationVersion) ? '세전 연봉' : '보상 정보'}</span><strong>{formatJobSalary(job)}</strong>{job.salary && job.salary.currency !== 'USD' && (job.source === 'sample' || job.compensationVersion) && <small>약 {formatSalary(job.salary, true)} USD / 년</small>}</div><div><span>비자 지원</span><strong className={job.visa === 'conditional' ? 'conditional-visa' : job.visa === 'yes' ? 'text-accent' : ''}>{VISA_LABELS[job.visa]}</strong><small>{job.source === 'sample' ? '샘플 시나리오 기준' : '공고의 명시적 문구 기준'}</small></div></div>
       <CompensationDetails job={job} />
       {job.workMode === 'remote' && <div className="remote-scope"><Globe2 size={18} /><div><strong>명시된 원격근무 지역</strong><p>{job.remoteWorldwide ? '전 세계 · 공고에 Global / Worldwide 명시' : job.remoteCountries.length ? job.remoteCountries.map(code => COUNTRIES.find(([id]) => id === code)?.[1] ?? code).join(' · ') : '국가별 근무 지역 미확인'}</p><small>지역에 포함되어도 취업 허가·국적·주별 제한·협업 시간대는 별도로 확인해야 해요.</small></div></div>}
+      {isUnmappedJob(job) && <div className="unmapped-job-notice"><MapPin size={17} /><div><strong>지도에 표시되지 않은 근무지</strong><p>위에 적힌 공고의 위치를 확인해 주세요. 제공 도시 밖이거나 도시를 특정하기 어려워 지도에는 표시하지 않아요. 출근 장소와 근무 형태는 원문에서 다시 확인해 주세요.</p></div></div>}
       <JobEvidenceDetails evidence={job.evidence} />
       <JobEligibilityDetails job={job} />
       <section className="match-section"><h4><span className="section-icon green"><Check size={15} /></span>이 기회와 연결되는 이유</h4>{reasons.length ? <ul>{reasons.map(reason => <li key={reason}><Check size={14} /><span>{reason}</span></li>)}</ul> : <p className="field-description">선택한 개발 직무에 해당해요. 구체적인 기술 요구사항은 원문에서 확인해 주세요.</p>}{!job.qualifications && <div className="skill-list">{job.skills.map(skill => <span className={`skill-tag ${matchedSkills.includes(skill) ? 'matched' : ''}`} key={skill}>{matchedSkills.includes(skill) && <Check size={11} />}{skill}</span>)}</div>}</section>
