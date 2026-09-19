@@ -8,6 +8,7 @@ import { DEFAULT_FILTERS } from '../../shared/types'
 import type { SavedJob } from '../../shared/types'
 import { SEARCH_COMPANIES, SEARCH_PROFILE, SEARCH_TIME, searchCatalog, searchJob } from '../fixtures/search-catalog'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
+import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
 
 const jobs = [
   ['poland-saved', 'Remote, Poland'],
@@ -60,6 +61,7 @@ for (const width of [1440, 320]) {
   test.describe(`remote country discovery at ${width}px`, () => {
     test.use({ viewport: { width, height: 960 } })
     test('country selection, saved records, posting comparison and exports agree without sending personal filters', async ({ page }) => {
+      const traffic = watchApiRequests(page)
       const errors: string[] = []
       const requests: { url: string; method: string; body: string | null }[] = []
       page.on('pageerror', error => errors.push(error.message))
@@ -84,6 +86,7 @@ for (const width of [1440, 320]) {
         original,
       })
       await page.goto('/')
+      const initialRequest = await expectInitialCatalogRequest(page, traffic)
       await waitForSavedCommit(page)
       await expect(page.locator('.mini-job')).toHaveCount(0)
       await chooseResidence(page, 'PL')
@@ -92,7 +95,7 @@ for (const width of [1440, 320]) {
       await expect(page.locator('.mini-job-title')).toHaveText([jobs[1].title, jobs[0].title])
       await expect(page.locator('.map-stats strong')).toHaveText(['1곳', '0곳'])
       await expect(page.locator('.city-row')).toHaveCount(0)
-      expect(requests.filter(request => new URL(request.url).pathname === '/api/catalog')).toHaveLength(1)
+      expect(requests.filter(request => new URL(request.url).pathname === '/api/catalog')).toHaveLength(initialRequest.attempts)
 
       await page.getByRole('button', { name: jobs[0].title, exact: true }).click()
       await expect(page.locator('.remote-scope p')).toHaveText('폴란드')

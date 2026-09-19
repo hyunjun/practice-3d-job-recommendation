@@ -7,6 +7,7 @@ import { CATALOG_LIFETIME } from '../../shared/catalog-freshness'
 import { DEFAULT_FILTERS } from '../../shared/types'
 import type { Catalog } from '../../shared/types'
 import { searchCatalog, searchJob, SEARCH_COMPANIES, SEARCH_PROFILE, SEARCH_TIME } from '../fixtures/search-catalog'
+import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
 
 const base = Date.parse(SEARCH_TIME)
 const iso = (value: number) => new Date(value).toISOString()
@@ -25,12 +26,9 @@ function snapshot(first = base, second = first, empty = false): Catalog {
 
 async function restore(page: Page, initial = snapshot(), now = base) {
   let catalog = initial
-  const requests: string[] = []
+  const traffic = watchApiRequests(page)
   await page.clock.install({ time: new Date(now) })
-  await page.route('**/api/catalog?source=public*', route => {
-    requests.push(route.request().url())
-    return route.fulfill({ json: catalog })
-  })
+  await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: catalog }))
   await page.addInitScript(({ profile, filters }) => {
     localStorage.setItem('orbit.v1.profile', JSON.stringify(profile))
     if (!localStorage.getItem('orbit.v1.exploration')) localStorage.setItem('orbit.v1.exploration', JSON.stringify({
@@ -39,7 +37,8 @@ async function restore(page: Page, initial = snapshot(), now = base) {
   }, { profile: SEARCH_PROFILE, filters: DEFAULT_FILTERS })
   await page.goto('/')
   await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
-  return { requests, replace(value: Catalog) { catalog = value } }
+  const initialRequest = await expectInitialCatalogRequest(page, traffic)
+  return { requests: traffic.requests, initialRequests: initialRequest.attempts, replace(value: Catalog) { catalog = value } }
 }
 
 test('an open job ages and expires without changing saved notes, application status or search conditions, then refresh recovers', async ({ page }) => {
@@ -64,7 +63,7 @@ test('an open job ages and expires without changing saved notes, application sta
   await expect(page.locator('.map-stats strong').first()).toContainText('—')
   await expect(page.getByLabel('도시, 회사 또는 포지션 검색')).toHaveValue('Backend')
   await expect(page.locator('.recovery-option')).toHaveCount(0)
-  expect(server.requests).toHaveLength(1)
+  expect(server.requests).toHaveLength(server.initialRequests)
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
   await expect(page.locator('.saved-card .stale-job-badge')).toHaveText('확인 기간 지남')
   expect(await readSavedJson(page)).toBe(saved)
@@ -77,8 +76,8 @@ test('an open job ages and expires without changing saved notes, application sta
   await page.getByRole('button', { name: '다시 조회', exact: true }).click()
   await expect(page.locator('.company-card')).toHaveCount(1)
   await expect(page.locator('.catalog-placeholder, .company-card .stale-job-badge')).toHaveCount(0)
-  expect(server.requests).toHaveLength(2)
-  expect(server.requests.every(url => /\/api\/catalog\?source=public(?:&refresh=1)?$/.test(url))).toBe(true)
+  expect(server.requests).toHaveLength(server.initialRequests + 1)
+  expect(server.requests.every(request => /\/api\/catalog\?source=public(?:&refresh=1)?$/.test(request.url))).toBe(true)
   expect(await readSavedJson(page)).toBe(saved)
 })
 
@@ -97,7 +96,7 @@ test('partial expiry updates company counts, city comparison and per-board histo
   await expect(page.locator('.board-row').filter({ hasText: 'Fixture A' })).toContainText('확인 기간 지남')
   await expect(page.locator('.board-row').filter({ hasText: 'Fixture B' })).toContainText('이전 1개 유지')
   await expect(page.locator('.board-error-detail')).toHaveCount(0)
-  expect(server.requests).toHaveLength(1)
+  expect(server.requests).toHaveLength(server.initialRequests)
 })
 
 for (const event of ['pageshow', 'focus', 'visibilitychange'] as const) {
@@ -114,7 +113,7 @@ for (const event of ['pageshow', 'focus', 'visibilitychange'] as const) {
     }, event)
     await expect(page.getByRole('heading', { name: '공고를 다시 확인해 주세요' })).toBeVisible()
     await expect(page.locator('.company-card, .flat-marker')).toHaveCount(0)
-    expect(server.requests).toHaveLength(1)
+    expect(server.requests).toHaveLength(server.initialRequests)
   })
 }
 
@@ -134,5 +133,5 @@ test('an expired empty collection asks for a new check and remains accessible at
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
   await expect(page.locator('.catalog-placeholder')).toHaveCount(0)
-  expect(server.requests).toHaveLength(1)
+  expect(server.requests).toHaveLength(server.initialRequests)
 })

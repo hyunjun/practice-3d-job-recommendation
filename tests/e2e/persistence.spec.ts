@@ -4,6 +4,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { normalizeJob } from '../../server/normalize'
 import { createSampleCatalog } from '../../shared/sample'
 import { DEFAULT_FILTERS } from '../../shared/types'
+import { readServerMode, watchApiRequests } from './helpers/api-requests'
 
 const demo = createSampleCatalog()
 const fetchedAt = '2026-09-19T06:00:00.000Z'
@@ -120,6 +121,7 @@ test('a failed restored feed keeps public mode and search context, distinguishes
 })
 
 test('restored loading state shows no sample jobs and switching to sample cancels the pending response', async ({ page, context }) => {
+  const traffic = watchApiRequests(page)
   let release!: () => void
   const gate = new Promise<void>(resolve => { release = resolve })
   await context.route('**/api/catalog?source=public*', async route => {
@@ -132,16 +134,27 @@ test('restored loading state shows no sample jobs and switching to sample cancel
     await expect(page.getByRole('heading', { name: '공개 공고를 불러오고 있어요' })).toBeVisible()
     await expect(page.locator('.city-row, .company-card')).toHaveCount(0)
     await expect(page.locator('.map-stats strong')).toContainText(['—', '—'])
+    const mode = await readServerMode(page.request, new URL('/api/health', page.url()).href)
+    await expect.poll(() => traffic.catalog().filter(request => request.state === 'pending').length).toBe(1)
+    const attempts = traffic.catalog().length
+    expect(attempts).toBeGreaterThanOrEqual(1)
+    expect(attempts).toBeLessThanOrEqual(mode === 'development' ? 2 : 1)
     await page.getByRole('button', { name: '공개 공고 조회 중', exact: true }).click()
     await expect(page.locator('.coverage-stats strong').last()).toHaveText('—')
     await expect(page.getByRole('dialog')).not.toContainText('Invalid Date')
     await page.getByRole('button', { name: /샘플로 탐색/ }).click()
     await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
+    await expect.poll(() => traffic.catalog().filter(request => request.state === 'failed').length).toBe(attempts)
     await page.getByRole('button', { name: '닫기', exact: true }).click()
     release()
     await page.waitForLoadState('networkidle')
     await expect(page.locator('.city-row')).toHaveCount(22)
     await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
+    expect(traffic.requests).toHaveLength(attempts)
+    for (const request of traffic.requests) expect(request).toMatchObject({
+      url: new URL('/api/catalog?source=public', page.url()).href,
+      method: 'GET', body: null, state: 'failed', error: 'net::ERR_ABORTED',
+    })
     const revisit = await context.newPage()
     await revisit.goto('/')
     await expect(revisit.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()

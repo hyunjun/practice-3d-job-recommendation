@@ -5,6 +5,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { DEFAULT_FILTERS } from '../../shared/types'
 import { COLLECTION_ID, progressSnapshot, progressUpdate } from '../fixtures/catalog-progress'
 import { SEARCH_TIME } from '../fixtures/search-catalog'
+import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
 
 test.beforeEach(async ({ page }) => { await page.clock.install({ time: new Date(SEARCH_TIME) }) })
 
@@ -114,20 +115,18 @@ test('all-failed first collection shows a retryable connection error instead of 
 test.describe('incremental collection at 320px', () => {
   test.use({ viewport: { width: 320, height: 780 }, isMobile: true, hasTouch: true })
   test('distinguishes pending from failed companies, retains first results on disconnect and reconnects on request', async ({ page }) => {
-    let starts = 0
+    const traffic = watchApiRequests(page)
     let fail = false
     let complete = false
     let monitors = 0
-    await page.route('**/api/catalog?source=public*', route => {
-      starts++
-      return route.fulfill({ status: 202, json: progressSnapshot(1) })
-    })
+    await page.route('**/api/catalog?source=public*', route => route.fulfill({ status: 202, json: progressSnapshot(1) }))
     await page.route('**/api/catalog/progress?*', route => {
       monitors++
       return fail ? route.abort('failed') : complete ? route.fulfill({ json: progressUpdate(2) }) : route.fulfill({ status: 204 })
     })
     await restore(page)
     await expect(page.locator('.company-card')).toHaveCount(1)
+    const initialRequest = await expectInitialCatalogRequest(page, traffic)
     await page.getByRole('button', { name: '공개 공고 조회 중', exact: true }).click()
     await expect(page.getByRole('dialog').getByRole('progressbar')).toHaveAttribute('aria-valuetext', '2개 회사 중 1개 조회 종료')
     const pending = page.locator('.board-row').filter({ hasText: 'Fixture B' })
@@ -144,7 +143,7 @@ test.describe('incremental collection at 320px', () => {
     const stoppedAt = monitors
     await page.clock.fastForward(10000)
     expect(monitors).toBe(stoppedAt)
-    expect(starts).toBe(1)
+    expect(traffic.catalog()).toHaveLength(initialRequest.attempts)
     fail = false
     complete = true
     await page.getByRole('button', { name: '다시 조회', exact: true }).click()
@@ -152,7 +151,7 @@ test.describe('incremental collection at 320px', () => {
     await page.clock.fastForward(1100)
     await expect(page.locator('.company-card')).toHaveCount(2)
     await expect(page.getByRole('progressbar')).toHaveCount(0)
-    expect(starts).toBe(2)
+    expect(traffic.catalog()).toHaveLength(initialRequest.attempts + 1)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   })
 })

@@ -333,3 +333,19 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 2026-09-20 각 원문을 확인했습니다. 경력 정보가 없을 때 기본값 3년을 넣고, `3.5 years of experience`를 5년으로 읽던 동작은 앱의 실제 분석 함수와 보관된 공개 공고로 재현했습니다.
 
 미입력 경력의 점수를 제외하고 경력 충족 여부를 설명하지 않는 것은 이 앱의 추천 설계입니다. 위 표준이 특정 추출 규칙이나 추천 가중치를 보장한다는 의미는 아닙니다. 한국어·영어의 명시적 기간을 읽는 기능이며, 전체 경력과 기술별 경력의 중복·경력 공백을 자동 계산하지 않습니다.
+
+## 개발·배포 환경의 요청 완료와 취소 검증
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [React: Synchronizing with Effects — Fetching data](https://react.dev/learn/synchronizing-with-effects#fetching-data) | 개발 중 두 번의 조회가 보일 수 있으며, 정리 함수가 이전 요청을 취소하거나 결과를 무시하도록 구현해야 함 | 요청 시작 횟수와 실제 완료를 구분하고, 취소된 이전 응답이 현재 공고를 바꾸지 않는지 확인 |
+| [React: StrictMode](https://react.dev/reference/react/StrictMode) | 개발 환경에서 Effect 설정·정리를 추가 실행해 정리 누락을 탐지 | StrictMode를 유지하고 실제 서버 모드에 맞춰 초기 요청을 검증 |
+| [Playwright: Request](https://playwright.dev/docs/api/class-request) | 요청·응답·완료 이벤트와 실패 이벤트가 구분됨. HTTP 404·503도 네트워크 관점에서는 완료될 수 있음 | 완료 이벤트와 HTTP 200·202를 함께 확인. 개발 초기화에서는 최대 한 번의 `net::ERR_ABORTED`만 허용하고 모든 요청의 URL·메서드·본문을 보존 |
+| [Playwright: Web server](https://playwright.dev/docs/test-webserver) | 설정한 서버 명령 실행, 준비 상태 확인과 실행 중인 서버 재사용 | 기본 개발 검사와 이미 실행한 배포용 서버 검사의 절차를 README에 구분해 안내 |
+| [Vite: server.watch](https://vite.dev/config/server-options#server-watch) | 프로젝트 루트의 변경을 감시하며 `ignored`로 제외 대상을 지정. 기본 제외에는 `test-results`가 포함됨 | 별도의 `.local` 자료와 `playwright-report`도 제외해 생성한 HTML이 앱 새로고침을 유발하지 않도록 설정 |
+
+2026-09-20 원문과 로컬 개발 서버의 실패 추적을 확인했습니다. 실패한 검사의 초기 조회 두 건은 정상 취소 한 건과 HTTP 200 완료 한 건이었습니다. 실제 `/api/health`의 모드를 읽으며 포트 번호나 테스트 환경 변수만으로 개발·배포 모드를 추정하지 않습니다.
+
+취소된 요청도 기록에 남겨 개인정보 전송 여부와 추가 조회 횟수 검사를 유지합니다. 초기화 검증이 끝난 뒤의 사용자 재조회는 정확히 한 건 증가해야 하며, 초기 조회 중 샘플로 바꾼 경우에는 대기 중인 요청이 취소되고 늦은 응답이 샘플을 바꾸지 않아야 합니다.
+
+추가 검증에서는 `.local`에 생성된 추적용 HTML에 개발 서버가 `full-reload`를 보내는 것을 기록했습니다. 설치된 Vite 8.3.0의 middleware 모드에서 전체 페이지를 새로고침하는 동작이었으며, 파일 감시 제외 설정으로 대응했습니다.

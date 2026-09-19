@@ -8,6 +8,7 @@ import type { Catalog, Job } from '../../shared/types'
 import { normalizeJob } from '../../server/normalize'
 import { POSTING_TIME } from '../fixtures/public-postings'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
+import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
 
 type Scope = 'cities' | 'remote' | 'unmapped'
 const company = { ...PUBLIC_COMPANIES.find(value => value.id === 'stripe')!, name: 'Pagination Fixture' }
@@ -59,12 +60,14 @@ function disclosure(card: Locator) { return card.locator('.company-job-toolbar .
 
 test('visits every company job in recommendation order with bounded pages and saves and opens a later-page job', async ({ page }) => {
   const data = catalog()
+  const traffic = watchApiRequests(page)
   const requests: { method: string; path: string; body: string | null }[] = []
   page.on('request', request => {
     const url = new URL(request.url())
     if (url.pathname.startsWith('/api/')) requests.push({ method: request.method(), path: url.pathname + url.search, body: request.postData() })
   })
   const card = await open(page, 'cities', data)
+  const initialRequest = await expectInitialCatalogRequest(page, traffic)
   await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '23'])
   await expect(disclosure(card)).toHaveAttribute('aria-expanded', 'false')
   await disclosure(card).click()
@@ -99,7 +102,9 @@ test('visits every company job in recommendation order with bounded pages and sa
   await expect(card.locator('.mini-job-title').first()).toBeFocused()
   await expect(card.locator('.company-job-toolbar')).toContainText('21–23 / 23개 공고')
   expect((await readSaved(page))[0].note).toBe('A note from the third company page')
-  expect(requests).toEqual([{ method: 'GET', path: '/api/catalog?source=public', body: null }])
+  expect(requests).toEqual(Array.from({ length: initialRequest.attempts }, () => ({
+    method: 'GET', path: '/api/catalog?source=public', body: null,
+  })))
 })
 
 test('searches jobs outside the current page and resets to the beginning when the results change or return', async ({ page }) => {

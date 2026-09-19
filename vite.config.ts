@@ -3,7 +3,11 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  server: { middlewareMode: true },
+  server: {
+    middlewareMode: true,
+    // Generated HTML traces/reports must not trigger a middleware-mode reload.
+    watch: { ignored: ['**/.local/**', '**/playwright-report/**'] },
+  },
   build: {
     target: 'es2022',
     chunkSizeWarningLimit: 850,
