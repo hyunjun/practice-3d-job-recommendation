@@ -1,11 +1,24 @@
 # 자산과 데이터 출처
 
+아래 라이선스와 고지는 각각의 외부 자산과 의존성에 적용됩니다. ORBIT 자체 코드의 오픈소스 라이선스는 아직 지정하지 않았습니다.
+
 ## 지도
 
-- 지구 위성·야간 텍스처: NASA Blue Marble 계열 자료를 사용하는 [three-globe 예제 이미지](https://github.com/vasturiano/three-globe/tree/master/example/img). `earth-blue-marble.jpg`, `earth-night.jpg`를 로컬에 포함했습니다.
+- 지구 위성·야간 텍스처: [three-globe 예제 이미지](https://github.com/vasturiano/three-globe/tree/017a3a5d182b2413f403154d3eb3ed4af3e598ca/example/img). 아래에 원본 파일과 라이선스 고지를 명시했습니다.
 - 국가 경계: [world-atlas 2](https://github.com/topojson/world-atlas)의 `countries-110m.json`. 원천 데이터는 [Natural Earth](https://www.naturalearthdata.com/), public domain입니다.
 - 3D 엔진: [Three.js](https://threejs.org/), MIT.
 - 2D 투영: [D3 Geo](https://github.com/d3/d3-geo), ISC. 위상 데이터 변환: [topojson-client](https://github.com/topojson/topojson-client), ISC.
+
+### 지구 텍스처의 원본과 고지
+
+다음 두 이미지는 파일명만 바꾸어 포함했습니다. 원본 저장소의 [MIT 라이선스 원문](https://github.com/vasturiano/three-globe/blob/017a3a5d182b2413f403154d3eb3ed4af3e598ca/LICENSE)을 [로컬 고지 파일](licenses/three-globe-MIT.txt)에 그대로 보존했습니다. 저작권 표기는 `Copyright (c) 2019 Vasco Asturiano`입니다.
+
+| 로컬 파일 | 원본 파일 |
+| --- | --- |
+| `public/earth/day.jpg` | [earth-blue-marble.jpg](https://github.com/vasturiano/three-globe/blob/017a3a5d182b2413f403154d3eb3ed4af3e598ca/example/img/earth-blue-marble.jpg) |
+| `public/earth/night.jpg` | [earth-night.jpg](https://github.com/vasturiano/three-globe/blob/017a3a5d182b2413f403154d3eb3ed4af3e598ca/example/img/earth-night.jpg) |
+
+출처를 고정한 리비전은 [`017a3a5d182b2413f403154d3eb3ed4af3e598ca`](https://github.com/vasturiano/three-globe/commit/017a3a5d182b2413f403154d3eb3ed4af3e598ca)입니다. 두 이미지가 이 리비전의 원본과 바이트 단위로 동일함을 확인했습니다.
 
 ## 도시 사진
 
