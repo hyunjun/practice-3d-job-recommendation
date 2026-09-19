@@ -3,9 +3,13 @@ import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { readFile } from 'node:fs/promises'
 import { normalizeJob } from '../../server/normalize'
+import { normalizeAshbyJob } from '../../server/providers/ashby'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { CITIES } from '../../shared/cities'
+import { COMPENSATION_VERSION, DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Catalog, Job, SavedJob } from '../../shared/types'
+import { ashbyPosting } from '../fixtures/public-postings'
+import { geographicPayText } from '../fixtures/geographic-pay'
 
 const company = PUBLIC_COMPANIES.find(item => item.id === 'stripe')!
 const fetchedAt = '2026-09-19T07:00:00.000Z'
@@ -26,8 +30,8 @@ const catalog: Catalog = {
   boards: [{ companyId: company.id, provider: 'greenhouse', board: company.board!, status: 'ok', dataStatus: 'fresh', included: 3, total: 3 }],
 }
 
-async function restore(page: Page, saved: SavedJob[] = []) {
-  await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: catalog }))
+async function restore(page: Page, saved: SavedJob[] = [], data = catalog) {
+  await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: data }))
   await page.addInitScript(saved => {
     if (!localStorage.getItem('orbit.v1.exploration')) localStorage.setItem('orbit.v1.exploration', JSON.stringify({
       source: 'public', mapMode: 'flat', selectedId: 'london',
@@ -80,26 +84,84 @@ test('existing saved regional pay is rechecked without losing status or notes, a
   const saved: SavedJob[] = [
     { job: legacyJob, company, savedAt: fetchedAt, status: 'applied', note: 'Keep this application note' },
     { job: { ...legacyJob, id: 'greenhouse-stripe-legacy-unknown', title: 'Old saved amount fixture', description: 'This old excerpt has no compensation information.' }, company, savedAt: fetchedAt, status: 'saved', note: 'Keep the original saved amount' },
+    { job: { ...legacyJob, id: 'greenhouse-stripe-version-one-unknown', title: 'Version-one saved amount fixture', compensationVersion: 1, description: 'This old excerpt has no compensation information.' }, company, savedAt: fetchedAt, status: 'saved', note: 'Keep the version-one saved amount' },
   ]
   await restore(page, saved)
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
-  await expect(page.locator('.saved-card')).toHaveCount(2)
+  await expect(page.locator('.saved-card')).toHaveCount(3)
   await page.locator('.saved-title').filter({ hasText: 'regional pay fixture' }).click()
   await expect(page.locator('.job-key-facts')).toContainText('별도 보상 조건')
   await expect(page.locator('.job-compensation dd > span')).toHaveCount(2)
   await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue('Keep this application note')
   await expect(page.getByRole('button', { name: '지원 완료로 표시됨', exact: true })).toBeVisible()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
-  await page.locator('.saved-title').filter({ hasText: 'Old saved amount fixture' }).click()
-  await expect(page.locator('.job-key-facts')).toContainText('£90–120k · 이전 기록')
-  await expect(page.locator('.job-compensation')).toContainText('이전 형식으로 저장된 금액')
-  await expect(page.locator('.job-key-facts')).not.toContainText('USD / 년')
-  await page.getByRole('button', { name: '닫기', exact: true }).click()
+  for (const title of ['Old saved amount fixture', 'Version-one saved amount fixture']) {
+    await page.locator('.saved-title').filter({ hasText: title }).click()
+    await expect(page.locator('.job-key-facts')).toContainText('£90–120k · 이전 기록')
+    await expect(page.locator('.job-compensation')).toContainText('이전 형식으로 저장된 금액')
+    await expect(page.locator('.job-key-facts')).not.toContainText('USD / 년')
+    await page.getByRole('button', { name: '닫기', exact: true }).click()
+  }
   await page.reload()
   const persisted = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
-  expect(persisted[0]).toMatchObject({ savedAt: fetchedAt, status: 'applied', note: 'Keep this application note', job: { salary: null, compensationVersion: 1, fetchedAt } })
+  expect(persisted[0]).toMatchObject({ savedAt: fetchedAt, status: 'applied', note: 'Keep this application note', job: { salary: null, compensationVersion: COMPENSATION_VERSION, fetchedAt } })
   expect(persisted[1].job.salary).toEqual(legacyJob.salary)
+  expect(persisted[2].job).toMatchObject({ salary: legacyJob.salary, compensationVersion: 1 })
 })
+
+for (const width of [1440, 320]) {
+  test(`geographic pay rows upgrade in discovery and saved records with accessible evidence and CSV at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    const jane = PUBLIC_COMPANIES.find(item => item.id === 'jane')!
+    const normalized = normalizeAshbyJob(ashbyPosting({
+      id: 'geographic-pay-fixture', title: 'Backend Engineer — geographic pay fixture',
+      location: 'Canada', address: { postalAddress: { addressCountry: 'CA' } },
+      isRemote: true, workplaceType: 'Remote', compensation: { compensationTiers: [], summaryComponents: [] },
+      descriptionPlain: `5 years of software engineering experience with Python and AWS.\n${geographicPayText}`,
+    }), jane.id, fetchedAt)!
+    const { compensationRanges: _ranges, compensationNote: _note, ...prior } = normalized
+    const old: Job = { ...prior, salary: null, compensationVersion: 1 }
+    const saved: SavedJob = { job: old, company: jane, savedAt: fetchedAt, status: 'applied', note: 'Keep both country ranges and the original application date' }
+    const data: Catalog = {
+      ...catalog, jobs: [old], companies: [jane],
+      boards: [{ companyId: jane.id, provider: 'ashby', board: jane.board!, status: 'ok', dataStatus: 'fresh', total: 1, included: 1, lastSuccessAt: fetchedAt, checkedAt: fetchedAt }],
+    }
+    await page.addInitScript(({ profile, filters }) => {
+      localStorage.setItem('orbit.v1.profile', JSON.stringify(profile))
+      if (!localStorage.getItem('orbit.v1.exploration')) localStorage.setItem('orbit.v1.exploration', JSON.stringify({
+        source: 'public', mapMode: 'flat', selectedId: null, panelTab: 'remote', filters,
+      }))
+    }, { profile: { ...SAMPLE_PROFILE, kind: 'personal', residence: 'CA' }, filters: { ...DEFAULT_FILTERS, workMode: 'remote' } })
+    const requests: { method: string; body: string | null }[] = []
+    page.on('request', request => { if (request.url().includes('/api/')) requests.push({ method: request.method(), body: request.postData() }) })
+    await restore(page, [saved], data)
+    await expect(page.locator('.company-card')).toContainText('별도 보상 조건')
+    await page.locator('.mini-job-title').click()
+    await expect(page.locator('.job-compensation dd > span')).toHaveText(['CAD 120,000–180,000 / 기간 미확인', 'USD 110,000–165,000 / 기간 미확인'])
+    await expect(page.locator('.compensation-scope')).toHaveText(['적용 조건Canada', '적용 조건United States'])
+    await page.locator('.compensation-evidence > summary').first().click()
+    await expect(page.locator('.compensation-evidence blockquote').first()).toContainText('Canada: $120,000 – $180,000 (accomplished: ~$145,000 CAD)')
+    expect(await page.locator('.dialog').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+    expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
+    await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue(saved.note)
+    await page.getByRole('button', { name: '닫기', exact: true }).click()
+    await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+    await page.reload()
+    await expect(page.locator('.saved-status')).toHaveText('지원 완료')
+    const restored = JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.saved')) || '[]')
+    expect(restored[0]).toMatchObject({
+      company: { id: 'jane', provider: 'ashby', board: 'jane' },
+      savedAt: fetchedAt, note: saved.note, status: 'applied',
+      job: { compensationVersion: COMPENSATION_VERSION, fetchedAt, salary: null, description: normalized.description },
+    })
+    expect(restored[0].job.compensationRanges).toHaveLength(2)
+    const download = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
+    const csv = await readFile((await (await download).path())!, 'utf8')
+    for (const value of ['Ashby', 'Canada', 'United States', 'CAD 120,000–180,000 / 기간 미확인', 'USD 110,000–165,000 / 기간 미확인', saved.note, fetchedAt]) expect(csv).toContain(value)
+    expect(requests.every(request => request.method === 'GET' && request.body === null)).toBe(true)
+  })
+}
 
 test.describe('mobile pay disclosure', () => {
   test.use({ viewport: { width: 320, height: 780 }, isMobile: true, hasTouch: true })

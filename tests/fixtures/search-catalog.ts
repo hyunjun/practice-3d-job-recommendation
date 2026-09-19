@@ -1,6 +1,6 @@
 import { createSampleCatalog } from '../../shared/sample'
 import { isUnmappedJob } from '../../shared/job-location'
-import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
+import { COMPENSATION_VERSION, DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Catalog, Company, Filters, Job, Profile } from '../../shared/types'
 
 const sample = createSampleCatalog()
@@ -26,7 +26,7 @@ export function searchJob(id: string, overrides: Partial<Job> = {}): Job {
     source: 'greenhouse', fetchedAt: SEARCH_TIME, stale: false, url: `https://example.com/jobs/${id}`,
     workMode: 'onsite', employment: 'fulltime', visa: 'yes', skills: ['TypeScript'], minExperience: 3,
     salary: { min: 100000, max: 180000, currency: 'USD' },
-    compensationVersion: 1, compensationRanges: undefined, compensationNote: undefined, compensationEvidence: undefined,
+    compensationVersion: COMPENSATION_VERSION, compensationRanges: undefined, compensationNote: undefined, compensationEvidence: undefined,
     qualifications: undefined, eligibility: { version: 1, rules: [] }, evidence: undefined,
     remoteWorldwide: false, remoteCountries: [], remoteRegions: undefined, remoteScopeUnknown: false,
     description: 'Synthetic job for search recovery verification.', requirements: ['TypeScript'],

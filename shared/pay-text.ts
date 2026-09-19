@@ -8,7 +8,10 @@ const NUMBER = '(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\.\\d+)?'
 const PAY = /\b(?:salary|salaries|compensation|remuneration|base (?:pay|range)|pay (?:range|rate|band)|hourly (?:pay|rate)|on[- ]target earnings|OTE)\b/i
 const NON_BASE = /^[\s,:;]*(?:(?:plus|and|with|an?|annual|yearly|monthly|target|discretionary|additional|cash|sign[- ]on|signing)\s+)*(?:equity|stock|bonus|stipend|allowance|budget|reimbursement)\b/i
 const TOTAL = /\b(?:total (?:annual |cash |target )?(?:compensation|pay|remuneration)|on[- ]target earnings|OTE)\b/i
-const GEO = /\b(?:United States|U\.?S\.?A?|United Kingdom|U\.?K\.?|Canada|Canadian|Europe|European|EMEA|APAC|Americas?|Portugal|Germany|France|Ireland|Australia|Singapore|Japan|Korea|India|California|Colorado|Washington|New York|San Francisco|Seattle|NYC|London|Berlin|Toronto|Vancouver|Lisbon|Dublin)\b/i
+const GEO_NAME = String.raw`United States|U\.?S\.?A?\.?|United Kingdom|U\.?K\.?|Canada|Canadian|Europe|European|EMEA|APAC|Americas?|Portugal|Germany|France|Ireland|Australia|Singapore|Japan|Korea|India|California|Colorado|Washington|New York|San Francisco|Seattle|NYC|London|Berlin|Toronto|Vancouver|Lisbon|Dublin`
+const GEO = new RegExp(String.raw`\b(?:${GEO_NAME})\b`, 'i')
+const GEO_LABEL = new RegExp(String.raw`^(?:${GEO_NAME})(?:\s*(?:,|/|&|and)\s*(?:${GEO_NAME}))*(?:\s*\((?:${CODES})\))?$`, 'i')
+const ONE_SIDED = /\b(?:up to|from|starting (?:at|from)|at least|minimum of|maximum of|more than|over)\s*$/i
 const MAX_TEXT = 100000
 
 interface Mention {
@@ -120,7 +123,47 @@ function contextOf(text: string, mention: Mention, previous?: Mention) {
   const heading = preceding.filter(line => line.length < 100 && PAY.test(line) && !/[\d$€£]/.test(line)).at(-1) ?? ''
   const context = [inherited || heading, clause].filter(Boolean).join('\n')
   const evidence = [inherited ? preceding.slice(-2).join('\n') : heading, clause].filter(Boolean).join('\n').slice(0, 2000)
-  return { clause, before, segmentBefore, bare, inherited, heading, context, evidence }
+  return { lineStart, clause, before, segmentBefore, bare, inherited, heading, context, evidence }
+}
+
+function geographicLabel(prefix: string): string | undefined {
+  const label = prefix.replace(ONE_SIDED, '').trim()
+    .replace(/^[\s*•\-–—]+/, '').replace(/^[\p{Regional_Indicator}\uFE0F]+\s*/u, '')
+    .replace(/:\s*$/, '').trim()
+  return /:\s*(?:up to|from|starting (?:at|from)|at least|minimum of|maximum of|more than|over)?\s*$/i.test(prefix)
+    && GEO_LABEL.test(label) ? label : undefined
+}
+
+function sectionHeading(line: string): boolean {
+  const text = line.replace(/^[#*\s]+/, '').replace(/[:*\s]+$/, '')
+  return text.length > 0 && text.length <= 100 && !/[.!?;\d$€£]/.test(text)
+    && (text === text.toUpperCase() || text.split(/\s+/).every(word => /^[A-Z][A-Za-z'-]*$/.test(word) || /^(?:&|\/|and|by|for|of|the|in)$/.test(word)))
+}
+
+/** A country row may inherit pay context, but never a currency from another row. */
+function geographicPayContext(text: string, lineStart: number): { text: string; period: CompensationRange['period'] } | undefined {
+  const lines = text.slice(Math.max(0, lineStart - 5000), lineStart).split('\n').map(line => line.trim()).filter(Boolean).slice(-20)
+  const context: string[] = []
+  let otherParagraphs = 0
+  for (const line of lines.reverse()) {
+    const firstAmount = mentions(line)[0]
+    if (firstAmount && geographicLabel(line.slice(0, firstAmount.index))) continue
+    if (NON_BASE.test(line)) break
+    const heading = sectionHeading(line)
+    if (heading && !PAY.test(line)) break
+    if (PAY.test(line)) {
+      context.unshift(line)
+      if (heading) break
+    } else if (/[$€£¥₩]|\b(?:equity|stocks?|bonus(?:es)?|stipends?|allowances?|budgets?|reimbursements?|funding|valuation|revenue|donations?|benefits?)\b/i.test(line) || ++otherParagraphs > 2) break
+  }
+  if (!context.length) return undefined
+  // Compensation reviews and annual benefits do not establish a salary period.
+  const periodContext = context.filter(line =>
+    !/\b(?:salary|salaries|pay|compensation)\s+(?:reviews?|discussions?|growth|adjustments?|increases?)\b/i.test(line)
+    && (/\b(?:annual(?:ized)?|yearly|monthly|weekly|daily|hourly)\s+(?:(?:base|total|cash)\s+){0,2}(?:salary|salaries|pay|compensation|remuneration|rate)\b/i.test(line)
+      || /\b(?:salary|salaries|pay|compensation|remuneration)\s+(?:(?:is|are|will be)\s+)?(?:paid|payable)\s+(?:annually|yearly|monthly|weekly|daily|hourly|per (?:year|month|week|day|hour))\b/i.test(line)),
+  )
+  return { text: context.join('\n'), period: payPeriod(periodContext.join('\n')) }
 }
 
 export function textCompensationInputs(input: string): CompensationInput[] {
@@ -129,16 +172,18 @@ export function textCompensationInputs(input: string): CompensationInput[] {
   const inputs: CompensationInput[] = []
   for (const [index, mention] of found.slice(0, 100).entries()) {
     const details = contextOf(text, mention, found[index - 1])
-    const labelText = details.bare ? details.inherited : details.segmentBefore || details.before
-    if (NON_BASE.test(labelText) || (!PAY.test(details.before) && !(details.bare && PAY.test(details.inherited)))) continue
+    const geography = geographicLabel(details.before)
+    const regional = geography ? geographicPayContext(text, details.lineStart) : undefined
+    const labelText = regional ? geography! : details.bare ? details.inherited : details.segmentBefore || details.before
+    if (NON_BASE.test(labelText) || (!PAY.test(details.before) && !(details.bare && PAY.test(details.inherited)) && !regional)) continue
     const after = text.slice(mention.end, mention.end + 180).split(/[.!?;,\n]/)[0]
-    const basisText = `${PAY.test(labelText) ? labelText : details.inherited || details.before}\n${after}`
+    const basisText = `${regional?.text || (PAY.test(labelText) ? labelText : details.inherited || details.before)}\n${after}`
     const period = payPeriod(details.clause)
-    const interval = period !== 'unknown' ? period : payPeriod(details.inherited || details.heading)
-    const evidence: FactEvidence = { source: 'description', text: details.evidence }
+    const interval = period !== 'unknown' ? period : regional?.period ?? payPeriod(details.inherited || details.heading)
+    const evidence: FactEvidence = { source: 'description', text: regional ? `${regional.text}\n${details.clause}`.slice(-2000) : details.evidence }
     // A one-sided offer is not an exact salary. Keep the quote without inventing the other bound.
-    const partial = mention.single && /\b(?:up to|from|starting (?:at|from)|at least|minimum of|maximum of|more than|over)\s*$/i.test(details.before)
-    const scope = payScope(details.context)
+    const partial = mention.single && ONE_SIDED.test(details.before)
+    const scope = regional ? geography : payScope(details.context)
     inputs.push({
       label: labelText.replace(/[:\s]+$/, '').slice(0, 180) || '공고의 보상 범위',
       min: partial ? null : mention.min, max: mention.max,

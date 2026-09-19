@@ -6,18 +6,19 @@ import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { createSampleCatalog } from '../../shared/sample'
 import { isUnmappedJob, unmappedCoverage } from '../../shared/job-location'
 import type { Company, Job, JobProvider } from '../../shared/types'
-import { OCCUPATION_VERSION } from '../../shared/types'
+import { COMPENSATION_VERSION, OCCUPATION_VERSION } from '../../shared/types'
 import { createFileBoardCache, parseCachedBoards } from '../../server/board-cache'
 import type { BoardCache, CachedBoard } from '../../server/board-cache'
 import { BoardFetchError, CATALOG_POLICY, CatalogUnavailableError, createCatalogService, parseRetryAfter } from '../../server/catalog-service'
 import { fetchGreenhouseBoard } from '../../server/catalog'
+import { geographicPayText } from '../fixtures/geographic-pay'
 
 const BASE = Date.parse('2026-09-19T06:00:00.000Z')
 const companies = PUBLIC_COMPANIES.slice(0, 2)
 const demoJob = createSampleCatalog().jobs[0]
 const iso = (value: number) => new Date(value).toISOString()
 const job = (company: Company, fetchedAt: string, suffix = 'one'): Job & { source: JobProvider } => ({
-  ...demoJob, id: `${company.provider ?? 'greenhouse'}-${company.id}-${suffix}`, companyId: company.id, source: company.provider ?? 'greenhouse', fetchedAt, compensationVersion: 1,
+  ...demoJob, id: `${company.provider ?? 'greenhouse'}-${company.id}-${suffix}`, companyId: company.id, source: company.provider ?? 'greenhouse', fetchedAt, compensationVersion: COMPENSATION_VERSION,
   qualifications: { version: 1, skills: [], experience: [] },
 })
 const snapshot = (company: Company, time = BASE): CachedBoard => ({
@@ -298,7 +299,7 @@ describe('cache validation and migration', () => {
     prior.description = 'For Portugal based hires: Annual base salary EUR 54000–91000.\nFor United States based hires: Annual base salary USD 136000–187000.'
     prior.salary = { min: 54000, max: 91000, currency: 'EUR' }
     const migrated = parseCachedBoards({ version: 5, boards: [cached] })
-    expect(migrated[0].snapshot!.jobs[0]).toMatchObject({ salary: null, compensationVersion: 1, fetchedAt: iso(BASE) })
+    expect(migrated[0].snapshot!.jobs[0]).toMatchObject({ salary: null, compensationVersion: COMPENSATION_VERSION, fetchedAt: iso(BASE) })
     expect(migrated[0].snapshot!.jobs[0].compensationRanges).toHaveLength(2)
     const result = await createCatalogService({
       companies: [companies[0]], cache: memoryCache(migrated), now: () => BASE + CATALOG_POLICY.freshFor, random: () => 0,
@@ -306,6 +307,23 @@ describe('cache validation and migration', () => {
     }).get()
     expect(result.jobs[0]).toMatchObject({ id: prior.id, salary: null, stale: true, fetchedAt: iso(BASE) })
     expect(result.boards[0]).toMatchObject({ status: 'error', lastSuccessAt: iso(BASE) })
+  })
+
+  it('upgrades version-one country pay rows while retaining the full published index and retry state', () => {
+    const cached = snapshot(companies[0])
+    const prior = cached.snapshot!.jobs[0]
+    prior.compensationVersion = 1
+    prior.salary = null
+    prior.description = geographicPayText
+    cached.snapshot!.publishedIds = [prior.id, `${prior.id}-outside-occupation`]
+    cached.failures = 2
+    cached.retryAt = iso(BASE + 120000)
+    const [migrated] = parseCachedBoards({ version: 5, boards: [cached] })
+    expect(migrated).toMatchObject({ checkedAt: cached.checkedAt, failures: 2, retryAt: cached.retryAt })
+    expect(migrated.snapshot).toMatchObject({ fetchedAt: iso(BASE), total: 2, publishedIds: cached.snapshot!.publishedIds })
+    expect(migrated.snapshot!.jobs[0]).toMatchObject({ id: prior.id, fetchedAt: iso(BASE), compensationVersion: COMPENSATION_VERSION, salary: null })
+    expect(migrated.snapshot!.jobs[0].compensationRanges).toHaveLength(2)
+    expect(prior.compensationVersion).toBe(1)
   })
 
   it('keeps a fresh v4 Greenhouse snapshot when migrating to a provider-aware cache', async () => {

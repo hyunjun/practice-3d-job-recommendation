@@ -1,6 +1,6 @@
 import { ArrowUpRight, Bookmark, BookmarkCheck, BriefcaseBusiness, Check, CheckCircle2, CircleHelp, Clock3, Globe2, MapPin, ShieldCheck } from 'lucide-react'
 import { formatJobSalary, formatSalary, safeExternalUrl } from '../../shared/matching'
-import { COUNTRIES, EMPLOYMENT_LABELS, JOB_SOURCE_LABELS, MODE_LABELS, VISA_LABELS } from '../../shared/types'
+import { COMPENSATION_VERSION, COUNTRIES, EMPLOYMENT_LABELS, JOB_SOURCE_LABELS, MODE_LABELS, VISA_LABELS } from '../../shared/types'
 import type { MatchedJob, SavedJob } from '../../shared/types'
 import { CompanyLogo, Dialog } from './ui'
 import { JobEvidenceDetails } from './JobEvidenceDetails'
@@ -27,6 +27,7 @@ export function JobDialog({ match, saved, postingObservation, onToggleSave, onUp
   const { job, company, matchedSkills, reasons, cautions } = match
   const url = safeExternalUrl(job.url)
   const date = new Date(job.fetchedAt).toLocaleDateString('ko-KR')
+  const verifiedSalary = job.salary && (job.source === 'sample' || job.compensationVersion === COMPENSATION_VERSION)
   return <Dialog title={company.name} eyebrow={company.industry} onClose={onClose} className="job-dialog">
     <div className="dialog-body">
       <div className="job-detail-heading"><CompanyLogo company={company} /><div><h3>{job.title}</h3><p><MapPin size={14} />{job.locationLabel}</p></div></div>
@@ -35,7 +36,7 @@ export function JobDialog({ match, saved, postingObservation, onToggleSave, onUp
       <JobFreshnessNotice job={job} />
       {saved && <SavedPostingNotice observation={postingObservation} job={saved.job} />}
       <JobRoleDetails job={job} />
-      <div className="job-key-facts"><div><span>{job.salary && (job.source === 'sample' || job.compensationVersion) ? '세전 연봉' : '보상 정보'}</span><strong>{formatJobSalary(job)}</strong>{job.salary && job.salary.currency !== 'USD' && (job.source === 'sample' || job.compensationVersion) && <small>약 {formatSalary(job.salary, true)} USD / 년</small>}</div><div><span>비자 지원</span><strong className={job.visa === 'conditional' ? 'conditional-visa' : job.visa === 'yes' ? 'text-accent' : ''}>{VISA_LABELS[job.visa]}</strong><small>{job.source === 'sample' ? '샘플 시나리오 기준' : '공고의 명시적 문구 기준'}</small></div></div>
+      <div className="job-key-facts"><div><span>{verifiedSalary ? '세전 연봉' : '보상 정보'}</span><strong>{formatJobSalary(job)}</strong>{verifiedSalary && job.salary && job.salary.currency !== 'USD' && <small>약 {formatSalary(job.salary, true)} USD / 년</small>}</div><div><span>비자 지원</span><strong className={job.visa === 'conditional' ? 'conditional-visa' : job.visa === 'yes' ? 'text-accent' : ''}>{VISA_LABELS[job.visa]}</strong><small>{job.source === 'sample' ? '샘플 시나리오 기준' : '공고의 명시적 문구 기준'}</small></div></div>
       <CompensationDetails job={job} />
       {job.workMode === 'remote' && <div className="remote-scope"><Globe2 size={18} /><div><strong>명시된 원격근무 지역</strong><p>{job.remoteWorldwide ? '전 세계 · 공고에 Global / Worldwide 명시' : job.remoteCountries.length ? job.remoteCountries.map(code => COUNTRIES.find(([id]) => id === code)?.[1] ?? code).join(' · ') : '국가별 근무 지역 미확인'}</p><small>지역에 포함되어도 취업 허가·국적·주별 제한·협업 시간대는 별도로 확인해야 해요.</small></div></div>}
       {isUnmappedJob(job) && <div className="unmapped-job-notice"><MapPin size={17} /><div><strong>지도에 표시되지 않은 근무지</strong><p>위에 적힌 공고의 위치를 확인해 주세요. 제공 도시 밖이거나 도시를 특정하기 어려워 지도에는 표시하지 않아요. 출근 장소와 근무 형태는 원문에서 다시 확인해 주세요.</p></div></div>}

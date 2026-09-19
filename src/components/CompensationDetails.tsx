@@ -1,10 +1,11 @@
 import { ChevronDown, Coins } from 'lucide-react'
 import { formatCompensation } from '../../shared/matching'
+import { COMPENSATION_VERSION } from '../../shared/types'
 import type { FactEvidence, Job } from '../../shared/types'
 
 export function CompensationDetails({ job }: { job: Job }) {
   const ranges = job.compensationRanges ?? []
-  const legacy = job.source !== 'sample' && job.salary && !job.compensationVersion
+  const legacy = job.source !== 'sample' && job.salary && job.compensationVersion !== COMPENSATION_VERSION
   if (!ranges.length && !job.compensationNote && !legacy) return null
   return <details className="job-compensation" open={!job.salary || Boolean(legacy)}>
     <summary><Coins size={16} />공고의 보상 조건{ranges.length > 0 && <small>{ranges.length}개 구간</small>}<ChevronDown size={14} /></summary>

@@ -197,3 +197,14 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 2026-09-19 공식 페이지와 공개 API를 대조했습니다. 회사의 오피스 소개는 채용 출처를 확인하는 자료이며, 각 공고의 위치·근무 형태·원격근무 자격을 대신하지 않습니다. 회사 전체의 정책·가능성 표현·서로 충돌하는 본문은 직무의 확정된 근무 형태로 바꾸지 않습니다.
 
 같은 날 SmartRecruiters의 [Endpoints](https://developers.smartrecruiters.com/docs/endpoints)·[객체 설명](https://developers.smartrecruiters.com/docs/objects)과 상세 응답의 HTTP 재검증도 확인했습니다. `releasedDate`는 게시 날짜로 설명되어 있어 본문·활성 상태의 버전으로 취급하지 않았습니다. 확인한 상세 4건은 `ETag`가 있었지만 `If-None-Match` 요청에도 `200`으로 응답했고, 동일한 요청 헤더로 다시 확인한 Canva 공고도 같은 태그·본문의 `200`이었습니다. 이번 관측만으로 API 전체의 동작을 단정하지 않으며, 상세 조회를 생략하는 변경은 적용하지 않았습니다.
+
+## 국가별 보상 행과 이전 기록의 재해석
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [Ashby Job Postings API](https://developers.ashbyhq.com/docs/public-job-posting-api) | `includeCompensation=true`로 구조화된 보상을 요청할 수 있으며 본문도 별도 필드로 제공 | 구조화된 구간을 우선하고 값이 없는 공고의 본문을 확인 |
+| [Jane Staff Analytics Engineer](https://jobs.ashbyhq.com/jane/aad68bb2-49b3-4d45-b08d-aab8076cd5c3) · [공개 응답](https://api.ashbyhq.com/posting-api/job-board/jane?includeCompensation=true) | 보상 배열은 비어 있고, 급여 설명 뒤에 캐나다·미국 구간과 괄호 안의 경력 단계별 예시 금액을 나열 | 보상 문맥 안의 지역별 행을 읽고 해당 지역·통화·전체 구간과 원문을 보존 |
+
+2026-09-19 문서·실제 공고·API 응답을 확인했습니다. 해당 공고는 캐나다 CAD 152,000–237,500, 미국 USD 149,600–215,100을 표시하지만 지급 기간은 명시하지 않습니다. 다른 공고의 연간 지급 문구나 나라 이름으로 기간·통화를 채우지 않습니다. 예시 금액은 원문 안에 남기고 별도의 확정 급여로 추가하지 않습니다.
+
+보상 문맥은 근처의 제목·설명과 이어지는 지역별 행 안에서만 사용합니다. 다른 섹션·복지 예산·보너스 설명을 만나면 상속을 멈추고, 급여 검토 주기를 급여의 지급 기간으로 사용하지 않습니다. 기존 캐시·저장 공고를 다시 읽을 때는 구조화된 보상과 따로 보관한 원문 근거를 유지하며, 재해석을 새 조회로 표시하지 않습니다.

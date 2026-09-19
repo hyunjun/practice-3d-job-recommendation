@@ -62,7 +62,7 @@ export const JobSchema = z.object({
   }).refine(range => range.max >= range.min)).max(100).optional(),
   compensationNote: z.string().max(1000).optional(),
   compensationEvidence: z.array(EvidenceSchema).max(20).optional(),
-  compensationVersion: z.literal(COMPENSATION_VERSION).optional(),
+  compensationVersion: z.union([z.literal(1), z.literal(COMPENSATION_VERSION)]).optional(),
   visa: z.enum(['yes', 'conditional', 'no', 'unknown']), remoteCountries: z.array(z.string()).max(300),
   eligibility: z.object({
     version: z.literal(ELIGIBILITY_VERSION),

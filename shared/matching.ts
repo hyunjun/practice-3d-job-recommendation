@@ -1,4 +1,4 @@
-import { ROLE_LABELS, USD_RATES } from './types'
+import { COMPENSATION_VERSION, ROLE_LABELS, USD_RATES } from './types'
 import { formatExperienceYears } from './job-qualifications'
 import { matchQualifications } from './qualification-matching'
 import { eligibilitySummary } from './job-eligibility'
@@ -29,7 +29,7 @@ export function isRemoteEligible(job: Job, country: string): boolean {
 }
 
 export function formatJobSalary(job: Job): string {
-  return job.salary ? `${formatSalary(job.salary)}${job.source !== 'sample' && !job.compensationVersion ? ' · 이전 기록' : ''}` : job.compensationRanges?.length
+  return job.salary ? `${formatSalary(job.salary)}${job.source !== 'sample' && job.compensationVersion !== COMPENSATION_VERSION ? ' · 이전 기록' : ''}` : job.compensationRanges?.length
     ? '별도 보상 조건' : job.compensationNote ? '보상 확인 필요' : '연봉 미공개'
 }
 

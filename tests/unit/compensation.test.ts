@@ -6,8 +6,9 @@ import { upgradeJobCompensation } from '../../shared/job-compensation'
 import { formatCompensation, formatJobSalary, filterJobs, medianSalary } from '../../shared/matching'
 import { JobSchema } from '../../shared/schemas'
 import { createSampleCatalog } from '../../shared/sample'
-import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
+import { COMPENSATION_VERSION, DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Job } from '../../shared/types'
+import { geographicPayText } from '../fixtures/geographic-pay'
 
 const timestamp = '2026-09-19T07:00:00.000Z'
 const tiered = [
@@ -104,6 +105,76 @@ describe('amounts, currencies and payment periods from posting text', () => {
   })
 })
 
+describe('geographic rows within a compensation section', () => {
+  it('preserves each country, currency and full range without promoting reference points or company valuation to salary', () => {
+    const pay = parseTextCompensation(geographicPayText)
+    expect(pay.salary).toBeNull()
+    expect(pay.compensationRanges).toHaveLength(2)
+    expect(pay.compensationRanges).toMatchObject([
+      { label: 'Canada', scope: 'Canada', min: 120000, max: 180000, currency: 'CAD', period: 'unknown', basis: 'base' },
+      { label: 'United States', scope: 'United States', min: 110000, max: 165000, currency: 'USD', period: 'unknown', basis: 'base' },
+    ])
+    for (const range of pay.compensationRanges!) {
+      expect(range.evidence?.text).toContain('Salaries above that point')
+      expect(range.evidence?.text).toContain(`${range.scope}:`)
+      expect(range.evidence?.text).toContain('accomplished:')
+      expect(range.evidence?.text).not.toContain('company was valued')
+    }
+  })
+
+  it.each([
+    ['Annual base salary by location', 'year'],
+    ['Monthly base salary by location', 'month'],
+    ['Hourly base pay by location', 'hour'],
+    ['The base salary is paid monthly.', 'month'],
+  ])('inherits only an explicitly stated pay interval: %s', (heading, period) => {
+    const pay = parseTextCompensation(`${heading}\nCanada: CAD 120–180`)
+    expect(pay.salary).toBeNull()
+    expect(pay.compensationRanges).toMatchObject([{ scope: 'Canada', currency: 'CAD', period }])
+  })
+
+  it('does not establish currency from a country or the next country row', () => {
+    const pay = parseTextCompensation('Annual base salary by location\nCanada: $120,000–$180,000\nUnited States: USD 110,000–165,000')
+    expect(pay.compensationRanges).toMatchObject([
+      { scope: 'Canada', currency: null, period: 'year' },
+      { scope: 'United States', currency: 'USD', period: 'year' },
+    ])
+    expect(pay.salary).toBeNull()
+  })
+
+  it('keeps adjacent city and country rows in one pay section with their own explicit units', () => {
+    const pay = parseTextCompensation('Annual base salary by location\nCanada (CAD): $120,000–$180,000\nUnited States: USD 110,000–165,000\nLondon: GBP 90,000–110,000\nBerlin: EUR 95,000–120,000\nToronto, Canada: CAD 125,000–185,000 per month')
+    expect(pay.compensationRanges).toHaveLength(5)
+    expect(pay.compensationRanges?.map(range => range.period)).toEqual(['year', 'year', 'year', 'year', 'month'])
+    expect(pay.compensationRanges?.[0]).toMatchObject({ scope: 'Canada (CAD)', currency: 'CAD' })
+    expect(pay.compensationRanges?.[4].scope).toBe('Toronto, Canada')
+    expect(pay.salary).toBeNull()
+  })
+
+  it.each([
+    'Canada: CAD 2,000–3,000',
+    'Annual base salary by location\nBENEFITS\nCanada: CAD 2,000–3,000',
+    'Annual base salary by location\nLearning Budget\nCanada: CAD 2,000–3,000',
+    'Annual base salary by location\nWe offer an annual learning budget.\nCanada: CAD 2,000–3,000',
+    'Annual base salary by location\nCanada: signing bonus CAD 2,000–3,000\nUnited States: USD 2,000–3,000',
+  ])('does not carry a salary section into unrelated regional amounts: %s', text => {
+    expect(parseTextCompensation(text).compensationRanges).toBeUndefined()
+  })
+
+  it('does not take the payment interval from a compensation review', () => {
+    const pay = parseTextCompensation('COMPENSATION\nAnnual salary reviews reflect contribution.\nCanada: CAD 120,000–180,000')
+    expect(pay.compensationRanges?.[0]).toMatchObject({ period: 'unknown', scope: 'Canada' })
+    expect(pay.salary).toBeNull()
+  })
+
+  it('retains a regional maximum as an incomplete offer instead of inventing its lower bound', () => {
+    const pay = parseTextCompensation('Annual base salary by location\nCanada: up to CAD 180,000')
+    expect(pay.salary).toBeNull()
+    expect(pay.compensationRanges).toBeUndefined()
+    expect(pay.compensationEvidence?.[0].text).toContain('Canada: up to CAD 180,000')
+  })
+})
+
 describe('Greenhouse pay transparency metadata', () => {
   it('uses every structured range, including its title, currency and original explanation', () => {
     const pay = greenhouseCompensation('Annual base salary: USD 999,999–999,999.', [
@@ -156,7 +227,7 @@ describe('rechecking existing compensation without losing saved context', () => 
   it('corrects old first-range snapshots while retaining identity, description and original collection time', () => {
     const job = oldJob()
     const updated = upgradeJobCompensation(job)
-    expect(updated).toMatchObject({ id: job.id, fetchedAt: timestamp, description: job.description, salary: null, compensationVersion: 1 })
+    expect(updated).toMatchObject({ id: job.id, fetchedAt: timestamp, description: job.description, salary: null, compensationVersion: COMPENSATION_VERSION })
     expect(updated.compensationRanges).toHaveLength(3)
     expect(upgradeJobCompensation(updated)).toBe(updated)
     expect(job.salary).not.toBeNull()
@@ -171,5 +242,45 @@ describe('rechecking existing compensation without losing saved context', () => 
     expect(cached.salary).toBeNull()
     expect(cached.compensationNote).toContain('보상 근거')
     expect(cached.fetchedAt).toBe(timestamp)
+  })
+
+  it('accepts version one and recovers previously omitted country rows without changing the original snapshot', () => {
+    const { compensationRanges: _ranges, compensationNote: _note, ...base } = posting(geographicPayText)
+    const old: Job = { ...base, salary: null, compensationVersion: 1 }
+    expect(JobSchema.safeParse(old).success).toBe(true)
+    const updated = upgradeJobCompensation(old)
+    expect(updated.compensationRanges).toHaveLength(2)
+    expect(updated).toMatchObject({ id: old.id, fetchedAt: timestamp, description: old.description, salary: null, compensationVersion: COMPENSATION_VERSION })
+    expect(old.compensationRanges).toBeUndefined()
+    expect(JobSchema.safeParse(updated).success).toBe(true)
+    expect(JobSchema.safeParse({ ...updated, compensationVersion: 99 }).success).toBe(false)
+    expect(upgradeJobCompensation(updated)).toBe(updated)
+  })
+
+  it.each(['greenhouse', 'ashby', 'lever', 'smartrecruiters'] as const)('keeps %s structured disclosures ahead of different or missing prose', source => {
+    const old: Job = {
+      ...posting(geographicPayText), source, compensationVersion: 1,
+      ...greenhouseCompensation('', [{ title: 'Annual base salary', min_cents: 9000000, max_cents: 12000000, currency_type: 'GBP' }]),
+    }
+    expect(upgradeJobCompensation(old)).toEqual({ ...old, compensationVersion: COMPENSATION_VERSION })
+    const invalid: Job = { ...old, salary: null, compensationRanges: undefined, compensationNote: 'Provider did not return both bounds.', compensationEvidence: [{ source: 'board', text: 'Annual base salary · GBP · upper bound unavailable' }] }
+    expect(upgradeJobCompensation(invalid)).toEqual({ ...invalid, compensationVersion: COMPENSATION_VERSION })
+  })
+
+  it('preserves a quoted pay statement omitted by the stored body length limit without extending the description or its date', () => {
+    const complete = posting('Annual base salary: CAD 120,000–180,000.')
+    const old: Job = { ...complete, compensationVersion: 1, description: 'Original technical responsibilities. '.repeat(900).slice(0, 26000) }
+    const updated = upgradeJobCompensation(old)
+    expect(updated.salary).toEqual(complete.salary)
+    expect(updated.compensationRanges).toEqual(complete.compensationRanges)
+    expect(updated.description).toBe(old.description)
+    expect(updated.fetchedAt).toBe(timestamp)
+  })
+
+  it('labels a version-one amount without recoverable evidence as an earlier saved record', () => {
+    const old: Job = { ...oldJob(), compensationVersion: 1, description: 'The saved excerpt contains no compensation.' }
+    expect(upgradeJobCompensation(old, true)).toBe(old)
+    expect(formatJobSalary(old)).toContain('이전 기록')
+    expect(upgradeJobCompensation(old)).toMatchObject({ salary: null, compensationVersion: COMPENSATION_VERSION, fetchedAt: timestamp })
   })
 })
