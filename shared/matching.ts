@@ -7,7 +7,7 @@ import { jobRoles, matchesJobRole } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
 import { upgradeJobRemoteScope } from './job-remote'
 import { upgradeJob } from './job-upgrade'
-import type { SearchEntry } from './job-search'
+import type { SearchEntry, SearchIndex } from './job-search'
 import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
 
 export function toUsd(salary: Salary): { min: number; max: number } {
@@ -95,9 +95,29 @@ export function filterJobs(catalog: Catalog, profile: Profile, filters: Filters)
   return rankSearchJobs(selectSearchJobs(createSearchIndex(catalog, profile), filters), profile)
 }
 
+function matchSearchEntry({ job, company }: SearchEntry, profile: Profile): MatchedJob {
+  return { job, company, ...matchJob(job, profile) }
+}
+
+function compareSearchMatches(a: MatchedJob, b: MatchedJob): number {
+  return b.score - a.score || a.company.name.localeCompare(b.company.name) || a.job.id.localeCompare(b.job.id)
+}
+
 export function rankSearchJobs(entries: SearchEntry[], profile: Profile): MatchedJob[] {
-  return entries.map(({ job, company }) => ({ job, company, ...matchJob(job, profile) }))
-    .sort((a, b) => b.score - a.score || a.company.name.localeCompare(b.company.name) || a.job.id.localeCompare(b.job.id))
+  return entries.map(entry => matchSearchEntry(entry, profile)).sort(compareSearchMatches)
+}
+
+// Recreate for each immutable index/profile snapshot. Filters change eligibility, not scores.
+export function createSearchRanker(index: SearchIndex, profile: Profile): (filters: Filters) => MatchedJob[] {
+  const scores = new WeakMap<SearchEntry, MatchedJob>()
+  return filters => selectSearchJobs(index, filters).map(entry => {
+    let match = scores.get(entry)
+    if (!match) {
+      match = matchSearchEntry(entry, profile)
+      scores.set(entry, match)
+    }
+    return match
+  }).sort(compareSearchMatches)
 }
 
 export function groupCities(catalog: Catalog, matches: MatchedJob[], filters: Filters): CityResult[] {

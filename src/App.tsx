@@ -3,8 +3,8 @@ import { ArrowRight, ArrowUpRight, Bookmark, BriefcaseBusiness, Check, ChevronDo
 import { CITY_BY_ID } from '../shared/cities'
 import { catalogNeedsAttention } from '../shared/catalog-health'
 import { ageCatalog, catalogDeadlines, snapshotDeadlines } from '../shared/catalog-freshness'
-import { countFilters, groupCities, matchJob, rankSearchJobs } from '../shared/matching'
-import { createSearchIndex, selectSearchJobs } from '../shared/job-search'
+import { countFilters, createSearchRanker, groupCities, matchJob } from '../shared/matching'
+import { createSearchIndex } from '../shared/job-search'
 import { isUnmappedJob } from '../shared/job-location'
 import type { SearchScope } from '../shared/job-search'
 import { analyzeSearchRecovery, undoRecoveryChanges } from '../shared/search-recovery'
@@ -92,7 +92,8 @@ export default function App() {
   const showSavedData = () => { setOpenJob(null); setModal('saved-data') }
 
   const searchIndex = useMemo(() => createSearchIndex(catalog, profile), [catalog, profile])
-  const matches = useMemo(() => rankSearchJobs(selectSearchJobs(searchIndex, filters), profile), [searchIndex, profile, filters])
+  const rankSearch = useMemo(() => createSearchRanker(searchIndex, profile), [searchIndex, profile])
+  const matches = useMemo(() => rankSearch(filters), [rankSearch, filters])
   const cities = useMemo(() => groupCities(catalog, matches, filters), [catalog, matches, filters])
   const remote = useMemo(() => matches.filter(match => match.job.workMode === 'remote'), [matches])
   const unmapped = useMemo(() => matches.filter(match => isUnmappedJob(match.job)), [matches])
@@ -304,7 +305,7 @@ export default function App() {
     <footer className="app-footer"><span><OrbitLogo small />A WORLD OF POSSIBILITIES.</span><span>{catalog.source === 'sample' ? 'DEMO WORKSPACE' : 'PUBLIC JOB BOARDS'}<span className="footer-dot">·</span>LOCAL FIRST<button onClick={() => setModal('data')}><Database size={11} />데이터와 추천 방식</button></span></footer>
     {modal === 'profile' && <ProfileDialog profile={profile} filters={filters} remember={rememberProfile} onApply={applyProfile} onDelete={() => { deleteProfile(); setProfile(SAMPLE_PROFILE); setRememberProfile(true); setFilters({ ...DEFAULT_FILTERS }); setPanelTab('cities'); setSelectedId(null); setModal(null); notify('저장된 프로필을 삭제하고 샘플로 돌아왔어요.') }} onClose={() => setModal(null)} />}
     {modal === 'saved-data' && <SavedDataDialog storage={savedStorage} onClose={() => setModal(null)} />}
-    {modal === 'filters' && <FiltersDialog filters={filters} catalog={catalog} profile={profile} onApply={updateFilters} onClose={() => setModal(null)} />}
+    {modal === 'filters' && <FiltersDialog filters={filters} searchIndex={searchIndex} source={catalog.source} onApply={updateFilters} onClose={() => setModal(null)} />}
     {modal === 'data' && <DataDialog catalog={catalog} expired={catalogExpired} loading={loading} progress={progress} error={dataError} retryAt={retryAt} onSource={source => void changeSource(source, { announce: catalogReady })} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
     {openJob && <JobDialog storage={savedStorage} onManageSaved={showSavedData} match={{ ...openJob, ...matchJob(openJob.job, profile) }} saved={savedOpenJob} postingObservation={savedOpenJob ? postingStatus.observations.get(savedOpenJob.job.id) : undefined} onToggleSave={() => toggleSave(openJob)} onUpdateSaved={update => { changeSaved({ kind: 'update', id: openJob.job.id, patch: update }) }} onClose={() => setOpenJob(null)} />}
     {notice && <Toast message={notice.message} action={notice.action} tone={notice.tone} onDismiss={closeNotice} />}
