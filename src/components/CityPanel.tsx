@@ -1,17 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronDown, CircleHelp, Globe2, MapPin, MapPinOff, Plus, ShieldCheck, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ArrowUpRight, Check, ChevronDown, CircleHelp, Globe2, MapPin, MapPinOff, Plus, SlidersHorizontal } from 'lucide-react'
 import { CITY_BY_ID } from '../../shared/cities'
 import { catalogNeedsAttention } from '../../shared/catalog-health'
-import { isUnmappedJob, unmappedCoverage } from '../../shared/job-location'
-import { formatJobSalary, groupCompanies, medianSalary } from '../../shared/matching'
-import { COUNTRIES, MODE_LABELS, VISA_LABELS } from '../../shared/types'
+import { unmappedCoverage } from '../../shared/job-location'
+import { groupCompanies, medianSalary } from '../../shared/matching'
+import { COUNTRIES } from '../../shared/types'
 import type { Catalog, CityResult, MatchedJob, Profile } from '../../shared/types'
 import type { ExplorationState } from '../lib/storage'
 import { CityImage, CompanyLogo } from './ui'
-import { JobFreshnessNotice } from './JobFreshnessNotice'
-import { EligibilityNotice } from './JobEligibilityDetails'
-import { jobRoleLabel } from '../../shared/job-roles'
+import { CompanyCard } from './CompanyCard'
 
 interface Props {
   catalog: Catalog
@@ -104,26 +102,6 @@ export function CityPanel(props: Props) {
     </div>
     <button className="panel-data-footer" onClick={onData}><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>{catalog.source === 'sample' ? '샘플 데이터로 탐색 중' : catalog.boards.some(board => board.status === 'pending') ? '회사별 수집 진행 확인' : !catalog.fetchedAt ? '공개 공고 연결 확인' : catalogNeedsAttention(catalog) ? '일부 게시판 · 조회 상태 확인' : '회사별 공개 채용공고'}</span><CircleHelp size={14} /></button>
   </aside>
-}
-
-export function CompanyCard({ matches, savedIds, saveReady, onOpen, onSave }: { matches: MatchedJob[]; savedIds: Set<string>; saveReady: boolean; onOpen: (match: MatchedJob) => void; onSave: (match: MatchedJob) => void }) {
-  const [expanded, setExpanded] = useState(false)
-  const company = matches[0].company
-  const visible = expanded ? matches : matches.slice(0, 1)
-  return <article className="company-card">
-    <header><CompanyLogo company={company} /><div><h3>{company.name}</h3><p>{company.industry}</p></div>{matches[0].job.source === 'sample' && <span className="sample-label">샘플</span>}</header>
-    {visible.map(match => <div key={match.job.id} className="mini-job">
-      <button className="mini-job-title" onClick={() => onOpen(match)}>{match.job.title}<ArrowUpRight size={14} /></button>
-      {match.job.source !== 'sample' && <p className="mini-job-role">{jobRoleLabel(match.job)}</p>}
-      {isUnmappedJob(match.job) && <p className="mini-job-location"><MapPinOff size={12} /><span>{match.job.locationLabel}</span></p>}
-      <div className="mini-job-meta"><span>{formatJobSalary(match.job)}</span><span>·</span><span>{MODE_LABELS[match.job.workMode]}</span></div>
-      <JobFreshnessNotice job={match.job} compact />
-      <EligibilityNotice job={match.job} />
-      <div className="mini-job-reason">{match.matchedSkills.length ? <Check size={12} /> : <CircleHelp size={12} />}<span>{match.skillSummary}</span></div>
-      <div className="mini-job-footer"><span className={`visa-tag ${match.job.visa === 'yes' ? 'confirmed' : match.job.visa === 'conditional' ? 'conditional' : ''}`}>{match.job.visa === 'yes' ? <ShieldCheck size={12} /> : <CircleHelp size={12} />}비자 {VISA_LABELS[match.job.visa]}</span><button className={`icon-button bookmark-button ${savedIds.has(match.job.id) ? 'is-saved' : ''}`} aria-label={`${company.name} ${match.job.title} ${savedIds.has(match.job.id) ? '저장 취소' : '저장'}`} disabled={!saveReady} onClick={() => onSave(match)}>{savedIds.has(match.job.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button></div>
-    </div>)}
-    {matches.length > 1 && <button className="more-jobs" onClick={() => setExpanded(!expanded)}>{expanded ? '공고 접기' : `${matches.length - 1}개 공고 더 보기`}<ChevronDown size={13} className={expanded ? 'rotated' : ''} /></button>}
-  </article>
 }
 
 function mostMatchedSkills(matches: MatchedJob[]) {

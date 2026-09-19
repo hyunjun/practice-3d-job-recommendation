@@ -194,7 +194,7 @@ test('public conditions expose their evidence, preserve visa distinctions and su
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.getByLabel('비자 지원 필터').selectOption('supported')
   await page.getByRole('button', { name: /^런던, 추천 회사 1곳 보기$/ }).click()
-  await page.getByRole('button', { name: '1개 공고 더 보기', exact: true }).click()
+  await page.getByRole('button', { name: '전체 2개 공고 보기', exact: true }).click()
   await expect(page.locator('.mini-job-title')).toHaveCount(2)
   await page.locator('.mini-job-title').filter({ hasText: 'conditional fixture' }).click()
   await expect(page.locator('.job-key-facts')).toContainText('조건부 지원 명시')

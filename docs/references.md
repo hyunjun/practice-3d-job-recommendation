@@ -229,3 +229,14 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 | [WHATWG HTML: Web storage](https://html.spec.whatwg.org/multipage/webstorage.html) | 다중 프로세스의 agent cluster 사이에는 잠금이 없다고 가정해야 함 | 이전 localStorage 사본 삭제에 원자적인 비교·삭제를 보장하지 않으며 이전 버전의 다른 탭을 닫도록 안내 |
 
 2026-09-19 원문을 확인했습니다. 파일은 업로드하지 않고 브라우저에서 검토·저장합니다. 선택한 공고의 현재 값 비교와 한도 확인·일괄 반영은 IndexedDB의 한 트랜잭션 안에서 수행합니다. 원본 정리는 보관 위치별로 범위를 나누며, 이전 완료 표시와 현재 정상 기록을 유지합니다. [파일 형식·충돌·삭제 범위](saved-storage.md)에 구체적인 계약을 정리했습니다.
+
+## 회사에 공고가 많을 때의 페이지 탐색
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [GOV.UK Design System: Pagination](https://design-system.service.gov.uk/components/pagination/) | 모든 내용을 한 화면에 표시하는 것이 사용성·성능에 불리할 때 페이지 구분을 고려하고, 키보드 사용에 문제가 되는 자동 무한 스크롤을 피함 | 실제 138개 공고가 펼쳐지는 회사에서 문제를 확인하고, 10개씩 직접 이동하는 페이지와 현재 범위를 표시 |
+| [WAI-ARIA APG: Disclosure](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/) | 네이티브 버튼의 Enter·Space 조작, aria-expanded와 대상 영역의 관계 | 회사 공고 펼치기·접기의 상태와 제어 대상을 연결 |
+| [WCAG 2.2: Focus Order](https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html) | 동적으로 내용이 달라져도 의미와 조작 순서를 유지하는 포커스 | 페이지 이동 후 첫 공고, 접기 후 펼치기 버튼으로 포커스를 이동하고 모바일 화면 안에 표시 |
+| [React: Adjusting some state when a prop changes](https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes) | 입력 변경 시 상태 일부를 조정하는 조건부 렌더링과 부수 효과의 분리 | 공고 ID·정렬 순서가 바뀌면 페이지를 초기화하고, 실제 포커스·스크롤은 사용자 동작 후 처리 |
+
+2026-09-20 원문을 확인했습니다. 페이지당 10개는 이 앱의 회사 카드 크기와 탐색 흐름에 맞춘 선택이며 레퍼런스가 지정한 수치가 아닙니다. 검색·추천·집계는 전체 후보로 계산하고 페이지 선택은 브라우저에서 처리합니다. 데스크톱에서는 회사 목록의 스크롤 영역만 이동하고, 모바일에서는 문서를 이동해 선택한 공고를 보여줍니다.

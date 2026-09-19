@@ -167,7 +167,7 @@ test('older count-only snapshots disclose omitted contents and refresh into actu
   await expect(page.locator('.unmapped-previous-note')).toHaveCount(0)
   await expect(page.locator('.results-tabs button').last()).toHaveText('기타 근무지1')
   await expect(page.locator('.list-toolbar')).toHaveText('1개 회사 · 2개 공고조건')
-  await page.getByRole('button', { name: '1개 공고 더 보기', exact: true }).click()
+  await page.getByRole('button', { name: '전체 2개 공고 보기', exact: true }).click()
   await expect(page.locator('.mini-job-location')).toHaveCount(2)
   expect((await page.locator('.mini-job-location').allTextContents()).sort()).toEqual(['Cork, Ireland', 'Gurugram'])
 })

@@ -243,7 +243,7 @@ select option { background: #1e271c; color: var(--text); }
 .compare-add.added { color: #c2ef91; background: #304126; }
 .city-reason { display: flex; align-items: center; gap: 7px; padding: 10px 9px; margin-top: 17px; background: #2b3a2166; color: #b7d995; border: 1px solid #425b2d; border-radius: 5px; font-size: 9px; }
 .company-list { padding: 0 17px 20px; }
-.company-card { border: 1px solid #384830; border-radius: 7px; background: #1d271b; padding: 15px 14px 0; margin-bottom: 12px; }
+.company-card { border: 1px solid #384830; border-radius: 7px; background: #1d271b; padding: 15px 14px 0; margin-bottom: 12px; scroll-margin-top: 16px; min-width: 0; }
 .company-card > header { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; }
 .company-card h3 { font-size: 14px; font-weight: 550; }
 .company-card > header p { margin-top: 4px; font-size: 10px; color: #a8b999; }
@@ -312,6 +312,16 @@ select option { background: #1e271c; color: var(--text); }
 .bookmark-button.is-saved { color: var(--accent); background: #3a4f2b; }
 .more-jobs { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; border-top: 1px solid #35462c; padding: 11px 0; color: #b5caa3; font-size: 9px; }
 .more-jobs:hover { color: #d7edbd; }
+.company-job-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; padding: 0 0 10px; }
+.company-job-toolbar > p { color: #b9cfa6; font-size: 10px; line-height: 1.8; font-variant-numeric: tabular-nums; }
+.company-job-toolbar .more-jobs { width: auto; border: 1px solid #526c3f; border-radius: 5px; padding: 7px 9px; min-height: 34px; font-size: 10px; color: #d6eac5; background: #293b21; }
+.company-job-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; border-top: 1px solid #415535; padding: 10px 0; }
+.company-job-pagination > button { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex-shrink: 0; border: 1px solid #536d40; border-radius: 5px; color: #d6eac5; background: #293b21; }
+.company-job-pagination > button:hover:not(:disabled) { background: #3c542e; border-color: #a0c77f; }
+.company-job-pagination > button:disabled { opacity: .4; }
+.company-job-pagination > span { min-width: 42px; text-align: center; font-size: 12px; color: #e0eecf; font-variant-numeric: tabular-nums; }
+.company-job-pagination small { color: #b8cba6; font-size: 10px; }
+.company-job-bottom > .more-jobs { min-height: 36px; font-size: 10px; }
 .rotated { transform: rotate(180deg); }
 .remote-heading { padding-top: 22px; padding-bottom: 18px; background: radial-gradient(ellipse at 80% 30%, #33492350, transparent 65%); }
 .remote-illustration { position: relative; display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 20px; border: 1px solid #4b6338; border-radius: 50%; color: #b5d991; background: radial-gradient(circle, #3f582a80, #23321b); }

@@ -157,7 +157,7 @@ test('a role-specific office schedule reaches the Vancouver hybrid filter withou
   await expect(page.locator('.company-card')).toHaveCount(1)
   await expect(page.locator('.company-card')).toContainText('Asana')
   await expect(page.locator('.city-detail-count')).toContainText('2공고')
-  await page.getByRole('button', { name: '1개 공고 더 보기', exact: true }).click()
+  await page.getByRole('button', { name: '전체 2개 공고 보기', exact: true }).click()
   await page.locator('.mini-job-title').filter({ hasText: 'annual fixture' }).click()
   await expect(page.locator('.job-meta-pills')).toContainText('하이브리드')
   await expect(page.locator('.job-compensation')).toContainText('CAD 110,000–145,000 / 년')
