@@ -1,6 +1,7 @@
 import { applySavedOperation, MAX_SAVED_JOBS } from '../../shared/saved-jobs'
 import type { SavedOperation } from '../../shared/saved-jobs'
 import type { SavedJob } from '../../shared/types'
+import type { SavedImportPlan } from '../../shared/saved-backup'
 import { SavedStorageError } from './saved-store'
 import type { SavedRecovery, SavedStorageErrorCode, SavedStore, SavedStoreSnapshot } from './saved-store'
 
@@ -11,12 +12,16 @@ export interface SavedState {
   error: SavedStorageErrorCode | null
   pending: number
   recovery: SavedRecovery[]
+  occupied: number
+  unreadableIds: string[]
+  busy: boolean
 }
 interface Pending {
   operation: SavedOperation
   draft?: SavedJob
 }
-export type SavedChangeResult = { accepted: true } | { accepted: false; reason: 'loading' | 'limit' | 'unreadable' | 'missing' }
+export type SavedChangeResult = { accepted: true } | { accepted: false; reason: 'loading' | 'limit' | 'unreadable' | 'missing' | 'busy' }
+export type SavedBulkResult = { ok: true; refreshFailed?: boolean } | { ok: false; error: SavedStorageErrorCode }
 
 /** The visible draft is separate from the last committed database state. */
 export class SavedController {
@@ -33,10 +38,11 @@ export class SavedController {
   private refreshing = false
   private refreshRequested = false
   private recreateMissing = false
+  private exclusive = false
   private ready = false
   private error: SavedStorageErrorCode | null = null
   private phase: SavedState['phase'] = 'loading'
-  private snapshot: SavedState = { records: [], phase: 'loading', ready: false, error: null, pending: 0, recovery: [] }
+  private snapshot: SavedState = { records: [], phase: 'loading', ready: false, error: null, pending: 0, recovery: [], occupied: 0, unreadableIds: [], busy: false }
   onCommit?: () => void
 
   constructor(private open: () => Promise<SavedStore>) {}
@@ -60,6 +66,7 @@ export class SavedController {
     this.snapshot = {
       records: this.records(), phase: this.phase, ready: this.ready,
       error: this.error, pending: this.pending.length, recovery: this.recovery,
+      occupied: this.base.length + this.unreadableCount, unreadableIds: [...this.unreadableIds], busy: this.exclusive,
     }
     this.listeners.forEach(listener => listener())
   }
@@ -78,6 +85,7 @@ export class SavedController {
     this.running = false
     this.active = null
     this.refreshing = false
+    this.exclusive = false
     this.error = null
     this.phase = this.ready && this.pending.length ? 'saving' : 'loading'
     this.publish()
@@ -106,10 +114,12 @@ export class SavedController {
     this.store = null
     this.running = false
     this.active = null
+    this.exclusive = false
   }
 
   change(operation: SavedOperation): SavedChangeResult {
     if (!this.ready) return { accepted: false, reason: 'loading' }
+    if (this.exclusive) return { accepted: false, reason: 'busy' }
     const id = operation.kind === 'add' ? operation.record.job.id : operation.id
     if (this.unreadableIds.has(id)) return { accepted: false, reason: 'unreadable' }
     const current = this.snapshot.records.find(item => item.job.id === id)
@@ -139,7 +149,7 @@ export class SavedController {
   }
 
   private async flush() {
-    if (this.running || this.refreshing || !this.store || this.error || !this.pending.length) return
+    if (this.running || this.refreshing || this.exclusive || !this.store || this.error || !this.pending.length) return
     const epoch = this.epoch
     this.running = true
     try {
@@ -172,6 +182,7 @@ export class SavedController {
   }
 
   async retry() {
+    if (this.exclusive) return
     // A deliberate removal supersedes earlier failed edits to that record.
     // Delete first so a full database can accept the remaining saves.
     const removed = new Set<string>()
@@ -191,10 +202,54 @@ export class SavedController {
     await this.start()
   }
 
+  importRecords(plan: SavedImportPlan): Promise<SavedBulkResult> {
+    return this.bulk(store => store.importRecords(plan))
+  }
+
+  discardRecovery(target: SavedRecovery): Promise<SavedBulkResult> {
+    return this.bulk(store => store.discardRecovery(target))
+  }
+
+  private async bulk(action: (store: SavedStore) => Promise<void>): Promise<SavedBulkResult> {
+    if (!this.store || !this.ready || this.pending.length || this.error || this.running || this.refreshing || this.exclusive) return { ok: false, error: 'busy' }
+    const store = this.store
+    const epoch = this.epoch
+    this.exclusive = true
+    this.phase = 'saving'
+    this.publish()
+    let committed = false
+    try {
+      await action(store)
+      committed = true
+      this.onCommit?.()
+      if (epoch !== this.epoch) return { ok: true, refreshFailed: true }
+      const snapshot = await store.read()
+      if (epoch !== this.epoch) return { ok: true, refreshFailed: true }
+      this.accept(snapshot)
+      this.phase = 'ready'
+      return { ok: true }
+    } catch (error) {
+      if (epoch === this.epoch) {
+        if (committed) this.fail(error)
+        else this.phase = 'ready'
+      }
+      // A committed import must never be described as rolled back just because
+      // re-reading the list failed; the regular reconnect action reloads it.
+      return committed ? { ok: true, refreshFailed: true }
+        : { ok: false, error: error instanceof SavedStorageError ? error.code : 'write' }
+    } finally {
+      if (epoch === this.epoch) {
+        this.exclusive = false
+        this.publish()
+        if (this.refreshRequested && !this.error) void this.refresh()
+      }
+    }
+  }
+
   /** Cross-tab refresh never replaces an uncommitted local draft. */
   async refresh() {
     this.refreshRequested = true
-    if (!this.store || this.running || this.refreshing || this.pending.length || this.error) return
+    if (!this.store || this.running || this.refreshing || this.exclusive || this.pending.length || this.error) return
     const epoch = this.epoch
     const store = this.store
     this.refreshing = true

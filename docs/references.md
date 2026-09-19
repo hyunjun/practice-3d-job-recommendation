@@ -219,3 +219,13 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 | [MDN: beforeunload](https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event) | 저장하지 않은 입력이 있을 때 이탈 안내에 사용할 수 있지만 특히 모바일에서 항상 실행되지 않음 | 대기 중인 변경이 있을 때만 등록하고, 실제 보관은 저장 완료 표시와 CSV로 확인 |
 
 2026-09-19 원문을 확인했습니다. 실제 보관 공고 1,322개 중 본문이 긴 500개의 저장 문자열은 이 환경의 localStorage 한도를 넘었고, 같은 자료를 IndexedDB에 기록한 뒤 앱에서 다시 읽는 것을 확인했습니다. 모든 500개 조합이 같은 크기이거나 IndexedDB 용량이 무제한이라는 뜻은 아닙니다. [저장소 동작과 제한](saved-storage.md)에 이전 원본의 보관 범위, 실패 후 재시도, 여러 탭의 동시 수정 규칙을 정리했습니다.
+
+## 저장 기록의 파일 백업과 원본 정리
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [MDN: Using files from web applications](https://developer.mozilla.org/en-US/docs/Web/API/File_API/Using_files_from_web_applications) | 사용자가 선택한 File의 이름·바이트 크기와 객체 URL의 생성·해제 | 파일 크기를 읽기 전에 확인하고 브라우저 안에서 JSON을 해석하며 다운로드 뒤 객체 URL 해제 |
+| [MDN: accept](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/accept) | 파일 선택기의 accept는 형식 검증이 아닌 안내 | 확장자·MIME만으로 판단하지 않고 JSON·버전·공고 스키마·수량을 검증 |
+| [WHATWG HTML: Web storage](https://html.spec.whatwg.org/multipage/webstorage.html) | 다중 프로세스의 agent cluster 사이에는 잠금이 없다고 가정해야 함 | 이전 localStorage 사본 삭제에 원자적인 비교·삭제를 보장하지 않으며 이전 버전의 다른 탭을 닫도록 안내 |
+
+2026-09-19 원문을 확인했습니다. 파일은 업로드하지 않고 브라우저에서 검토·저장합니다. 선택한 공고의 현재 값 비교와 한도 확인·일괄 반영은 IndexedDB의 한 트랜잭션 안에서 수행합니다. 원본 정리는 보관 위치별로 범위를 나누며, 이전 완료 표시와 현재 정상 기록을 유지합니다. [파일 형식·충돌·삭제 범위](saved-storage.md)에 구체적인 계약을 정리했습니다.

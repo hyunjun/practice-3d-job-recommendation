@@ -16,7 +16,7 @@ import { JobOccupationNotice } from './JobRoleDetails'
 import type { SavedJobsController } from '../hooks/useSavedJobs'
 import { SavedStorageNotice } from './SavedStorageNotice'
 
-export function SavedView({ saved, storage, showStorageStatus, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; storage: SavedJobsController; showStorageStatus: boolean; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
+export function SavedView({ saved, storage, showStorageStatus, onManage, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; storage: SavedJobsController; showStorageStatus: boolean; onManage: () => void; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [postingFilter, setPostingFilter] = useState('all')
@@ -39,8 +39,8 @@ export function SavedView({ saved, storage, showStorageStatus, profile, postingS
       && `${item.company.name} ${item.job.title} ${jobRoleLabel(item.job)} ${item.job.locationLabel} ${item.note}`.toLowerCase().includes(query.toLowerCase())
   }), [saved, status, query, postingFilter, observations, publicCount])
   return <main id="main-content" className="collection-page" tabIndex={-1}>
-    <div className="page-heading"><div><p className="eyebrow">YOUR COLLECTION OF POSSIBILITIES</p><h1>가능성을 모아두는 곳<span className="accent-dot">.</span></h1><p>마음이 움직인 기회들. 이제 하나씩 다음 단계로 이어가 보세요.</p></div><button className="button secondary" disabled={!saved.length} onClick={() => exportSavedCsv(saved, observations)}><Download size={16} />CSV 내보내기</button></div>
-    {showStorageStatus && <SavedStorageNotice storage={storage} />}
+    <div className="page-heading"><div><p className="eyebrow">YOUR COLLECTION OF POSSIBILITIES</p><h1>가능성을 모아두는 곳<span className="accent-dot">.</span></h1><p>마음이 움직인 기회들. 이제 하나씩 다음 단계로 이어가 보세요.</p></div><div className="collection-file-actions"><button className="button secondary" onClick={onManage}>기록 백업·복원</button><button className="button secondary" disabled={!saved.length} onClick={() => exportSavedCsv(saved, observations)}><Download size={16} />CSV 내보내기</button></div></div>
+    {showStorageStatus && <SavedStorageNotice storage={storage} onManage={onManage} />}
     {publicCount > 0 && <section className="posting-toolbar" aria-labelledby="posting-status-title">
       <div className="posting-toolbar-top"><div><h2 id="posting-status-title">저장한 공고, 지금도 게시 중일까요?</h2><p>공개 공고 {publicCount}개의 게시 여부와 저장 내용의 차이를 확인해 보세요. 메모와 지원 기록은 그대로 보관돼요.</p></div><div className="posting-refresh"><button className="button secondary" disabled={loading || remaining > 0} onClick={() => void check()}><RefreshCw size={15} className={loading ? 'posting-refreshing' : ''} />{loading ? '게시 상태 확인 중' : checked ? '새로 확인' : '게시 상태 확인'}</button>{remaining > 0 && !loading && <small>{formatRetryWait(remaining)} 후 다시 확인 가능</small>}</div></div>
       <div className="posting-summary" role="status">{loading ? <p>회사별 공개 게시판을 확인하고 있어요.</p> : error ? <p>{error}</p> : checked ? <p><span>게시 확인 <strong>{counts.listed}</strong></span><span>내용 차이 <strong>{counts.changed}</strong></span><span>목록에서 미확인 <strong>{counts.missing}</strong></span><span>확인 필요 <strong>{counts.unknown}</strong></span></p> : <p>직접 확인할 때만 조회해요. 저장한 공고·메모·프로필은 전송하지 않습니다.</p>}</div>

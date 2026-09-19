@@ -216,4 +216,57 @@ describe('saved drafts and committed records', () => {
     expect(committed.some(record => record.job.id === 'local-add')).toBe(true)
     expect(committed.some(record => record.job.id === 'other-tab')).toBe(true)
   })
+
+  it('keeps import exclusive with local edits and refreshes other-tab records after the import commits', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item() })
+    const gate = deferred<void>()
+    const controller = create(async () => ({
+      ...store,
+      importRecords: async plan => { await gate.promise; await store.importRecords(plan) },
+    }))
+    await controller.start()
+    const importing = controller.importRecords({ items: [{ record: item('imported'), expected: null }] })
+    expect(controller.getSnapshot()).toMatchObject({ busy: true, phase: 'saving', pending: 0 })
+    expect(controller.change({ kind: 'update', id: 'one', patch: { note: 'Cannot interleave' } })).toEqual({ accepted: false, reason: 'busy' })
+    expect(await controller.importRecords({ items: [] })).toEqual({ ok: false, error: 'busy' })
+    await store.apply({ kind: 'add', record: item('other-tab') })
+    await controller.refresh()
+    gate.resolve()
+    expect(await importing).toEqual({ ok: true })
+    await ready(controller)
+    expect(controller.getSnapshot().records.map(record => record.job.id)).toEqual(['imported', 'other-tab', 'one'])
+    expect(controller.getSnapshot().busy).toBe(false)
+  })
+
+  it('leaves the prior collection usable after an atomic import failure without adding an unsaved draft', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item() })
+    const controller = create(async () => ({ ...store, importRecords: async () => { throw new SavedStorageError('quota') } }))
+    await controller.start()
+    expect(await controller.importRecords({ items: [{ record: item('file'), expected: null }] })).toEqual({ ok: false, error: 'quota' })
+    expect(controller.getSnapshot()).toMatchObject({ records: [item()], phase: 'ready', pending: 0, busy: false, error: null })
+    controller.change({ kind: 'update', id: 'one', patch: { note: 'Normal editing still works' } })
+    await ready(controller)
+    expect((await store.read()).records[0].note).toBe('Normal editing still works')
+  })
+
+  it('reports a committed import separately from a failed subsequent read and recovers by reconnecting', async () => {
+    let failRead = false
+    const controller = create(async () => {
+      const store = await open()
+      return {
+        ...store,
+        read: () => failRead ? Promise.reject(new SavedStorageError('unavailable')) : store.read(),
+        importRecords: async plan => { await store.importRecords(plan); failRead = true },
+      }
+    })
+    await controller.start()
+    expect(await controller.importRecords({ items: [{ record: item('file'), expected: null }] })).toEqual({ ok: true, refreshFailed: true })
+    expect(controller.getSnapshot()).toMatchObject({ phase: 'error', pending: 0, busy: false, error: 'unavailable' })
+    expect((await (await open()).read()).records).toEqual([item('file')])
+    failRead = false
+    await controller.retry()
+    expect(controller.getSnapshot()).toMatchObject({ phase: 'ready', records: [item('file')] })
+  })
 })

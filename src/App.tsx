@@ -20,6 +20,7 @@ import { FiltersDialog } from './components/FiltersDialog'
 import { DataDialog } from './components/DataDialog'
 import { JobDialog } from './components/JobDialog'
 import { SavedStorageNotice } from './components/SavedStorageNotice'
+import { SavedDataDialog } from './components/SavedDataDialog'
 import { CompareView, SavedView } from './components/Views'
 import { OrbitLogo, Spinner, Toast } from './components/ui'
 import type { GlobeHandle } from './components/Globe'
@@ -63,7 +64,7 @@ export default function App() {
   const [mapMode, setMapMode] = useState<ExplorationState['mapMode']>(initial.exploration.mapMode)
   const [light, setLight] = useState(initial.exploration.light)
   const [citySort, setCitySort] = useState<ExplorationState['citySort']>(initial.exploration.citySort)
-  const [modal, setModal] = useState<'profile' | 'filters' | 'data' | null>(null)
+  const [modal, setModal] = useState<'profile' | 'filters' | 'data' | 'saved-data' | null>(null)
   const [openJob, setOpenJob] = useState<MatchedJob | null>(null)
   const [notice, setNotice] = useState<Notice | null>(null)
   const explorationStorageWarned = useRef(false)
@@ -88,6 +89,7 @@ export default function App() {
   const catalogReady = Boolean(catalog.fetchedAt)
   const retryCatalog = () => void changeSource('public', { refresh: true, announce: catalogReady })
   const showData = () => setModal('data')
+  const showSavedData = () => { setOpenJob(null); setModal('saved-data') }
 
   const searchIndex = useMemo(() => createSearchIndex(catalog, profile), [catalog, profile])
   const matches = useMemo(() => rankSearchJobs(selectSearchJobs(searchIndex, filters), profile), [searchIndex, profile, filters])
@@ -195,6 +197,7 @@ export default function App() {
         limit: '최대 500개까지 저장할 수 있어요. CSV로 내보낸 뒤 정리해 주세요.',
         unreadable: '이 공고의 기존 기록을 읽을 수 없어 원본을 그대로 보관했어요.',
         missing: '저장한 목록에서 이 공고를 찾지 못했어요. 다시 저장해 주세요.',
+        busy: '파일을 반영하고 있어요. 완료된 뒤 다시 시도해 주세요.',
       }
       notify(messages[result.reason], undefined, 'error')
     }
@@ -263,7 +266,7 @@ export default function App() {
       </nav>
       <div className="header-actions"><button className="data-status-button" onClick={showData}>{loading ? <Spinner /> : <span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : dataError || catalogNeedsAttention(catalog) ? 'attention' : ''}`} />}<span>{loading ? '공개 공고 조회 중' : catalog.source === 'sample' ? '샘플 탐색' : dataError ? '공개 공고 연결 필요' : catalogExpired ? '공개 공고 확인 필요' : '공개 채용'}</span><ChevronDown size={12} /></button><span className="header-divider" /><button className="profile-avatar" onClick={() => setModal('profile')} aria-label="내 프로필 편집" title="내 프로필">{initials}<span /></button></div>
     </header>
-    {view !== 'saved' && !openJob && (savedStorage.phase === 'error' || savedStorage.recovery.length > 0) && <div className="global-saved-status"><SavedStorageNotice storage={savedStorage} issuesOnly /></div>}
+    {view !== 'saved' && !openJob && modal !== 'saved-data' && (savedStorage.phase === 'error' || savedStorage.recovery.length > 0) && <div className="global-saved-status"><SavedStorageNotice storage={savedStorage} onManage={showSavedData} issuesOnly /></div>}
     {view === 'explore' ? <>
       <div className="search-toolbar">
         <label className="global-search"><Search size={18} /><input ref={searchRef} value={filters.query} maxLength={500} aria-label="도시, 회사 또는 포지션 검색" placeholder="도시, 회사 또는 포지션 검색" onChange={event => setFilters(current => ({ ...current, query: event.target.value }))} />{filters.query ? <button aria-label="검색어 지우기" onClick={() => setFilters(current => ({ ...current, query: '' }))}><X size={15} /></button> : <kbd>⌘ K</kbd>}</label>
@@ -292,12 +295,13 @@ export default function App() {
         <div ref={panelRef} className="panel-container"><CityPanel catalog={catalog} results={cities} remote={remote} unmapped={unmapped} remoteEligibleOnly={filters.remoteEligibleOnly} selectedId={selectedId} tab={panelTab} sort={citySort} profile={profile} compareIds={compareIds} savedIds={savedIds} saveReady={savedStorage.ready} onSort={setCitySort} onTab={setPanelTab} onSelect={selectCity} onHover={setHoveredId} onCompare={toggleCompare} onOpenJob={setOpenJob} onSave={toggleSave} onProfile={() => setModal('profile')} onData={showData} onFilters={() => setModal('filters')} status={catalogStatus} emptyState={<SearchRecovery analysis={recovery} filters={filters} scope={searchScope} sample={catalog.source === 'sample'} onApply={applyRecovery} onNavigate={navigateRecovery} onFilters={() => setModal('filters')} onProfile={() => setModal('profile')} onData={showData} />} /></div>
       </main>
       {catalogReady && (filters.query || countFilters(filters) > 0) && <div className="active-filter-summary"><span>{matches.length}개 공고가 현재 조건에 맞아요{catalog.source === 'public' && filters.role !== 'all' && (filters.role === 'unknown' ? ' · 세부 직무 미확인 공고' : ' · 직무 미확인 공고 제외')}{filters.salaryMin > 0 && ` · 희망 연봉 $${filters.salaryMin / 1000}k+`}{filters.employment !== 'all' && ' · 고용 형태 필터 적용'}{!filters.remoteEligibleOnly && ' · 원격근무 지역 제한 해제'}</span><button onClick={resetFilters}><RotateCcw size={11} />초기화</button></div>}
-    </> : view === 'saved' ? <SavedView saved={saved} storage={savedStorage} showStorageStatus={!openJob} profile={profile} postingStatus={postingStatus} onOpen={setOpenJob} onRemove={toggleSave} onExplore={() => navigate('explore')} /> : !catalogReady ? <main id="main-content" className="collection-page" tabIndex={-1}>{catalogStatus}</main> : <CompareView catalog={catalog} results={cities} compareIds={compareIds} status={catalogStatus} onToggle={toggleCompare} onAuto={() => setCompareIds(cities.slice(0, 3).map(result => result.city.id))} onSelect={id => { navigate('explore'); selectCity(id) }} onExplore={() => navigate('explore')} />}
+    </> : view === 'saved' ? <SavedView saved={saved} storage={savedStorage} showStorageStatus={!openJob && modal !== 'saved-data'} onManage={showSavedData} profile={profile} postingStatus={postingStatus} onOpen={setOpenJob} onRemove={toggleSave} onExplore={() => navigate('explore')} /> : !catalogReady ? <main id="main-content" className="collection-page" tabIndex={-1}>{catalogStatus}</main> : <CompareView catalog={catalog} results={cities} compareIds={compareIds} status={catalogStatus} onToggle={toggleCompare} onAuto={() => setCompareIds(cities.slice(0, 3).map(result => result.city.id))} onSelect={id => { navigate('explore'); selectCity(id) }} onExplore={() => navigate('explore')} />}
     <footer className="app-footer"><span><OrbitLogo small />A WORLD OF POSSIBILITIES.</span><span>{catalog.source === 'sample' ? 'DEMO WORKSPACE' : 'PUBLIC JOB BOARDS'}<span className="footer-dot">·</span>LOCAL FIRST<button onClick={() => setModal('data')}><Database size={11} />데이터와 추천 방식</button></span></footer>
     {modal === 'profile' && <ProfileDialog profile={profile} filters={filters} remember={rememberProfile} onApply={applyProfile} onDelete={() => { deleteProfile(); setProfile(SAMPLE_PROFILE); setRememberProfile(true); setFilters({ ...DEFAULT_FILTERS }); setPanelTab('cities'); setSelectedId(null); setModal(null); notify('저장된 프로필을 삭제하고 샘플로 돌아왔어요.') }} onClose={() => setModal(null)} />}
+    {modal === 'saved-data' && <SavedDataDialog storage={savedStorage} onClose={() => setModal(null)} />}
     {modal === 'filters' && <FiltersDialog filters={filters} catalog={catalog} profile={profile} onApply={updateFilters} onClose={() => setModal(null)} />}
     {modal === 'data' && <DataDialog catalog={catalog} expired={catalogExpired} loading={loading} progress={progress} error={dataError} retryAt={retryAt} onSource={source => void changeSource(source, { announce: catalogReady })} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
-    {openJob && <JobDialog storage={savedStorage} match={{ ...openJob, ...matchJob(openJob.job, profile) }} saved={savedOpenJob} postingObservation={savedOpenJob ? postingStatus.observations.get(savedOpenJob.job.id) : undefined} onToggleSave={() => toggleSave(openJob)} onUpdateSaved={update => { changeSaved({ kind: 'update', id: openJob.job.id, patch: update }) }} onClose={() => setOpenJob(null)} />}
+    {openJob && <JobDialog storage={savedStorage} onManageSaved={showSavedData} match={{ ...openJob, ...matchJob(openJob.job, profile) }} saved={savedOpenJob} postingObservation={savedOpenJob ? postingStatus.observations.get(savedOpenJob.job.id) : undefined} onToggleSave={() => toggleSave(openJob)} onUpdateSaved={update => { changeSaved({ kind: 'update', id: openJob.job.id, patch: update }) }} onClose={() => setOpenJob(null)} />}
     {notice && <Toast message={notice.message} action={notice.action} tone={notice.tone} onDismiss={closeNotice} />}
   </div></FreshnessTimeContext.Provider>
 }

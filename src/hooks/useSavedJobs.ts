@@ -2,6 +2,8 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { SavedController } from '../lib/saved-controller'
 import { openSavedStore } from '../lib/saved-store'
 import type { SavedOperation } from '../../shared/saved-jobs'
+import type { SavedImportPlan } from '../../shared/saved-backup'
+import type { SavedRecovery } from '../lib/saved-store'
 
 export function useSavedJobs() {
   const [controller] = useState(() => new SavedController(() => openSavedStore()))
@@ -29,7 +31,12 @@ export function useSavedJobs() {
     window.addEventListener('beforeunload', preventLoss)
     return () => window.removeEventListener('beforeunload', preventLoss)
   }, [state.pending])
-  return { ...state, change: (operation: SavedOperation) => controller.change(operation), retry: () => { void controller.retry() } }
+  return {
+    ...state, change: (operation: SavedOperation) => controller.change(operation), retry: () => { void controller.retry() },
+    importRecords: (plan: SavedImportPlan) => controller.importRecords(plan),
+    discardRecovery: (target: SavedRecovery) => controller.discardRecovery(target),
+    refresh: async () => { await controller.refresh(); return controller.getSnapshot() },
+  }
 }
 
 export type SavedJobsController = ReturnType<typeof useSavedJobs>

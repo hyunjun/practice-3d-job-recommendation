@@ -203,3 +203,125 @@ describe('transactional edits', () => {
     expect((await store.read()).records.find(record => record.job.id === 'job-0')?.note).toBe('Allowed at capacity')
   })
 })
+
+describe('reviewed imports and recovery cleanup', () => {
+  it('imports a selection atomically, preserves existing positions and keeps the file order and dates for new records', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item('one', 'Current note') })
+    await store.apply({ kind: 'add', record: item('two') })
+    const current = (await store.read()).records.find(record => record.job.id === 'one')!
+    await store.importRecords({ items: [
+      { record: item('file-first'), expected: null },
+      { record: item('one', 'Selected incoming note'), expected: current },
+      { record: item('file-second'), expected: null },
+    ] })
+    const after = (await store.read()).records
+    expect(after.map(record => record.job.id)).toEqual(['file-first', 'file-second', 'two', 'one'])
+    expect(after.find(record => record.job.id === 'one')).toMatchObject({ note: 'Selected incoming note', savedAt: time })
+    expect(after.every(record => record.savedAt === time)).toBe(true)
+  })
+
+  it('aborts every selected write when a transaction fails after an earlier record was written', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item('one', 'Keep current note') })
+    const current = (await store.read()).records[0]
+    const originalPut = FakeObjectStore.prototype.put
+    let writes = 0
+    vi.spyOn(FakeObjectStore.prototype, 'put').mockImplementation(function (this: IDBObjectStore, value, key) {
+      if (this.name === SAVED_RECORD_STORE && ++writes === 2) throw new DOMException('Full storage', 'QuotaExceededError')
+      return originalPut.call(this, value, key)
+    })
+    await expect(store.importRecords({ items: [
+      { record: item('new'), expected: null },
+      { record: item('one', 'Uncommitted replacement'), expected: current },
+    ] })).rejects.toMatchObject({ code: 'quota' })
+    expect(writes).toBe(2)
+    expect((await store.read()).records).toEqual([current])
+  })
+
+  it('rejects stale previews if another connection edited, added or removed an affected record', async () => {
+    const first = await open()
+    await first.apply({ kind: 'add', record: item('one', 'Previewed note') })
+    const preview = (await first.read()).records[0]
+    const other = await open()
+    await other.apply({ kind: 'update', id: 'one', patch: { note: 'Newer other-tab note' } })
+    await expect(first.importRecords({ items: [
+      { record: item('new'), expected: null },
+      { record: item('one', 'File note'), expected: preview },
+    ] })).rejects.toMatchObject({ code: 'changed' })
+    expect((await first.read()).records).toHaveLength(1)
+    await expect(first.importRecords({ items: [{ record: item('one'), expected: null }] })).rejects.toMatchObject({ code: 'changed' })
+    await other.apply({ kind: 'remove', id: 'one' })
+    await expect(first.importRecords({ items: [{ record: item('one'), expected: preview }] })).rejects.toMatchObject({ code: 'changed' })
+  })
+
+  it('checks total capacity before an import and allows a replacement at the limit', async () => {
+    values.set('orbit.v1.saved', JSON.stringify(Array.from({ length: MAX_SAVED_JOBS }, (_, index) => item(`job-${index}`))))
+    const store = await open()
+    const current = (await store.read()).records[0]
+    await expect(store.importRecords({ items: [
+      { record: { ...current, note: 'Must roll back too' }, expected: current },
+      { record: item('overflow'), expected: null },
+    ] })).rejects.toMatchObject({ code: 'limit' })
+    expect((await store.read()).records[0]).toEqual(current)
+    await store.importRecords({ items: [{ record: { ...current, note: 'Replacement at capacity' }, expected: current }] })
+    expect((await store.read()).records[0].note).toBe('Replacement at capacity')
+    expect((await store.read()).records).toHaveLength(MAX_SAVED_JOBS)
+  })
+
+  it('does not overwrite unreadable entries and removes only the reviewed unreadable source', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item('healthy') })
+    const damaged = { id: 'damaged', order: 2, record: { invalid: true } }
+    await rawEntries(damaged)
+    const target = (await store.read()).recovery[0]
+    await expect(store.importRecords({ items: [{ record: item('damaged'), expected: null }] })).rejects.toMatchObject({ code: 'unreadable' })
+    await store.discardRecovery(target)
+    expect((await store.read()).records).toEqual([item('healthy')])
+    expect((await store.read()).recovery).toEqual([])
+    await store.importRecords({ items: [{ record: item('damaged'), expected: null }] })
+    expect((await store.read()).records).toHaveLength(2)
+  })
+
+  it('does not delete a source that changed after review or a now-healthy database entry', async () => {
+    const store = await open()
+    await rawEntries({ id: 'damaged', order: 2, record: { invalid: true } })
+    const target = (await store.read()).recovery[0]
+    await rawEntries({ id: 'damaged', order: 2, record: item('damaged', 'Repaired elsewhere') })
+    await expect(store.discardRecovery(target)).rejects.toMatchObject({ code: 'changed' })
+    expect((await store.read()).records[0].note).toBe('Repaired elsewhere')
+    values.set('orbit.v1.saved', JSON.stringify([item('old-tab')]))
+    const legacy = (await store.read()).recovery[0]
+    const newer = JSON.stringify([item('old-tab', 'Changed after review')])
+    values.set('orbit.v1.saved', newer)
+    await expect(store.discardRecovery(legacy)).rejects.toMatchObject({ code: 'changed' })
+    expect(values.get('orbit.v1.saved')).toBe(newer)
+    await store.discardRecovery((await store.read()).recovery[0])
+    expect(values.has('orbit.v1.saved')).toBe(false)
+    expect((await store.read()).records[0].note).toBe('Repaired elsewhere')
+  })
+
+  it('retains the migration marker after clearing an archived source so deleted records do not reappear', async () => {
+    const original = JSON.stringify([item('one'), { invalid: true }])
+    values.set('orbit.v1.saved', original)
+    const store = await open()
+    await store.apply({ kind: 'remove', id: 'one' })
+    await store.discardRecovery((await store.read()).recovery[0])
+    expect((await store.read()).recovery).toEqual([])
+    store.close()
+    values.set('orbit.v1.saved', original)
+    expect((await (await open()).read()).records).toEqual([])
+    expect(values.has('orbit.v1.saved')).toBe(false)
+  })
+
+  it('discloses an undeleted legacy copy separately and never implies that deleting the archive removed it', async () => {
+    const original = JSON.stringify([item('one'), { invalid: true }])
+    values.set('orbit.v1.saved', original)
+    legacy.removeItem = () => { throw new DOMException('Denied removal', 'SecurityError') }
+    const store = await open()
+    expect((await store.read()).recovery.map(source => source.kind)).toEqual(['legacy', 'additional-legacy'])
+    await store.discardRecovery((await store.read()).recovery[0])
+    expect((await store.read()).recovery.map(source => source.kind)).toEqual(['additional-legacy'])
+    expect(values.get('orbit.v1.saved')).toBe(original)
+  })
+})

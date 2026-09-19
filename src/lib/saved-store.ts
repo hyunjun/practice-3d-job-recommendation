@@ -1,6 +1,8 @@
 import { decodeSavedJobs, MAX_SAVED_JOBS, SavedJobSchema } from '../../shared/saved-jobs'
 import type { SavedOperation } from '../../shared/saved-jobs'
 import type { SavedJob } from '../../shared/types'
+import { sameSavedRecord } from '../../shared/saved-backup'
+import type { SavedImportPlan } from '../../shared/saved-backup'
 
 export const SAVED_DATABASE = 'orbit-saved-opportunities'
 export const SAVED_DATABASE_VERSION = 1
@@ -26,13 +28,15 @@ export interface SavedStoreSnapshot {
   unreadableIds: string[]
   occupied: number
 }
-export type SavedStorageErrorCode = 'unavailable' | 'blocked' | 'legacy-read' | 'quota' | 'limit' | 'unreadable' | 'missing' | 'write'
+export type SavedStorageErrorCode = 'unavailable' | 'blocked' | 'legacy-read' | 'quota' | 'limit' | 'unreadable' | 'missing' | 'write' | 'changed' | 'busy'
 export class SavedStorageError extends Error {
   constructor(readonly code: SavedStorageErrorCode, options?: ErrorOptions) { super(code, options) }
 }
 export interface SavedStore {
   read(): Promise<SavedStoreSnapshot>
   apply(operation: SavedOperation, recreate?: SavedJob): Promise<Entry | null>
+  importRecords(plan: SavedImportPlan): Promise<void>
+  discardRecovery(target: SavedRecovery): Promise<void>
   close(): void
 }
 interface Options {
@@ -187,7 +191,7 @@ export async function openSavedStore(options: Options = {}): Promise<SavedStore>
       // An older tab can recreate a legacy key after migration. Preserve and disclose it.
       try {
         const additional = readLegacy()
-        if (additional !== null && await digest(additional) !== state.legacyDigest) recovery.push({
+        if (additional !== null) recovery.push({
           kind: 'additional-legacy', count: null, original: additional,
         })
       } catch { /* Reading the current database does not require legacy storage. */ }
@@ -222,6 +226,65 @@ export async function openSavedStore(options: Options = {}): Promise<SavedStore>
           const entry: Entry = { id, order, record }
           await request(records.put(entry))
           return entry
+        })
+      } catch (error) { throw storageError(error) }
+    },
+    async importRecords(plan) {
+      try {
+        if (plan.items.length > MAX_SAVED_JOBS) throw new SavedStorageError('limit')
+        const items = plan.items.map(item => ({ ...item, record: SavedJobSchema.parse(item.record) }))
+        const ids = new Set(items.map(item => item.record.job.id))
+        if (ids.size !== items.length || items.some(item => item.record.company.id !== item.record.job.companyId)) throw new SavedStorageError('write')
+        await transaction(db, 'readwrite', async (records, meta) => {
+          const existing = new Map<string, Entry | null>()
+          let additions = 0
+          for (const item of items) {
+            const raw = await request<unknown>(records.get(item.record.job.id))
+            const entry = raw === undefined ? null : decodeEntry(raw)
+            if (raw !== undefined && !entry) throw new SavedStorageError('unreadable')
+            if (entry ? !item.expected || !sameSavedRecord(entry.record, item.expected) : item.expected !== null) throw new SavedStorageError('changed')
+            existing.set(item.record.job.id, entry)
+            if (!entry) additions++
+          }
+          if (await request(records.count()) + additions > MAX_SAVED_JOBS) throw new SavedStorageError('limit')
+          const state = await request<State>(meta.get('state'))
+          if (!Number.isSafeInteger(state.nextOrder) || state.nextOrder < 1 || !Number.isSafeInteger(state.nextOrder + additions)) throw new SavedStorageError('write')
+          // Preserve existing positions and the file's relative order for new records.
+          for (const { record } of [...items].reverse()) {
+            const order = existing.get(record.job.id)?.order ?? state.nextOrder++
+            await request(records.put({ id: record.job.id, order, record } satisfies Entry))
+          }
+          if (additions) await request(meta.put(state))
+        })
+      } catch (error) { throw storageError(error) }
+    },
+    async discardRecovery(target) {
+      try {
+        if (target.kind === 'additional-legacy') {
+          // Uncoordinated older tabs have no localStorage compare-and-delete API.
+          // Check immediately before removal and advise closing those tabs in the UI.
+          if (typeof target.original !== 'string' || readLegacy() !== target.original) throw new SavedStorageError('changed')
+          const legacyStorage = options.legacy ?? globalThis.localStorage
+          legacyStorage.removeItem(LEGACY_KEY)
+          return
+        }
+        await transaction(db, 'readwrite', async (records, meta) => {
+          if (target.kind === 'legacy') {
+            const state = await request<State>(meta.get('state'))
+            if (!state.recovery || state.recovery.raw !== target.original) throw new SavedStorageError('changed')
+            delete state.recovery
+            await request(meta.put(state))
+          } else {
+            if (!Array.isArray(target.original) || !target.original.length) throw new SavedStorageError('changed')
+            const ids: IDBValidKey[] = []
+            for (const expected of target.original) {
+              if (!expected || typeof expected !== 'object' || !('id' in expected)) throw new SavedStorageError('unreadable')
+              const raw = await request<unknown>(records.get(expected.id))
+              if (raw === undefined || decodeEntry(raw) || JSON.stringify(raw) !== JSON.stringify(expected)) throw new SavedStorageError('changed')
+              ids.push(expected.id)
+            }
+            for (const id of ids) await request(records.delete(id))
+          }
         })
       } catch (error) { throw storageError(error) }
     },
