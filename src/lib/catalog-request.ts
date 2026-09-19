@@ -1,6 +1,7 @@
 import { applyCatalogUpdate } from '../../shared/catalog-progress'
-import type { CatalogCollectionSnapshot, CatalogCollectionUpdate, CatalogProgress } from '../../shared/catalog-progress'
+import type { CatalogCollectionSnapshot, CatalogProgress } from '../../shared/catalog-progress'
 import type { Catalog } from '../../shared/types'
+import { CatalogUpdateDataSchema, hasConsistentCatalog, isPublicCatalog } from './catalog-validation'
 
 export class CatalogRequestError extends Error {
   constructor(message: string, readonly code?: string, readonly retryAt?: string) { super(message) }
@@ -11,9 +12,8 @@ const record = (value: unknown): value is Record<string, unknown> => !!value && 
 const date = (value: unknown) => typeof value === 'string' && Number.isFinite(Date.parse(value))
 
 function readCatalog(value: unknown, partial = false): Catalog {
-  if (!record(value) || value.source !== 'public' || !['jobs', 'companies', 'cities', 'boards'].every(key => Array.isArray(value[key]))
-    || !(date(value.fetchedAt) || partial && value.fetchedAt === '' && (value.jobs as unknown[]).length === 0)) throw malformed()
-  return value as unknown as Catalog
+  if (!isPublicCatalog(value, partial)) throw malformed()
+  return value
 }
 
 function readProgress(value: unknown, catalog: Catalog): CatalogProgress {
@@ -34,28 +34,37 @@ function readSnapshot(value: unknown): CatalogCollectionSnapshot {
   return { catalog, progress }
 }
 
-function readUpdate(value: unknown, previous: CatalogCollectionSnapshot): CatalogCollectionUpdate {
-  if (!record(value) || !record(value.catalog) || !Array.isArray(value.jobs) || !Array.isArray(value.companyIds)) throw malformed()
-  const catalog = readCatalog({ ...value.catalog, jobs: value.jobs, companies: previous.catalog.companies, cities: previous.catalog.cities }, true)
-  const progress = readProgress(value.progress, catalog)
+function readUpdate(value: unknown, previous: CatalogCollectionSnapshot): CatalogCollectionSnapshot {
+  if (!record(value)) throw malformed()
+  const progressValue = value.progress
+  if (!CatalogUpdateDataSchema.validate(value)) throw malformed()
+  const catalog = { ...value.catalog, jobs: value.jobs, companies: previous.catalog.companies, cities: previous.catalog.cities }
+  const progress = readProgress(progressValue, catalog)
   const companies = new Map(previous.catalog.companies.map(company => [company.id, company]))
   const replaced = new Set(value.companyIds)
   const previousBoards = new Map(previous.catalog.boards.map(board => [board.companyId, board]))
+  const boards = new Map(catalog.boards.map(board => [board.companyId, board]))
   if (progress.id !== previous.progress.id || progress.total !== previous.progress.total || progress.completed < previous.progress.completed
     || progress.revision < previous.progress.revision || progress.revision === previous.progress.revision && !progress.done
     || replaced.size !== value.companyIds.length || value.companyIds.some(id => typeof id !== 'string' || !companies.has(id))
-    || catalog.boards.length !== previous.catalog.boards.length || new Set(catalog.boards.map(board => board.companyId)).size !== catalog.boards.length
+    || catalog.boards.length !== previous.catalog.boards.length || boards.size !== catalog.boards.length
     || catalog.boards.some(board => {
       const prior = previousBoards.get(board.companyId)
-      return !prior || board.board !== prior.board || board.provider !== prior.provider
+      return !prior || board.board !== prior.board || (board.provider ?? 'greenhouse') !== (prior.provider ?? 'greenhouse')
         || prior.status === 'pending' && board.status !== 'pending' && !replaced.has(board.companyId)
+        || prior.status !== 'pending' && board.status === 'pending'
+        || replaced.has(board.companyId) && board.status === 'pending'
     })
-    || catalog.jobs.some(job => !record(job) || typeof job.id !== 'string' || !replaced.has(job.companyId)
+    || catalog.jobs.some(job => !replaced.has(job.companyId)
       || job.source !== (companies.get(job.companyId)?.provider ?? 'greenhouse')
-      || !job.id.startsWith(`${job.source}-${job.companyId}-`) || !date(job.fetchedAt))
+      || !job.id.startsWith(`${job.source}-${job.companyId}-`)
+      || boards.get(job.companyId)?.dataStatus === 'unavailable')
     || new Set(catalog.jobs.map(job => job.id)).size !== catalog.jobs.length) throw malformed()
+  // A delta cannot replace the validated company/city registry from the snapshot.
   const { companies: _companies, cities: _cities, jobs, ...metadata } = catalog
-  return { progress, companyIds: value.companyIds as string[], jobs, catalog: metadata }
+  const merged = applyCatalogUpdate(previous.catalog, { catalog: metadata, companyIds: value.companyIds, jobs, progress })
+  if (!hasConsistentCatalog(merged, !progress.done)) throw malformed()
+  return { catalog: merged, progress }
 }
 
 async function readResponse(response: Response): Promise<unknown> {
@@ -120,9 +129,9 @@ export async function requestPublicCatalog({
       monitoring.throwIfAborted()
       delay = retryDelay(next)
       if (next.status === 204) continue
-      const update = readUpdate(await readResponse(next), state)
+      const updated = readUpdate(await readResponse(next), state)
       monitoring.throwIfAborted()
-      state = { catalog: applyCatalogUpdate(state.catalog, update), progress: update.progress }
+      state = updated
       onUpdate(state.catalog, state.progress)
     }
   } catch (error) {

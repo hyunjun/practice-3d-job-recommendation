@@ -4,6 +4,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { CITIES } from '../../shared/cities'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { DEFAULT_FILTERS } from '../../shared/types'
+import { isUnmappedJob } from '../../shared/job-location'
 import type { Catalog, Job } from '../../shared/types'
 import { normalizeJob } from '../../server/normalize'
 import { POSTING_TIME } from '../fixtures/public-postings'
@@ -29,7 +30,7 @@ function catalog(scope: Scope = 'cities', count = 23): Catalog {
   })
   return {
     source: 'public', cities: CITIES, companies: [company], jobs, stale: false,
-    fetchedAt: POSTING_TIME, checkedAt: POSTING_TIME, unmappedCount: 0,
+    fetchedAt: POSTING_TIME, checkedAt: POSTING_TIME, unmappedCount: jobs.filter(isUnmappedJob).length,
     boards: [{
       companyId: company.id, board: company.board!, provider: company.provider, total: jobs.length,
       included: jobs.length, status: 'ok', dataStatus: 'fresh', checkedAt: POSTING_TIME, lastSuccessAt: POSTING_TIME,

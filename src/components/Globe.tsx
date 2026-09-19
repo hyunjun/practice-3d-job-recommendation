@@ -413,7 +413,7 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
 
   return (
     <div ref={containerRef} className={`earth-canvas ${loaded ? 'is-ready' : ''}`} tabIndex={0} role="region" aria-label="3D 기회 지도. 방향키로 회전하고 더하기, 빼기 키로 확대하거나 축소할 수 있습니다.">
-      <div className="globe-markers" aria-label="지도에 표시된 도시">
+      <div className="globe-markers" role="group" aria-label="지도에 표시된 도시">
         {markers.map(marker => {
           const active = marker.cityIds.includes(selectedId ?? '') || marker.cityIds.includes(hoveredId ?? '')
           return <button

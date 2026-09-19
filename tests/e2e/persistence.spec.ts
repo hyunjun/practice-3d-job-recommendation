@@ -86,7 +86,10 @@ test('a failed restored feed keeps public mode and search context, distinguishes
   let available = false
   let empty = false
   await page.route('**/api/catalog?source=public*', route => available
-    ? route.fulfill({ json: { ...publicCatalog, jobs: empty ? [] : publicCatalog.jobs } })
+    ? route.fulfill({ json: {
+      ...publicCatalog, jobs: empty ? [] : publicCatalog.jobs,
+      boards: publicCatalog.boards.map(board => empty ? { ...board, total: 0, included: 0 } : board),
+    } })
     : route.fulfill({ status: 503, json: { error: '게시판 연결을 확인해 주세요.' } }))
   await page.addInitScript(() => localStorage.setItem('orbit.v1.exploration', JSON.stringify({
     source: 'public', filters: { query: '런던' }, selectedId: 'london', mapMode: 'flat',

@@ -22,8 +22,9 @@ export const SEARCH_FILTERS: Filters = {
 export function searchJob(id: string, overrides: Partial<Job> = {}): Job {
   const skills = overrides.skills ?? ['TypeScript']
   const years = overrides.minExperience === undefined ? 3 : overrides.minExperience
+  const companyId = overrides.companyId ?? SEARCH_COMPANIES[0].id
   return {
-    ...sample.jobs[0], id: `greenhouse-search-fixture-a-${id}`, companyId: SEARCH_COMPANIES[0].id,
+    ...sample.jobs[0], id: `greenhouse-${companyId}-${id}`, companyId,
     title: `Backend Engineer ${id}`, role: 'backend', cityIds: ['london'], locationLabel: 'London',
     source: 'greenhouse', fetchedAt: SEARCH_TIME, stale: false, url: `https://example.com/jobs/${id}`,
     workMode: 'onsite', employment: 'fulltime', visa: 'yes', skills, minExperience: years,
