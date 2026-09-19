@@ -6,6 +6,7 @@ import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { createSampleCatalog } from '../../shared/sample'
 import { isUnmappedJob, unmappedCoverage } from '../../shared/job-location'
 import type { Company, Job, JobProvider } from '../../shared/types'
+import { OCCUPATION_VERSION } from '../../shared/types'
 import { createFileBoardCache, parseCachedBoards } from '../../server/board-cache'
 import type { BoardCache, CachedBoard } from '../../server/board-cache'
 import { BoardFetchError, CATALOG_POLICY, CatalogUnavailableError, createCatalogService, parseRetryAfter } from '../../server/catalog-service'
@@ -329,7 +330,7 @@ describe('cache validation and migration', () => {
         jobs: previous.snapshot!.jobs.map(job => ({
           ...job, visa: 'unknown', eligibility: { version: 1, rules: [] }, evidence: {},
           roleClassification: { version: 1, roles: ['backend'], evidence: [{ role: 'backend', source: 'title', text: job.title }] },
-          occupation: { version: 1, category: 'engineering', departments: [], evidence: [{ source: 'title', text: job.title }] },
+          occupation: { version: OCCUPATION_VERSION, category: 'engineering', departments: [], evidence: [{ source: 'title', text: job.title }] },
         })),
       })
       await rm(currentFile)

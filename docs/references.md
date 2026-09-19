@@ -35,6 +35,7 @@
 | [Greenhouse Job Board API](https://developers.greenhouse.io/job-board.html) | 공개 GET 조회, 공고별 `metadata`·`offices`, `pay_transparency`, 급여 구간의 통화·제목·설명문 | 실제 근무지와 보상 조건의 원문 근거, 기존 10개 회사 수집 |
 | [Ashby Public Job Posting API](https://developers.ashbyhq.com/docs/public-job-posting-api) | `isListed`, `workplaceType`, `employmentType`, `secondaryLocations`, `includeCompensation=true`와 보상 구간 | 목록 비공개 공고 제외, 추가 근무지와 국가 주소, 기본 급여·통화·기간 보존, 5개 회사 수집 |
 | [Lever Postings API](https://github.com/lever/postings-api) | 공개 공고 배열, `limit`·`skip`, `allLocations`, `commitment`, `salaryRange.interval`, EU 주소 | 전체 페이지 성공 후 반영, 계약 기간과 근무 시간 구분, 2개 회사 수집 |
+| [SmartRecruiters Posting API](https://developers.smartrecruiters.com/docs/posting-api) | 공개 게시 목록과 상세의 별도 조회, 국가·도시·원격·하이브리드 필드, 공개 고용 형태 이름 | Canva·Grab·Wise 추가, 전체 공개 목록과 필요한 본문 확인, 근무 조건의 공개 근거 보존 |
 | [Google JobPosting 구조화된 데이터](https://developers.google.com/search/docs/appearance/structured-data/job-posting) | 실제 고용주가 제공한 `baseSalary`, 통화와 `HOUR`·`DAY`·`WEEK`·`MONTH`·`YEAR`, 고정 금액과 범위 | 기본 급여·총보상 구분, 지급 기간 확인, 임의 연봉 환산 제외 |
 | [Schema.org baseSalary](https://schema.org/baseSalary) | 직무나 직원의 기본 급여 | 기본 급여와 그 밖의 보상을 분리하는 데이터 계약 |
 | [MDN Retry-After](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After) | 초 단위와 HTTP 날짜 형식 | 게시판별 재조회 대기 시각 |
@@ -158,3 +159,19 @@ HTTP 재검증은 게시판의 실시간 채용 상태를 보증하지 않습니
 페이지 복원 시 외부 게시판을 자동 조회하지 않습니다. 현재 보관한 공개 기록이 얼마나 오래됐는지만 다시 계산하고, 30분 이후의 이전 조회·24시간 이후 추천 제외와 재조회 경로를 보여줍니다. 회사별 원래 시각·실제 실패 기록·재시도 시각은 유지하고 저장한 공고의 모집 종료를 추정하지 않습니다.
 
 브라우저 검사에서 타이머 없이 시각만 이동한 뒤 복원 이벤트를 처리하는 경우를 확인했습니다. 별도의 Chrome 검증에서는 실제 뒤로 가기를 실행해 `pageshow.persisted: true`와 카탈로그 추가 요청 없음을 확인했습니다. 이는 확인 기간의 적용을 검증한 결과이며 브라우저가 항상 페이지를 메모리 캐시에 보관한다는 보장은 아닙니다.
+
+## SmartRecruiters의 목록·상세와 지역 커버리지
+
+| 레퍼런스 | 확인한 동작 | 반영 |
+| --- | --- | --- |
+| [Public postings 목록](https://developers.smartrecruiters.com/reference/v1listpostings) | 인증 없는 조회 허용, `destination=PUBLIC`, 페이지당 최대 100개, `offset`·`totalFound` | 회사별 모든 공개 페이지를 확인하며 전체 수 변경·중복·짧은 페이지를 불완전한 조회로 처리 |
+| [공고 상세](https://developers.smartrecruiters.com/reference/v1getposting) · [Endpoints](https://developers.smartrecruiters.com/docs/endpoints) | 목록은 일부 필드만 포함, 상세에서 본문 제공, 게시 내용 갱신에는 재게시 필요 | 개발·연구 후보의 본문을 별도 조회하고 회사·ID·게시 버전을 대조, 일반 연구 직함도 본문 확인 |
+| [Posting objects](https://developers.smartrecruiters.com/docs/objects) | `active`는 게시 중인지 게시 해제됐는지 구분 | 회사·ID가 일치하는 상세가 비활성·내부 게시임을 명시하면 공개 ID에서 제외하고, 통신 실패와 구분 |
+| [공고 위치](https://developers.smartrecruiters.com/docs/location) · [공고 상세 스키마](https://developers.smartrecruiters.com/reference/v1getposting) | ISO 국가 코드, 도시·지역, `remote`·`hybrid`, 보상 금액·통화·기간 | 동명 도시 오연결 방지, 근무 형태가 충돌하면 미확인, 기본 급여 여부가 없는 보상은 연봉 비교에서 제외 |
+| [Throttling policies](https://developers.smartrecruiters.com/docs/throttling-policies) | Customer API의 요청 속도·동시성 제한, `429`와 재시도 안내 | 제공자별 공통 대기열, 시작 간격 200ms·동시 4개, `Retry-After`와 취소·조회 한도 적용 |
+
+공개 목록·상세 API의 인증 없는 조회를 확인하고 공개 목록에 `destination=PUBLIC`을 명시했습니다. Customer API 문서의 인증 고객용 할당량을 익명 Posting API의 보장된 한도로 해석하지 않습니다. 이 프로젝트의 한 프로세스 안에서 요청 속도와 동시성을 제한하며, 처음 확인하는 게시판은 개별 본문 조회 때문에 시간이 더 필요합니다.
+
+2026-09-19 Canva·Grab·Wise의 실제 공개 API 응답을 대조했습니다. Grab에는 목록에 남아 있지만 상세가 `active: false`이고 원문도 만료로 표시하는 항목이 있었습니다. 유효한 비활성 응답은 해당 공고를 제외할 근거가 되며, 실패하거나 해석할 수 없는 응답은 새 목록이 완성됐다고 간주하지 않습니다.
+
+Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 컴퓨터 연구직으로 포함되는 사례도 확인했습니다. 사용자·시장·사람 연구의 명시적인 직함은 해당 분야로 구분하도록 보완했습니다. 기존 분류 버전도 읽고 재평가하며, 보관된 부서·관리자 근거와 본문 길이 한도 밖의 원문 근거를 보존합니다. 재해석은 새 수집으로 취급하지 않고 저장 메모·지원 상태·원래 조회 시각을 유지합니다.

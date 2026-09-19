@@ -7,11 +7,13 @@ import type { BoardResult } from './catalog-service'
 import { fetchAshbyBoard } from './providers/ashby'
 import { fetchGreenhouseBoard } from './providers/greenhouse'
 import { fetchLeverBoard } from './providers/lever'
+import { fetchSmartRecruitersBoard } from './providers/smartrecruiters'
 
 export { fetchGreenhouseBoard } from './providers/greenhouse'
 
 const providers: Record<JobProvider, (company: Company, fetchedAt: string) => Promise<BoardResult>> = {
   greenhouse: fetchGreenhouseBoard, ashby: fetchAshbyBoard, lever: fetchLeverBoard,
+  smartrecruiters: fetchSmartRecruitersBoard,
 }
 
 const service = createCatalogService({

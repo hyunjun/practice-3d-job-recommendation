@@ -592,7 +592,8 @@ select option { background: #1e271c; color: var(--text); }
 .provider-coverage li { display: flex; align-items: center; gap: 7px; padding: 7px 9px; border: 1px solid #4b6138; border-radius: 5px; background: #1b2817; }
 .provider-coverage strong { font-size: 10px; font-weight: 500; color: #c9deb3; }
 .provider-coverage span { font-size: 9px; color: #b3c59d; }
-.data-loading { display: flex; align-items: center; justify-content: center; padding: 20px 10px 0; color: #c9e8aa; }
+.data-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px 10px 0; color: #c9e8aa; text-align: center; }
+.data-loading p { max-width: 42ch; margin: 0; color: #bdc4b7; font-size: 11px; line-height: 1.6; }
 .catalog-placeholder { padding: 25px 0; }
 .catalog-placeholder .empty-icon { width: auto; height: auto; padding: 15px; }
 .catalog-placeholder .spinner-wrap { font-size: 11px; color: #c9e8aa; }

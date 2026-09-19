@@ -12,7 +12,7 @@ const SERVICES_TITLE = /\btechnical services? engineers?\b/i
 const SUPPORT_DEPARTMENT = /\b(?:technical support|customer support|support engineering)\b/i
 const PHYSICAL_TITLE = /\b(?:mechanical|electrical|civil|structural|chemical|manufacturing|facilities|hardware)\b|\bdata[\s-]?cent(?:er|re)\s+(?:(?:design|systems?|operations?|infrastructure)\s+){0,2}engineers?\b/i
 const COMMERCIAL_TITLE = /\b(?:recruiter|recruiting|account executive|sales representative|pre[- ]sales|post[- ]sales)\b/i
-const OTHER_RESEARCH = /\b(?:ux|user experience|user research|market research|people research|recruit(?:ing|ment)?|medicinal chemistry|wet[- ]lab)\b|\blife sciences\b.*\bchemistry\b/i
+const OTHER_RESEARCH = /\b(?:ux|user experience|(?:user|market|people) research(?:ers?)?|recruit(?:ing|ment)?|medicinal chemistry|wet[- ]lab)\b|\blife sciences\b.*\bchemistry\b/i
 const SOFTWARE_TITLE = /\b(?:(?:software|firmware|embedded|back[\s-]?end|front[\s-]?end|full[\s-]?stack|data|machine learning|security|devops|site reliability)\s+(?:engineers?|developers?)|software architects?)\b/i
 const MAX_TEXT = 100000
 const MAX_EVIDENCE = 8
@@ -117,12 +117,28 @@ export function isTechnicalOccupation(occupation: JobOccupation): boolean {
   return occupation.category === 'engineering' || occupation.category === 'research'
 }
 
+/** A list-only provider must still fetch generic research duties before deciding scope. */
+export function needsOccupationDescription(title: string): boolean {
+  const preliminary = occupationFacts({ title, description: '' })
+  return isTechnicalOccupation(preliminary)
+    || preliminary.category === 'unconfirmed' && RESEARCH_TITLE.test(title.normalize('NFKC'))
+}
+
 export function upgradeJobOccupation<T extends Job>(job: T): T {
   if (job.source === 'sample' || job.occupation?.version === OCCUPATION_VERSION) return job
   // Older snapshots may have only the department labels used for a role. Missing
   // job-level metadata is never manufactured, and collection dates remain unchanged.
-  const departments = job.roleClassification?.evidence.filter(evidence => evidence.source === 'board').map(evidence => evidence.text) ?? []
-  return { ...job, occupation: occupationFacts({ title: job.title, description: job.description, departments }) }
+  const departments = job.occupation?.departments
+    ?? job.roleClassification?.evidence.filter(evidence => evidence.source === 'board').map(evidence => evidence.text) ?? []
+  // Old evidence may come from beyond the stored description's length limit.
+  const omittedEvidence = job.occupation?.evidence.filter(evidence => evidence.source === 'description'
+    && !job.description.includes(evidence.text.split('\n').at(-1) ?? '')).map(evidence => evidence.text) ?? []
+  return {
+    ...job, occupation: occupationFacts({
+      title: job.title, description: [job.description, ...omittedEvidence].join('\n'),
+      departments, management: job.occupation?.management,
+    }),
+  }
 }
 
 export function isTechnicalJob(job: Job): boolean {

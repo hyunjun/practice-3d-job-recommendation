@@ -52,4 +52,7 @@ export const PUBLIC_COMPANIES: Company[] = [
   { id: 'mistral', name: 'Mistral AI', initials: 'M', color: '#f0ad7f', industry: 'AI · 언어 모델', careerUrl: 'https://mistral.ai/careers/', provider: 'ashby', board: 'mistral.ai' },
   publicCompany('spotify', 'lever', 'spotify'),
   { id: 'contentsquare', name: 'Contentsquare', initials: 'C', color: '#f5bd83', industry: '디지털 경험 · 제품 분석', careerUrl: 'https://contentsquare.com/careers/', provider: 'lever', board: 'contentsquare' },
+  publicCompany('canva', 'smartrecruiters', 'Canva'),
+  publicCompany('grab', 'smartrecruiters', 'Grab'),
+  publicCompany('wise', 'smartrecruiters', 'Wise'),
 ]

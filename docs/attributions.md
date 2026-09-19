@@ -62,5 +62,6 @@
 - [Greenhouse Job Board API](https://developers.greenhouse.io/job-board.html): 회사별 공개 채용 게시판.
 - [Ashby Public Job Posting API](https://developers.ashbyhq.com/docs/public-job-posting-api): 회사별 공개 공고.
 - [Lever Postings API](https://github.com/lever/postings-api): 공개 공고와 페이지 조회.
+- [SmartRecruiters Posting API](https://developers.smartrecruiters.com/docs/posting-api): Canva·Grab·Wise의 공개 게시 목록과 공고 상세.
 - 원문 URL, 조회 시각, 회사와 근무지를 보존합니다. 공개 게시 여부는 조회 시점의 상태입니다.
 - 샘플 데이터는 ORBIT의 기능 체험용으로 작성한 가상 시나리오입니다.

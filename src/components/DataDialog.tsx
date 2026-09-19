@@ -23,7 +23,7 @@ export function DataDialog({ catalog, loading, error, expired, retryAt, onSource
         <button disabled={loading || retryIn > 0} className={!isSample ? 'selected' : ''} aria-pressed={!isSample} onClick={() => onSource('public')}><span className="data-option-icon"><Database size={21} /></span><strong>공개 채용공고</strong><span>회사의 공개 게시판을 함께 조회해요</span><small>API 키 없이 · 인터넷 연결 필요</small>{!isSample && <CheckCircle2 size={16} className="data-option-check" />}</button>
       </div>
       {!isSample && <ul className="provider-coverage" aria-label="공개 공고 출처">{providers.map(item => <li key={item.provider}><strong>{JOB_SOURCE_LABELS[item.provider]}</strong><span>{item.count}개 회사</span></li>)}</ul>}
-      {loading && <div className="data-loading"><Spinner label="회사별 공개 채용공고를 가져오고 있어요…" /></div>}
+      {loading && <div className="data-loading"><Spinner label="회사별 공개 채용공고를 가져오고 있어요…" /><p>첫 조회에는 1분 이상 걸릴 수 있어요. 기다리는 동안 샘플로 탐색할 수 있습니다.</p></div>}
       {error && <p className="form-error" role="alert">{error}</p>}
       {expired && <p className="retry-note" role="status">마지막 정상 조회가 24시간을 지나 추천을 비웠어요. 검색 조건과 저장 기록은 유지하며, 다시 조회하면 현재 공고로 갱신됩니다.</p>}
       {retryIn > 0 && <p className="retry-note">다음 조회 가능 시각: <time dateTime={retryAt}>{formatCollectionTime(retryAt)}</time>. 게시판별 대기 시간을 지키며 다시 확인해요.</p>}

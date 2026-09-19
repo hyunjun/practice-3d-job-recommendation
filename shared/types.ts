@@ -5,7 +5,7 @@ export type Role = 'all' | KnownJobRole
 export type JobRole = KnownJobRole | 'unknown'
 export type WorkMode = 'remote' | 'hybrid' | 'onsite' | 'unknown'
 export type Visa = 'yes' | 'conditional' | 'no' | 'unknown'
-export const PUBLIC_PROVIDERS = ['greenhouse', 'ashby', 'lever'] as const
+export const PUBLIC_PROVIDERS = ['greenhouse', 'ashby', 'lever', 'smartrecruiters'] as const
 export type JobProvider = typeof PUBLIC_PROVIDERS[number]
 export type JobSource = 'sample' | JobProvider
 export type Source = 'sample' | 'public'
@@ -14,10 +14,10 @@ export const COMPENSATION_VERSION = 1 as const
 export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 1 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
-export const OCCUPATION_VERSION = 1 as const
+export const OCCUPATION_VERSION = 2 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
-  sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever',
+  sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever', smartrecruiters: 'SmartRecruiters',
 }
 
 export interface FactEvidence {
@@ -116,7 +116,8 @@ export interface JobManagement {
 }
 
 export interface JobOccupation {
-  version: typeof OCCUPATION_VERSION
+  /** Version 1 remains readable in saved records and cached snapshots. */
+  version: 1 | typeof OCCUPATION_VERSION
   category: 'engineering' | 'research' | 'support' | 'management' | 'other' | 'unconfirmed'
   evidence: FactEvidence[]
   departments: string[]
