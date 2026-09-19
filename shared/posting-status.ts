@@ -3,6 +3,7 @@ import { PUBLIC_PROVIDERS } from './types'
 import { jobRoleEvidence, jobRoles, upgradeJobRole } from './job-roles'
 import { isTechnicalJob, upgradeJobOccupation } from './job-occupation'
 import { upgradeJobLocation } from './job-location'
+import { upgradeJobEligibility } from './job-eligibility'
 import type { Job, JobProvider, SavedJob } from './types'
 
 export const REVISION_FIELDS = ['title', 'location', 'conditions', 'compensation', 'qualifications', 'description', 'url'] as const
@@ -88,7 +89,7 @@ function stable(value: unknown): unknown {
 }
 
 export async function createJobRevision(job: Job): Promise<JobRevision> {
-  const current = upgradeJobLocation(upgradeJobRole(upgradeJobOccupation(job)))
+  const current = upgradeJobEligibility(upgradeJobLocation(upgradeJobRole(upgradeJobOccupation(job))))
   const sections: Record<RevisionField, unknown> = {
     title: {
       text: job.title, roles: jobRoles(current), evidence: jobRoleEvidence(current),
@@ -103,10 +104,11 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
       ...(current.locationResolution ? { resolution: current.locationResolution } : {}),
     },
     conditions: {
-      workMode: job.workMode, employment: job.employment, visa: job.visa,
+      workMode: job.workMode, employment: job.employment, visa: current.visa,
       remoteCountries: job.remoteCountries, remoteWorldwide: job.remoteWorldwide,
       remoteScopeUnknown: job.remoteScopeUnknown, remoteRegions: job.remoteRegions ?? [],
-      eligibility: job.eligibility ?? null,
+      eligibility: current.eligibility ?? null,
+      ...(current.evidence?.visa && !job.description.includes(current.evidence.visa.text) ? { visaEvidence: current.evidence.visa } : {}),
     },
     compensation: {
       salary: job.salary, ranges: job.compensationRanges ?? [],

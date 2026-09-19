@@ -1,10 +1,10 @@
 import { CircleHelp, FileSearch } from 'lucide-react'
-import { eligibilitySummary } from '../../shared/job-eligibility'
+import { eligibilitySummary, sponsorshipTransferSummary } from '../../shared/job-eligibility'
 import { ELIGIBILITY_LABELS, ELIGIBILITY_LEVEL_LABELS } from '../../shared/types'
 import type { EligibilityKind, EligibilityLevel, Job } from '../../shared/types'
 
 export function EligibilityNotice({ job }: { job: Job }) {
-  const summary = eligibilitySummary(job)
+  const summary = [sponsorshipTransferSummary(job), eligibilitySummary(job)].filter(Boolean).join(' · ')
   return summary ? <p className="eligibility-notice"><CircleHelp size={13} /><span>{summary}</span></p> : null
 }
 

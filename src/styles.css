@@ -507,7 +507,7 @@ select option { background: #1e271c; color: var(--text); }
 .job-key-facts > div { display: flex; flex-direction: column; gap: 7px; }
 .job-key-facts > div > span { font-size: 9px; color: #a7ba91; }
 .job-key-facts strong { font-size: 19px; font-weight: 500; color: #d4e5be; letter-spacing: -.35px; }
-.job-key-facts small { font-size: 8px; color: #92aa78; }
+.job-key-facts small { font-size: 11px; line-height: 1.7; color: #92aa78; }
 .remote-scope { display: flex; align-items: flex-start; gap: 9px; margin: 20px 0; padding: 15px; border-radius: 6px; background: #263e275e; border: 1px solid #5579555c; color: #abd3a2; }
 .remote-scope strong { font-size: 10px; font-weight: 500; }
 .remote-scope p { font-size: 10px; color: #cfdfbd; margin: 6px 0; line-height: 1.7; }
@@ -1200,9 +1200,8 @@ select option { background: #1e271c; color: var(--text); }
   .job-detail-heading > .company-logo { width: 44px; height: 44px; font-size: 26px; }
   .job-detail-heading { gap: 12px; }
   .job-meta-pills > span { font-size: 9px; }
-  .job-key-facts { padding: 14px; gap: 13px; }
+  .job-key-facts { padding: 14px; gap: 13px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
   .job-key-facts strong { font-size: 17px; }
-  .job-key-facts small { font-size: 7px; }
   .match-section li { font-size: 11px; }
   .match-section.caution li { font-size: 10px; }
   .job-description { font-size: 11px; }

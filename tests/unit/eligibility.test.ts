@@ -5,7 +5,7 @@ import { filterJobs, matchJob } from '../../shared/matching'
 import { createJobRevision, REVISION_FIELDS } from '../../shared/posting-status'
 import { createSampleCatalog } from '../../shared/sample'
 import { JobSchema } from '../../shared/schemas'
-import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
+import { DEFAULT_FILTERS, ELIGIBILITY_VERSION, SAMPLE_PROFILE } from '../../shared/types'
 import type { Job, SavedJob } from '../../shared/types'
 import { BoardSnapshotSchema } from '../../server/board-cache'
 import { normalizeJob } from '../../server/normalize'
@@ -195,7 +195,7 @@ describe('normalization, persistence and matching', () => {
     const oldJob = { ...legacy, visa: 'yes' as const, stale: true }
     const previous: SavedJob = { job: oldJob, company, savedAt: '2026-09-18T06:00:00.000Z', status: 'applied', note: 'Original application note' }
     const restored = decodeSavedJobs(JSON.stringify([previous])).records[0]
-    expect(restored).toMatchObject({ savedAt: previous.savedAt, status: 'applied', note: previous.note, job: { id: oldJob.id, fetchedAt: POSTING_TIME, stale: true, visa: 'conditional', eligibility: { version: 1 } } })
+    expect(restored).toMatchObject({ savedAt: previous.savedAt, status: 'applied', note: previous.note, job: { id: oldJob.id, fetchedAt: POSTING_TIME, stale: true, visa: 'conditional', eligibility: { version: ELIGIBILITY_VERSION } } })
     const snapshot = BoardSnapshotSchema.parse({ fetchedAt: POSTING_TIME, jobs: [oldJob], total: 1, unmappedCount: 0, publishedIds: [oldJob.id] })
     expect(snapshot.jobs[0]).toMatchObject({ id: oldJob.id, fetchedAt: POSTING_TIME, visa: 'conditional' })
     expect(snapshot.publishedIds).toEqual([oldJob.id])
@@ -204,11 +204,12 @@ describe('normalization, persistence and matching', () => {
     expect(upgradeJobEligibility(sample)).toBe(sample)
   })
 
-  it('includes eligibility changes in saved content comparison without changing unrelated sections', async () => {
+  it('canonicalizes missing legacy facts and still detects an actual change to the legal requirements', async () => {
     const job = makeJob('Applicants must be US citizens.')
     const before = { ...job, eligibility: undefined }
-    const first = await createJobRevision(before)
-    const next = await createJobRevision(job)
-    expect(REVISION_FIELDS.filter(field => first[field] !== next[field])).toEqual(['conditions'])
+    expect(await createJobRevision(before)).toEqual(await createJobRevision(job))
+    const first = await createJobRevision(job)
+    const next = await createJobRevision(makeJob('Applicants must be Canadian citizens.'))
+    expect(REVISION_FIELDS.filter(field => first[field] !== next[field])).toEqual(['conditions', 'description'])
   })
 })

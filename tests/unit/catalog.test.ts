@@ -6,7 +6,7 @@ import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { createSampleCatalog } from '../../shared/sample'
 import { isUnmappedJob, unmappedCoverage } from '../../shared/job-location'
 import type { Company, Job, JobProvider } from '../../shared/types'
-import { COMPENSATION_VERSION, OCCUPATION_VERSION } from '../../shared/types'
+import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, OCCUPATION_VERSION } from '../../shared/types'
 import { createFileBoardCache, parseCachedBoards } from '../../server/board-cache'
 import type { BoardCache, CachedBoard } from '../../server/board-cache'
 import { BoardFetchError, CATALOG_POLICY, CatalogUnavailableError, createCatalogService, parseRetryAfter } from '../../server/catalog-service'
@@ -346,7 +346,7 @@ describe('cache validation and migration', () => {
       expect((await cache.load())[0].snapshot).toEqual({
         ...previous.snapshot,
         jobs: previous.snapshot!.jobs.map(job => ({
-          ...job, visa: 'unknown', eligibility: { version: 1, rules: [] }, evidence: {},
+          ...job, visa: 'unknown', eligibility: { version: ELIGIBILITY_VERSION, rules: [] }, evidence: {},
           roleClassification: { version: 1, roles: ['backend'], evidence: [{ role: 'backend', source: 'title', text: job.title }] },
           occupation: { version: OCCUPATION_VERSION, category: 'engineering', departments: [], evidence: [{ source: 'title', text: job.title }] },
         })),

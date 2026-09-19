@@ -12,7 +12,7 @@ export type Source = 'sample' | 'public'
 export type Employment = 'fulltime' | 'parttime' | 'permanent' | 'contract' | 'intern' | 'temporary' | 'unknown'
 export const COMPENSATION_VERSION = 2 as const
 export const QUALIFICATIONS_VERSION = 1 as const
-export const ELIGIBILITY_VERSION = 1 as const
+export const ELIGIBILITY_VERSION = 2 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
 export const OCCUPATION_VERSION = 3 as const
 
@@ -99,7 +99,7 @@ export type EligibilityKind = 'sponsorship-scope' | 'work-authorization' | 'citi
 export type EligibilityLevel = 'required' | 'conditional' | 'preferred' | 'unspecified'
 
 export interface JobEligibility {
-  version: typeof ELIGIBILITY_VERSION
+  version: 1 | typeof ELIGIBILITY_VERSION
   rules: { kind: EligibilityKind; level: EligibilityLevel; evidence: FactEvidence }[]
   truncated?: boolean
 }

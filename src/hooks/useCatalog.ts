@@ -7,6 +7,7 @@ import { upgradeJobRole } from '../../shared/job-roles'
 import { upgradeCatalogOccupations } from '../../shared/job-occupation'
 import { upgradeJobLocations } from '../../shared/job-location'
 import { upgradeJobCompensation } from '../../shared/job-compensation'
+import { upgradeJobEligibility } from '../../shared/job-eligibility'
 import type { Catalog, Source } from '../../shared/types'
 import type { CatalogProgress } from '../../shared/catalog-progress'
 import { CatalogRequestError, requestPublicCatalog } from '../lib/catalog-request'
@@ -46,7 +47,7 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
       await requestPublicCatalog({ refresh, signal: controller.signal, onUpdate(result, latest) {
         if (controller.signal.aborted) return
         current = upgradeJobLocations(upgradeCatalogOccupations(result))
-        current.jobs = current.jobs.map(job => upgradeJobRole(upgradeJobCompensation(job)))
+        current.jobs = current.jobs.map(job => upgradeJobRole(upgradeJobEligibility(upgradeJobCompensation(job))))
         setCatalog(current)
         setProgress(latest)
       } })

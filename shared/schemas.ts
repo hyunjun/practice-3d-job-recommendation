@@ -74,7 +74,7 @@ export const JobSchema = z.object({
   compensationVersion: z.union([z.literal(1), z.literal(COMPENSATION_VERSION)]).optional(),
   visa: z.enum(['yes', 'conditional', 'no', 'unknown']), remoteCountries: z.array(z.string()).max(300),
   eligibility: z.object({
-    version: z.literal(ELIGIBILITY_VERSION),
+    version: z.union([z.literal(1), z.literal(ELIGIBILITY_VERSION)]),
     rules: z.array(z.object({
       kind: z.enum(['sponsorship-scope', 'work-authorization', 'citizenship', 'residency', 'security-clearance', 'export-authorization']),
       level: z.enum(['required', 'conditional', 'preferred', 'unspecified']),

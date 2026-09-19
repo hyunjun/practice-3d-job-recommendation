@@ -6,6 +6,7 @@ import { formatExperienceYears } from '../../shared/job-qualifications'
 import { jobRoleEvidence, jobRoleLabel } from '../../shared/job-roles'
 import { jobOccupationLabel, upgradeJobOccupation } from '../../shared/job-occupation'
 import { upgradeJobLocation } from '../../shared/job-location'
+import { upgradeJobEligibility } from '../../shared/job-eligibility'
 import { jobFreshness } from '../../shared/catalog-freshness'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
 import { POSTING_STATE_LABELS, REVISION_LABELS } from '../../shared/posting-status'
@@ -113,7 +114,7 @@ export function deleteProfile(): void {
 
 export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<string, PostingObservation>): void {
   const exportedAt = new Date()
-  const current = saved.map(item => ({ ...item, job: upgradeJobLocation(item.job) }))
+  const current = saved.map(item => ({ ...item, job: upgradeJobEligibility(upgradeJobLocation(item.job)) }))
   // Neutralize spreadsheet formulas in imported job titles and user notes.
   const cell = (value: unknown) => {
     const text = String(value ?? '')

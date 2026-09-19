@@ -5,7 +5,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { readFile } from 'node:fs/promises'
 import { CITIES } from '../../shared/cities'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
-import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
+import { DEFAULT_FILTERS, ELIGIBILITY_VERSION, SAMPLE_PROFILE } from '../../shared/types'
 import type { Catalog, SavedJob } from '../../shared/types'
 import { normalizeJob } from '../../server/normalize'
 import { normalizeAshbyJob } from '../../server/providers/ashby'
@@ -82,7 +82,7 @@ test('country-specific sponsorship stays conditional through filtering, evidence
   await waitForSavedCommit(page)
   await page.reload()
   const stored = JSON.parse(await readSavedJson(page) || '[]')
-  expect(stored[0]).toMatchObject({ status: 'applied', note: '독일과 다른 국가의 취업 허가 조건 확인', job: { id: countryJob.id, fetchedAt, visa: 'conditional', eligibility: { version: 1 } } })
+  expect(stored[0]).toMatchObject({ status: 'applied', note: '독일과 다른 국가의 취업 허가 조건 확인', job: { id: countryJob.id, fetchedAt, visa: 'conditional', eligibility: { version: ELIGIBILITY_VERSION } } })
 })
 
 test('matching a remote country does not hide mandatory citizenship or turn preferred clearance into a requirement', async ({ page }) => {
@@ -123,7 +123,7 @@ test('legacy saved support is rechecked while the original timestamp, note and a
   await waitForSavedCommit(page)
   await page.reload()
   const restored = JSON.parse(await readSavedJson(page) || '[]')[0]
-  expect(restored).toMatchObject({ savedAt: saved.savedAt, status: saved.status, note: saved.note, job: { id: saved.job.id, fetchedAt: saved.job.fetchedAt, visa: 'conditional', eligibility: { version: 1 } } })
+  expect(restored).toMatchObject({ savedAt: saved.savedAt, status: saved.status, note: saved.note, job: { id: saved.job.id, fetchedAt: saved.job.fetchedAt, visa: 'conditional', eligibility: { version: ELIGIBILITY_VERSION } } })
 })
 
 test.describe('eligibility evidence on narrow screens', () => {

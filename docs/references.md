@@ -279,3 +279,16 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 2026-09-20 Google·Ashby 문서, Mistral의 공식 페이지·공개 API, Canva의 네 공고 상세 API를 확인했습니다. 이 문서들이 자동 위치 판별의 정확도를 보증하는 것은 아닙니다.
 
 명시적인 영어 직무 문장과 제공 도시 이름을 확인하는 제한된 규칙입니다. 근무 문장 전체의 도시 목록을 확인할 수 없는 경우, 일부 도시가 겹치는 복수 위치, 원격근무의 지역 조건은 기존 처리를 유지합니다. 회사 소개·담당자 위치·출장·지원자 거주지·조건부 이후 근무지를 현재 직무의 위치로 추론하지 않습니다. 해석에 사용한 제목·문단은 표시 본문의 길이 제한과 별도로 보관하고, 캐시·저장·검색·게시 내용 비교·백업에서 같은 판단을 사용합니다.
+
+## 비자와 이주 지원, 기존 스폰서십 변경
+
+| 레퍼런스 | 확인한 내용 | 반영 |
+| --- | --- | --- |
+| [Mistral: Applied Scientist, Internship in Paris or London](https://jobs.ashbyhq.com/mistral.ai/60ab6a5e-9b02-4ae7-a0fb-4c7d9ec0fdf8) · [공개 Ashby API](https://api.ashbyhq.com/posting-api/job-board/mistral.ai?includeCompensation=true) | 6개월 인턴십에 `visa sponsorship and relocation support provided by Mistral`을 명시. 같은 문단에 한국 거주와 이후 서울 채용 단계의 조건도 포함 | 비자와 이주 지원이 함께 쓰인 제공 문구를 읽고 현재 인턴십의 지원·기간·이후 조건을 보존 |
+| [Wise: Global KYC and Onboarding](https://api.smartrecruiters.com/v1/companies/Wise/postings/744000150420919) · [Payin Platform](https://api.smartrecruiters.com/v1/companies/Wise/postings/744000150045299) | 현지 지원자만 고려하며 이주 지원은 제공하지 않고 `support transfer of visa sponsorship`을 명시 | 기존 스폰서십 변경에 한정된 조건부 지원으로 표시하고 적용 조건 문단을 함께 제공 |
+| [Wise: Reliability](https://api.smartrecruiters.com/v1/companies/Wise/postings/744000149726079) · [Wise Platform](https://api.smartrecruiters.com/v1/companies/Wise/postings/744000149653173) | 런던 공고의 현지 지원자에 대한 같은 스폰서십 변경 지원 문구 | 목록·상세·저장 기록에 지원 유형을 안내하고 조건부 지원 필터에 포함 |
+| [GOV.UK: Update your Skilled Worker visa if you change job or employer](https://www.gov.uk/skilled-worker-visa/update-your-visa-if-you-change-job-or-employer) | 적용 대상자의 고용주 변경에는 비자 갱신 신청, 새 직무의 자격 요건과 새 후원 증명서가 필요하며 새 허가를 확인하기 전에 새 직무를 시작하지 않도록 안내 | 고용주의 스폰서십 변경 지원을 새 비자 발급·취업 허가 보장으로 해석하지 않음 |
+
+2026-09-20 Mistral의 공개 게시판과 Wise의 네 상세 API, GOV.UK 안내 원문을 확인했습니다. 다섯 공고는 정상 응답의 공개·활성 공고였고, 보관된 공고와 새 응답의 비자 지원·원문 근거·취업 자격 해석이 일치했습니다. GOV.UK 안내는 지원과 허가의 차이를 확인하는 참고 자료이며, Wise 공고의 비자 종류나 지원자의 신청 자격을 자동으로 판단하는 규칙으로 사용하지 않습니다.
+
+명시적인 영어 문구를 다루며 질문·업무 경험·과거 제공 이력·가능성 표현·카드 네트워크의 Visa를 지원 약속으로 바꾸지 않습니다. 이주 지원의 부정, 스폰서십 변경만의 부정, 전체 비자 지원의 부정을 구분하고, 상충하는 근거는 원문과 함께 미확인으로 남깁니다. 이후 별도 채용 단계에만 적용되는 지원을 현재 인턴십에 확대하지 않습니다. 전체 문단은 기간·현지 지원자·거주 및 이후 취업 조건을 함께 확인할 수 있도록 보존합니다.
