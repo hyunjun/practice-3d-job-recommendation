@@ -24,7 +24,7 @@ export function SavedView({ saved, profile, onOpen, onRemove, onExplore }: { sav
         <p className="saved-location"><MapPin size={13} />{item.job.locationLabel}</p>
         <div className="saved-card-tags"><span>{formatJobSalary(item.job)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
         <JobFreshnessNotice job={item.job} compact />
-        <div className="saved-card-match"><CheckCircle2 size={13} />{match.matchedSkills.length ? `${match.matchedSkills.slice(0, 3).join(' · ')} 경험 일치` : '공고 조건을 확인해 보세요'}</div>
+        <div className="saved-card-match"><CheckCircle2 size={13} />{match.skillSummary}</div>
         {item.note && <p className="saved-note-preview">{item.note}</p>}
         <footer><span className={`saved-status ${item.status === 'applied' ? 'applied' : ''}`}><span />{item.status === 'applied' ? '지원 완료' : '검토 중'}</span><span>{new Date(item.savedAt).toLocaleDateString('ko-KR')} 저장</span><button className="text-button" onClick={() => onOpen(match)}>자세히<ArrowRight size={13} /></button></footer>
       </article>

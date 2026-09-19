@@ -1,9 +1,10 @@
 import { z } from 'zod'
 import { CITY_BY_ID } from '../../shared/cities'
 import { JobProviderSchema, JobSchema } from '../../shared/schemas'
-import { DEFAULT_FILTERS, JOB_SOURCE_LABELS, SAMPLE_PROFILE } from '../../shared/types'
+import { DEFAULT_FILTERS, JOB_SOURCE_LABELS, QUALIFICATION_LABELS, SAMPLE_PROFILE } from '../../shared/types'
 import { formatCompensation, formatJobSalary } from '../../shared/matching'
 import { upgradeJobCompensation } from '../../shared/job-compensation'
+import { formatExperienceYears, upgradeJobQualifications } from '../../shared/job-qualifications'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
 
 export const STORAGE_KEYS = {
@@ -40,7 +41,7 @@ const ProfileSchema = z.object({
 })
 
 const SavedSchema = z.array(z.object({
-  job: JobSchema.transform(job => upgradeJobCompensation(job, true)),
+  job: JobSchema.transform(job => upgradeJobQualifications(upgradeJobCompensation(job, true))),
   company: z.object({
     id: z.string(), name: z.string().max(200), color: z.string().regex(/^#[0-9a-f]{6}$/i),
     initials: z.string().max(8), industry: z.string().max(200), careerUrl: z.string().max(2000),
@@ -130,13 +131,16 @@ export function exportSavedCsv(saved: SavedJob[]): void {
     return `"${safe.replace(/"/g, '""')}"`
   }
   const rows = [
-    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거'],
+    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거'],
     ...saved.map(item => [
       item.company.name, item.job.title, item.job.locationLabel, JOB_SOURCE_LABELS[item.job.source],
       item.status === 'applied' ? '지원 완료' : '저장됨', item.savedAt, item.note, item.job.url,
       formatJobSalary(item.job),
       [item.job.compensationNote, ...(item.job.compensationRanges?.map(range => `${range.label}: ${formatCompensation(range)}${range.scope ? `\n적용 조건: ${range.scope}` : ''}`) ?? [])].filter(Boolean).join('\n'),
       [...(item.job.compensationRanges?.flatMap(range => range.evidence ? [`${range.label}\n${range.evidence.text}`] : []) ?? []), ...(item.job.compensationEvidence?.map(evidence => evidence.text) ?? [])].join('\n\n'),
+      item.job.qualifications?.skills.map(rule => `${QUALIFICATION_LABELS[rule.kind]}: ${rule.skills.join(rule.match === 'any' ? ' 또는 ' : ', ')}${rule.match === 'unspecified' ? ' · 선택 조건 원문 확인' : ''}`).join('\n') ?? '',
+      [item.job.qualifications?.experienceNote, ...(item.job.qualifications?.experience.map(rule => `${QUALIFICATION_LABELS[rule.kind]}: ${formatExperienceYears(rule.minYears)}${rule.maxYears === undefined ? ' 이상' : `–${formatExperienceYears(rule.maxYears)}`}${rule.conditional ? ' · 적용 조건 확인' : ''}`) ?? [])].filter(Boolean).join('\n'),
+      [...new Set([...(item.job.qualifications?.skills ?? []), ...(item.job.qualifications?.experience ?? [])].map(rule => rule.evidence.text))].join('\n\n'),
     ]),
   ]
   const blob = new Blob(['\ufeff', rows.map(row => row.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' })

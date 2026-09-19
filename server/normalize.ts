@@ -1,5 +1,6 @@
 import { CITY_BY_ID, LOCATION_ALIASES } from '../shared/cities'
-import { extractSkills, extractYears, inferRole } from '../shared/profile'
+import { inferRole } from '../shared/profile'
+import { qualificationFacts } from '../shared/job-qualifications'
 import { plainText } from '../shared/text'
 export { plainText } from '../shared/text'
 import { COMPENSATION_VERSION } from '../shared/types'
@@ -145,7 +146,7 @@ export function normalizePosting(input: PostingInput): Job | null {
   return {
     id: `${input.provider}-${companyId}-${input.id}`, companyId, title, role: inferRole(title),
     cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
-    employment: employment.value, minExperience: extractYears(text), skills: extractSkills(text), salary,
+    employment: employment.value, ...qualificationFacts(text, companyId), salary,
     ...(compensationRanges?.length ? { compensationRanges } : {}),
     ...(compensationNote ? { compensationNote } : {}),
     ...(input.compensationEvidence?.length ? { compensationEvidence: input.compensationEvidence } : {}),

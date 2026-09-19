@@ -475,6 +475,27 @@ select option { background: #1e271c; color: var(--text); }
 .compensation-evidence > summary::-webkit-details-marker { display: none; }
 .compensation-evidence[open] > summary > svg { transform: rotate(180deg); }
 .compensation-evidence blockquote { margin: 6px 0 0; padding-left: 12px; border-left: 2px solid #6b8553; white-space: pre-wrap; overflow-wrap: anywhere; color: #c7d8b6; font-size: 11px; line-height: 1.9; }
+.job-qualifications { border: 1px solid #53633d; border-radius: 7px; padding: 16px; margin: 22px 0; background: #222d1b; }
+.job-qualifications > h4 { display: flex; align-items: center; gap: 9px; color: #d6e5c1; font-size: 13px; font-weight: 550; margin: 0 0 10px; }
+.qualification-intro, .qualification-help { color: #bac9a8; font-size: 11px; line-height: 1.9; margin: 0 0 12px; }
+.qualification-group + .qualification-group, .qualification-experience { border-top: 1px solid #475533; margin-top: 16px; padding-top: 16px; }
+.job-qualifications h5 { font-size: 12px; font-weight: 600; color: #d1e1ba; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 7px; }
+.job-qualifications h5 small { font-size: 10px; font-weight: 400; color: #b4c69f; }
+.qualification-group .skill-list { margin-top: 0; }
+.qualification-group.context .skill-tag { background: #293321; color: #b5c49f; border-color: #4d5c3c; }
+.qualification-evidence { margin-top: 8px; }
+.qualification-evidence > summary { display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: 11px; color: #c0d0ac; cursor: pointer; list-style: none; }
+.qualification-evidence > summary::-webkit-details-marker { display: none; }
+.qualification-evidence[open] > summary > svg { transform: rotate(180deg); }
+.qualification-evidence > ul { margin: 4px 0 0; padding: 0; list-style: none; }
+.qualification-evidence li + li { margin-top: 14px; }
+.qualification-evidence blockquote { margin: 5px 0 0; padding-left: 12px; border-left: 2px solid #6b8553; white-space: pre-wrap; overflow-wrap: anywhere; color: #c7d8b6; font-size: 11px; line-height: 1.9; }
+.qualification-relation { display: block; color: #c9d7b2; font-size: 10px; margin: 8px 0 5px; }
+.experience-rule > summary { flex-wrap: wrap; gap: 5px 10px; padding: 5px 0; }
+.experience-rule > summary > span { min-width: 70px; color: #b9cba3; }
+.experience-rule > summary > strong { font-size: 12px; font-weight: 500; color: #d7e7be; }
+.experience-rule > summary > small { font-size: 10px; color: #decd9c; }
+.qualification-empty, .qualification-note { font-size: 11px; line-height: 1.9; color: #d4c6a0; margin: 14px 0 0; }
 .job-description { font-size: 13px; line-height: 2; color: #bed0ad; padding-top: 18px; border-top: 1px solid #465e33; }
 .job-description h4 { font-size: 14px; color: #d9e8c8; font-weight: 500; margin-bottom: 10px; }
 .job-description p { white-space: pre-wrap; margin-bottom: 22px; word-break: break-word; }

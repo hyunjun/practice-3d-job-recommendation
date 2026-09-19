@@ -16,6 +16,7 @@ const demoJob = createSampleCatalog().jobs[0]
 const iso = (value: number) => new Date(value).toISOString()
 const job = (company: Company, fetchedAt: string, suffix = 'one'): Job & { source: JobProvider } => ({
   ...demoJob, id: `${company.provider ?? 'greenhouse'}-${company.id}-${suffix}`, companyId: company.id, source: company.provider ?? 'greenhouse', fetchedAt, compensationVersion: 1,
+  qualifications: { version: 1, skills: [], experience: [] },
 })
 const snapshot = (company: Company, time = BASE): CachedBoard => ({
   companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', boardRegion: company.boardRegion, checkedAt: iso(time), failures: 0, retryAt: null,
@@ -215,6 +216,21 @@ describe('request scheduling and retries', () => {
 })
 
 describe('cache validation and migration', () => {
+  it('rechecks old qualification facts while retaining the original board snapshot and retry state', () => {
+    const cached = snapshot(companies[0])
+    const previous = cached.snapshot!.jobs[0]
+    delete previous.qualifications
+    previous.description = 'Minimum requirements\n3 years of software engineering experience with Python.\nPreferred qualifications\n5 years of software engineering experience with Rust.'
+    previous.minExperience = 5
+    previous.skills = ['Python', 'Rust', 'Figma']
+    cached.failures = 2
+    cached.retryAt = iso(BASE + 120000)
+    const [migrated] = parseCachedBoards({ version: 5, boards: [cached] })
+    expect(migrated).toMatchObject({ checkedAt: cached.checkedAt, failures: 2, retryAt: cached.retryAt })
+    expect(migrated.snapshot!.jobs[0]).toMatchObject({ minExperience: 3, skills: ['Python', 'Rust'], fetchedAt: iso(BASE), id: previous.id })
+    expect(migrated.snapshot!.fetchedAt).toBe(iso(BASE))
+  })
+
   it('rechecks legacy pay without changing the age of a retained snapshot during an outage', async () => {
     const cached = snapshot(companies[0])
     const prior = cached.snapshot!.jobs[0]

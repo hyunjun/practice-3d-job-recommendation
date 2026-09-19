@@ -42,6 +42,8 @@ export function DataDialog({ catalog, loading, error, retryAt, onSource, onRefre
           <div><dt>고용 형태 확인</dt><dd>{catalog.jobs.filter(job => job.employment !== 'unknown').length}<small> / {catalog.jobs.length}개</small></dd></div>
           <div><dt>비교 가능한 연봉</dt><dd>{catalog.jobs.filter(job => job.salary).length}<small> / {catalog.jobs.length}개</small></dd></div>
           <div><dt>보상 조건 확인 필요</dt><dd>{catalog.jobs.filter(job => !job.salary && (job.compensationRanges?.length || job.compensationNote)).length}<small>개</small></dd></div>
+          <div><dt>자격 항목의 기술</dt><dd>{catalog.jobs.filter(job => job.qualifications?.skills.some(rule => rule.kind === 'required' || rule.kind === 'qualification')).length}<small> / {catalog.jobs.length}개</small></dd></div>
+          <div><dt>경력 조건의 원문</dt><dd>{catalog.jobs.filter(job => job.qualifications?.experience.length).length}<small> / {catalog.jobs.length}개</small></dd></div>
         </dl>
         <p>전체 조회 공고 기준입니다. 조건부 지원과 미확인을 구분하며, 공고 상세에서 판단에 사용한 원문을 확인할 수 있어요.</p>
       </section>}

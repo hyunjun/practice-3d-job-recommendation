@@ -1,7 +1,8 @@
 import { z } from 'zod'
-import { COMPENSATION_VERSION, PUBLIC_PROVIDERS } from './types'
+import { COMPENSATION_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
+const QualificationKindSchema = z.enum(['required', 'qualification', 'preferred', 'context'])
 
 const EvidenceSchema = z.object({
   source: z.enum(['board', 'description', 'title']),
@@ -16,6 +17,18 @@ export const JobSchema = z.object({
   workMode: z.enum(['remote', 'hybrid', 'onsite', 'unknown']),
   employment: z.enum(['fulltime', 'parttime', 'permanent', 'contract', 'intern', 'temporary', 'unknown']),
   minExperience: z.number().min(0).max(50).nullable(), skills: z.array(z.string()).max(100),
+  qualifications: z.object({
+    version: z.literal(QUALIFICATIONS_VERSION),
+    skills: z.array(z.object({
+      kind: QualificationKindSchema, skills: z.array(z.string().max(100)).min(1).max(100),
+      match: z.enum(['all', 'any', 'unspecified']), evidence: EvidenceSchema,
+    })).max(100),
+    experience: z.array(z.object({
+      kind: QualificationKindSchema, minYears: z.number().min(0).max(50),
+      maxYears: z.number().min(0).max(50).optional(), conditional: z.boolean(), evidence: EvidenceSchema,
+    }).refine(rule => rule.maxYears === undefined || rule.maxYears >= rule.minYears)).max(100),
+    experienceNote: z.string().max(1000).optional(), truncated: z.boolean().optional(),
+  }).optional(),
   salary: z.object({
     min: z.number().nonnegative(), max: z.number().nonnegative(),
     currency: z.enum(['USD', 'EUR', 'GBP', 'CAD', 'SGD', 'AUD', 'KRW', 'JPY', 'CHF']),

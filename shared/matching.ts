@@ -1,5 +1,7 @@
 import { CITY_BY_ID } from './cities'
 import { MODE_LABELS, ROLE_LABELS, USD_RATES } from './types'
+import { formatExperienceYears } from './job-qualifications'
+import { matchingSkills, matchQualifications } from './qualification-matching'
 import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
 
 export function toUsd(salary: Salary): { min: number; max: number } {
@@ -36,23 +38,27 @@ export function formatCompensation(range: NonNullable<Job['compensationRanges']>
 
 export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company' | 'job'> {
   const profileSkills = new Set(profile.skills.map(skill => skill.toLowerCase()))
-  const matchedSkills = job.skills.filter(skill => profileSkills.has(skill.toLowerCase()))
-  const missingSkills = job.skills.filter(skill => !profileSkills.has(skill.toLowerCase()))
-  const skillScore = job.skills.length ? matchedSkills.length / job.skills.length * 60 : 12
+  const qualificationMatch = job.qualifications ? matchQualifications(job, profile) : undefined
+  const matchedSkills = qualificationMatch?.matchedSkills ?? job.skills.filter(skill => profileSkills.has(skill.toLowerCase()))
+  const missingSkills = qualificationMatch?.missingSkills ?? job.skills.filter(skill => !profileSkills.has(skill.toLowerCase()))
+  const skillScore = qualificationMatch?.skillScore ?? (job.skills.length ? matchedSkills.length / job.skills.length * 60 : 12)
   const roleScore = profile.desiredRole === 'all' ? 15 : job.role === profile.desiredRole ? 25 : 0
   const experienceScore = job.minExperience === null ? 8 : Math.max(0, 15 - Math.max(0, job.minExperience - profile.years) * 5)
-  const reasons: string[] = []
-  const cautions: string[] = []
-  if (matchedSkills.length) reasons.push(`${matchedSkills.slice(0, 3).join(' · ')} 경험과 연결돼요`)
+  const reasons: string[] = [...(qualificationMatch?.reasons ?? [])]
+  const cautions: string[] = [...(qualificationMatch?.cautions ?? [])]
+  if (!qualificationMatch && matchedSkills.length) reasons.push(`${matchedSkills.slice(0, 3).join(' · ')} 경험과 연결돼요`)
   if (profile.desiredRole !== 'all' && job.role === profile.desiredRole) reasons.push(`희망하는 ${ROLE_LABELS[job.role]} 직무예요`)
-  if (job.minExperience !== null && job.minExperience <= profile.years) reasons.push(`경력 ${profile.years}년이 공고의 ${job.minExperience}년 이상 조건에 부합해요`)
+  if (job.minExperience !== null && job.minExperience <= profile.years) reasons.push(job.qualifications
+    ? `입력 경력 ${formatExperienceYears(profile.years)} · 공고에서 확인한 연수 하한 ${formatExperienceYears(job.minExperience)}`
+    : `경력 ${profile.years}년이 공고의 ${job.minExperience}년 이상 조건에 부합해요`)
   if (job.visa === 'yes') reasons.push('공고에서 비자 지원을 명시했어요')
   if (job.visa === 'conditional') cautions.push('비자 지원을 명시했지만 직무·지원자별 조건이 있어요. 원문 근거를 확인해 주세요.')
   if (job.workMode === 'remote' && isRemoteEligible(job, profile.residence)) reasons.push('선택한 거주 국가에서 원격 지원이 가능해요')
-  if (missingSkills.length) cautions.push(`경력에서 확인하지 못한 기술: ${missingSkills.slice(0, 5).join(', ')}`)
-  if (!job.skills.length) cautions.push('구체적인 기술 요구사항을 원문에서 확인해 주세요')
-  if (job.minExperience !== null && job.minExperience > profile.years) cautions.push(`요구 경력 ${job.minExperience}년 · 현재 입력한 경력보다 ${job.minExperience - profile.years}년 많아요`)
-  if (job.minExperience === null) cautions.push('최소 경력 연수가 확인되지 않았어요')
+  if (!qualificationMatch && missingSkills.length) cautions.push(`경력에서 확인하지 못한 기술: ${missingSkills.slice(0, 5).join(', ')}`)
+  if (!qualificationMatch && !job.skills.length) cautions.push('구체적인 기술 요구사항을 원문에서 확인해 주세요')
+  if (job.minExperience !== null && job.minExperience > profile.years) cautions.push(`요구 경력 ${formatExperienceYears(job.minExperience)} · 현재 입력한 경력보다 ${formatExperienceYears(job.minExperience - profile.years)} 많아요`)
+  if (job.minExperience === null) cautions.push(job.qualifications?.experienceNote || '최소 경력 연수가 확인되지 않았어요')
+  if (job.qualifications?.experience.length) cautions.push('전체 경력 연수만 비교합니다. 기술·직무별 경력과 학력 조건의 충족 여부는 원문에서 확인해 주세요.')
   if (job.visa === 'unknown') cautions.push('비자 지원 여부는 회사에 확인이 필요해요')
   if (job.visa === 'no') cautions.push('비자 지원이 없는 공고예요')
   if (!job.salary) cautions.push(job.compensationRanges?.length || job.compensationNote
@@ -60,7 +66,10 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
   if (job.workMode === 'unknown') cautions.push('출근·원격 근무 형태를 확인해 주세요')
   if (job.workMode === 'remote' && !isRemoteEligible(job, profile.residence)) cautions.push(job.remoteScopeUnknown ? '지원 가능한 거주 국가가 확인되지 않았어요' : '현재 선택한 거주 국가는 원격 지원 대상에 포함되지 않아요')
   if (job.workMode === 'remote') cautions.push('원격근무 시간대와 현지 고용 가능 여부를 최종 확인해 주세요')
-  return { score: Math.round(skillScore + roleScore + experienceScore), matchedSkills, missingSkills, reasons, cautions }
+  return {
+    score: Math.round(skillScore + roleScore + experienceScore), matchedSkills, missingSkills, reasons, cautions,
+    skillSummary: qualificationMatch?.skillSummary ?? (matchedSkills.length ? `${matchedSkills.slice(0, 2).join(' · ')} 경험 일치` : '기술 요구사항 확인 필요'),
+  }
 }
 
 export function filterJobs(catalog: Catalog, profile: Profile, filters: Filters): MatchedJob[] {
@@ -94,7 +103,7 @@ export function filterJobs(catalog: Catalog, profile: Profile, filters: Filters)
       if (!query.every(word => haystack.includes(word))) return []
     }
     const match = matchJob(job, profile)
-    if (job.skills.length && profile.skills.length && !match.matchedSkills.length && effectiveRole === 'all') return []
+    if (matchingSkills(job).length && profile.skills.length && !match.matchedSkills.length && effectiveRole === 'all') return []
     return [{ job, company, ...match }]
   }).sort((a, b) => b.score - a.score || a.company.name.localeCompare(b.company.name) || a.job.id.localeCompare(b.job.id))
 }

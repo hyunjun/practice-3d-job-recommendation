@@ -8,6 +8,7 @@ export type JobSource = 'sample' | JobProvider
 export type Source = 'sample' | 'public'
 export type Employment = 'fulltime' | 'parttime' | 'permanent' | 'contract' | 'intern' | 'temporary' | 'unknown'
 export const COMPENSATION_VERSION = 1 as const
+export const QUALIFICATIONS_VERSION = 1 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever',
@@ -63,6 +64,31 @@ export interface CompensationRange {
   evidence?: FactEvidence
 }
 
+export type QualificationKind = 'required' | 'qualification' | 'preferred' | 'context'
+
+export interface SkillRequirement {
+  kind: QualificationKind
+  skills: string[]
+  match: 'all' | 'any' | 'unspecified'
+  evidence: FactEvidence
+}
+
+export interface ExperienceRequirement {
+  kind: QualificationKind
+  minYears: number
+  maxYears?: number
+  conditional: boolean
+  evidence: FactEvidence
+}
+
+export interface JobQualifications {
+  version: typeof QUALIFICATIONS_VERSION
+  skills: SkillRequirement[]
+  experience: ExperienceRequirement[]
+  experienceNote?: string
+  truncated?: boolean
+}
+
 export interface Job {
   id: string
   companyId: string
@@ -74,6 +100,7 @@ export interface Job {
   employment: Employment
   minExperience: number | null
   skills: string[]
+  qualifications?: JobQualifications
   salary: Salary | null
   compensationRanges?: CompensationRange[]
   compensationNote?: string
@@ -151,6 +178,7 @@ export interface MatchedJob {
   score: number
   matchedSkills: string[]
   missingSkills: string[]
+  skillSummary: string
   reasons: string[]
   cautions: string[]
 }
@@ -226,6 +254,13 @@ export const FACT_LABELS: Record<keyof JobEvidence, string> = {
   visa: '비자 지원',
   workMode: '근무 형태',
   employment: '고용 형태',
+}
+
+export const QUALIFICATION_LABELS: Record<QualificationKind, string> = {
+  required: '필수로 명시',
+  qualification: '자격 항목',
+  preferred: '우대 사항',
+  context: '업무·본문 언급',
 }
 
 export const COUNTRIES = [
