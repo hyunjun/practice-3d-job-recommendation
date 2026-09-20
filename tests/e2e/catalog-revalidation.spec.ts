@@ -263,7 +263,9 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await page.clock.runFor(20)
     await expect(page.locator('.data-loading')).toHaveCount(1)
     await expect(page.getByRole('dialog').getByRole('progressbar')).toHaveCount(0)
-    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
+    await expect(page.getByRole('button', { name: /공개 채용공고/ })).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('button', { name: /샘플로 탐색/ })).toHaveAttribute('aria-pressed', 'false')
+    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
     await latest[0].fulfill({ json: revalidationCatalog([revalidationJob('FinalChoice48', { fetchedAt: iso(300000) })], iso(300000)) })
     await expect(page.locator('.data-loading')).toHaveCount(0)
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '1'])
@@ -276,7 +278,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await evidence(page, info, state, [forced, monitor, ordinary, monitor, ordinary], 1)
   })
 
-  test('a failed switch remains publicly intended despite retained samples, and a malformed refresh can recover while retained data is still fresh', async ({ page }, info) => {
+  test('a failed switch keeps public selected with unknown counts, and a malformed refresh can recover while retained data is still fresh', async ({ page }, info) => {
     const state = await setup(page, revalidationCatalog(), 'sample')
     state.respond(route => route.fulfill({ status: 503, headers: { 'Retry-After': '120' }, json: {
       error: 'Fictional public retry48', code: 'CATALOG_UNAVAILABLE', retryAt: iso(120000),
@@ -284,7 +286,9 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
     await page.getByRole('button', { name: /공개 채용공고/ }).click()
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveText('Fictional public retry48')
-    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
+    await expect(page.getByRole('button', { name: /공개 채용공고/ })).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('button', { name: /샘플로 탐색/ })).toHaveAttribute('aria-pressed', 'false')
+    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
     expect(state.traffic.catalog()).toHaveLength(1)
     await page.clock.fastForward(8000)
     for (const offset of [60000, 119000]) {

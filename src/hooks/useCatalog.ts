@@ -23,14 +23,12 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
   const [error, setError] = useState('')
   const [errorRetryAt, setErrorRetryAt] = useState<string>()
   const requestRef = useRef<AbortController | null>(null)
-  const selectedSourceRef = useRef(initialSource)
   const catalogRef = useRef(catalog)
   const lastAttemptRef = useRef<number | null>(null)
   const retryAtRef = useRef<string | undefined>(undefined)
   const failedRequestRef = useRef(false)
 
   const changeSource = useCallback(async (source: Source, { refresh = false, announce = true }: { refresh?: boolean; announce?: boolean } = {}) => {
-    selectedSourceRef.current = source
     requestRef.current?.abort()
     requestRef.current = null
     retryAtRef.current = undefined
@@ -44,6 +42,12 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
       setCatalog(sample)
       setLoading(false)
       return
+    }
+    // The selected source takes effect even if its first request fails.
+    if (catalogRef.current.source !== 'public') {
+      const pending = initialCatalog('public')
+      catalogRef.current = pending
+      setCatalog(pending)
     }
     const controller = new AbortController()
     requestRef.current = controller
@@ -99,7 +103,7 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
 
   useEffect(() => {
     const revalidate = () => {
-      if (document.visibilityState !== 'visible' || selectedSourceRef.current !== 'public' || requestRef.current) return
+      if (document.visibilityState !== 'visible' || catalogRef.current.source !== 'public' || requestRef.current) return
       const now = Date.now()
       if (lastAttemptRef.current !== null && now - lastAttemptRef.current < PUBLIC_CATALOG_RECHECK_COOLDOWN) return
       const retryAt = Date.parse(retryAtRef.current ?? catalogRef.current.refreshAfter ?? '')

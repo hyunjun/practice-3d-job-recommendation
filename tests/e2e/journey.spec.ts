@@ -158,10 +158,13 @@ test('a failed public feed never relabels sample data as real jobs', async ({ pa
   await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
   await page.getByRole('button', { name: /공개 채용공고/ }).click()
   await expect(page.getByRole('alert')).toContainText('게시판 연결을 확인해 주세요.')
-  await expect(page.getByRole('button', { name: /샘플로 탐색/ })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: /샘플로 탐색/ })).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('button', { name: /공개 채용공고/ })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
   await page.getByRole('button', { name: '닫기', exact: true }).click()
-  await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
-  await expect(page.locator('.city-row')).toHaveCount(22)
+  await expect(page.getByRole('button', { name: '공개 공고 연결 필요', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '공개 공고에 연결하지 못했어요', exact: true })).toBeVisible()
+  await expect(page.locator('.city-row, .company-card, .flat-marker')).toHaveCount(0)
 })
 
 test('public conditions expose their evidence, preserve visa distinctions and survive saving', async ({ page }) => {
