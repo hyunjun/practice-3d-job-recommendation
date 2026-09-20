@@ -3,6 +3,31 @@ export const FLAT_MAP_HEIGHT = 640
 export const FLAT_MARKER_SIZE = 44
 
 export interface FlatMapView { x: number; y: number; k: number }
+interface FlatMapBounds { left: number; top: number; right: number; bottom: number }
+
+export function revealFlatMapMarker(target: FlatMapBounds, viewport: FlatMapBounds, overlays: readonly FlatMapBounds[] = []): { x: number; y: number } {
+  const padding = 8
+  const width = target.right - target.left
+  const height = target.bottom - target.top
+  const clampX = (x: number) => Math.max(viewport.left + padding, Math.min(viewport.right - padding - width, x))
+  const clampY = (y: number) => Math.max(viewport.top + padding, Math.min(viewport.bottom - padding - height, y))
+  const obstacles = overlays.filter(rect => rect.right > rect.left && rect.bottom > rect.top
+    && rect.left < viewport.right && rect.right > viewport.left && rect.top < viewport.bottom && rect.bottom > viewport.top)
+  // A closest free position lies at the current coordinate, a map edge, or an overlay edge.
+  const xs = new Set([clampX(target.left), ...obstacles.flatMap(rect => [clampX(rect.left - padding - width), clampX(rect.right + padding)])])
+  const ys = new Set([clampY(target.top), ...obstacles.flatMap(rect => [clampY(rect.top - padding - height), clampY(rect.bottom + padding)])])
+  let best = { x: clampX(target.left) - target.left, y: clampY(target.top) - target.top }
+  let distance = Infinity
+  for (const left of xs) for (const top of ys) {
+    if (obstacles.some(rect => left < rect.right + padding && left + width > rect.left - padding
+      && top < rect.bottom + padding && top + height > rect.top - padding)) continue
+    const x = left - target.left
+    const y = top - target.top
+    const nextDistance = x * x + y * y
+    if (nextDistance < distance) { best = { x, y }; distance = nextDistance }
+  }
+  return best
+}
 
 export function flatMapScale(width: number, height: number): number {
   return Math.min(width / FLAT_MAP_WIDTH, height / FLAT_MAP_HEIGHT)

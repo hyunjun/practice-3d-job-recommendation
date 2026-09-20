@@ -4,6 +4,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { DEFAULT_FILTERS } from '../../shared/types'
 import { searchCatalog, searchJob, SEARCH_COMPANIES, SEARCH_PROFILE, SEARCH_TIME } from '../fixtures/search-catalog'
 import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
+import { expectFlatMapTargets } from './helpers/flat-map'
 
 const nearby = searchCatalog([
   searchJob('seattle', { cityIds: ['seattle'], locationLabel: 'Seattle, Washington, United States' }),
@@ -11,7 +12,6 @@ const nearby = searchCatalog([
   searchJob('vancouver-b', { companyId: SEARCH_COMPANIES[1].id, cityIds: ['vancouver'], locationLabel: 'Vancouver, Canada' }),
 ])
 const single = searchCatalog([searchJob('london')])
-const settle = (page: Page) => page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))))
 const geometry = (page: Page) => page.locator('.flat-map svg path').evaluateAll(paths => paths.map(path => path.getAttribute('d')))
 
 async function setup(page: Page, catalog = nearby) {
@@ -28,30 +28,8 @@ async function setup(page: Page, catalog = nearby) {
   await expect.poll(() => page.locator('.flat-map svg path').count()).toBeGreaterThan(100)
 }
 
-async function expectReadableTargets(page: Page) {
-  // ResizeObserver and the subsequent SVG layout can span more than two frames.
-  await expect.poll(() => page.locator('.flat-marker-hit').evaluateAll(targets => targets.length
-    ? Math.max(...targets.flatMap(target => {
-      const rect = target.getBoundingClientRect()
-      return [Math.abs(rect.width - 44), Math.abs(rect.height - 44)]
-    })) : Infinity,
-  )).toBeLessThan(0.005)
-  const controls = await page.locator('.flat-marker').evaluateAll(markers => markers.map(marker => {
-    const target = marker.querySelector('.flat-marker-hit')!.getBoundingClientRect()
-    const text = marker.querySelector('text')!
-    const matrix = text.getScreenCTM()!
-    return { width: target.width, height: target.height, font: parseFloat(getComputedStyle(text).fontSize) * Math.hypot(matrix.a, matrix.b) }
-  }))
-  expect(controls.length).toBeGreaterThan(0)
-  for (const control of controls) {
-    expect(control.width).toBeCloseTo(44, 2)
-    expect(control.height).toBeCloseTo(44, 2)
-    expect(control.font).toBeCloseTo(12, 2)
-  }
-}
-
 async function screenView(page: Page) {
-  await settle(page)
+  await expectFlatMapTargets(page)
   return page.locator('.flat-map svg').evaluate(svg => {
     const matrix = svg.querySelector<SVGGElement>(':scope > g')!.getScreenCTM()!
     return { x: matrix.e, y: matrix.f }
@@ -70,7 +48,7 @@ for (const [width, height] of [[320, 960], [1440, 960], [2560, 720]]) test.descr
     const paths = await geometry(page)
     await expect(page.locator('.flat-marker')).toHaveCount(1)
     await expect(page.locator('.flat-marker')).toHaveAttribute('aria-label', '밴쿠버 외 1개 도시, 추천 회사 2곳, 확대해서 도시별로 보기')
-    await expectReadableTargets(page)
+    await expectFlatMapTargets(page)
     await page.locator('.flat-map svg').focus()
     await page.locator('.flat-map svg').press('Home')
     for (let step = 0; step < 8; step++) {
@@ -78,8 +56,11 @@ for (const [width, height] of [[320, 960], [1440, 960], [2560, 720]]) test.descr
       if (!(await marker.getAttribute('aria-label'))?.includes('확대해서')) break
       await marker.focus()
       await expect(marker).toBeFocused()
+      const scale = async () => Number((await page.locator('.flat-map svg > g').getAttribute('transform'))!.match(/scale\(([^)]+)\)/)![1])
+      const before = await scale()
       await marker.press('Enter')
-      await expectReadableTargets(page)
+      await expect.poll(scale).toBeGreaterThan(before)
+      await expectFlatMapTargets(page)
     }
     await expect(page.locator('.flat-marker')).toHaveCount(2)
     const vancouver = page.getByRole('button', { name: '밴쿠버, 추천 회사 2곳, 회사 보기', exact: true })
@@ -108,7 +89,7 @@ test('resizing and fullscreen preserve target sizes, and pointer and keyboard mo
   const svg = page.locator('.flat-map svg')
   for (const [width, height] of [[320, 960], [2560, 720], [390, 844]]) {
     await page.setViewportSize({ width, height })
-    await expectReadableTargets(page)
+    await expectFlatMapTargets(page)
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
     await svg.focus()
     await svg.press('Home')
@@ -137,10 +118,10 @@ test('resizing and fullscreen preserve target sizes, and pointer and keyboard mo
   await page.setViewportSize({ width: 1440, height: 960 })
   await page.getByRole('button', { name: '지도 전체 화면', exact: true }).click()
   await expect.poll(() => page.evaluate(() => document.fullscreenElement?.classList.contains('map-stage'))).toBe(true)
-  await expectReadableTargets(page)
+  await expectFlatMapTargets(page)
   await page.getByRole('button', { name: '지도 전체 화면', exact: true }).click()
   await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
-  await expectReadableTargets(page)
+  await expectFlatMapTargets(page)
   expect(await geometry(page)).toEqual(paths)
   expect(traffic.requests).toHaveLength(initial.attempts)
   expect(errors).toEqual([])

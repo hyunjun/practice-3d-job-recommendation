@@ -4,7 +4,7 @@ import { feature } from 'topojson-client'
 import type { FeatureCollection, Geometry } from 'geojson'
 import type { GeometryCollection, Topology } from 'topojson-specification'
 import type { CityResult } from '../../shared/types'
-import { FLAT_MAP_HEIGHT, FLAT_MAP_WIDTH, FLAT_MARKER_SIZE, flatMapScale, flatMapZoomLimit, groupFlatMapPoints, zoomFlatMap } from '../lib/flat-map-layout'
+import { FLAT_MAP_HEIGHT, FLAT_MAP_WIDTH, FLAT_MARKER_SIZE, flatMapScale, flatMapZoomLimit, groupFlatMapPoints, revealFlatMapMarker, zoomFlatMap } from '../lib/flat-map-layout'
 import type { GlobeHandle } from './Globe'
 
 interface Props {
@@ -19,7 +19,9 @@ interface Props {
 export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results, selectedId, hoveredId, onSelect, onHover, onReady }, ref) {
   const [land, setLand] = useState<FeatureCollection<Geometry> | null>(null)
   const [view, setView] = useState({ x: 0, y: 0, k: 1 })
-  const [viewportScale, setViewportScale] = useState(1)
+  const [viewport, setViewport] = useState({ width: FLAT_MAP_WIDTH, height: FLAT_MAP_HEIGHT })
+  const [focusTarget, setFocusTarget] = useState<{ element: SVGGElement; cityId: string } | null>(null)
+  const viewportScale = flatMapScale(viewport.width, viewport.height)
   const svgRef = useRef<SVGSVGElement>(null)
   const drag = useRef<{ id: number; x: number; y: number; startX: number; startY: number } | null>(null)
   const projection = useMemo(() => geoNaturalEarth1().scale(176).translate([500, 340]), [])
@@ -36,7 +38,7 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
     if (!container) return
     const measure = () => {
       const { width, height } = container.getBoundingClientRect()
-      if (width > 0 && height > 0) setViewportScale(flatMapScale(width, height))
+      if (width > 0 && height > 0) setViewport(previous => previous.width === width && previous.height === height ? previous : { width, height })
     }
     measure()
     const observer = new ResizeObserver(measure)
@@ -79,6 +81,44 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
     cityIds: group.map(entry => entry.result.city.id),
     count: new Set(group.flatMap(entry => entry.result.matches.map(match => match.company.id))).size,
   })), [points, view.k, viewportScale])
+
+  useLayoutEffect(() => {
+    const svg = svgRef.current
+    if (!svg || !focusTarget) return
+    const point = markers.find(marker => marker.item.result.city.id === focusTarget.cityId)?.item.point
+    if (!point || document.activeElement !== focusTarget.element || !svg.contains(focusTarget.element)) {
+      setFocusTarget(null)
+      return
+    }
+    // Native Tab navigation may have scrolled the page toward the city's old, off-map position.
+    svg.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })
+    // Measure after the focused city name is rendered, and include room for its outline.
+    const frame = svg.getBoundingClientRect()
+    const visibleFrame = { left: Math.max(0, frame.left), top: Math.max(0, frame.top), right: Math.min(window.innerWidth, frame.right), bottom: Math.min(window.innerHeight, frame.bottom) }
+    const overlays = Array.from(svg.closest('.map-stage')?.querySelectorAll('[data-map-overlay]') ?? [], element => element.getBoundingClientRect())
+    const local = focusTarget.element.getBBox()
+    const matrix = svg.getScreenCTM()
+    if (!matrix) return
+    const inverse = matrix.inverse()
+    const origin = new DOMPoint(0, 0).matrixTransform(inverse)
+    setView(previous => {
+      // Calculate from the current view, including when zoom and focus change together.
+      const corners = [local.x, local.x + local.width].flatMap(x =>
+        [local.y, local.y + local.height].map(y => new DOMPoint(
+          previous.x + point[0] * previous.k + x / viewportScale,
+          previous.y + point[1] * previous.k + y / viewportScale,
+        ).matrixTransform(matrix)),
+      )
+      const left = Math.min(...corners.map(corner => corner.x))
+      const right = Math.max(...corners.map(corner => corner.x))
+      const top = Math.min(...corners.map(corner => corner.y))
+      const bottom = Math.max(...corners.map(corner => corner.y))
+      const { x: dx, y: dy } = revealFlatMapMarker({ left, right, top, bottom }, visibleFrame, overlays)
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return previous
+      const moved = new DOMPoint(dx, dy).matrixTransform(inverse)
+      return { ...previous, x: previous.x + moved.x - origin.x, y: previous.y + moved.y - origin.y }
+    })
+  }, [focusTarget, markers, viewport, viewportScale])
 
   const endDrag = (pointerId: number) => { if (drag.current?.id === pointerId) drag.current = null }
 
@@ -144,8 +184,11 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
             onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); activate() } }}
             onPointerEnter={() => onHover(item.result.city.id)}
             onPointerLeave={() => onHover(null)}
-            onFocus={() => onHover(item.result.city.id)}
-            onBlur={() => onHover(null)}
+            onFocus={event => {
+              onHover(item.result.city.id)
+              if (event.currentTarget.matches(':focus-visible')) setFocusTarget({ element: event.currentTarget, cityId: item.result.city.id })
+            }}
+            onBlur={() => { setFocusTarget(null); onHover(null) }}
           >
             <rect className="flat-marker-hit" x={-FLAT_MARKER_SIZE / 2} y={-FLAT_MARKER_SIZE / 2} width={FLAT_MARKER_SIZE} height={FLAT_MARKER_SIZE} rx="6" fill="transparent" />
             <circle r={active ? 21 : 18} fill={active ? '#d9ffae' : '#c2ed8b'} stroke="#101812" strokeWidth="4" />
