@@ -102,8 +102,12 @@ export default function App() {
   const savedOpenJob = saved.find(item => item.job.id === openJob?.job.id)
   const searchScope = useMemo<SearchScope>(() => panelTab !== 'cities' ? { kind: panelTab }
     : selectedId && CITY_BY_ID.has(selectedId) ? { kind: 'city', cityId: selectedId } : { kind: 'cities' }, [panelTab, selectedId])
-  const recovery = useMemo(() => view === 'explore' && catalogReady && !loading && !catalog.boards.some(board => board.status === 'pending')
-    ? analyzeSearchRecovery(searchIndex, filters, searchScope) : null, [view, catalogReady, loading, catalog.boards, searchIndex, filters, searchScope])
+  // Other cities or tabs can still have matches when the displayed scope is empty.
+  const hasScopeResults = searchScope.kind === 'cities' ? cities.length > 0
+    : searchScope.kind === 'city' ? cities.some(result => result.city.id === searchScope.cityId)
+    : searchScope.kind === 'remote' ? remote.length > 0 : unmapped.length > 0
+  const recovery = useMemo(() => view === 'explore' && catalogReady && !loading && !hasScopeResults && !catalog.boards.some(board => board.status === 'pending')
+    ? analyzeSearchRecovery(searchIndex, filters, searchScope) : null, [view, catalogReady, loading, hasScopeResults, catalog.boards, searchIndex, filters, searchScope])
 
   useEffect(() => {
     const onHash = () => setView(currentView())
