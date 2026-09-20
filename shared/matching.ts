@@ -107,17 +107,34 @@ export function rankSearchJobs(entries: SearchEntry[], profile: Profile): Matche
   return entries.map(entry => matchSearchEntry(entry, profile)).sort(compareSearchMatches)
 }
 
-// Recreate for each immutable index/profile snapshot. Filters change eligibility, not scores.
+// Recreate for each immutable index/profile snapshot. Filters change eligibility, not ranking.
 export function createSearchRanker(index: SearchIndex, profile: Profile): (filters: Filters) => MatchedJob[] {
   const scores = new WeakMap<SearchEntry, MatchedJob>()
-  return filters => selectSearchJobs(index, filters).map(entry => {
-    let match = scores.get(entry)
-    if (!match) {
-      match = matchSearchEntry(entry, profile)
-      scores.set(entry, match)
+  let ordered: MatchedJob[] = []
+  return filters => {
+    const included = new Set<MatchedJob>()
+    let changed = false
+    for (const entry of selectSearchJobs(index, filters)) {
+      let match = scores.get(entry)
+      if (!match) {
+        match = matchSearchEntry(entry, profile)
+        scores.set(entry, match)
+        changed = true
+      }
+      included.add(match)
     }
-    return match
-  }).sort(compareSearchMatches)
+    if (!included.size) return []
+    if (changed) {
+      // Source order preserves stable ties when a later query reveals earlier entries.
+      ordered = []
+      for (const entry of index.entries) {
+        const match = scores.get(entry)
+        if (match) ordered.push(match)
+      }
+      ordered.sort(compareSearchMatches)
+    }
+    return ordered.filter(match => included.has(match))
+  }
 }
 
 export function groupCities(catalog: Catalog, matches: MatchedJob[], filters: Filters): CityResult[] {

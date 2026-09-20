@@ -21,7 +21,7 @@ describe('ranking across search and filter changes', () => {
   it('keeps the same complete recommendations when narrowing, widening and changing hard conditions', () => {
     const rank = createSearchRanker(createSearchIndex(catalog, SEARCH_PROFILE), SEARCH_PROFILE)
     const changes: Partial<Filters>[] = [
-      { query: 'senior' }, {}, { query: 'engineer' }, { query: 'no-such-job' },
+      { query: 'no-such-job' }, { query: 'senior' }, {}, { query: 'engineer' }, { query: 'no-such-job' },
       { role: 'frontend' }, { salaryMin: 190000 }, { includeUnknownSalary: false },
       { visa: 'yes' }, { visa: 'possible' }, { workMode: 'remote' },
       { workMode: 'remote', remoteEligibleOnly: false }, { region: 'asia-pacific' }, {},
@@ -48,6 +48,26 @@ describe('ranking across search and filter changes', () => {
     expect(repeated).toEqual(filterJobs(catalog, SEARCH_PROFILE, DEFAULT_FILTERS))
     expect(repeated.find(match => match.job.id === senior.id)).toBe(first[0])
     expect(index.entries).toEqual(originalOrder)
+  })
+
+  it('keeps the original order of locale-equivalent ties when an earlier entry is discovered later', () => {
+    const earlier = searchJob('earlier', { id: 'greenhouse-tie-é' })
+    const later = searchJob('later', { id: 'greenhouse-tie-e\u0301', companyId: SEARCH_COMPANIES[1].id })
+    const tied = {
+      ...searchCatalog([earlier, later]),
+      companies: SEARCH_COMPANIES.map((company, position) => ({ ...company, name: position === 0 ? 'Café' : 'Cafe\u0301' })),
+    }
+    expect(earlier.id.localeCompare(later.id)).toBe(0)
+    expect(tied.companies[0].name.localeCompare(tied.companies[1].name)).toBe(0)
+    const rank = createSearchRanker(createSearchIndex(tied, SEARCH_PROFILE), SEARCH_PROFILE)
+    expect(rank({ ...DEFAULT_FILTERS, query: 'later' }).map(match => match.job.id)).toEqual([later.id])
+    const all = rank(DEFAULT_FILTERS)
+    expect(all[0].score).toBe(all[1].score)
+    expect(all.map(match => match.job.id)).toEqual([earlier.id, later.id])
+    for (const query of ['earlier', 'no-such-job', 'later', '']) {
+      const filters = { ...DEFAULT_FILTERS, query }
+      expect(rank(filters)).toEqual(filterJobs(tied, SEARCH_PROFILE, filters))
+    }
   })
 
   it('recalculates scores, explanations and eligibility for a new profile snapshot', () => {
