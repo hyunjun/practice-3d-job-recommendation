@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test'
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { CITIES } from '../../shared/cities'
 import { DEFAULT_FILTERS } from '../../shared/types'
 import { searchCatalog, searchJob, SEARCH_PROFILE, SEARCH_TIME } from '../fixtures/search-catalog'
 import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
-import { expectFlatMapTargets } from './helpers/flat-map'
+import { expectFlatMapFocus, expectFlatMapTargets } from './helpers/flat-map'
 
 const catalog = searchCatalog(CITIES.map(city => searchJob(city.id, {
   title: `Backend Engineer — ${city.en}`, cityIds: [city.id], locationLabel: city.en,
@@ -26,24 +26,6 @@ async function setup(page: Page, data = catalog) {
   await expect(page.locator('.city-row')).toHaveCount(data === single ? 1 : CITIES.length)
   await expect.poll(() => page.locator('.flat-map svg path').count()).toBeGreaterThan(100)
   await page.evaluate(() => document.fonts.ready)
-}
-
-async function expectExposed(marker: Locator) {
-  await expect(marker).toBeFocused()
-  await expect.poll(() => marker.evaluate(element => {
-    const viewport = element.closest('svg')!.getBoundingClientRect()
-    const full = element.getBoundingClientRect()
-    const target = element.querySelector('.flat-marker-hit')!.getBoundingClientRect()
-    const overlays = Array.from(element.closest('.map-stage')!.querySelectorAll('[data-map-overlay]'), overlay => overlay.getBoundingClientRect())
-    return full.left >= Math.max(0, viewport.left) && full.right <= Math.min(innerWidth, viewport.right)
-      && full.top >= Math.max(0, viewport.top) && full.bottom <= Math.min(innerHeight, viewport.bottom)
-      && overlays.every(overlay => overlay.width === 0 || overlay.height === 0
-        || full.right <= overlay.left || full.left >= overlay.right || full.bottom <= overlay.top || full.top >= overlay.bottom)
-      && [0.15, 0.5, 0.85].every(x => [0.15, 0.5, 0.85].every(y => {
-        const hit = document.elementFromPoint(target.left + target.width * x, target.top + target.height * y)
-        return hit !== null && element.contains(hit)
-      }))
-  }), { message: 'The focused city, its name and its pointer target must be visible inside the map' }).toBe(true)
 }
 
 for (const [width, height] of [[320, 568], [320, 844], [667, 375], [768, 1024], [1440, 960], [2560, 720]]) test.describe(`2D keyboard focus at ${width}×${height}`, () => {
@@ -68,14 +50,14 @@ for (const [width, height] of [[320, 568], [320, 844], [667, 375], [768, 1024], 
     for (const label of labels) {
       await page.keyboard.press('Tab')
       await expect(focused).toHaveAttribute('aria-label', label)
-      await expectExposed(focused)
+      await expectFlatMapFocus(focused)
       expect(await zoom(page)).toBe(7.59375)
     }
     await page.screenshot({ path: info.outputPath('last-city-focused.png') })
     for (const label of labels.slice(0, -1).reverse()) {
       await page.keyboard.press('Shift+Tab')
       await expect(focused).toHaveAttribute('aria-label', label)
-      await expectExposed(focused)
+      await expectFlatMapFocus(focused)
     }
     await expect(page.locator('.city-detail-hero')).toHaveCount(0)
     await expect(page.locator('.city-row')).toHaveCount(CITIES.length)
@@ -89,7 +71,7 @@ for (const [width, height] of [[320, 568], [320, 844], [667, 375], [768, 1024], 
     await settle(page)
     const before = await view(page)
     await page.keyboard.press('Tab')
-    await expectExposed(focused)
+    await expectFlatMapFocus(focused)
     expect(await view(page)).toBe(before)
     await focused.press('Enter')
     await expect(page.locator('.city-hero-caption h2')).toContainText('런던')
@@ -149,10 +131,10 @@ test('a focused city remains visible when the map changes between desktop and ph
   for (let step = 0; step < 5; step++) await svg.press('+')
   await page.keyboard.press('Tab')
   const focused = page.locator('.flat-marker:focus')
-  await expectExposed(focused)
+  await expectFlatMapFocus(focused)
   for (const [width, height] of [[320, 844], [768, 1024], [2560, 720]]) {
     await page.setViewportSize({ width, height })
-    await expectExposed(focused)
+    await expectFlatMapFocus(focused)
     expect(await zoom(page)).toBe(7.59375)
   }
   await expect(page.locator('.city-detail-hero')).toHaveCount(0)

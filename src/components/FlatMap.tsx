@@ -23,6 +23,18 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
   const [focusTarget, setFocusTarget] = useState<{ element: SVGGElement; cityId: string } | null>(null)
   const viewportScale = flatMapScale(viewport.width, viewport.height)
   const svgRef = useRef<SVGSVGElement>(null)
+  const markerElements = useRef(new Map<string, SVGGElement>())
+  const removingFocusedMarker = useRef<SVGGElement | null>(null)
+  const rememberMarker = useCallback((element: SVGGElement | null) => {
+    if (!element) return
+    const cityId = element.getAttribute('data-map-marker')!
+    markerElements.current.set(cityId, element)
+    return () => {
+      // Capture focus before DOM removal can fire blur and move it to the document body.
+      if (document.activeElement === element && element.matches(':focus-visible')) removingFocusedMarker.current = element
+      markerElements.current.delete(cityId)
+    }
+  }, [])
   const drag = useRef<{ id: number; x: number; y: number; startX: number; startY: number } | null>(null)
   const projection = useMemo(() => geoNaturalEarth1().scale(176).translate([500, 340]), [])
   const path = useMemo(() => geoPath(projection), [projection])
@@ -84,12 +96,33 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
 
   useLayoutEffect(() => {
     const svg = svgRef.current
+    const removedFocus = removingFocusedMarker.current
+    removingFocusedMarker.current = null
     if (!svg || !focusTarget) return
-    const point = markers.find(marker => marker.item.result.city.id === focusTarget.cityId)?.item.point
-    if (!point || document.activeElement !== focusTarget.element || !svg.contains(focusTarget.element)) {
+    const active = document.activeElement
+    if (active !== focusTarget.element && (removedFocus !== focusTarget.element || active !== document.body)) {
       setFocusTarget(null)
       return
     }
+    const group = markers.find(marker => marker.cityIds.includes(focusTarget.cityId))
+    const element = group && markerElements.current.get(group.item.result.city.id)
+    if (!group || !element) {
+      setFocusTarget(null)
+      onHover(null)
+      svg.focus({ preventScroll: true })
+      svg.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })
+      return
+    }
+    if (element !== focusTarget.element) {
+      element.focus({ preventScroll: true })
+      // Keep the original city through a merged group, so splitting returns focus to it.
+      if (document.activeElement === element) {
+        setFocusTarget({ element, cityId: focusTarget.cityId })
+        onHover(focusTarget.cityId)
+      } else setFocusTarget(null)
+      return
+    }
+    const point = group.item.point
     // Native Tab navigation may have scrolled the page toward the city's old, off-map position.
     svg.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })
     // Measure after the focused city name is rendered, and include room for its outline.
@@ -118,7 +151,7 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
       const moved = new DOMPoint(dx, dy).matrixTransform(inverse)
       return { ...previous, x: previous.x + moved.x - origin.x, y: previous.y + moved.y - origin.y }
     })
-  }, [focusTarget, markers, viewport, viewportScale])
+  }, [focusTarget, markers, onHover, viewport, viewportScale])
 
   const endDrag = (pointerId: number) => { if (drag.current?.id === pointerId) drag.current = null }
 
@@ -174,7 +207,8 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
           }
           return <g
             key={item.result.city.id}
-            data-map-marker
+            ref={rememberMarker}
+            data-map-marker={item.result.city.id}
             className={`flat-marker ${active ? 'active' : ''}`}
             transform={`translate(${item.point.join(',')}) scale(${1 / (view.k * viewportScale)})`}
             role="button"
@@ -188,7 +222,11 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
               onHover(item.result.city.id)
               if (event.currentTarget.matches(':focus-visible')) setFocusTarget({ element: event.currentTarget, cityId: item.result.city.id })
             }}
-            onBlur={() => { setFocusTarget(null); onHover(null) }}
+            onBlur={event => {
+              if (removingFocusedMarker.current === event.currentTarget) return
+              setFocusTarget(null)
+              onHover(null)
+            }}
           >
             <rect className="flat-marker-hit" x={-FLAT_MARKER_SIZE / 2} y={-FLAT_MARKER_SIZE / 2} width={FLAT_MARKER_SIZE} height={FLAT_MARKER_SIZE} rx="6" fill="transparent" />
             <circle r={active ? 21 : 18} fill={active ? '#d9ffae' : '#c2ed8b'} stroke="#101812" strokeWidth="4" />
