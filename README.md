@@ -50,7 +50,7 @@ npm run dev
 
 | 설정 | 동작 |
 | --- | --- |
-| 설정 파일 없음 | 기본 22개 회사 사용 |
+| 설정 파일 없음 | 기본 24개 회사 사용 |
 | `mode: "extend"` 또는 mode 생략 | 기본 목록에 추가. 같은 ID의 회사 객체는 해당 회사의 등록 정보 변경 |
 | `mode: "replace"` | `companies`에 적은 회사만 사용 |
 | 회사 ID 문자열 | 기본 목록의 등록 정보 재사용. `npm run boards:check -- --help`에서 ID 목록 확인 |
@@ -131,14 +131,18 @@ ORBIT_BOARDS_FILE="/absolute/path/my-boards.json" npm start
 
 샘플은 **22개 도시, 32개 실제 회사 이름을 활용한 체험용 시나리오**입니다. 공고·연봉·비자·근무 조건은 실제 채용 사실을 나타내지 않습니다. 샘플 공고의 링크는 실제 회사의 채용 페이지로 연결됩니다.
 
-공개 모드의 기본 설정은 다음 **22개 회사의 공개 게시판 API**를 조회합니다. 로컬 설정으로 이 목록을 선택·확장할 수 있습니다.
+공개 모드의 기본 설정은 다음 **24개 회사의 공개 게시판 API**를 조회합니다. 로컬 설정으로 이 목록을 선택·확장할 수 있습니다.
 
 | 출처 | 대상 회사 |
 | --- | --- |
-| Greenhouse | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom, Asana |
+| Greenhouse | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom, Asana, Moloco, Delight.ai (Sendbird) |
 | Ashby | Linear, DeepL, n8n, Supabase, Mistral AI, Jane |
 | Lever | Spotify, Contentsquare |
 | SmartRecruiters | Canva, Grab, Wise |
+
+Moloco와 Delight.ai의 공식 채용 페이지가 사용하는 게시판을 포함해 서울의 실제 개발·연구 공고도 탐색합니다. 회사명과 현재 게시판 이름이 다른 Delight.ai는 **Delight.ai (Sendbird)**로 표시하며 두 이름으로 검색할 수 있습니다. 해당 회사의 모든 공고가 서울 근무나 모든 사용자의 지원 조건에 맞는다는 뜻은 아닙니다.
+
+Sendbird API의 이전 채용 목록 주소는 게시 ID가 정확히 일치하는 경우 현재 공식 직무 페이지로 연결합니다. 상세·게시 상태 확인·CSV에는 연결할 직무 주소를 사용하고, 수집·캐시·저장 기록과 JSON 백업에는 API의 원래 주소를 보존합니다. 같은 공고의 이전·현재 주소만 달라진 것은 게시 내용 변경으로 표시하지 않습니다. 다른 제공자·도메인·게시 ID와 확인하지 않은 주소 형식은 그대로 유지합니다.
 
 - 게시판 조회 시점에 공개된 개발·컴퓨팅 엔지니어링과 컴퓨터·AI 연구 공고를 사용합니다. 제목·공개 부서·직급을 확인해 고객 지원·솔루션, 관리직, 기계·제조 등 다른 직군을 제외합니다.
 - `Applied Scientist`처럼 일반적인 연구 직함은 해당 공고의 업무·자격에서 알고리즘·소프트웨어·모델 개발 등 컴퓨팅 근거를 확인합니다. 회사가 AI 기업이거나 부서명에 AI가 있다는 이유만으로 연구직을 포함하지 않습니다. UX 연구·채용 연구·화학 실험 등 명시적으로 다른 분야인 연구직은 구분합니다.

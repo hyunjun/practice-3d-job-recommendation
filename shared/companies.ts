@@ -57,4 +57,6 @@ export const PUBLIC_COMPANIES: Company[] = [
   publicCompany('canva', 'smartrecruiters', 'Canva'),
   publicCompany('grab', 'smartrecruiters', 'Grab'),
   publicCompany('wise', 'smartrecruiters', 'Wise'),
+  { id: 'moloco', name: 'Moloco', initials: 'M', color: '#e8b283', industry: 'AI · 광고 기술', careerUrl: 'https://www.moloco.com/company/careers', provider: 'greenhouse', board: 'moloco' },
+  { id: 'sendbird', name: 'Delight.ai (Sendbird)', initials: 'D', color: '#b6d9a2', industry: 'AI · 고객 경험', careerUrl: 'https://delight.ai/careers', provider: 'greenhouse', board: 'sendbird' },
 ]

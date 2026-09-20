@@ -20,6 +20,7 @@ import type { SavedJobsController } from '../hooks/useSavedJobs'
 import { SavedStorageNotice } from './SavedStorageNotice'
 import { JobRemoteScopeDetails } from './JobRemoteScopeDetails'
 import { JobPostingPurposeDetails } from './JobPostingPurpose'
+import { jobPostingUrl } from '../../shared/job-links'
 
 interface Props {
   match: MatchedJob
@@ -35,7 +36,7 @@ interface Props {
 export function JobDialog({ match, saved, storage, onManageSaved, postingObservation, onToggleSave, onUpdateSaved, onClose }: Props) {
   const { job, company, matchedSkills, reasons, cautions } = match
   const technical = isTechnicalJob(job)
-  const url = safeExternalUrl(job.url)
+  const url = safeExternalUrl(jobPostingUrl(job))
   const date = new Date(job.fetchedAt).toLocaleDateString('ko-KR')
   const verifiedSalary = job.salary && (job.source === 'sample' || job.compensationVersion === COMPENSATION_VERSION)
   return <Dialog title={company.name} eyebrow={company.industry} onClose={onClose} className="job-dialog">

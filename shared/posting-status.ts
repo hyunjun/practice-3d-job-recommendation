@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { PUBLIC_PROVIDERS } from './types'
 import { jobRoleEvidence, jobRoles } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
+import { jobPostingUrl } from './job-links'
 import { upgradeJob } from './job-upgrade'
 import type { Job, JobProvider, SavedJob } from './types'
 
@@ -117,7 +118,7 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
     },
     qualifications: { skills: current.skills, years: current.minExperience, details: current.qualifications ?? null },
     description: job.description,
-    url: job.url,
+    url: jobPostingUrl(job),
   }
   const pairs = await Promise.all(REVISION_FIELDS.map(async field => {
     const bytes = new TextEncoder().encode(JSON.stringify(stable(sections[field])))
@@ -166,7 +167,7 @@ export function observeSavedPosting(saved: SavedJob, index: PostingStatusIndex |
   const current = listing.jobs.find(item => item.id === job.id)
   return {
     state: 'listed', checkedAt,
-    ...(current ? { currentTitle: current.title, currentUrl: current.url } : {}),
+    ...(current ? { currentTitle: current.title, currentUrl: jobPostingUrl({ ...job, url: current.url }) } : {}),
     ...(current && revision ? { changedFields: REVISION_FIELDS.filter(field => revision[field] !== current.revision[field]) }
       : { message: current ? '게시 여부를 확인했어요. 이 기록의 내용 비교는 확인하지 못했습니다.' : '게시판에는 있지만 현재 탐색 범위 밖의 공고라 내용은 원문에서 확인해야 합니다.' }),
   }

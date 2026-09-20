@@ -1,6 +1,7 @@
 import { ArrowUpRight, CheckCircle2, CircleHelp, FileDiff } from 'lucide-react'
 import { formatCollectionTime } from '../../shared/catalog-health'
 import { safeExternalUrl } from '../../shared/matching'
+import { jobPostingUrl } from '../../shared/job-links'
 import { POSTING_STATE_LABELS, REVISION_LABELS } from '../../shared/posting-status'
 import type { PostingObservation } from '../../shared/posting-status'
 import type { Job } from '../../shared/types'
@@ -12,7 +13,7 @@ export function SavedPostingNotice({ observation, job, compact = false }: {
 }) {
   if (!observation || observation.state === 'sample') return null
   const changed = Boolean(observation.changedFields?.length)
-  const url = safeExternalUrl(observation.currentUrl ?? job.url)
+  const url = safeExternalUrl(jobPostingUrl({ ...job, url: observation.currentUrl ?? job.url }))
   const Icon = changed ? FileDiff : observation.state === 'listed' ? CheckCircle2 : CircleHelp
   return <div className={`posting-notice ${observation.state} ${changed ? 'changed' : ''} ${compact ? 'compact' : ''}`}>
     <div className="posting-notice-heading"><Icon size={14} /><strong>{POSTING_STATE_LABELS[observation.state]}</strong>{changed && <span>저장 내용과 차이</span>}</div>

@@ -23,7 +23,7 @@ const repository = fileURLToPath(new URL('../../', import.meta.url))
 const defaultIds = [
   'stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'airbnb', 'gitlab',
   'anthropic', 'intercom', 'asana', 'linear', 'deepl', 'n8n', 'supabase', 'mistral',
-  'jane', 'spotify', 'contentsquare', 'canva', 'grab', 'wise',
+  'jane', 'spotify', 'contentsquare', 'canva', 'grab', 'wise', 'moloco', 'sendbird',
 ]
 const BASE = Date.parse('2026-09-20T06:00:00.000Z')
 const initialTime = '2026-09-20T06:00:00.000Z'
@@ -102,7 +102,7 @@ afterEach(async () => {
 })
 
 describe('board configuration resolution', () => {
-  it('keeps the 22 defaults in order without a file and leaves the filesystem untouched', async () => {
+  it('keeps the 24 defaults in order without a file and leaves the filesystem untouched', async () => {
     const cwd = await directory()
     const resolved = await loadBoardConfiguration({ cwd })
     expect(resolved.mode).toBe('default')
@@ -175,8 +175,8 @@ describe('board configuration resolution', () => {
     const replaced = parseBoardConfiguration(replacement(many))
     expect(replaced.companies).toHaveLength(1000)
     expect(replaced.companies[999].id).toBe('fixture-999')
-    expect(parseBoardConfiguration({ version: 1, companies: many.slice(0, 978) }).companies).toHaveLength(1000)
-    expect(() => parseBoardConfiguration({ version: 1, companies: many.slice(0, 979) })).toThrow(/1000/)
+    expect(parseBoardConfiguration({ version: 1, companies: many.slice(0, 1000 - defaultIds.length) }).companies).toHaveLength(1000)
+    expect(() => parseBoardConfiguration({ version: 1, companies: many.slice(0, 1001 - defaultIds.length) })).toThrow(/1000/)
     expect(() => parseBoardConfiguration(replacement([...many, boardRegistration()]))).toThrow(/1000/)
   })
 
@@ -524,7 +524,7 @@ describe('offline board-check CLI', () => {
     expect(result.code).toBe(0)
     expect(result.signal).toBeNull()
     expect(result.stdout).toContain('기본 공개 게시판 목록을 사용합니다.')
-    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 22개')
+    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 24개')
     expect(result.stdout).toContain('stripe · Stripe · Greenhouse · stripe')
     expect(result.stdout).toContain('wise · Wise · SmartRecruiters · Wise')
     expect(result.stdout).toContain('네트워크 요청 없이 설정 형식을 확인했습니다.')

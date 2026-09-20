@@ -3,6 +3,7 @@ import { CATALOG_LIFETIME } from '../shared/catalog-freshness'
 import type { CatalogCollectionUpdate, CatalogProgress } from '../shared/catalog-progress'
 import { randomUUID } from 'node:crypto'
 import { createJobRevision } from '../shared/posting-status'
+import { jobPostingUrl } from '../shared/job-links'
 import type { PostingBoard, PostingStatusIndex } from '../shared/posting-status'
 import { PUBLIC_PROVIDERS } from '../shared/types'
 import type { BoardStatus, Catalog, Company, Job } from '../shared/types'
@@ -145,7 +146,7 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
         let summaries = revisions.get(snapshot)
         if (!summaries) {
           summaries = Promise.all(snapshot.jobs.map(async job => ({
-            id: job.id, title: job.title, url: job.url, revision: await createJobRevision(job),
+            id: job.id, title: job.title, url: jobPostingUrl(job), revision: await createJobRevision(job),
           })))
           revisions.set(snapshot, summaries)
           void summaries.catch(() => revisions.delete(snapshot))
