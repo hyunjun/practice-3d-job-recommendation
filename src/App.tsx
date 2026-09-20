@@ -229,6 +229,7 @@ export default function App() {
   }
 
   const applyProfile = (next: Profile, preferences: Partial<Filters>, remember: boolean) => {
+    const isNewProfile = profile.kind !== 'personal'
     const updatedProfile: Profile = { ...next, preferences: {
       workMode: preferences.workMode ?? filters.workMode,
       visa: preferences.visa ?? filters.visa,
@@ -236,20 +237,25 @@ export default function App() {
     } }
     setProfile(updatedProfile)
     setFilters(current => ({ ...current, ...preferences }))
-    setSelectedId(null)
-    setPanelTab(preferences.workMode === 'remote' ? 'remote' : 'cities')
+    if (isNewProfile) {
+      setSelectedId(null)
+      setPanelTab(preferences.workMode === 'remote' ? 'remote' : 'cities')
+    } else if (preferences.workMode !== undefined && preferences.workMode !== filters.workMode) {
+      if (preferences.workMode === 'remote') setPanelTab('remote')
+      else if (preferences.workMode !== 'all') setPanelTab(current => current === 'remote' ? 'cities' : current)
+    }
     if (remember) {
       const remembered = persist(STORAGE_KEYS.profile, updatedProfile)
       setRememberProfile(remembered)
       if (!remembered) notify('프로필을 저장하지 못했지만 이번 탐색에는 적용했어요.', undefined, 'error')
-      else notify(`${next.name}님의 경험으로 기회 지도를 업데이트했어요.`)
+      else notify(isNewProfile ? `${next.name}님의 경험으로 기회 지도를 업데이트했어요.` : `${next.name}님의 프로필을 업데이트했어요.`)
     } else {
       setRememberProfile(false)
       deleteProfile()
       notify('프로필을 이번 탐색에만 적용했어요.')
     }
     setModal(null)
-    navigate('explore')
+    if (isNewProfile) navigate('explore')
   }
 
   const resetFilters = () => {

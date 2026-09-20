@@ -182,7 +182,7 @@ test('opting out removes previously remembered conditions and keeps that choice 
   await page.getByLabel('이름 또는 별명').fill('Private Profile')
   await page.getByLabel('희망 직무', { exact: true }).selectOption('frontend')
   await page.getByRole('checkbox', { name: /이 브라우저에 프로필 기억하기/ }).uncheck()
-  await page.getByRole('button', { name: '내 기회 지도 만들기', exact: true }).click()
+  await page.getByRole('button', { name: '변경 사항 적용', exact: true }).click()
   await page.getByLabel('도시, 회사 또는 포지션 검색').fill('private-query-do-not-remember')
   await page.getByRole('button', { name: '2D 지도', exact: true }).click()
   await page.getByRole('button', { name: '내 프로필 편집', exact: true }).click()

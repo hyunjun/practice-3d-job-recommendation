@@ -84,7 +84,9 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
     setYearsError('')
     if (!draft.name.trim()) { setError('프로필 이름을 입력해 주세요. 별명도 좋아요.'); return }
     if (!draft.skills.length && draft.desiredRole === 'all') { setError('기술을 하나 이상 추가하거나 희망 직무를 선택해 주세요.'); return }
-    onApply({ ...draft, years: parsedYears, name: draft.name.trim(), kind: 'personal' }, { ...preferences, role: draft.desiredRole }, remember)
+    const nextPreferences: Partial<Filters> = { ...preferences }
+    if (profile.kind !== 'personal' || draft.desiredRole !== profile.desiredRole) nextPreferences.role = draft.desiredRole
+    onApply({ ...draft, years: parsedYears, name: draft.name.trim(), kind: 'personal' }, nextPreferences, remember)
   }
 
   return <Dialog title={step === 1 ? '커리어의 다음 좌표를 찾아보세요.' : '당신의 경험을 이렇게 이해했어요.'} eyebrow="YOUR CAREER, A WORLD OF POSSIBILITIES" onClose={onClose} className="profile-dialog">
@@ -163,7 +165,7 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
           <div className="salary-field"><label htmlFor="profile-salary">희망 연봉 <strong>{preferences.salaryMin ? `$${preferences.salaryMin / 1000}k 이상` : '제한 없음'}</strong></label><input id="profile-salary" type="range" min={0} max={250000} step={10000} value={preferences.salaryMin} onChange={event => setPreferences({ ...preferences, salaryMin: Number(event.target.value) })} /><p className="field-description">세전 연간 USD 환산 · 공고의 연봉 상한 기준으로 탐색해요.</p></div>
           <Toggle checked={remember} onChange={setRemember} label="이 브라우저에 프로필 기억하기" description="기술·경력·탐색 조건을 기억해요. 끄면 이번 화면에만 적용하며, 이력서 원문은 항상 저장하지 않아요." />
           {error && <p className="form-error" role="alert">{error}</p>}
-          <div className="profile-form-actions"><button className="button secondary" onClick={() => { setStep(1); setError('') }}><ArrowLeft size={16} />다시 입력</button><button className="button primary" onClick={submit}>내 기회 지도 만들기<ArrowRight size={16} /></button></div>
+          <div className="profile-form-actions"><button className="button secondary" onClick={() => { setStep(1); setError('') }}><ArrowLeft size={16} />다시 입력</button><button className="button primary" onClick={submit}>{profile.kind === 'personal' ? '변경 사항 적용' : '내 기회 지도 만들기'}<ArrowRight size={16} /></button></div>
           {profile.kind === 'personal' && <button className="delete-profile-button" onClick={onDelete}>저장된 프로필 삭제 · 샘플로 돌아가기</button>}
         </>}
       </section>

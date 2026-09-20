@@ -43,7 +43,7 @@ async function changeYears(page: Page, years: string) {
   const field = page.getByLabel('개발 경력', { exact: true })
   await field.fill(years)
   await expect(field).toHaveValue(years)
-  await page.getByRole('button', { name: '내 기회 지도 만들기', exact: true }).click()
+  await page.getByRole('button', { name: '변경 사항 적용', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
 }
 
@@ -97,7 +97,7 @@ for (const width of [1440, 320]) {
       await page.getByRole('button', { name: '닫기', exact: true }).click()
       await changeYears(page, '')
       await expect.poll(() => storedYears(page)).toBeNull()
-      await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+      await expect(page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ })).toHaveAttribute('aria-current', 'page')
       await page.reload()
       await expect(page.locator('.saved-card')).toHaveCount(1)
       await page.getByRole('button', { name: '내 프로필 편집', exact: true }).click()
@@ -108,7 +108,7 @@ for (const width of [1440, 320]) {
       await page.getByRole('button', { name: '닫기', exact: true }).click()
       await changeYears(page, '0')
       await expect.poll(() => storedYears(page)).toBe(0)
-      await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+      await expect(page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ })).toHaveAttribute('aria-current', 'page')
       await page.getByRole('button', { name: jobs[1].title, exact: true }).click()
       await expect(page.getByRole('dialog')).toContainText('요구 경력 5년 · 현재 입력한 경력보다 5년 많아요')
       await expect(page.getByRole('dialog')).not.toContainText('내 경력 연수가 미입력')

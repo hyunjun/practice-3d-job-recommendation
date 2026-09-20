@@ -82,8 +82,11 @@ for (const width of [1440, 320]) test.describe(`search ranking at ${width}px`, (
 
     await page.getByRole('button', { name: '내 프로필 편집', exact: true }).click()
     await page.getByLabel('개발 경력', { exact: true }).fill('9')
-    await page.getByRole('button', { name: '내 기회 지도 만들기', exact: true }).click()
-    await page.getByRole('button', { name: '런던, 추천 회사 2곳 보기', exact: true }).click()
+    await page.getByRole('button', { name: '변경 사항 적용', exact: true }).click()
+    await expect(page.locator('.city-hero-caption h2')).toContainText('런던')
+    await expect(page.locator('.city-detail-count strong')).toHaveText(['2', '2'])
+    await expect(search).toHaveValue('engineer')
+    await expect(page.getByLabel('직무 필터', { exact: true })).toHaveValue('all')
     await expect(page.locator('.mini-job-title')).toHaveText([senior.title, mid.title])
     await page.getByRole('button', { name: senior.title, exact: true }).click()
     await expect(page.getByRole('dialog')).toContainText('입력 경력 9년 · 공고에서 확인한 연수 하한 7년')

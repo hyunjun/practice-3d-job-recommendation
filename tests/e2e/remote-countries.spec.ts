@@ -53,7 +53,7 @@ async function chooseResidence(page: Page, country: string) {
   await expect(select).toHaveValue(country)
   expect(await page.locator('.dialog').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([])
-  await page.getByRole('button', { name: '내 기회 지도 만들기', exact: true }).click()
+  await page.getByRole('button', { name: '변경 사항 적용', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
 }
 
