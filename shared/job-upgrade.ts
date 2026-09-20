@@ -7,6 +7,7 @@ import { upgradeCatalogOccupations, upgradeJobOccupation } from './job-occupatio
 import { upgradeJobRole } from './job-roles'
 import { upgradeJobPostingPurpose } from './job-posting'
 import { upgradeJobLanguages } from './job-languages'
+import { upgradeJobWorkTime } from './job-work-time'
 import type { Catalog, Job } from './types'
 
 interface JobUpgradeOptions {
@@ -20,6 +21,7 @@ export function upgradeJob<T extends Job>(job: T, { preserveUnverifiablePay = fa
   let current = upgradeJobCompensation(job, preserveUnverifiablePay)
   current = upgradeJobQualifications(current)
   current = upgradeJobLanguages(current)
+  current = upgradeJobWorkTime(current)
   current = upgradeJobEligibility(current)
   // Research-role interpretation can depend on the occupation's original evidence.
   current = upgradeJobOccupation(current)

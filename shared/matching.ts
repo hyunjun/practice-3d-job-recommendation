@@ -7,6 +7,7 @@ import { jobRoles, matchesJobRole } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
 import { isTalentPoolJob } from './job-posting'
 import { languageCaution } from './job-languages'
+import { workTimeCaution } from './job-work-time'
 import { upgradeJobRemoteScope } from './job-remote'
 import { upgradeJob } from './job-upgrade'
 import type { SearchEntry, SearchIndex } from './job-search'
@@ -63,6 +64,8 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
   const cautions: string[] = [...(qualificationMatch?.cautions ?? [])]
   const languages = languageCaution(job)
   if (languages) cautions.push(languages)
+  const workTime = workTimeCaution(job)
+  if (workTime) cautions.push(workTime)
   if (isTalentPoolJob(job)) cautions.push('인재풀·향후 관심 등록으로 확인된 공고예요. 현재 모집 중인 포지션은 원문에서 확인해 주세요.')
   if (!qualificationMatch && matchedSkills.length) reasons.push(`${matchedSkills.slice(0, 3).join(' · ')} 경험과 연결돼요`)
   if (profile.desiredRole !== 'all' && roleMatches) reasons.push(`희망하는 ${ROLE_LABELS[profile.desiredRole]} 직무 표기가 있어요`)
@@ -89,7 +92,7 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
     ? '급여 구간·통화·지급 기간을 보상 조건에서 확인해 주세요' : '보상 범위가 공개되지 않았어요')
   if (job.workMode === 'unknown') cautions.push('출근·원격 근무 형태를 확인해 주세요')
   if (job.workMode === 'remote' && !isRemoteEligible(job, profile.residence)) cautions.push(job.remoteScopeUnknown ? '원격근무 가능한 국가가 확인되지 않았어요' : '현재 선택한 거주 국가는 명시된 원격근무 지역에 포함되지 않아요')
-  if (job.workMode === 'remote') cautions.push('원격근무 시간대와 현지 고용 가능 여부를 최종 확인해 주세요')
+  if (job.workMode === 'remote') cautions.push(workTime ? '현지 고용 가능 여부를 최종 확인해 주세요' : '원격근무 시간대와 현지 고용 가능 여부를 최종 확인해 주세요')
   return {
     score: Math.round(skillScore + roleScore + experienceScore), matchedSkills, missingSkills, reasons, cautions,
     skillSummary: qualificationMatch?.skillSummary ?? (matchedSkills.length ? `${matchedSkills.slice(0, 2).join(' · ')} 경험 일치` : '기술 요구사항 확인 필요'),

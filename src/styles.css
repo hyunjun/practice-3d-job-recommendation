@@ -312,6 +312,9 @@ select option { background: #1e271c; color: var(--text); }
 .job-eligibility > .eligibility-footnote { font-size: 10px; color: #b8c2a7; }
 .job-languages .eligibility-rule > summary { min-height: 44px; }
 .language-scope { display: block; margin-top: 4px; color: #cbd0bc; font-size: 10px; }
+.job-work-time .eligibility-rule > summary { min-height: 44px; }
+.work-time-scope { display: block; margin-top: 4px; color: #cbd0bc; font-size: 10px; }
+.work-time-statement { display: block; margin-top: 7px; color: #d6dccb; font-size: 11px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 .icon-button { display: inline-flex; justify-content: center; align-items: center; width: 30px; height: 30px; border-radius: 5px; color: #aab89d; flex-shrink: 0; }
 .icon-button:hover { color: #e0f7c4; background: #5267413b; }
 .bookmark-button { height: 26px; width: 26px; color: #91a47f; }

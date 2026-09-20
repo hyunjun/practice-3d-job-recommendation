@@ -348,6 +348,7 @@ describe('cache validation and migration', () => {
         jobs: previous.snapshot!.jobs.map(job => ({
           ...job, visa: 'unknown', eligibility: { version: ELIGIBILITY_VERSION, rules: [] }, evidence: {},
           languageRequirements: { version: 1, rules: [] },
+          workTimeRequirements: { version: 1, rules: [] },
           roleClassification: { version: 1, roles: ['backend'], evidence: [{ role: 'backend', source: 'title', text: job.title }] },
           occupation: { version: OCCUPATION_VERSION, category: 'engineering', departments: [], evidence: [{ source: 'title', text: job.title }] },
         })),

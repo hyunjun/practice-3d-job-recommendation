@@ -117,11 +117,11 @@ function csvRows(text: string, count: number) {
   const boundary = text.indexOf('\r\n')
   const headers = cells(text.slice(0, boundary))
   const values = cells(text.slice(boundary + 2))
-  expect(headers).toHaveLength(43)
-  expect(headers.slice(-6)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거'])
+  expect(headers).toHaveLength(45)
+  expect(headers.slice(-8)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거'])
   expect(headers).toContain('기술·경력 근거')
-  expect(values).toHaveLength(43 * count)
-  return Array.from({ length: count }, (_, row) => Object.fromEntries(headers.map((header, i) => [header, values[row * 43 + i]])))
+  expect(values).toHaveLength(45 * count)
+  return Array.from({ length: count }, (_, row) => Object.fromEntries(headers.map((header, i) => [header, values[row * 45 + i]])))
 }
 async function csvDownload(page: Page) {
   const event = page.waitForEvent('download')
@@ -159,7 +159,7 @@ for (const width of [1440, 320]) test.describe(`spoken languages through real fo
       await expect(page.locator('.city-detail-count strong')).toHaveText(['2', '3'])
       await expect(page.locator('.company-card h3')).toHaveText(['Aster Systems', 'Birch Studio'])
       await expect(page.getByRole('button', { name: '전체 2개 공고 보기', exact: true })).toBeVisible()
-      await expect(search(page)).toHaveAttribute('aria-description', '도시, 회사, 포지션, 기술과 공고의 언어 조건을 검색합니다.')
+      await expect(search(page)).toHaveAttribute('aria-description', '도시, 회사, 포지션, 기술과 공고의 언어·시간대·협업 시간 조건을 검색합니다.')
       const fresh = await catalog(page, server.origin)
       expect(fresh.jobs.map(job => job.id)).toEqual([
         'greenhouse-language-aster-4501', 'greenhouse-language-aster-4502', 'greenhouse-language-aster-4503',

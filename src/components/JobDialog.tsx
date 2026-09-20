@@ -22,6 +22,7 @@ import { JobRemoteScopeDetails } from './JobRemoteScopeDetails'
 import { JobPostingPurposeDetails } from './JobPostingPurpose'
 import { jobPostingUrl } from '../../shared/job-links'
 import { JobLanguageDetails } from './JobLanguageDetails'
+import { JobWorkTimeDetails } from './JobWorkTimeDetails'
 
 interface Props {
   match: MatchedJob
@@ -58,6 +59,7 @@ export function JobDialog({ match, saved, storage, onManageSaved, postingObserva
       <JobEvidenceDetails evidence={job.evidence} />
       <JobEligibilityDetails job={job} />
       <JobLanguageDetails job={job} />
+      <JobWorkTimeDetails job={job} />
       <section className="match-section"><h4><span className={`section-icon ${technical ? 'green' : 'amber'}`}>{technical ? <Check size={15} /> : <CircleHelp size={15} />}</span>{technical ? '이 기회와 연결되는 이유' : '입력 정보와 공고의 조건'}</h4>{reasons.length ? <ul>{reasons.map(reason => <li key={reason}><Check size={14} /><span>{reason}</span></li>)}</ul> : <p className="field-description">현재 입력 정보에서 공고와 연결되는 조건을 확인하지 못했어요. 실제 업무와 자격 조건은 원문에서 확인해 주세요.</p>}{!job.qualifications && <div className="skill-list">{job.skills.map(skill => <span className={`skill-tag ${matchedSkills.includes(skill) ? 'matched' : ''}`} key={skill}>{matchedSkills.includes(skill) && <Check size={11} />}{skill}</span>)}</div>}</section>
       <JobQualificationDetails job={job} matchedSkills={matchedSkills} />
       {cautions.length > 0 && <section className="match-section caution"><h4><span className="section-icon amber"><CircleHelp size={15} /></span>함께 확인하면 좋을 것들</h4><ul>{cautions.map(caution => <li key={caution}><span className="caution-bullet" /><span>{caution}</span></li>)}</ul></section>}

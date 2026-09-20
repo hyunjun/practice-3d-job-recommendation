@@ -19,6 +19,9 @@ export const REMOTE_SCOPE_VERSION = 2 as const
 export const EMPLOYMENT_VERSION = 1 as const
 export const POSTING_PURPOSE_VERSION = 1 as const
 export const LANGUAGE_REQUIREMENTS_VERSION = 1 as const
+export const WORK_TIME_REQUIREMENTS_VERSION = 1 as const
+export const WORK_TIME_REQUIREMENT_KINDS = ['location', 'collaboration', 'core-hours', 'working-hours', 'overlap'] as const
+export type WorkTimeRequirementKind = typeof WORK_TIME_REQUIREMENT_KINDS[number]
 export const SPOKEN_LANGUAGE_CODES = ['en', 'ko', 'ja', 'de', 'fr', 'es', 'pt', 'zh', 'cmn', 'yue', 'it', 'nl', 'sv', 'pl', 'ar', 'hi', 'vi', 'id', 'th', 'ms', 'ru', 'da', 'no', 'fi', 'tr', 'he', 'cs', 'ro', 'uk', 'el', 'hu'] as const
 export type SpokenLanguageCode = typeof SPOKEN_LANGUAGE_CODES[number]
 
@@ -115,6 +118,21 @@ export interface JobLanguageRequirements {
   truncated?: boolean
 }
 
+export interface WorkTimeRequirement {
+  kind: WorkTimeRequirementKind
+  level: 'required' | 'preferred' | 'stated'
+  /** The employer's literal declaration, with no time-zone or DST conversion. */
+  statement: string
+  scope?: string
+  evidence: FactEvidence & { source: 'description' }
+}
+
+export interface JobWorkTimeRequirements {
+  version: typeof WORK_TIME_REQUIREMENTS_VERSION
+  rules: WorkTimeRequirement[]
+  truncated?: boolean
+}
+
 export type EligibilityKind = 'sponsorship-scope' | 'work-authorization' | 'citizenship' | 'residency' | 'security-clearance' | 'export-authorization'
 export type EligibilityLevel = 'required' | 'conditional' | 'preferred' | 'unspecified'
 
@@ -189,6 +207,7 @@ export interface Job {
   skills: string[]
   qualifications?: JobQualifications
   languageRequirements?: JobLanguageRequirements
+  workTimeRequirements?: JobWorkTimeRequirements
   salary: Salary | null
   compensationRanges?: CompensationRange[]
   compensationNote?: string

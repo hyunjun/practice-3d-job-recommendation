@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, LANGUAGE_REQUIREMENTS_VERSION, OCCUPATION_VERSION, POSTING_PURPOSE_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION, SPOKEN_LANGUAGE_CODES } from './types'
+import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, LANGUAGE_REQUIREMENTS_VERSION, OCCUPATION_VERSION, POSTING_PURPOSE_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION, SPOKEN_LANGUAGE_CODES, WORK_TIME_REQUIREMENTS_VERSION, WORK_TIME_REQUIREMENT_KINDS } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 const QualificationKindSchema = z.enum(['required', 'qualification', 'preferred', 'context'])
@@ -72,6 +72,18 @@ export const JobSchema = z.object({
       scope: z.string().min(1).max(200).optional(),
       evidence: EvidenceSchema.extend({ source: z.literal('description'), text: z.string().min(1).max(3000) }),
     }).refine(rule => new Set(rule.languages).size === rule.languages.length && rule.evidence.text.trim().length > 0
+      && (!rule.scope || rule.scope.trim().length > 0 && rule.evidence.text.includes(rule.scope)))).max(50),
+    truncated: z.boolean().optional(),
+  }).optional(),
+  workTimeRequirements: z.object({
+    version: z.literal(WORK_TIME_REQUIREMENTS_VERSION),
+    rules: z.array(z.object({
+      kind: z.enum(WORK_TIME_REQUIREMENT_KINDS),
+      level: z.enum(['required', 'preferred', 'stated']),
+      statement: z.string().min(1).max(1000),
+      scope: z.string().min(1).max(200).optional(),
+      evidence: EvidenceSchema.extend({ source: z.literal('description'), text: z.string().min(1).max(3000) }),
+    }).refine(rule => rule.statement.trim().length > 0 && rule.evidence.text.includes(rule.statement)
       && (!rule.scope || rule.scope.trim().length > 0 && rule.evidence.text.includes(rule.scope)))).max(50),
     truncated: z.boolean().optional(),
   }).optional(),

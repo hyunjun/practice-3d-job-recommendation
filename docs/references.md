@@ -550,3 +550,15 @@ CPU 프로파일에서는 검색 중 국가 경계의 투영 계산이 반복되
 | [Europass CEFR 자기평가표](https://europass.europa.eu/en/common-european-framework-reference-language-skills) | 듣기·읽기·말하기·쓰기 능력을 A1–C2의 구체적인 설명으로 구분 | 공고의 회화·비즈니스·원어민 표현을 임의로 하나의 CEFR 등급으로 치환하지 않고 원문 유지 |
 
 2026-09-20에 Europass 페이지와 Sendbird 공개 응답을 확인했습니다. 실제 응답은 로컬 조사 자료로 보관하고 공개 회귀 검사에는 가상 문구를 사용합니다. 언어의 작성 위치·제목·부정·선택 관계를 확인하는 규칙이며, 모든 언어를 이해하거나 지원자의 숙련도를 평가하는 기능은 아닙니다. 명시된 언어 조건은 지원 전에 따로 확인하도록 안내하고 기술·경력 정렬 점수와 자동 제외 조건에 넣지 않습니다.
+
+## 공고의 시간대·협업 시간
+
+| 레퍼런스 | 확인한 내용 | 적용 |
+| --- | --- | --- |
+| [Spotify 공개 게시판](https://api.lever.co/v0/postings/spotify?mode=json&limit=100&skip=0) · [공식 직무](https://jobs.lever.co/spotify/0eebb462-b5a2-4e3a-b830-d8ef7505b014) | 팀의 협업 시간대와 `CET 3pm-6pm / EST 9am-12pm` 코어 시간을 각각 명시 | 협업 시간대와 코어 근무시간을 구분하고 원래 표현·본문 맥락 보존 |
+| [Jane 공개 게시판](https://api.ashbyhq.com/posting-api/job-board/jane?includeCompensation=true) · [공식 직무](https://jobs.ashbyhq.com/jane/0acad06e-1acb-4ff3-8236-19e0f0b023e2) | 동부 시간대 또는 그보다 동쪽, 이른 업무 시작과 별도의 캐나다 우대를 함께 설명 | 시간대의 방향·시작 시간과 국가 선호를 섞어 해석하지 않고 전체 문구 유지 |
+| [MongoDB 공개 게시판](https://boards-api.greenhouse.io/v1/boards/mongodb/jobs?content=true) | 보관한 응답에서 Senior / Staff의 원격 근무 범위를 Eastern / Central 시간대로 한정 | 직급별 적용 범위와 원문 보존 |
+| [IANA 시간대 데이터의 이론](https://data.iana.org/time-zones/tzdb/theory.html) | `CST`·`IST` 등의 약어는 지역에 따라 의미가 다르고, 시간대의 오프셋·전환 규칙은 바뀔 수 있음 | 약어만으로 지역을 선택하거나 고정 UTC 값·사용자 현지 시각으로 변환하지 않음 |
+| [W3C 시간대 처리 노트](https://www.w3.org/International/core/2005/09/timezone) | 반복되는 지역 시각과 고정 UTC 오프셋은 다르며, 반복 일정에는 오프셋만으로 정보가 부족함 | 공고가 명시하지 않은 서머타임·날짜·고정 오프셋 정책을 만들지 않음 |
+
+2026-09-20 10:35 UTC에 Spotify·Jane 응답과 두 시간대 문서를 확인했습니다. MongoDB 사례와 전체 공고 적용 결과는 44단계에서 보관한 같은 날 08:19 UTC의 자료를 사용했으며 새 전체 수집으로 표현하지 않습니다. W3C 자료는 시간 처리 원리를 설명하는 기존 노트입니다. 지원자의 협업 가능 시간이나 개별 회사의 서머타임 운영 방식을 확인한 결과는 아니므로 원문 확인을 안내합니다. 실제 응답은 로컬에 보관하고 공개 회귀 검사는 가상 자료를 사용합니다.

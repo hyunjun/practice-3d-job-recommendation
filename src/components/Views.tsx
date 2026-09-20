@@ -19,6 +19,7 @@ import type { SavedJobsController } from '../hooks/useSavedJobs'
 import { SavedStorageNotice } from './SavedStorageNotice'
 import { PostingPurposeBadge } from './JobPostingPurpose'
 import { languageSearchText } from '../../shared/job-languages'
+import { workTimeSearchText } from '../../shared/job-work-time'
 import { searchWords } from '../../shared/job-search'
 
 export function SavedView({ saved, storage, showStorageStatus, onManage, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; storage: SavedJobsController; showStorageStatus: boolean; onManage: () => void; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
@@ -42,7 +43,7 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
         || (postingFilter === 'changed' ? Boolean(observation?.changedFields?.length)
           : postingFilter === 'unknown' ? observation?.state === 'unknown' || observation?.state === 'unchecked'
             : observation?.state === postingFilter)
-      const text = `${item.company.name} ${item.job.title} ${jobRoleLabel(item.job)} ${jobLocationSearchText(item.job)} ${languageSearchText(item.job)} ${item.note}`.toLowerCase()
+      const text = `${item.company.name} ${item.job.title} ${jobRoleLabel(item.job)} ${jobLocationSearchText(item.job)} ${languageSearchText(item.job)} ${workTimeSearchText(item.job)} ${item.note}`.toLowerCase()
       return postingMatches && (status === 'all' || item.status === status) && words.every(word => text.includes(word))
     })
   }, [saved, status, query, postingFilter, observations, publicCount])
@@ -54,7 +55,7 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
       <div className="posting-summary" role="status">{loading ? <p>회사별 공개 게시판을 확인하고 있어요.</p> : error ? <p>{error}</p> : checked ? <p><span>게시 확인 <strong>{counts.listed}</strong></span><span>내용 차이 <strong>{counts.changed}</strong></span><span>목록에서 미확인 <strong>{counts.missing}</strong></span><span>확인 필요 <strong>{counts.unknown}</strong></span></p> : <p>직접 확인할 때만 조회해요. 저장한 공고·메모·프로필은 전송하지 않습니다.</p>}</div>
       <div className="posting-toolbar-bottom"><p>공개 목록에서 찾지 못해도 채용 종료가 확정되는 것은 아니에요. 내용 차이는 원문 변경이나 정보 해석 방식에 따라 생길 수 있어요.</p><label className="posting-filter">게시 상태<select value={postingFilter} onChange={event => setPostingFilter(event.target.value)}><option value="all">전체 게시 상태</option><option value="listed">게시 확인</option><option value="changed">저장 내용과 차이</option><option value="missing">공개 목록에서 미확인</option><option value="unknown">확인 필요 · 미조회</option></select></label></div>
     </section>}
-    {storage.ready && <div className="collection-toolbar"><div className="collection-tabs">{[['all', '전체', saved.length], ['saved', '검토 중', saved.filter(item => item.status === 'saved').length], ['applied', '지원 완료', saved.filter(item => item.status === 'applied').length]].map(([value, label, count]) => <button key={value} className={status === value ? 'active' : ''} onClick={() => setStatus(String(value))}>{label}<span>{count}</span></button>)}</div><label className="collection-search"><Search size={16} /><input aria-label="저장한 기회 검색" title="회사·직무·언어 조건·메모 검색" placeholder="회사·직무·언어·메모 검색" value={query} onChange={event => setQuery(event.target.value)} /></label></div>}
+    {storage.ready && <div className="collection-toolbar"><div className="collection-tabs">{[['all', '전체', saved.length], ['saved', '검토 중', saved.filter(item => item.status === 'saved').length], ['applied', '지원 완료', saved.filter(item => item.status === 'applied').length]].map(([value, label, count]) => <button key={value} className={status === value ? 'active' : ''} onClick={() => setStatus(String(value))}>{label}<span>{count}</span></button>)}</div><label className="collection-search"><Search size={16} /><input aria-label="저장한 기회 검색" title="회사·직무·언어·시간대·협업 시간·메모 검색" placeholder="회사·직무·언어·시간대·메모" value={query} onChange={event => setQuery(event.target.value)} /></label></div>}
     {storage.ready && (matches.length ? <div className="saved-grid">{matches.map(item => {
       const match = { job: item.job, company: item.company, ...matchJob(item.job, profile) }
       return <article className="saved-card" key={item.job.id}>

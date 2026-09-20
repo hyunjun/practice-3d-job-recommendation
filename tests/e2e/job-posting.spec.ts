@@ -198,7 +198,7 @@ function csvRecords(text: string) {
   const cells = (value: string) => [...value.matchAll(/"((?:[^"]|"")*)"(?:,|\r\n|$)/g)].map(match => match[1].replaceAll('""', '"'))
   const headerEnd = text.indexOf('\r\n')
   const headers = cells(text.slice(0, headerEnd))
-  expect(headers.slice(-6)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거'])
+  expect(headers.slice(-8)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거'])
   const values = cells(text.slice(headerEnd + 2))
   expect(values).toHaveLength(headers.length * 2)
   return [0, 1].map(row => Object.fromEntries(headers.map((header, index) => [header, values[row * headers.length + index]])))
