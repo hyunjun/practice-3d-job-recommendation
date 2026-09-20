@@ -4,8 +4,9 @@ import { matchingSkills } from './qualification-matching'
 import { isUnmappedJob, jobLocationSearchText } from './job-location'
 import { jobRoleLabel, matchesJobRole } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
+import { isTalentPoolJob } from './job-posting'
 import { upgradeJob } from './job-upgrade'
-import { MODE_LABELS, USD_RATES } from './types'
+import { MODE_LABELS, POSTING_TYPE_LABELS, USD_RATES } from './types'
 import type { Catalog, City, Company, Filters, Job, Profile, Region } from './types'
 
 export type FilterFailure = keyof Filters | 'profile'
@@ -46,7 +47,9 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
       : job.cityIds.flatMap(id => CITY_BY_ID.get(id)?.region ?? [])
     return [{
       job, company,
-      text: [company.name, company.industry, job.title, jobRoleLabel(job), MODE_LABELS[job.workMode], ...job.skills, ...locations, ...countrySearchText(job.remoteCountries), jobLocationSearchText(job)].join(' ').toLowerCase(),
+      text: [company.name, company.industry, job.title, jobRoleLabel(job), MODE_LABELS[job.workMode],
+        isTalentPoolJob(job) ? POSTING_TYPE_LABELS['talent-pool'] : '', ...job.skills, ...locations,
+        ...countrySearchText(job.remoteCountries), jobLocationSearchText(job)].join(' ').toLowerCase(),
       profileMatches: !skills.length || !profileSkills.size || skills.some(skill => profileSkills.has(skill.toLowerCase())),
       residenceMatches: job.remoteWorldwide || job.remoteCountries.includes(profile.residence),
       salaryMax: job.salary ? job.salary.max * USD_RATES[job.salary.currency] : null,
@@ -69,6 +72,8 @@ export function failedSearchFilters(entry: SearchEntry, filters: Filters, words 
     || filters.visa === 'supported' && job.visa !== 'yes' && job.visa !== 'conditional'
     || filters.visa === 'possible' && job.visa === 'no') failed.push('visa')
   if (filters.employment !== 'all' && job.employment !== filters.employment) failed.push('employment')
+  const postingType = filters.postingType ?? 'opening'
+  if (postingType !== 'all' && isTalentPoolJob(job) !== (postingType === 'talent-pool')) failed.push('postingType')
   if (entry.salaryMax === null && !filters.includeUnknownSalary) failed.push('includeUnknownSalary')
   if (filters.salaryMin > 0 && entry.salaryMax !== null && entry.salaryMax < filters.salaryMin) failed.push('salaryMin')
   if (job.workMode === 'remote' && filters.remoteEligibleOnly && !entry.residenceMatches) failed.push('remoteEligibleOnly')

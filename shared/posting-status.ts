@@ -9,7 +9,7 @@ export const REVISION_FIELDS = ['title', 'location', 'conditions', 'compensation
 export type RevisionField = typeof REVISION_FIELDS[number]
 export type JobRevision = Record<RevisionField, string>
 export const REVISION_LABELS: Record<RevisionField, string> = {
-  title: '포지션', location: '근무지', conditions: '근무·고용·비자', compensation: '보상',
+  title: '포지션', location: '근무지', conditions: '모집·근무·고용·비자', compensation: '보상',
   qualifications: '기술·경력', description: '본문', url: '지원 링크',
 }
 
@@ -104,6 +104,7 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
     },
     conditions: {
       workMode: job.workMode, employment: current.employment, visa: current.visa,
+      ...(current.postingPurpose ? { postingPurpose: current.postingPurpose } : {}),
       remoteCountries: current.remoteCountries, remoteWorldwide: current.remoteWorldwide,
       remoteScopeUnknown: current.remoteScopeUnknown, remoteRegions: current.remoteRegions ?? [],
       ...(current.remoteScopeResolution ? { remoteScopeResolution: current.remoteScopeResolution } : {}),

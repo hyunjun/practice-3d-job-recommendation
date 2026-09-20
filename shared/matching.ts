@@ -5,6 +5,7 @@ import { eligibilitySummary } from './job-eligibility'
 import { createSearchIndex, selectSearchJobs } from './job-search'
 import { jobRoles, matchesJobRole } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
+import { isTalentPoolJob } from './job-posting'
 import { upgradeJobRemoteScope } from './job-remote'
 import { upgradeJob } from './job-upgrade'
 import type { SearchEntry, SearchIndex } from './job-search'
@@ -59,6 +60,7 @@ export function matchJob(job: Job, profile: Profile): Omit<MatchedJob, 'company'
     : Math.max(0, 15 - Math.max(0, job.minExperience - profile.years) * 5)
   const reasons: string[] = [...(qualificationMatch?.reasons ?? [])]
   const cautions: string[] = [...(qualificationMatch?.cautions ?? [])]
+  if (isTalentPoolJob(job)) cautions.push('인재풀·향후 관심 등록으로 확인된 공고예요. 현재 모집 중인 포지션은 원문에서 확인해 주세요.')
   if (!qualificationMatch && matchedSkills.length) reasons.push(`${matchedSkills.slice(0, 3).join(' · ')} 경험과 연결돼요`)
   if (profile.desiredRole !== 'all' && roleMatches) reasons.push(`희망하는 ${ROLE_LABELS[profile.desiredRole]} 직무 표기가 있어요`)
   if (technical && !jobRoles(job).length) cautions.push('세부 직무를 확인하지 못했어요. 실제 업무 범위는 원문에서 확인해 주세요.')
@@ -172,6 +174,7 @@ export function groupCompanies(matches: MatchedJob[]): { company: MatchedJob['co
 export function countFilters(filters: Filters): number {
   return Number(filters.role !== 'all') + Number(filters.workMode !== 'all') + Number(filters.visa !== 'all')
     + Number(filters.employment !== 'all') + Number(filters.salaryMin > 0 || !filters.includeUnknownSalary)
+    + Number((filters.postingType ?? 'opening') !== 'opening')
     + Number(!filters.remoteEligibleOnly)
 }
 

@@ -8,6 +8,7 @@ import type { MatchedJob } from '../../shared/types'
 import { EligibilityNotice } from './JobEligibilityDetails'
 import { JobFreshnessNotice } from './JobFreshnessNotice'
 import { JobLocationNotice } from './JobLocationDetails'
+import { PostingPurposeBadge } from './JobPostingPurpose'
 import { CompanyLogo } from './ui'
 
 const PAGE_SIZE = 10
@@ -89,6 +90,7 @@ export function CompanyCard({ matches, savedIds, saveReady, onOpen, onSave }: Pr
       {visible.map((match, index) => <div key={match.job.id} className="mini-job">
         <button ref={index === 0 ? firstJob : undefined} className="mini-job-title" onClick={() => onOpen(match)}>{match.job.title}<ArrowUpRight size={14} /></button>
         {match.job.source !== 'sample' && <p className="mini-job-role">{jobRoleLabel(match.job)}</p>}
+        <PostingPurposeBadge job={match.job} />
         {isUnmappedJob(match.job) && <p className="mini-job-location"><MapPinOff size={12} /><span>{match.job.locationLabel}</span></p>}
         <JobLocationNotice job={match.job} />
         <div className="mini-job-meta"><span>{formatJobSalary(match.job)}</span><span>·</span><span>{MODE_LABELS[match.job.workMode]}</span></div>

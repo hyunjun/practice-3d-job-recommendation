@@ -56,6 +56,7 @@ export function SearchRecovery({ analysis, filters, scope, sample, onApply, onNa
                 : '국가·직무·지원자별 지원 조건을 원문에서 확인해야 합니다.'}</p>}
             {suggestion.changes.remoteEligibleOnly === false && <p className="recovery-warning">다른 국가만 허용하거나 지역이 미확인인 공고도 포함합니다. 선택한 거주 국가에서 근무할 수 있다는 뜻은 아닙니다.</p>}
             {suggestion.changes.includeUnknownSalary && <p className="recovery-warning">미공개·별도 보상은 희망 연봉을 충족하는지 확인되지 않았어요.</p>}
+            {suggestion.changes.postingType === 'all' && <p className="recovery-warning">인재풀·향후 기회 등록도 포함합니다. 현재 채용 중인 특정 포지션이 없을 수 있어요.</p>}
             {scope.kind === 'unmapped' && suggestion.changes.region === 'all' && <p className="recovery-warning">지역을 구분하지 않고 표시합니다. 기존에 선택한 지역의 공고라는 뜻은 아니에요.</p>}
           </div>
           <button onClick={() => onApply(suggestion)} aria-describedby={optionId}>

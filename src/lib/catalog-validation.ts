@@ -27,7 +27,7 @@ const metadata = z.object({
   source: z.literal('public'), fetchedAt: z.union([timestamp, z.literal('')]), stale: z.boolean(),
   boards: z.array(board), unmappedCount: count.nullable(), checkedAt: timestamp.optional(), refreshAfter: timestamp.optional(),
 })
-const jobs = z.array(JobSchema.extend({ source: JobProviderSchema, fetchedAt: timestamp }))
+const jobs = z.array(JobSchema.safeExtend({ source: JobProviderSchema, fetchedAt: timestamp }))
 const catalogSchema = metadata.extend({ companies: z.array(company), cities: z.array(city), jobs })
 
 export const CatalogUpdateDataSchema = z.object({ catalog: metadata, companyIds: z.array(identifier), jobs })

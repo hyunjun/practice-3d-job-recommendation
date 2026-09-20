@@ -2,6 +2,7 @@ import { ArrowUpRight, CheckCircle2, ChevronDown, CircleHelp, Database, Globe2, 
 import { catalogNeedsAttention, collectionHealth, formatCollectionTime, formatRetryWait } from '../../shared/catalog-health'
 import { snapshotFreshness } from '../../shared/catalog-freshness'
 import { unmappedCoverage } from '../../shared/job-location'
+import { isTalentPoolJob } from '../../shared/job-posting'
 import type { Catalog, Source } from '../../shared/types'
 import type { CatalogProgress } from '../../shared/catalog-progress'
 import { JOB_SOURCE_LABELS, PUBLIC_PROVIDERS } from '../../shared/types'
@@ -15,6 +16,7 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
   const coverageKnown = isSample || ready || catalog.companies.length > 0
   const health = collectionHealth(catalog)
   const coverage = unmappedCoverage(catalog)
+  const talentPools = catalog.jobs.filter(isTalentPoolJob).length
   const retryIn = useRetryCountdown(retryAt)
   const providers = PUBLIC_PROVIDERS.map(provider => ({
     provider, count: catalog.companies.filter(company => (company.provider ?? 'greenhouse') === provider).length,
@@ -33,6 +35,7 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
       {!isSample && !ready && !loading && <button className="button secondary" disabled={retryIn > 0} onClick={onRefresh}><RefreshCw size={14} />공개 공고 다시 조회{retryIn > 0 && <span aria-hidden="true"> · {formatRetryWait(retryIn)} 후</span>}</button>}
       <div className="coverage-stats"><div><strong>{catalog.cities.length}</strong><span>제공 도시</span></div><div><strong>{coverageKnown ? catalog.companies.length : '—'}</strong><span>대상 회사</span></div><div><strong>{ready ? catalog.jobs.length.toLocaleString() : '—'}</strong><span>{isSample ? '샘플 공고' : '조회된 개발 공고'}</span></div></div>
       {!isSample && ready && <>
+        {talentPools > 0 && <p className="inline-note posting-purpose-count">조회된 개발 공고에 인재풀·관심 등록 {talentPools}개가 포함되어 있어요. 기본 추천에서는 제외하며 모집 유형 필터로 따로 볼 수 있어요.</p>}
         <dl className="collection-health" aria-label="공고 조회 상태 요약">
           <div><dt>최근 조회</dt><dd>{health.recent}<small>개 공고</small></dd></div>
           <div><dt>이전 조회</dt><dd>{health.retained}<small>개 공고</small></dd></div>
@@ -41,6 +44,11 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
         {!loading && health.pending > 0 && <p className="retry-note">{health.pending}개 회사의 진행 상태가 미확인입니다. 다시 조회하면 이어서 확인할 수 있어요.</p>}
       </>}
       {!isSample && catalog.boards.length > 0 && <BoardHistory catalog={catalog} loading={loading} retryIn={retryIn} onRefresh={onRefresh} />}
+      <section className="data-explanation">
+        <h3><CircleHelp size={16} />일반 채용과 인재풀의 차이</h3>
+        <p>기본 추천과 회사 수에서는 인재풀·향후 관심 등록으로 확인된 공고를 제외해요. 모집 유형 필터에서 따로 보거나 함께 볼 수 있으며, 저장한 인재풀 기록은 계속 보관됩니다. 게시 중이라는 사실과 현재 특정 포지션을 채용한다는 사실은 다릅니다.</p>
+        <p>공개 게시판의 관심 등록 표기나 본문에 명시된 등록 목적을 근거로 구분해요. 제목의 “Expression of Interest”만으로는 제외하지 않으며, 모든 인재풀을 식별한 결과는 아닙니다. 실제 모집 내용은 원문에서 확인해 주세요.</p>
+      </section>
       {!isSample && ready && <section className="data-explanation">
         <h3><CheckCircle2 size={16} />수집된 조건 정보</h3>
         <dl className="data-quality-list">

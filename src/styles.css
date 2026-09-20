@@ -259,6 +259,8 @@ select option { background: #1e271c; color: var(--text); }
 .mini-job-meta { display: flex; align-items: center; gap: 5px; font-size: 10px; margin-top: 7px; color: #a8b99b; flex-wrap: wrap; }
 .mini-job-meta > span:first-child { color: #d2dec6; }
 .mini-job-role, .saved-role { margin: 5px 0 0; color: #bbcbaa; font-size: 10px; line-height: 1.7; overflow-wrap: anywhere; }
+.posting-purpose-badge { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; margin-top: 8px; padding: 4px 8px; border: 1px solid #71613e; border-radius: 5px; background: #24291a; color: #edd098; font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
+.posting-purpose-badge > svg { flex-shrink: 0; }
 .mini-job-location { display: flex; align-items: flex-start; gap: 6px; margin: 9px 0 0; color: #c4d1b6; font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
 .mini-job-location > svg { flex-shrink: 0; margin-top: 3px; }
 .mini-job-reason { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #b8d59b; margin-top: 12px; }
@@ -557,6 +559,11 @@ select option { background: #1e271c; color: var(--text); }
 .job-role-details > strong { font-size: 13px; color: #d0e2bb; line-height: 1.8; }
 .job-role-details > p { margin: 7px 0 0; color: #b4c69f; font-size: 11px; line-height: 1.8; }
 .job-role-details .qualification-evidence li > span { color: #b4c69f; font-size: 11px; }
+.job-posting-purpose { margin: 0 0 24px; padding: 16px; border: 1px solid #71613e; border-radius: 7px; background: #24291a; overflow-wrap: anywhere; }
+.job-posting-purpose h4 { display: flex; align-items: center; gap: 8px; margin: 0; color: #edd098; font-size: 13px; line-height: 1.8; font-weight: 550; }
+.job-posting-purpose h4 > svg { flex-shrink: 0; }
+.job-posting-purpose > p { margin: 8px 0 0; color: #c3cfb7; font-size: 12px; line-height: 1.8; }
+.posting-purpose-count { font-size: 11px; overflow-wrap: anywhere; }
 .occupation-notice { margin: 16px 0; padding: 13px 14px; border: 1px solid #71613e; border-radius: 6px; background: #24291a; font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
 .occupation-notice strong { color: #edd098; font-weight: 550; }
 .occupation-notice p { margin: 6px 0 0; color: #c3cfb7; }

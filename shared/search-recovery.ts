@@ -1,6 +1,6 @@
 import { countSearchJobs, failedSearchFilters, inSearchScope, searchWords, selectSearchJobs } from './job-search'
 import type { FilterFailure, SearchCount, SearchEntry, SearchIndex, SearchScope } from './job-search'
-import { EMPLOYMENT_LABELS, MODE_LABELS, REGION_LABELS, ROLE_FILTER_LABELS, VISA_FILTER_LABELS } from './types'
+import { EMPLOYMENT_LABELS, MODE_LABELS, POSTING_TYPE_LABELS, REGION_LABELS, ROLE_FILTER_LABELS, VISA_FILTER_LABELS } from './types'
 import type { Filters } from './types'
 
 export interface RecoverySuggestion {
@@ -15,7 +15,7 @@ export interface RecoveryAnalysis {
   alternatives: { scope: SearchScope; count: SearchCount }[]
 }
 
-const ORDER: (keyof Filters)[] = ['query', 'region', 'role', 'workMode', 'employment', 'includeUnknownSalary', 'salaryMin', 'visa', 'remoteEligibleOnly']
+const ORDER: (keyof Filters)[] = ['query', 'region', 'role', 'workMode', 'employment', 'includeUnknownSalary', 'salaryMin', 'visa', 'remoteEligibleOnly', 'postingType']
 const VISA_ORDER = { yes: 0, supported: 1, possible: 2, all: 3 }
 const keys = (changes: Partial<Filters>) => ORDER.filter(key => key in changes)
 const identity = (changes: Partial<Filters>) => JSON.stringify(keys(changes).map(key => [key, changes[key]]))
@@ -27,6 +27,7 @@ function relax(failure: FilterFailure, entry: SearchEntry): Partial<Filters> {
     case 'role': return { role: 'all' }
     case 'workMode': return { workMode: 'all' }
     case 'employment': return { employment: 'all' }
+    case 'postingType': return { postingType: 'all' }
     case 'salaryMin': return { salaryMin: 0 }
     case 'includeUnknownSalary': return { includeUnknownSalary: true }
     case 'remoteEligibleOnly': return { remoteEligibleOnly: false }
@@ -84,7 +85,7 @@ export function describeRecoveryChanges(filters: Filters, changes: Partial<Filte
   const next = { ...filters, ...changes }
   return keys(changes).map(key => ({
     key, label: {
-      query: '검색어', region: '탐색 지역', role: '직무', workMode: '근무 형태', employment: '고용 형태',
+      query: '검색어', region: '탐색 지역', role: '직무', workMode: '근무 형태', employment: '고용 형태', postingType: '모집 유형',
       salaryMin: '희망 연봉 하한', includeUnknownSalary: '미공개·별도 보상', visa: '비자 지원', remoteEligibleOnly: '원격근무 지역',
     }[key],
     before: describeFilter(filters, key), after: describeFilter(next, key),
@@ -98,6 +99,7 @@ function describeFilter(filters: Filters, key: keyof Filters): string {
     case 'role': return ROLE_FILTER_LABELS[filters.role]
     case 'workMode': return MODE_LABELS[filters.workMode]
     case 'employment': return EMPLOYMENT_LABELS[filters.employment]
+    case 'postingType': return POSTING_TYPE_LABELS[filters.postingType ?? 'opening']
     case 'salaryMin': return filters.salaryMin ? `$${filters.salaryMin.toLocaleString('ko-KR')} 이상` : '연봉 하한 해제'
     case 'includeUnknownSalary': return filters.includeUnknownSalary ? '미공개·별도 보상도 포함' : '비교 가능한 연봉만'
     case 'visa': return filters.visa === 'all' ? '지원 없음까지 포함' : VISA_FILTER_LABELS[filters.visa]

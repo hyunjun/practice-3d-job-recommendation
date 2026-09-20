@@ -17,6 +17,7 @@ export const ROLE_CLASSIFICATION_VERSION = 1 as const
 export const OCCUPATION_VERSION = 3 as const
 export const REMOTE_SCOPE_VERSION = 2 as const
 export const EMPLOYMENT_VERSION = 1 as const
+export const POSTING_PURPOSE_VERSION = 1 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever', smartrecruiters: 'SmartRecruiters',
@@ -146,6 +147,13 @@ export interface JobRemoteScopeResolution {
   truncated?: boolean
 }
 
+export interface JobPostingPurpose {
+  version: typeof POSTING_PURPOSE_VERSION
+  kind: 'talent-pool'
+  basis: 'greenhouse-prospect' | 'description'
+  evidence: FactEvidence[]
+}
+
 export interface Job {
   id: string
   companyId: string
@@ -153,6 +161,7 @@ export interface Job {
   role: JobRole
   roleClassification?: JobRoleClassification
   occupation?: JobOccupation
+  postingPurpose?: JobPostingPurpose
   cityIds: string[]
   locationLabel: string
   locationResolution?: JobLocationResolution
@@ -232,6 +241,7 @@ export interface Filters {
   workMode: 'all' | WorkMode
   visa: 'all' | 'yes' | 'supported' | 'possible'
   employment: 'all' | Employment
+  postingType: 'opening' | 'talent-pool' | 'all'
   salaryMin: number
   includeUnknownSalary: boolean
   remoteEligibleOnly: boolean
@@ -305,6 +315,12 @@ export const EMPLOYMENT_LABELS: Record<Employment | 'all', string> = {
   unknown: '고용 형태 미확인',
 }
 
+export const POSTING_TYPE_LABELS: Record<Filters['postingType'], string> = {
+  opening: '일반 채용 공고',
+  'talent-pool': '인재풀·관심 등록',
+  all: '일반 공고·인재풀 모두',
+}
+
 export const VISA_LABELS: Record<Visa, string> = {
   yes: '지원 명시',
   conditional: '조건부 지원 명시',
@@ -352,7 +368,7 @@ export const USD_RATES: Record<Salary['currency'], number> = {
 
 export const DEFAULT_FILTERS: Filters = {
   query: '', region: 'all', role: 'all', workMode: 'all', visa: 'all',
-  employment: 'all', salaryMin: 0, includeUnknownSalary: true, remoteEligibleOnly: true,
+  employment: 'all', postingType: 'opening', salaryMin: 0, includeUnknownSalary: true, remoteEligibleOnly: true,
 }
 
 export const SAMPLE_PROFILE: Profile = {

@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, CheckCircle2, Download, GitCompareArrows, MapPin, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 import { CITY_BY_ID } from '../../shared/cities'
 import { formatJobSalary, groupCompanies, matchJob, medianSalary } from '../../shared/matching'
-import { MODE_LABELS } from '../../shared/types'
+import { MODE_LABELS, POSTING_TYPE_LABELS } from '../../shared/types'
 import { catalogNeedsAttention, formatRetryWait } from '../../shared/catalog-health'
-import type { Catalog, CityResult, MatchedJob, Profile, SavedJob } from '../../shared/types'
+import type { Catalog, CityResult, Filters, MatchedJob, Profile, SavedJob } from '../../shared/types'
 import { exportSavedCsv } from '../lib/storage'
 import { CityImage, CompanyLogo, EmptyState } from './ui'
 import { JobFreshnessNotice } from './JobFreshnessNotice'
@@ -17,6 +17,7 @@ import { JobLocationNotice } from './JobLocationDetails'
 import { JobOccupationNotice } from './JobRoleDetails'
 import type { SavedJobsController } from '../hooks/useSavedJobs'
 import { SavedStorageNotice } from './SavedStorageNotice'
+import { PostingPurposeBadge } from './JobPostingPurpose'
 
 export function SavedView({ saved, storage, showStorageStatus, onManage, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; storage: SavedJobsController; showStorageStatus: boolean; onManage: () => void; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
   const [query, setQuery] = useState('')
@@ -55,6 +56,7 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
         <header><CompanyLogo company={item.company} /><div><h2>{item.company.name}</h2><span>{item.company.industry}</span></div><button className="icon-button" aria-label={`${item.company.name} 저장 취소`} onClick={() => onRemove(match)}><BookmarkCheck size={18} /></button></header>
         <button className="saved-title" onClick={() => onOpen(match)}>{item.job.title}<ArrowUpRight size={17} /></button>
         {item.job.source !== 'sample' && <p className="saved-role">{jobRoleLabel(item.job)}</p>}
+        <PostingPurposeBadge job={item.job} />
         <p className="saved-location"><MapPin size={13} />{item.job.locationLabel}</p>
         <JobLocationNotice job={item.job} />
         <div className="saved-card-tags"><span>{formatJobSalary(item.job)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
@@ -71,7 +73,7 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
   </main>
 }
 
-export function CompareView({ catalog, results, compareIds, status, onToggle, onAuto, onSelect, onExplore }: { catalog: Catalog; results: CityResult[]; compareIds: string[]; status?: React.ReactNode; onToggle: (id: string) => void; onAuto: () => void; onSelect: (id: string) => void; onExplore: () => void }) {
+export function CompareView({ catalog, results, postingType, compareIds, status, onToggle, onAuto, onSelect, onExplore }: { catalog: Catalog; results: CityResult[]; postingType: Filters['postingType']; compareIds: string[]; status?: React.ReactNode; onToggle: (id: string) => void; onAuto: () => void; onSelect: (id: string) => void; onExplore: () => void }) {
   const selected = compareIds.flatMap(id => {
     const city = CITY_BY_ID.get(id)
     return city ? [{ city, result: results.find(result => result.city.id === id) }] : []
@@ -97,7 +99,7 @@ export function CompareView({ catalog, results, compareIds, status, onToggle, on
   ]
   return <main id="main-content" className="collection-page compare-page" tabIndex={-1}>
     <div className="page-heading"><div><p className="eyebrow">DIFFERENT CITIES. YOUR POSSIBILITIES.</p><h1>어느 도시에서 시작할까요<span className="accent-dot">?</span></h1><p>최대 3개 도시를 나란히 놓고, 중요한 조건을 비교해 보세요.</p></div><button className="button secondary" onClick={onAuto} disabled={!results.length}><GitCompareArrows size={16} />회사 많은 3개 도시</button></div>
-    <div className="comparison-source-note"><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} />{catalog.source === 'sample' ? '샘플 시나리오로 비교 중 · 보상 및 채용 조건은 예시입니다.' : '조회한 공개 채용공고의 비교 · 생활비와 세금은 반영하지 않습니다.'}</div>
+    <div className="comparison-source-note"><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>{catalog.source === 'sample' ? '샘플 시나리오로 비교 중 · 보상 및 채용 조건은 예시입니다.' : '조회한 공개 채용공고의 비교 · 생활비와 세금은 반영하지 않습니다.'}{postingType !== 'opening' && ` · 모집 유형: ${POSTING_TYPE_LABELS[postingType]}`}</span></div>
     {status}
     {selected.length > 0 ? <div className="comparison-scroll"><div className="comparison-table" role="table" aria-label="도시별 채용 조건 비교" style={{ '--city-columns': 3 } as React.CSSProperties}>
       <div className="comparison-row" role="row">

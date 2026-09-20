@@ -5,6 +5,7 @@ import { upgradeJobEmployment } from './job-employment'
 import { isUnmappedJob, upgradeJobLocation } from './job-location'
 import { upgradeCatalogOccupations, upgradeJobOccupation } from './job-occupation'
 import { upgradeJobRole } from './job-roles'
+import { upgradeJobPostingPurpose } from './job-posting'
 import type { Catalog, Job } from './types'
 
 interface JobUpgradeOptions {
@@ -22,7 +23,7 @@ export function upgradeJob<T extends Job>(job: T, { preserveUnverifiablePay = fa
   current = upgradeJobOccupation(current)
   current = upgradeJobRole(current)
   current = upgradeJobLocation(current)
-  return upgradeJobEmployment(current)
+  return upgradeJobPostingPurpose(upgradeJobEmployment(current))
 }
 
 /** Account for moved/conflicting locations without discarding legacy count-only omissions. */

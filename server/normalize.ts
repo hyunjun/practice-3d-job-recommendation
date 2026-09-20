@@ -2,6 +2,7 @@ import { CITY_BY_ID } from '../shared/cities'
 import { locateCities } from '../shared/city-location'
 export { locateCities } from '../shared/city-location'
 import { upgradeJobLocation } from '../shared/job-location'
+import { classifyPostingPurpose } from '../shared/job-posting'
 import { classifyJobRoles } from '../shared/job-roles'
 import { isTechnicalOccupation, occupationFacts } from '../shared/job-occupation'
 import { qualificationFacts } from '../shared/job-qualifications'
@@ -20,6 +21,7 @@ export { remoteScope } from '../shared/job-remote'
 
 export interface GreenhouseJob {
   id: number
+  internal_job_id?: number | null
   title: string
   absolute_url: string
   updated_at?: string
@@ -93,6 +95,7 @@ interface PostingInput extends Pick<Job, 'companyId' | 'title' | 'cityIds' | 'lo
   updatedAt?: string | null
   departments?: string[]
   management?: JobManagement
+  greenhouseProspect?: boolean
 }
 
 export function normalizePosting(input: PostingInput): Job | null {
@@ -102,9 +105,13 @@ export function normalizePosting(input: PostingInput): Job | null {
   if (!isTechnicalOccupation(occupation)) return null
   const eligibility = eligibilityFacts(text)
   const roleClassification = classifyJobRoles(title, input.departments, occupation)
+  const postingPurpose = classifyPostingPurpose({
+    title, description: text, greenhouseProspect: input.provider === 'greenhouse' && input.greenhouseProspect === true,
+  })
   const job: Job = {
     id: `${input.provider}-${companyId}-${input.id}`, companyId, title,
     role: roleClassification.roles[0] ?? 'unknown', roleClassification, occupation,
+    ...(postingPurpose ? { postingPurpose } : {}),
     cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
     employment: employment.value, employmentVersion: EMPLOYMENT_VERSION, ...qualificationFacts(text, companyId), salary,
     ...(compensationRanges?.length ? { compensationRanges } : {}),
@@ -147,6 +154,7 @@ export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: s
   const employment = employmentFact(raw.title, raw.metadata ?? [], text)
   return normalizePosting({
     provider: 'greenhouse', id: raw.id, companyId, title: raw.title, text, fetchedAt,
+    greenhouseProspect: raw.internal_job_id === null,
     departments: Array.isArray(raw.departments) ? raw.departments.flatMap(department => typeof department?.name === 'string' ? [department.name] : []) : [],
     management: managementFact(raw.metadata ?? []),
     cityIds, locationLabel: location, workMode, employment, scope,

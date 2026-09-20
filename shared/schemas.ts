@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, OCCUPATION_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION } from './types'
+import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, OCCUPATION_VERSION, POSTING_PURPOSE_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 const QualificationKindSchema = z.enum(['required', 'qualification', 'preferred', 'context'])
@@ -13,6 +13,12 @@ const EvidenceSchema = z.object({
 export const JobSchema = z.object({
   id: z.string().max(200), companyId: z.string().max(100), title: z.string().max(1000),
   role: z.enum([...JOB_ROLES, 'unknown']),
+  postingPurpose: z.object({
+    version: z.literal(POSTING_PURPOSE_VERSION), kind: z.literal('talent-pool'),
+    basis: z.enum(['greenhouse-prospect', 'description']),
+    evidence: z.array(EvidenceSchema.extend({ text: z.string().min(1).max(3000) })).min(1).max(4),
+  }).refine(value => value.evidence.every(item => item.text.trim().length > 0
+    && item.source === (value.basis === 'greenhouse-prospect' ? 'board' : 'description'))).optional(),
   roleClassification: z.object({
     version: z.literal(ROLE_CLASSIFICATION_VERSION),
     roles: z.array(z.enum(JOB_ROLES)).max(JOB_ROLES.length),
@@ -99,4 +105,6 @@ export const JobSchema = z.object({
     visa: EvidenceSchema.optional(), workMode: EvidenceSchema.optional(), employment: EvidenceSchema.optional(),
   }).optional(),
   stale: z.boolean().optional(),
+}).refine(job => job.postingPurpose?.basis !== 'greenhouse-prospect' || job.source === 'greenhouse', {
+  path: ['postingPurpose'], message: 'Greenhouse prospect evidence requires a Greenhouse posting',
 })

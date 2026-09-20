@@ -135,7 +135,7 @@ function singleCsvRecord(text: string) {
     .map(match => match[1].replaceAll('""', '"'))
   const headers = cells(text.slice(0, text.indexOf('\r\n')))
   const values = cells(text).slice(headers.length)
-  expect(headers.slice(-2)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거'])
+  expect(headers.slice(-4)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거'])
   expect(values).toHaveLength(headers.length)
   return Object.fromEntries(headers.map((header, index) => [header, values[index]]))
 }
@@ -371,7 +371,7 @@ for (const width of [1440, 320]) test.describe(`body-derived remote country cont
       await page.getByRole('button', { name: '게시 상태 확인', exact: true }).click()
       await expect(page.locator('.posting-notice.changed')).toHaveCount(1)
       await expect(page.locator('.posting-notice.missing')).toHaveCount(0)
-      await expect(page.locator('.posting-changes')).toHaveText('근무·고용·비자 · 본문 확인 필요')
+      await expect(page.locator('.posting-changes')).toHaveText('모집·근무·고용·비자 · 본문 확인 필요')
       await page.getByRole('button', { name: 'Backend Engineer Cedar', exact: true }).click()
       await expectScopeLabel(page, '영국', derivedNotice)
       await expandEvidence(page, REMOTE_UK_PARAGRAPH)

@@ -19,6 +19,7 @@ import { JobRoleDetails } from './JobRoleDetails'
 import type { SavedJobsController } from '../hooks/useSavedJobs'
 import { SavedStorageNotice } from './SavedStorageNotice'
 import { JobRemoteScopeDetails } from './JobRemoteScopeDetails'
+import { JobPostingPurposeDetails } from './JobPostingPurpose'
 
 interface Props {
   match: MatchedJob
@@ -44,6 +45,7 @@ export function JobDialog({ match, saved, storage, onManageSaved, postingObserva
       <div className="job-meta-pills"><span><BriefcaseBusiness size={13} />{EMPLOYMENT_LABELS[job.employment]}</span><span><Globe2 size={13} />{MODE_LABELS[job.workMode]}</span><span><Clock3 size={13} />{job.minExperience !== null ? `${formatExperienceYears(job.minExperience)} 이상` : '경력 확인 필요'}</span></div>
       {job.source === 'sample' && <div className="sample-notice"><span className="sample-dot" /><span><strong>체험용 샘플 공고</strong>회사별 채용 여부·기술·보상 조건은 실제 공고가 아닌 예시입니다.</span></div>}
       <JobFreshnessNotice job={job} />
+      <JobPostingPurposeDetails job={job} />
       <JobLocationDetails job={job} />
       {saved && <SavedPostingNotice observation={postingObservation} job={saved.job} />}
       <JobRoleDetails job={job} />
