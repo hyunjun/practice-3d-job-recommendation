@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check, CheckCheck, FileText, Fingerprint, Link2, Plus, ShieldCheck, Sparkles, Upload, X } from 'lucide-react'
 import { analyzeResume, KNOWN_SKILLS } from '../../shared/profile'
 import { COUNTRIES, MODE_LABELS, ROLE_LABELS, VISA_FILTER_LABELS } from '../../shared/types'
@@ -30,23 +30,69 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [fileName, setFileName] = useState('')
+  const [pendingFileName, setPendingFileName] = useState('')
+  const [readNotice, setReadNotice] = useState('')
   const [dragging, setDragging] = useState(false)
   const [skill, setSkill] = useState('')
   const [remember, setRemember] = useState(initialRemember)
   const fileRef = useRef<HTMLInputElement>(null)
+  const uploadRef = useRef<HTMLButtonElement>(null)
+  const importRef = useRef<AbortController | null>(null)
   const yearsRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => () => {
+    const previous = importRef.current
+    importRef.current = null
+    previous?.abort()
+  }, [])
+
+  const stopImport = () => {
+    const previous = importRef.current
+    importRef.current = null
+    previous?.abort()
+    setBusy(false)
+    setPendingFileName('')
+  }
+
+  const changeTab = (next: typeof tab) => {
+    if (next === tab) return
+    stopImport()
+    setReadNotice('')
+    setError('')
+    setTab(next)
+  }
 
   const importFile = async (file?: File) => {
     if (!file) return
+    stopImport()
+    const controller = new AbortController()
+    importRef.current = controller
     setBusy(true)
+    setPendingFileName(file.name)
+    setReadNotice('')
     setError('')
     try {
-      const content = await readResume(file)
+      const content = await readResume(file, controller.signal)
+      if (importRef.current !== controller || controller.signal.aborted) return
       setText(content.slice(0, 50000))
       setFileName(file.name)
     } catch (cause) {
+      if (importRef.current !== controller || controller.signal.aborted) return
       setError(cause instanceof Error ? cause.message : '파일을 읽지 못했어요. 텍스트를 직접 붙여넣어 주세요.')
-    } finally { setBusy(false) }
+    } finally {
+      if (importRef.current === controller) {
+        importRef.current = null
+        setBusy(false)
+        setPendingFileName('')
+      }
+    }
+  }
+
+  const cancelImport = () => {
+    stopImport()
+    setError('')
+    setReadNotice('파일 읽기를 취소했어요. 입력한 내용은 유지됩니다.')
+    uploadRef.current?.focus()
   }
 
   const analyze = () => {
@@ -106,20 +152,29 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
       <section className="profile-form">
         {step === 1 ? <>
           <div className="segmented profile-input-tabs" aria-label="경력 입력 방법">
-            <button className={tab === 'file' ? 'selected' : ''} aria-pressed={tab === 'file'} onClick={() => setTab('file')}><Upload size={15} />이력서</button>
-            <button className={tab === 'text' ? 'selected' : ''} aria-pressed={tab === 'text'} onClick={() => setTab('text')}><FileText size={15} />텍스트</button>
-            <button className={tab === 'linkedin' ? 'selected' : ''} aria-pressed={tab === 'linkedin'} onClick={() => setTab('linkedin')}><Link2 size={15} />LinkedIn</button>
+            <button className={tab === 'file' ? 'selected' : ''} aria-pressed={tab === 'file'} onClick={() => changeTab('file')}><Upload size={15} />이력서</button>
+            <button className={tab === 'text' ? 'selected' : ''} aria-pressed={tab === 'text'} onClick={() => changeTab('text')}><FileText size={15} />텍스트</button>
+            <button className={tab === 'linkedin' ? 'selected' : ''} aria-pressed={tab === 'linkedin'} onClick={() => changeTab('linkedin')}><Link2 size={15} />LinkedIn</button>
           </div>
           {tab === 'file' && <>
-            <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md" className="sr-only" aria-label="이력서 파일 선택" onChange={event => void importFile(event.target.files?.[0])} />
-            <button className={`upload-zone ${dragging ? 'dragging' : ''} ${fileName ? 'has-file' : ''}`} disabled={busy} onClick={() => fileRef.current?.click()} onDragOver={event => { event.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={event => { event.preventDefault(); setDragging(false); void importFile(event.dataTransfer.files[0]) }}>
+            <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md" className="sr-only" aria-label="이력서 파일 선택" onChange={event => {
+              const file = event.currentTarget.files?.[0]
+              event.currentTarget.value = ''
+              void importFile(file)
+            }} />
+            <button ref={uploadRef} className={`upload-zone ${dragging ? 'dragging' : ''} ${fileName ? 'has-file' : ''}`} aria-busy={busy} onClick={() => fileRef.current?.click()} onDragOver={event => { event.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={event => { event.preventDefault(); setDragging(false); void importFile(event.dataTransfer.files[0]) }}>
               <span className="upload-icon">{busy ? <Spinner /> : fileName ? <CheckCheck size={25} /> : <Upload size={25} />}</span>
               <strong>{busy ? '브라우저에서 이력서를 읽고 있어요' : fileName || '이력서를 이곳에 놓아주세요'}</strong>
-              <span>{fileName ? '클릭해서 다른 파일 선택' : '또는 클릭해서 파일 선택'}</span>
+              <span>{busy || fileName ? '클릭해서 다른 파일 선택' : '또는 클릭해서 파일 선택'}</span>
               <small>PDF, DOCX, TXT, MD · 최대 5MB</small>
             </button>
+            {busy && <div className="resume-read-progress">
+              <p role="status" aria-label="파일 읽기 상태"><strong>{pendingFileName}</strong><span>읽는 동안 다른 파일이나 입력 방법을 선택할 수 있어요.</span></p>
+              <button className="button secondary" onClick={cancelImport}>파일 읽기 취소</button>
+            </div>}
             {fileName && <p className="success-text"><Check size={13} />{text.length.toLocaleString()}자의 경력 텍스트를 읽었어요.</p>}
           </>}
+          {readNotice && <p className="resume-read-notice" role="status">{readNotice}</p>}
           {tab === 'linkedin' && <div className="field-group">
             <label htmlFor="linkedin-url">LinkedIn 프로필 주소 <span className="optional">선택</span></label>
             <input id="linkedin-url" type="url" value={linkedin} onChange={event => setLinkedin(event.target.value)} placeholder="https://www.linkedin.com/in/your-name" maxLength={400} />
@@ -127,13 +182,13 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
           </div>}
           {(tab !== 'file' || fileName) && <div className="field-group">
             <label htmlFor="resume-text">{tab === 'file' ? '읽어온 경력 · 필요한 부분을 수정하세요' : '경력 요약'}</label>
-            <textarea id="resume-text" value={text} onChange={event => setText(event.target.value)} maxLength={50000} rows={tab === 'file' ? 5 : 9} placeholder={'지금까지 어떤 일을 해오셨나요?\n\n예: 5년차 백엔드 개발자입니다. Python, TypeScript와 AWS로 결제 서비스를 개발했으며...'} />
+            <textarea id="resume-text" value={text} onChange={event => { stopImport(); setReadNotice(''); setError(''); setText(event.target.value) }} maxLength={50000} rows={tab === 'file' ? 5 : 9} placeholder={'지금까지 어떤 일을 해오셨나요?\n\n예: 5년차 백엔드 개발자입니다. Python, TypeScript와 AWS로 결제 서비스를 개발했으며...'} />
             <div className="field-meta"><span>이름과 연락처는 포함하지 않아도 괜찮아요.</span><span>{text.length.toLocaleString()}자</span></div>
           </div>}
-          {!fileName && tab === 'file' && <div className="profile-alternative"><span>파일이 없어도 괜찮아요</span><button className="text-button" onClick={() => setTab('text')}>경력 직접 입력 <ArrowRight size={14} /></button></div>}
+          {!fileName && tab === 'file' && <div className="profile-alternative"><span>파일이 없어도 괜찮아요</span><button className="text-button" onClick={() => changeTab('text')}>경력 직접 입력 <ArrowRight size={14} /></button></div>}
           {error && <p className="form-error" role="alert">{error}</p>}
           <button className="button primary wide" disabled={busy || text.trim().length < 30} onClick={analyze}><Sparkles size={17} />경력에서 가능성 찾기<ArrowRight size={16} /></button>
-          <button className="sample-text-button" onClick={() => { setText(EXAMPLE_RESUME); setTab('text'); setFileName(''); setError('') }}>먼저 샘플 경력으로 체험하기 <ArrowUpRightSmall /></button>
+          <button className="sample-text-button" onClick={() => { stopImport(); setReadNotice(''); setText(EXAMPLE_RESUME); setTab('text'); setFileName(''); setError('') }}>먼저 샘플 경력으로 체험하기 <ArrowUpRightSmall /></button>
         </> : <>
           <div className="extraction-note"><Fingerprint size={18} /><span>경력에서 찾은 기술과 경험이에요.<br /><strong>빠진 내용이나 희망 조건을 자유롭게 수정하세요.</strong></span></div>
           <div className="form-grid profile-identity-grid">

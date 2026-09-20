@@ -562,3 +562,14 @@ CPU 프로파일에서는 검색 중 국가 경계의 투영 계산이 반복되
 | [W3C 시간대 처리 노트](https://www.w3.org/International/core/2005/09/timezone) | 반복되는 지역 시각과 고정 UTC 오프셋은 다르며, 반복 일정에는 오프셋만으로 정보가 부족함 | 공고가 명시하지 않은 서머타임·날짜·고정 오프셋 정책을 만들지 않음 |
 
 2026-09-20 10:35 UTC에 Spotify·Jane 응답과 두 시간대 문서를 확인했습니다. MongoDB 사례와 전체 공고 적용 결과는 44단계에서 보관한 같은 날 08:19 UTC의 자료를 사용했으며 새 전체 수집으로 표현하지 않습니다. W3C 자료는 시간 처리 원리를 설명하는 기존 노트입니다. 지원자의 협업 가능 시간이나 개별 회사의 서머타임 운영 방식을 확인한 결과는 아니므로 원문 확인을 안내합니다. 실제 응답은 로컬에 보관하고 공개 회귀 검사는 가상 자료를 사용합니다.
+
+## 이력서 읽기 취소와 입력 순서
+
+| 레퍼런스 | 확인한 내용 | 적용 |
+| --- | --- | --- |
+| [React useEffect의 비동기 결과 정리](https://react.dev/reference/react/useEffect#fetching-data-with-effects) | 비동기 응답은 시작 순서와 다르게 도착할 수 있으므로 정리 후 이전 결과를 무시해야 함 | 현재 읽기 작업의 소유권을 확인하고, 새 입력·닫기 이후의 이전 결과·오류·완료 처리를 반영하지 않음 |
+| [MDN Blob.text](https://developer.mozilla.org/en-US/docs/Web/API/Blob/text) | UTF-8 문자열을 반환하는 Promise API이며 취소 신호 인자가 없음 | 파일 읽기가 계속되더라도 취소한 작업의 결과를 무시하고 화면에서 새 입력을 계속 허용 |
+| [MDN AbortSignal.throwIfAborted](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/throwIfAborted) | 신호가 취소됐으면 취소 이유를 던짐. 신호를 직접 받지 않는 작업도 처리 경계에서 확인할 수 있음 | 파일 읽기·라이브러리 로딩·페이지 추출 경계에서 취소 확인, 일반 파일 오류와 취소 구분 |
+| [PDF.js PDFDocumentLoadingTask.destroy](https://mozilla.github.io/pdf.js/api/draft/module-pdfjsLib-PDFDocumentLoadingTask.html) | 로딩 작업의 네트워크 요청과 워커를 정리하며 완료를 Promise로 반환 | 성공·실패·취소에서 PDF 작업 정리를 한 번만 시작하고, 취소 시 늦은 정리 결과가 새 입력에 영향을 주지 않게 처리 |
+
+2026-09-20 12:17 UTC에 공식 문서를 확인하고 설치된 PDF.js의 타입 선언도 대조했습니다. React 자료는 네트워크 요청 예시이지만, 시작 순서와 완료 순서가 다른 파일 읽기에도 같은 상태 관리 원리가 적용됩니다. 취소가 이미 실행 중인 모든 브라우저·문서 변환 연산을 물리적으로 중단한다는 의미는 아닙니다. 입력 반영을 즉시 중단하고 가능한 PDF 자원을 정리합니다.
