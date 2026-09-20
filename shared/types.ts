@@ -18,6 +18,9 @@ export const OCCUPATION_VERSION = 3 as const
 export const REMOTE_SCOPE_VERSION = 2 as const
 export const EMPLOYMENT_VERSION = 1 as const
 export const POSTING_PURPOSE_VERSION = 1 as const
+export const LANGUAGE_REQUIREMENTS_VERSION = 1 as const
+export const SPOKEN_LANGUAGE_CODES = ['en', 'ko', 'ja', 'de', 'fr', 'es', 'pt', 'zh', 'cmn', 'yue', 'it', 'nl', 'sv', 'pl', 'ar', 'hi', 'vi', 'id', 'th', 'ms', 'ru', 'da', 'no', 'fi', 'tr', 'he', 'cs', 'ro', 'uk', 'el', 'hu'] as const
+export type SpokenLanguageCode = typeof SPOKEN_LANGUAGE_CODES[number]
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever', smartrecruiters: 'SmartRecruiters',
@@ -98,6 +101,20 @@ export interface JobQualifications {
   truncated?: boolean
 }
 
+export interface LanguageRequirement {
+  languages: SpokenLanguageCode[]
+  kind: Exclude<QualificationKind, 'context'>
+  match: 'all' | 'any' | 'unspecified'
+  scope?: string
+  evidence: FactEvidence & { source: 'description' }
+}
+
+export interface JobLanguageRequirements {
+  version: typeof LANGUAGE_REQUIREMENTS_VERSION
+  rules: LanguageRequirement[]
+  truncated?: boolean
+}
+
 export type EligibilityKind = 'sponsorship-scope' | 'work-authorization' | 'citizenship' | 'residency' | 'security-clearance' | 'export-authorization'
 export type EligibilityLevel = 'required' | 'conditional' | 'preferred' | 'unspecified'
 
@@ -171,6 +188,7 @@ export interface Job {
   minExperience: number | null
   skills: string[]
   qualifications?: JobQualifications
+  languageRequirements?: JobLanguageRequirements
   salary: Salary | null
   compensationRanges?: CompensationRange[]
   compensationNote?: string

@@ -6,6 +6,7 @@ import { classifyPostingPurpose } from '../shared/job-posting'
 import { classifyJobRoles } from '../shared/job-roles'
 import { isTechnicalOccupation, occupationFacts } from '../shared/job-occupation'
 import { qualificationFacts } from '../shared/job-qualifications'
+import { languageRequirements } from '../shared/job-languages'
 import { plainText } from '../shared/text'
 export { plainText } from '../shared/text'
 import { COMPENSATION_VERSION, EMPLOYMENT_VERSION } from '../shared/types'
@@ -114,6 +115,7 @@ export function normalizePosting(input: PostingInput): Job | null {
     ...(postingPurpose ? { postingPurpose } : {}),
     cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
     employment: employment.value, employmentVersion: EMPLOYMENT_VERSION, ...qualificationFacts(text, companyId), salary,
+    languageRequirements: languageRequirements(text),
     ...(compensationRanges?.length ? { compensationRanges } : {}),
     ...(compensationNote ? { compensationNote } : {}),
     ...(input.compensationEvidence?.length ? { compensationEvidence: input.compensationEvidence } : {}),

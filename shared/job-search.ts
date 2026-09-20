@@ -5,6 +5,7 @@ import { isUnmappedJob, jobLocationSearchText } from './job-location'
 import { jobRoleLabel, matchesJobRole } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
 import { isTalentPoolJob } from './job-posting'
+import { languageSearchText } from './job-languages'
 import { upgradeJob } from './job-upgrade'
 import { MODE_LABELS, POSTING_TYPE_LABELS, USD_RATES } from './types'
 import type { Catalog, City, Company, Filters, Job, Profile, Region } from './types'
@@ -49,7 +50,7 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
       job, company,
       text: [company.name, company.industry, job.title, jobRoleLabel(job), MODE_LABELS[job.workMode],
         isTalentPoolJob(job) ? POSTING_TYPE_LABELS['talent-pool'] : '', ...job.skills, ...locations,
-        ...countrySearchText(job.remoteCountries), jobLocationSearchText(job)].join(' ').toLowerCase(),
+        ...countrySearchText(job.remoteCountries), jobLocationSearchText(job), languageSearchText(job)].join(' ').toLowerCase(),
       profileMatches: !skills.length || !profileSkills.size || skills.some(skill => profileSkills.has(skill.toLowerCase())),
       residenceMatches: job.remoteWorldwide || job.remoteCountries.includes(profile.residence),
       salaryMax: job.salary ? job.salary.max * USD_RATES[job.salary.currency] : null,

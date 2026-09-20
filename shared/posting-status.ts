@@ -11,7 +11,7 @@ export type RevisionField = typeof REVISION_FIELDS[number]
 export type JobRevision = Record<RevisionField, string>
 export const REVISION_LABELS: Record<RevisionField, string> = {
   title: '포지션', location: '근무지', conditions: '모집·근무·고용·비자', compensation: '보상',
-  qualifications: '기술·경력', description: '본문', url: '지원 링크',
+  qualifications: '기술·경력·언어', description: '본문', url: '지원 링크',
 }
 
 export interface PostingBoard {
@@ -116,7 +116,10 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
       salary: current.salary, ranges: current.compensationRanges ?? [],
       note: current.compensationNote ?? '', evidence: current.compensationEvidence ?? [],
     },
-    qualifications: { skills: current.skills, years: current.minExperience, details: current.qualifications ?? null },
+    qualifications: {
+      skills: current.skills, years: current.minExperience, details: current.qualifications ?? null,
+      ...(current.languageRequirements?.rules.length || current.languageRequirements?.truncated ? { languages: current.languageRequirements } : {}),
+    },
     description: job.description,
     url: jobPostingUrl(job),
   }

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, OCCUPATION_VERSION, POSTING_PURPOSE_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION } from './types'
+import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, LANGUAGE_REQUIREMENTS_VERSION, OCCUPATION_VERSION, POSTING_PURPOSE_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION, SPOKEN_LANGUAGE_CODES } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 const QualificationKindSchema = z.enum(['required', 'qualification', 'preferred', 'context'])
@@ -62,6 +62,18 @@ export const JobSchema = z.object({
       maxYears: z.number().min(0).max(50).optional(), conditional: z.boolean(), evidence: EvidenceSchema,
     }).refine(rule => rule.maxYears === undefined || rule.maxYears >= rule.minYears)).max(100),
     experienceNote: z.string().max(1000).optional(), truncated: z.boolean().optional(),
+  }).optional(),
+  languageRequirements: z.object({
+    version: z.literal(LANGUAGE_REQUIREMENTS_VERSION),
+    rules: z.array(z.object({
+      languages: z.array(z.enum(SPOKEN_LANGUAGE_CODES)).min(1).max(SPOKEN_LANGUAGE_CODES.length),
+      kind: z.enum(['required', 'qualification', 'preferred']),
+      match: z.enum(['all', 'any', 'unspecified']),
+      scope: z.string().min(1).max(200).optional(),
+      evidence: EvidenceSchema.extend({ source: z.literal('description'), text: z.string().min(1).max(3000) }),
+    }).refine(rule => new Set(rule.languages).size === rule.languages.length && rule.evidence.text.trim().length > 0
+      && (!rule.scope || rule.scope.trim().length > 0 && rule.evidence.text.includes(rule.scope)))).max(50),
+    truncated: z.boolean().optional(),
   }).optional(),
   salary: z.object({
     min: z.number().nonnegative(), max: z.number().nonnegative(),

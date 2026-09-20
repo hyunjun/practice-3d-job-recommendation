@@ -135,7 +135,7 @@ function singleCsvRecord(text: string) {
     .map(match => match[1].replaceAll('""', '"'))
   const headers = cells(text.slice(0, text.indexOf('\r\n')))
   const values = cells(text).slice(headers.length)
-  expect(headers.slice(-4)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거'])
+  expect(headers.slice(-6)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거'])
   expect(values).toHaveLength(headers.length)
   return Object.fromEntries(headers.map((header, index) => [header, values[index]]))
 }

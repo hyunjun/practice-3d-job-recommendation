@@ -82,10 +82,11 @@ function csvRecord(text: string) {
   const cells = (value: string) => [...value.matchAll(/"((?:[^"]|"")*)"(?:,|\r\n|$)/g)].map(match => match[1].replaceAll('""', '"'))
   const end = text.indexOf('\r\n')
   const headers = cells(text.slice(0, end))
-  expect(headers).toHaveLength(41)
+  expect(headers).toHaveLength(43)
   expect(headers.slice(0, 8)).toEqual(['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크'])
+  expect(headers.slice(-2)).toEqual(['언어 조건', '언어 조건 근거'])
   const values = cells(text.slice(end + 2))
-  expect(values).toHaveLength(41)
+  expect(values).toHaveLength(43)
   return Object.fromEntries(headers.map((header, index) => [header, values[index]]))
 }
 function expectSavedSource(records: SavedJob[]) {

@@ -6,6 +6,7 @@ import { isUnmappedJob, upgradeJobLocation } from './job-location'
 import { upgradeCatalogOccupations, upgradeJobOccupation } from './job-occupation'
 import { upgradeJobRole } from './job-roles'
 import { upgradeJobPostingPurpose } from './job-posting'
+import { upgradeJobLanguages } from './job-languages'
 import type { Catalog, Job } from './types'
 
 interface JobUpgradeOptions {
@@ -18,6 +19,7 @@ export function upgradeJob<T extends Job>(job: T, { preserveUnverifiablePay = fa
   if (job.source === 'sample') return job
   let current = upgradeJobCompensation(job, preserveUnverifiablePay)
   current = upgradeJobQualifications(current)
+  current = upgradeJobLanguages(current)
   current = upgradeJobEligibility(current)
   // Research-role interpretation can depend on the occupation's original evidence.
   current = upgradeJobOccupation(current)
