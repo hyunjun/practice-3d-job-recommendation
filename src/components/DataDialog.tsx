@@ -82,7 +82,7 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
 function BoardHistory({ catalog, loading, retryIn, onRefresh }: { catalog: Catalog; loading: boolean; retryIn: number; onRefresh: () => void }) {
   return <section className="board-section">
     <div className="board-heading"><h3>게시판 조회 상태</h3><button className="text-button" disabled={loading || retryIn > 0} onClick={onRefresh}><RefreshCw size={13} />새로고침{!loading && retryIn > 0 && <span aria-hidden="true"> · {formatRetryWait(retryIn)} 후</span>}</button></div>
-    <p className="field-description">최근 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />정상 확인 후 30분이 지나면 이전 조회로 표시하고, 24시간을 넘긴 공고는 추천에서 제외해요. 화면에 돌아왔을 때도 확인하며, 다시 조회하기 전까지 원래 조회 시각을 유지합니다.</p>
+    <p className="field-description">최근 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />정상 확인 후 30분이 지나면 이전 조회로 표시하고, 24시간을 넘긴 공고는 추천에서 제외해요. 공개 모드에서 화면으로 돌아오거나 네트워크가 다시 연결되면 오래되거나 확인하지 못한 게시판을 다시 조회해요. 게시판별 대기 시간을 지키며 검색 조건과 저장 기록은 유지합니다.</p>
     <details className="board-details" open={loading || catalogNeedsAttention(catalog)}>
       <summary>회사별 조회 기록<ChevronDown size={14} /></summary>
       <div className="board-list">{catalog.boards.map(board => {

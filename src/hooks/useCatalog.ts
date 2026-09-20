@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CITIES } from '../../shared/cities'
 import { catalogNeedsAttention, collectionHealth } from '../../shared/catalog-health'
+import { catalogNeedsRevalidation, PUBLIC_CATALOG_RECHECK_COOLDOWN } from '../../shared/catalog-freshness'
 import { createSampleCatalog } from '../../shared/sample'
 import { upgradeCatalog } from '../../shared/job-upgrade'
 import type { Catalog, Source } from '../../shared/types'
@@ -22,26 +23,38 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
   const [error, setError] = useState('')
   const [errorRetryAt, setErrorRetryAt] = useState<string>()
   const requestRef = useRef<AbortController | null>(null)
+  const selectedSourceRef = useRef(initialSource)
+  const catalogRef = useRef(catalog)
+  const lastAttemptRef = useRef<number | null>(null)
+  const retryAtRef = useRef<string | undefined>(undefined)
+  const failedRequestRef = useRef(false)
 
   const changeSource = useCallback(async (source: Source, { refresh = false, announce = true }: { refresh?: boolean; announce?: boolean } = {}) => {
+    selectedSourceRef.current = source
     requestRef.current?.abort()
     requestRef.current = null
+    retryAtRef.current = undefined
+    failedRequestRef.current = false
     setError('')
     setErrorRetryAt(undefined)
     setProgress(null)
     if (source === 'sample') {
-      setCatalog(createSampleCatalog())
+      const sample = createSampleCatalog()
+      catalogRef.current = sample
+      setCatalog(sample)
       setLoading(false)
       return
     }
     const controller = new AbortController()
     requestRef.current = controller
+    lastAttemptRef.current = Date.now()
     setLoading(true)
     try {
       let current: Catalog | undefined
       await requestPublicCatalog({ refresh, signal: controller.signal, onUpdate(result, latest) {
         if (controller.signal.aborted) return
         current = upgradeCatalog(result)
+        catalogRef.current = current
         setCatalog(current)
         setProgress(latest)
       } })
@@ -54,9 +67,15 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
       }
     } catch (cause) {
       if (!controller.signal.aborted) {
+        failedRequestRef.current = true
         if (cause instanceof CatalogRequestError) {
+          retryAtRef.current = cause.retryAt
           setErrorRetryAt(cause.retryAt)
-          if (cause.code === 'CATALOG_EXPIRED') setCatalog(previous => previous.source === 'public' ? initialCatalog('public') : previous)
+          if (cause.code === 'CATALOG_EXPIRED' && catalogRef.current.source === 'public') {
+            const expired = initialCatalog('public')
+            catalogRef.current = expired
+            setCatalog(expired)
+          }
         }
         const message = cause instanceof Error ? cause.message : '공고를 불러오지 못했어요.'
         setError(message)
@@ -72,8 +91,33 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
 
   useEffect(() => {
     if (initialSource !== 'sample') void changeSource(initialSource, { announce: false })
-    return () => requestRef.current?.abort()
+    return () => {
+      requestRef.current?.abort()
+      requestRef.current = null
+    }
   }, [initialSource, changeSource])
+
+  useEffect(() => {
+    const revalidate = () => {
+      if (document.visibilityState !== 'visible' || selectedSourceRef.current !== 'public' || requestRef.current) return
+      const now = Date.now()
+      if (lastAttemptRef.current !== null && now - lastAttemptRef.current < PUBLIC_CATALOG_RECHECK_COOLDOWN) return
+      const retryAt = Date.parse(retryAtRef.current ?? catalogRef.current.refreshAfter ?? '')
+      if (Number.isFinite(retryAt) && now < retryAt) return
+      if (!failedRequestRef.current && !catalogNeedsRevalidation(catalogRef.current, now)) return
+      void changeSource('public', { announce: false })
+    }
+    window.addEventListener('focus', revalidate)
+    window.addEventListener('pageshow', revalidate)
+    window.addEventListener('online', revalidate)
+    document.addEventListener('visibilitychange', revalidate)
+    return () => {
+      window.removeEventListener('focus', revalidate)
+      window.removeEventListener('pageshow', revalidate)
+      window.removeEventListener('online', revalidate)
+      document.removeEventListener('visibilitychange', revalidate)
+    }
+  }, [changeSource])
 
   return { catalog, loading, progress, error, changeSource, ready: Boolean(catalog.fetchedAt),
     retryAt: errorRetryAt ?? (error && progress && !progress.done ? undefined : catalog.refreshAfter) }

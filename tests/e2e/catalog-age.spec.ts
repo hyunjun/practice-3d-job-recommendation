@@ -103,17 +103,31 @@ for (const event of ['pageshow', 'focus', 'visibilitychange'] as const) {
   test(`a ${event} resume checks wall-clock age when timers did not run`, async ({ page }) => {
     const server = await restore(page)
     await expect(page.locator('.company-card')).toHaveCount(1)
-    await page.clock.setSystemTime(new Date(base + maxFallbackAge + 1000))
-    // Moving the wall clock does not run the scheduled timers. Exercise the
-    // resume handler explicitly; this is not a simulated network refresh.
+    const returnedAt = base + maxFallbackAge + 1000
+    const returned = snapshot(returnedAt)
+    returned.jobs[0] = searchJob('Returned48', { fetchedAt: iso(returnedAt) })
+    const held: import('@playwright/test').Route[] = []
+    await page.route('**/api/catalog?source=public*', route => { held.push(route) })
+    await page.clock.setSystemTime(new Date(returnedAt))
+    // This is a synthetic lifecycle hint, not actual bfcache navigation.
+    // Clock movement alone does not fetch; the visible return now revalidates.
     await page.evaluate(event => {
       if (event === 'visibilitychange') document.dispatchEvent(new Event(event))
       else if (event === 'pageshow') window.dispatchEvent(new PageTransitionEvent(event, { persisted: true }))
       else window.dispatchEvent(new Event(event))
     }, event)
-    await expect(page.getByRole('heading', { name: '공고를 다시 확인해 주세요' })).toBeVisible()
+    await expect.poll(() => held.length).toBe(1)
     await expect(page.locator('.company-card, .flat-marker')).toHaveCount(0)
-    expect(server.requests).toHaveLength(server.initialRequests)
+    await expect(page.locator('.catalog-placeholder')).toHaveAttribute('aria-busy', 'true')
+    expect(server.requests).toHaveLength(server.initialRequests + 1)
+    expect(server.requests.at(-1)).toMatchObject({
+      url: new URL('/api/catalog?source=public', page.url()).href, method: 'GET', body: null,
+    })
+    await held[0].fulfill({ json: returned })
+    await expect(page.locator('.mini-job-title')).toHaveText(['Backend Engineer Returned48'])
+    await expect(page.locator('.company-card')).toHaveCount(1)
+    await expect(page.locator('.catalog-placeholder')).toHaveCount(0)
+    expect(server.requests).toHaveLength(server.initialRequests + 1)
   })
 }
 

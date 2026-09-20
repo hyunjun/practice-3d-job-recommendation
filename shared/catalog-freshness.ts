@@ -6,6 +6,8 @@ export const CATALOG_LIFETIME = {
   maxFallbackAge: 24 * 60 * 60 * 1000,
 } as const
 
+export const PUBLIC_CATALOG_RECHECK_COOLDOWN = 60_000
+
 export type SnapshotFreshness = 'fresh' | 'stale' | 'expired' | 'unknown'
 
 export function snapshotFreshness(fetchedAt: string | null | undefined, now: number): SnapshotFreshness {
@@ -36,23 +38,56 @@ export function catalogDeadlines(catalog: Catalog): number[] {
   ])].sort((a, b) => a - b)
 }
 
-function boardSnapshotTime(board: BoardStatus, catalog: Catalog): string | undefined {
+function legacyJobTimes(catalog: Catalog): Map<string, string> {
+  const oldest = new Map<string, string>()
+  if (!catalog.boards.some(board => board.lastSuccessAt !== null
+    && (!board.lastSuccessAt || !Number.isFinite(Date.parse(board.lastSuccessAt))))) return oldest
+  for (const job of catalog.jobs) {
+    const time = Date.parse(job.fetchedAt)
+    if (!Number.isFinite(time)) continue
+    const previous = oldest.get(job.companyId)
+    if (previous === undefined || time < Date.parse(previous)) oldest.set(job.companyId, job.fetchedAt)
+  }
+  return oldest
+}
+
+function boardSnapshotTime(board: BoardStatus, catalog: Catalog, jobTimes: ReadonlyMap<string, string>): string | undefined {
   if (board.lastSuccessAt === null) return undefined
   if (board.lastSuccessAt && Number.isFinite(Date.parse(board.lastSuccessAt))) return board.lastSuccessAt
-  const records = catalog.jobs.filter(job => job.companyId === board.companyId && Number.isFinite(Date.parse(job.fetchedAt)))
-  if (records.length) return records.reduce((oldest, job) => Date.parse(job.fetchedAt) < Date.parse(oldest) ? job.fetchedAt : oldest, records[0].fetchedAt)
+  const oldest = jobTimes.get(board.companyId)
+  if (oldest !== undefined) return oldest
   return board.status === 'ok' && board.dataStatus !== 'unavailable' ? catalog.fetchedAt : undefined
+}
+
+/** A visible return may check due public boards; the server still owns collection scheduling. */
+export function catalogNeedsRevalidation(catalog: Catalog, now: number): boolean {
+  if (catalog.source === 'sample') return false
+  if (!catalog.fetchedAt) return true
+  if (!catalog.boards.length) return catalog.stale || snapshotFreshness(catalog.fetchedAt, now) !== 'fresh'
+  const jobTimes = legacyJobTimes(catalog)
+  return catalog.boards.some(board => {
+    if (board.status === 'pending') return true
+    if (board.status === 'error') {
+      const checkedAt = Date.parse(board.checkedAt ?? '')
+      const retryAt = Date.parse(board.retryAt ?? '')
+      return (!Number.isFinite(checkedAt) || now >= checkedAt + PUBLIC_CATALOG_RECHECK_COOLDOWN)
+        && (!Number.isFinite(retryAt) || now >= retryAt)
+    }
+    return board.dataStatus === 'unavailable' || board.dataStatus === 'stale'
+      || snapshotFreshness(boardSnapshotTime(board, catalog, jobTimes), now) !== 'fresh'
+  })
 }
 
 /** Derive the current view without rewriting the received snapshot or saved records. */
 export function ageCatalog(original: Catalog, now: number): { catalog: Catalog; expired: boolean } {
   if (original.source === 'sample' || !original.fetchedAt) return { catalog: original, expired: false }
+  const jobTimes = legacyJobTimes(original)
   const unavailable = new Set<string>()
   const retained = new Set<string>()
   let usableBoards = 0
   let expiredBoards = 0
   const boards = original.boards.map(board => {
-    const snapshotTime = boardSnapshotTime(board, original)
+    const snapshotTime = boardSnapshotTime(board, original, jobTimes)
     const age = snapshotFreshness(snapshotTime, now)
     const history = board.lastSuccessAt === undefined && snapshotTime ? { lastSuccessAt: snapshotTime } : {}
     if (age === 'expired') expiredBoards++

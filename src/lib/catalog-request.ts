@@ -93,7 +93,7 @@ function retryDelay(response: Response): number {
   return Math.max(1000, Number.isFinite(requested) ? requested : 0)
 }
 
-/** Poll only an explicitly requested, shared collection. No profile or job IDs leave the browser. */
+/** Follow one requested, shared collection. No profile or job IDs leave the browser. */
 export async function requestPublicCatalog({
   refresh, signal, onUpdate,
 }: { refresh: boolean; signal: AbortSignal; onUpdate: (catalog: Catalog, progress: CatalogProgress | null) => void }): Promise<void> {
