@@ -36,12 +36,13 @@ function paragraphEvidence(paragraph: string, position: number): FactEvidence {
 /**
  * Reconcile only explicit current-role statements with a disjoint listed city.
  * Applicant residence, company offices and future/conditional work are not workplaces.
- * Remote jobs use their own location fields; their scope never comes from role prose.
+ * Remote jobs reconcile their posting fields with explicit current-role country statements.
  * Overlapping multi-location city listings remain authoritative.
  */
-export function upgradeJobLocation<T extends Job>(job: T, description = job.description): T {
-  if (job.workMode === 'remote') return upgradeJobRemoteScope(job)
+export function upgradeJobLocation<T extends Job>(job: T, fullDescription?: string): T {
+  if (job.workMode === 'remote') return upgradeJobRemoteScope(job, fullDescription)
   if (job.source === 'sample' || !job.cityIds.length || job.locationResolution) return job
+  const description = fullDescription ?? job.description
   const roleLocation = new RegExp(ROLE_LOCATION)
   if (!roleLocation.test(description)) return job
   roleLocation.lastIndex = 0

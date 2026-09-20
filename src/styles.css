@@ -518,6 +518,11 @@ select option { background: #1e271c; color: var(--text); }
 .remote-scope strong { font-size: 12px; font-weight: 500; }
 .remote-scope p { font-size: 12px; color: #cfdfbd; margin: 6px 0; line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
 .remote-scope small { display: block; font-size: 11px; line-height: 1.7; color: #9cb48e; word-break: keep-all; overflow-wrap: anywhere; }
+.remote-scope.unconfirmed { background: #4e42252e; border-color: #a18d4c5c; color: #d6c281; }
+.remote-scope .remote-scope-note { color: #c2ceaf; font-size: 11px; }
+.remote-scope details { margin-top: 12px; }
+.remote-scope summary { color: #d0dfbb; font-size: 11px; cursor: pointer; line-height: 1.8; overflow-wrap: anywhere; }
+.remote-scope blockquote { margin: 12px 0; padding-left: 12px; border-left: 2px solid #7d9066; color: #d9e2cf; font-size: 11px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
 .job-freshness-notice { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 20px; padding: 15px; border: 1px solid #78673f; border-radius: 6px; background: #3c35254d; color: #e1ce9b; }
 .job-freshness-notice > svg { margin-top: 2px; flex-shrink: 0; }
 .job-freshness-notice strong { font-size: 12px; font-weight: 500; }

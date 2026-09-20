@@ -15,7 +15,7 @@ export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 2 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
 export const OCCUPATION_VERSION = 3 as const
-export const REMOTE_SCOPE_VERSION = 1 as const
+export const REMOTE_SCOPE_VERSION = 2 as const
 export const EMPLOYMENT_VERSION = 1 as const
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
@@ -136,6 +136,16 @@ export interface JobLocationResolution {
   evidence: FactEvidence[]
 }
 
+export interface JobRemoteScopeResolution {
+  version: 1
+  status: 'description' | 'unconfirmed'
+  /** Keep the original posting facts separate from countries interpreted from its body. */
+  listedCountries: string[]
+  listedWorldwide: boolean
+  evidence: (FactEvidence & { source: 'description' })[]
+  truncated?: boolean
+}
+
 export interface Job {
   id: string
   companyId: string
@@ -163,7 +173,8 @@ export interface Job {
   remoteWorldwide: boolean
   remoteScopeUnknown: boolean
   remoteRegions?: Exclude<Region, 'all'>[]
-  remoteScopeVersion?: typeof REMOTE_SCOPE_VERSION
+  remoteScopeVersion?: 1 | typeof REMOTE_SCOPE_VERSION
+  remoteScopeResolution?: JobRemoteScopeResolution
   description: string
   requirements: string[]
   url: string

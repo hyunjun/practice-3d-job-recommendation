@@ -38,8 +38,11 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
       const city = CITY_BY_ID.get(id)
       return city ? [city.name, city.en, city.country, city.countryCode] : []
     })
+    // A concrete body restriction can narrow a broader posting-region hint.
+    // Keep those original hints on the job, but search the now-confirmed countries.
     const regions = job.workMode === 'remote'
-      ? [...(job.remoteRegions ?? []), ...job.remoteCountries.flatMap(code => COUNTRY_BY_CODE.get(code)?.region ?? [])]
+      ? [...(job.remoteScopeResolution?.status === 'description' ? [] : job.remoteRegions ?? []),
+        ...job.remoteCountries.flatMap(code => COUNTRY_BY_CODE.get(code)?.region ?? [])]
       : job.cityIds.flatMap(id => CITY_BY_ID.get(id)?.region ?? [])
     return [{
       job, company,

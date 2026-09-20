@@ -1,7 +1,6 @@
 import { ArrowUpRight, Bookmark, BookmarkCheck, BriefcaseBusiness, Check, CheckCircle2, CircleHelp, Clock3, Globe2, MapPin, ShieldCheck } from 'lucide-react'
 import { formatJobSalary, formatSalary, safeExternalUrl } from '../../shared/matching'
 import { COMPENSATION_VERSION, EMPLOYMENT_LABELS, JOB_SOURCE_LABELS, MODE_LABELS, VISA_LABELS } from '../../shared/types'
-import { REMOTE_SCOPE_CAUTION, remoteScopeLabel } from '../../shared/job-remote'
 import type { MatchedJob, SavedJob } from '../../shared/types'
 import { CompanyLogo, Dialog } from './ui'
 import { JobEvidenceDetails } from './JobEvidenceDetails'
@@ -19,6 +18,7 @@ import { isTechnicalJob } from '../../shared/job-occupation'
 import { JobRoleDetails } from './JobRoleDetails'
 import type { SavedJobsController } from '../hooks/useSavedJobs'
 import { SavedStorageNotice } from './SavedStorageNotice'
+import { JobRemoteScopeDetails } from './JobRemoteScopeDetails'
 
 interface Props {
   match: MatchedJob
@@ -49,7 +49,7 @@ export function JobDialog({ match, saved, storage, onManageSaved, postingObserva
       <JobRoleDetails job={job} />
       <div className="job-key-facts"><div><span>{verifiedSalary ? '세전 연봉' : '보상 정보'}</span><strong>{formatJobSalary(job)}</strong>{verifiedSalary && job.salary && job.salary.currency !== 'USD' && <small>약 {formatSalary(job.salary, true)} USD / 년</small>}</div><div><span>비자 지원</span><strong className={job.visa === 'conditional' ? 'conditional-visa' : job.visa === 'yes' ? 'text-accent' : ''}>{VISA_LABELS[job.visa]}</strong><small>{job.source === 'sample' ? '샘플 시나리오 기준' : sponsorshipTransferSummary(job) ?? '공고의 명시적 문구 기준'}</small></div></div>
       <CompensationDetails job={job} />
-      {job.workMode === 'remote' && <div className="remote-scope"><Globe2 size={18} /><div><strong>명시된 원격근무 지역</strong><p>{remoteScopeLabel(job)}</p><small>{REMOTE_SCOPE_CAUTION}</small></div></div>}
+      <JobRemoteScopeDetails job={job} />
       {isUnmappedJob(job) && job.locationResolution?.status !== 'conflict' && <div className="unmapped-job-notice"><MapPin size={17} /><div><strong>지도에 표시되지 않은 근무지</strong><p>위에 적힌 공고의 위치를 확인해 주세요. 제공 도시 밖이거나 도시를 특정하기 어려워 지도에는 표시하지 않아요. 출근 장소와 근무 형태는 원문에서 다시 확인해 주세요.</p></div></div>}
       <JobEvidenceDetails evidence={job.evidence} />
       <JobEligibilityDetails job={job} />
