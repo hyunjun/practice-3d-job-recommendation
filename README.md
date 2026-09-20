@@ -27,6 +27,65 @@ PORT=5174 npm run dev
 
 지도 텍스처, 국가 경계, 도시 사진, 글꼴, PDF 분석 자산을 로컬에서 제공합니다. 패키지 설치가 끝나면 샘플 탐색과 이력서 분석은 인터넷 연결 없이 사용할 수 있습니다.
 
+### 수집할 회사 선택·추가
+
+`.local/job-boards.json`으로 공개 게시판 목록을 정할 수 있습니다. 처음 설정할 때는 실행 가능한 예시를 복사하세요. 기존 설정이 있으면 해당 파일을 편집합니다.
+
+```bash
+mkdir -p .local
+cp -n examples/job-boards.json .local/job-boards.json
+npm run boards:check
+npm run dev
+```
+
+예시는 GitLab·Airbnb·Linear·Spotify·Wise 5개 회사만 조회합니다. 샘플 시나리오는 계속 사용할 수 있습니다.
+
+```json
+{
+  "version": 1,
+  "mode": "replace",
+  "companies": ["gitlab", "airbnb", "linear", "spotify", "wise"]
+}
+```
+
+| 설정 | 동작 |
+| --- | --- |
+| 설정 파일 없음 | 기본 22개 회사 사용 |
+| `mode: "extend"` 또는 mode 생략 | 기본 목록에 추가. 같은 ID의 회사 객체는 해당 회사의 등록 정보 변경 |
+| `mode: "replace"` | `companies`에 적은 회사만 사용 |
+| 회사 ID 문자열 | 기본 목록의 등록 정보 재사용. `npm run boards:check -- --help`에서 ID 목록 확인 |
+| 회사 객체 | 회사와 공개 게시판을 직접 등록 |
+
+새 회사를 등록할 때는 `companies` 배열에 다음 형태의 객체를 넣고, 예시 값을 실제 회사 정보로 바꿉니다.
+
+```json
+{
+  "id": "acme-research",
+  "name": "Acme Research",
+  "provider": "ashby",
+  "board": "AcmeResearch",
+  "careerUrl": "https://example.com/careers",
+  "industry": "개발자 도구"
+}
+```
+
+`provider`는 `greenhouse`, `ashby`, `lever`, `smartrecruiters` 중 하나입니다. 회사의 공식 채용 페이지에서 공개 게시판을 확인하고, `board`에는 URL의 게시판 이름 부분을 넣으세요. 대소문자·공백·Unicode는 보존합니다. 예를 들어 Ashby의 `https://jobs.ashbyhq.com/Linear`는 `board: "Linear"`입니다. Lever EU 게시판에는 `boardRegion: "eu"`를 추가합니다. 표시용 이니셜과 색상은 자동으로 정하며 `industry`는 생략할 수 있습니다.
+
+회사 `id`는 회사 수의 중복 제거와 저장 기록의 연결 기준입니다. 같은 회사의 게시판을 변경할 때는 ID를 유지하고, 같은 실제 회사에 여러 ID를 만들지 마세요. 한 ID에는 하나의 게시판을 등록합니다. 목록 안의 중복 ID나 같은 출처·게시판·Lever 지역을 가리키는 중복 등록은 오류로 알려줍니다.
+
+다른 파일을 사용하려면:
+
+```bash
+ORBIT_BOARDS_FILE="/absolute/path/my-boards.json" npm run dev
+ORBIT_BOARDS_FILE="/absolute/path/my-boards.json" npm start
+```
+
+상대 경로는 서버를 실행하는 폴더 기준입니다. `npm run boards:check -- /absolute/path/my-boards.json`으로 먼저 확인할 수도 있습니다. `boards:check`는 네트워크 요청 없이 설정 형식을 검사하며, 실제 게시판의 존재·연결 상태는 앱의 공개 공고 조회에서 확인합니다. `npm run dev`도 이 검사를 먼저 수행합니다. JSON 오류·알 수 없는 항목·잘못된 경로는 필드와 함께 알려주며, 명시한 파일을 읽지 못하면 시작을 중단합니다.
+
+설정은 서버 시작 시 읽습니다. 파일을 수정한 뒤 서버를 재시작하면 적용되며, 배포용 빌드를 다시 만들 필요는 없습니다. 적용할 회사는 1–1,000개, 파일 크기는 1 MiB까지 지원합니다. `.local/`의 설정과 수집 자료는 Git에서 제외됩니다.
+
+설정 파일별 캐시는 기본 캐시와 분리됩니다. 같은 게시판의 정상 조회·재시도 기록은 재사용하고, 회사·출처·게시판·Lever 지역이 달라지면 새로 확인합니다. 조회 범위에서 뺀 회사의 저장 공고·메모·지원 상태는 유지되며, 이전 게시판이 현재 범위와 다르면 **확인 필요**로 안내합니다. 수집 범위를 아직 전달받지 못한 공개 화면의 대상 회사 수는 `—`로 표시합니다.
+
 ## 할 수 있는 일
 
 - **3D 지구 / 2D 지도:** 회전, 확대·축소, 지역 이동, 주간·야간 전환, 도시 선택. 가까운 도시는 묶고 확대하면 분리합니다.
@@ -72,7 +131,7 @@ PORT=5174 npm run dev
 
 샘플은 **22개 도시, 32개 실제 회사 이름을 활용한 체험용 시나리오**입니다. 공고·연봉·비자·근무 조건은 실제 채용 사실을 나타내지 않습니다. 샘플 공고의 링크는 실제 회사의 채용 페이지로 연결됩니다.
 
-공개 모드는 다음 **22개 회사의 공개 게시판 API**를 조회합니다.
+공개 모드의 기본 설정은 다음 **22개 회사의 공개 게시판 API**를 조회합니다. 로컬 설정으로 이 목록을 선택·확장할 수 있습니다.
 
 | 출처 | 대상 회사 |
 | --- | --- |
@@ -286,6 +345,7 @@ server/
   index.ts                   Express + Vite / 정적 앱 서버
   http.ts                    API 응답, 압축 협상과 조건부 HTTP 재검증
   catalog.ts                 수집기 선택과 공개 게시판 구성
+  board-config.ts            로컬 게시판 설정 검증·회사 목록 구성·캐시 선택
   providers/                 4종 공개 API 조회·정규화, 제공자별 공통 요청 제한
   catalog-service.ts         회사별 갱신·보존·만료·재시도 조정
   board-cache.ts             디스크 캐시 검증·이전·원자적 저장
@@ -293,10 +353,14 @@ server/
   greenhouse-compensation.ts  Greenhouse 보상 메타데이터 해석
   job-facts.ts               근무·고용 조건과 원문 근거 추출
 tests/                       단위·브라우저 검사와 가상 이력서
+examples/job-boards.json      실행 가능한 공개 게시판 선택 예시
+scripts/check-boards.ts       네트워크 요청 없이 로컬 설정 확인
 public/                      로컬 지도·사진·폰트 관련 자산
 ```
 
-공개 공고 캐시는 `.local/public-board-cache-v5.json`에 생성되며 이력서는 들어가지 않습니다. 기존 Greenhouse v4·v3 캐시를 순서대로 확인해 이전합니다. 회사·게시판·출처·Lever 지역이 같은 결과만 재사용하고, 복구할 수 없는 회사별 지도 제외 건수는 임의로 나누지 않고 미확인으로 표시합니다. 기존 브라우저의 Greenhouse 탐색 모드는 공개 모드로 복원하며 저장 공고의 출처와 ID는 유지합니다.
+기본 공개 공고 캐시는 `.local/public-board-cache-v5.json`에 생성되며 이력서는 들어가지 않습니다. 로컬 설정을 사용하면 정규화한 설정 파일 경로별로 `.local/configured-board-cache-v5-*.json`을 사용합니다. 별도 캐시가 없을 때는 기본 캐시도 이전 자료로 읽지만 기본 파일을 덮어쓰지 않습니다. 같은 설정 파일을 수정하면 일치하는 게시판의 기록을 재사용합니다.
+
+기존 Greenhouse v4·v3 캐시도 순서대로 확인해 이전합니다. 회사·게시판·출처·Lever 지역이 같은 결과만 재사용하고, 복구할 수 없는 회사별 지도 제외 건수는 임의로 나누지 않고 미확인으로 표시합니다. 손상된 새 캐시를 이전 자료로 대체하지 않습니다. 기존 브라우저의 Greenhouse 탐색 모드는 공개 모드로 복원하며 저장 공고의 출처와 ID는 유지합니다.
 
 지도에 연결되지 않은 공고를 개수만 남겼던 이전 캐시도 원래 조회 시각과 재시도 규칙을 유지합니다. 아직 내용이 없는 공고 수와 실제 검색 가능한 공고 수를 구분하고, 다음 정상 조회에서 내용을 받아 목록을 갱신합니다. `unmappedCount`는 이전 조회의 누락분을 포함한 지도 미연결 공고 수이며, 새 조회에서는 해당 공고가 `jobs`에도 포함됩니다.
 
@@ -318,7 +382,7 @@ public/                      로컬 지도·사진·폰트 관련 자산
 
 직군·직무 분류는 게시된 표기를 이용한 탐색 보조입니다. 제목의 제품 분야와 실제 담당 업무가 일치하지 않을 수 있고, 부서가 해당 직무보다 넓은 범위일 수 있습니다. 일반 연구 직함에서 영어 업무·자격 근거를 확인하지 못하면 탐색에서 빠질 수 있으며, 연구직으로 포함되어도 학위·연구 경력 충족을 보장하지 않습니다. 모든 직업·직급·언어를 검증하거나 O*NET 직업 코드를 자동 부여하는 분류 체계는 아닙니다.
 
-API는 `/api/catalog?source=sample` 또는 `source=public`을 사용합니다. 이전 `source=greenhouse` 요청도 받지만 반환하는 카탈로그 모드는 `public`이며, 각 공고의 `source`에는 실제 제공자를 기록합니다. 새 회사를 추가하려면 `shared/companies.ts`의 `PUBLIC_COMPANIES`에 회사·출처·게시판을 등록합니다. Lever EU 게시판은 `boardRegion: 'eu'`로 구분합니다.
+API는 `/api/catalog?source=sample` 또는 `source=public`을 사용합니다. 이전 `source=greenhouse` 요청도 받지만 반환하는 카탈로그 모드는 `public`이며, 각 공고의 `source`에는 실제 제공자를 기록합니다. 개인별 수집 목록은 로컬 게시판 설정으로 관리합니다. 저장소의 기본 목록 자체를 변경할 때는 `shared/companies.ts`의 `PUBLIC_COMPANIES`를 수정합니다. 두 방식 모두 같은 네 수집기를 사용합니다.
 
 `/api/posting-status`는 등록된 게시판의 전체 공개 ID, 탐색 대상 공고의 표시 항목별 SHA-256 값, 회사별 확인·실패·재시도 시각을 반환합니다. `?refresh=1`은 기존 회사별 재조회 정책을 따르며 카탈로그와 진행 중인 수집을 공유합니다. 저장한 공고 ID나 URL을 입력받는 API가 아니며 임의 사이트를 조회하지 않습니다. 전체 ID는 직군 선별 전에 확보하고, 비공개·비활성이 명시된 항목을 제외한 완전한 공개 목록을 회사별 캐시에 반영합니다. 지도에 연결되지 않은 개발·연구 공고의 내용도 비교 대상에 포함합니다.
 

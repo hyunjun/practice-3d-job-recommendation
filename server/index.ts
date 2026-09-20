@@ -1,7 +1,13 @@
 import express from 'express'
 import path from 'node:path'
-import { getProgressivePublicCatalog, getPublicCatalog, getPublicCatalogProgress, getPublicPostingStatus } from './catalog'
+import { getProgressivePublicCatalog, getPublicCatalog, getPublicCatalogProgress, getPublicPostingStatus, initializePublicCatalog } from './catalog'
 import { compressResponses, createApiRouter } from './http'
+
+try { await initializePublicCatalog() }
+catch (error) {
+  console.error('ORBIT 공개 게시판 설정을 확인해 주세요:', error instanceof Error ? error.message : '설정을 읽지 못했습니다.')
+  process.exit(1)
+}
 
 const app = express()
 const port = Number(process.env.PORT ?? 5173)

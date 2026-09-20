@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "mode": "replace",
+  "companies": ["gitlab", "airbnb", "linear", "spotify", "wise"]
+}

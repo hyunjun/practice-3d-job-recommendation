@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CITIES } from '../../shared/cities'
-import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { catalogNeedsAttention, collectionHealth } from '../../shared/catalog-health'
 import { createSampleCatalog } from '../../shared/sample'
 import { upgradeCatalog } from '../../shared/job-upgrade'
@@ -11,7 +10,7 @@ import { CatalogRequestError, requestPublicCatalog } from '../lib/catalog-reques
 function initialCatalog(source: Source): Catalog {
   // A blank timestamp marks a client-only placeholder, never a completed empty collection.
   return source === 'sample' ? createSampleCatalog() : {
-    source, fetchedAt: '', stale: false, companies: PUBLIC_COMPANIES, cities: CITIES,
+    source, fetchedAt: '', stale: false, companies: [], cities: CITIES,
     jobs: [], boards: [], unmappedCount: 0,
   }
 }
