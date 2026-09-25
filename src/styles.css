@@ -20,6 +20,7 @@
   --accent-dark: #1d2b15;
   --mono: "JetBrains Mono Variable", monospace;
   color-scheme: dark;
+  scroll-padding-block: 16px max(16px, var(--toast-clearance, 0px));
 }
 
 * { box-sizing: border-box; }
@@ -45,7 +46,7 @@ input[type="range"] { accent-color: var(--accent); cursor: pointer; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 .skip-link { position: fixed; top: -60px; left: 20px; padding: 12px 20px; color: var(--bg); background: var(--accent); border-radius: 6px; z-index: 1000; }
 .skip-link:focus { top: 12px; }
-.app-shell { min-height: 100dvh; display: flex; flex-direction: column; }
+.app-shell { min-height: 100dvh; display: flex; flex-direction: column; padding-bottom: var(--toast-clearance, 0px); }
 .app-header { height: 74px; flex-shrink: 0; display: flex; align-items: center; padding: 0 28px; border-bottom: 1px solid var(--line); background: #151a14; position: relative; z-index: 20; }
 .brand { display: inline-flex; align-items: center; gap: 9px; min-width: 276px; text-align: left; }
 .orbit-logo { width: 38px; height: 38px; display: inline-flex; color: var(--accent); }
@@ -1109,8 +1110,8 @@ select option { background: #1e271c; color: var(--text); }
   .active-filter-summary { bottom: 47px; font-size: 9px; }
 }
 @media (max-width: 680px) {
-  :root { --mobile-nav-height: calc(62px + env(safe-area-inset-bottom, 0px)); scroll-padding-block: 16px calc(var(--mobile-nav-height) + 16px); }
-  .app-shell { padding-bottom: var(--mobile-nav-height); }
+  :root { --mobile-nav-height: calc(62px + env(safe-area-inset-bottom, 0px)); scroll-padding-block: 16px max(calc(var(--mobile-nav-height) + 16px), var(--toast-clearance, 0px)); }
+  .app-shell { padding-bottom: max(var(--mobile-nav-height), var(--toast-clearance, 0px)); }
   .app-header { height: 62px; padding: 0 18px; }
   .brand { min-width: 0; }
   .brand > span:nth-child(2) { font-size: 28px; }

@@ -33,15 +33,16 @@ interface Props {
   onToggleSave: () => void
   onUpdateSaved: (update: Partial<Pick<SavedJob, 'note' | 'status'>>) => void
   onClose: () => void
+  fallbackFocus?: () => HTMLElement | null
 }
 
-export function JobDialog({ match, saved, storage, onManageSaved, postingObservation, onToggleSave, onUpdateSaved, onClose }: Props) {
+export function JobDialog({ match, saved, storage, onManageSaved, postingObservation, onToggleSave, onUpdateSaved, onClose, fallbackFocus }: Props) {
   const { job, company, matchedSkills, reasons, cautions } = match
   const technical = isTechnicalJob(job)
   const url = safeExternalUrl(jobPostingUrl(job))
   const date = new Date(job.fetchedAt).toLocaleDateString('ko-KR')
   const verifiedSalary = job.salary && (job.source === 'sample' || job.compensationVersion === COMPENSATION_VERSION)
-  return <Dialog title={company.name} eyebrow={company.industry} onClose={onClose} className="job-dialog">
+  return <Dialog title={company.name} eyebrow={company.industry} onClose={onClose} fallbackFocus={fallbackFocus} className="job-dialog">
     <div className="dialog-body">
       {!saved && <SavedStorageNotice storage={storage} onManage={onManageSaved} issuesOnly={storage.ready} />}
       <div className="job-detail-heading"><CompanyLogo company={company} /><div><h3>{job.title}</h3><p><MapPin size={14} />{job.locationLabel}</p></div></div>
