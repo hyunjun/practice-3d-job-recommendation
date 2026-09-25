@@ -65,10 +65,13 @@ export async function fetchLeverBoard(company: Company, fetchedAt: string) {
     const url = `https://${host}/v0/postings/${encodeURIComponent(company.board!)}?mode=json&limit=${PAGE_SIZE}&skip=${skip}`
     const parsed = z.array(LeverJobSchema).max(PAGE_SIZE).safeParse(await fetchBoardJson(url, signal))
     if (!parsed.success) throw new BoardFetchError('Lever 게시판의 공고 형식을 확인하지 못했어요.')
-    const previousSize = jobs.size
-    parsed.data.forEach(job => jobs.set(job.id, job))
+    for (const job of parsed.data) {
+      // An overlapping offset page can omit other postings; deduplication
+      // cannot establish a complete inventory for cache or posting status.
+      if (jobs.has(job.id)) throw new BoardFetchError('게시판의 공고 목록이 중복되어 전체 조회를 확인하지 못했어요.')
+      jobs.set(job.id, job)
+    }
     if (jobs.size > MAX_POSTINGS) throw new BoardFetchError('한 번에 확인할 수 있는 게시판 크기를 초과했어요.')
-    if (parsed.data.length && jobs.size === previousSize) throw new BoardFetchError('게시판의 다음 공고 페이지를 확인하지 못했어요.')
     if (parsed.data.length < PAGE_SIZE) return includedJobs([...jobs.values()].map(job => normalizeLeverJob(job, company.id, fetchedAt)), jobs.size, [...jobs.keys()].map(id => `lever-${company.id}-${id}`))
   }
   // Never replace a complete snapshot with a truncated feed.

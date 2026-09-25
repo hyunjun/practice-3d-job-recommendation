@@ -138,12 +138,12 @@ describe('public feed collection', () => {
     }
   })
 
-  it('reads all Lever pages through one deadline, deduplicates overlapping IDs and supports the EU endpoint', async () => {
+  it('reads unique Lever pages through one deadline and supports the EU endpoint', async () => {
     const fetcher = vi.fn()
     vi.stubGlobal('fetch', fetcher)
     const page = Array.from({ length: 50 }, (_, index) => leverPosting({ id: `page-${index}` }))
     fetcher.mockResolvedValueOnce(Response.json(page))
-    fetcher.mockResolvedValueOnce(Response.json([page[49], leverPosting({ id: 'last-page' })]))
+    fetcher.mockResolvedValueOnce(Response.json([leverPosting({ id: 'last-page' })]))
     const result = await fetchLeverBoard({ ...lever, boardRegion: 'eu' }, POSTING_TIME)
     expect(result.total).toBe(51)
     expect(result.jobs).toHaveLength(51)
@@ -239,7 +239,7 @@ describe('public feed collection', () => {
     const fetcher = vi.fn().mockResolvedValue(Response.json(page))
     vi.stubGlobal('fetch', fetcher)
     fetcher.mockImplementation(async () => Response.json(page))
-    await expect(fetchLeverBoard(lever, POSTING_TIME)).rejects.toThrow('다음 공고 페이지')
+    await expect(fetchLeverBoard(lever, POSTING_TIME)).rejects.toThrow('게시판의 공고 목록이 중복되어 전체 조회를 확인하지 못했어요.')
     expect(fetcher).toHaveBeenCalledTimes(2)
     fetcher.mockResolvedValueOnce(Response.json({ jobs: [] }))
     await expect(fetchLeverBoard(lever, POSTING_TIME)).rejects.toBeInstanceOf(BoardFetchError)
