@@ -8,7 +8,7 @@ import type { Fact } from '../job-facts'
 import type { WorkMode } from '../../shared/types'
 import { normalizePosting, plainText, postingCities, postingLocationLabel, postingRemoteScope } from '../normalize'
 import type { PostingLocation } from '../normalize'
-import { BOARD_TIMEOUT, MAX_POSTINGS, fetchBoardJson, includedJobs } from './http'
+import { BOARD_TIMEOUT, MAX_POSTINGS, assertUniquePostingIds, fetchBoardJson, includedJobs } from './http'
 
 const PostalAddress = z.object({
   addressLocality: z.string().nullish(), addressRegion: z.string().nullish(), addressCountry: z.string().nullish(),
@@ -72,6 +72,7 @@ export function normalizeAshbyJob(raw: AshbyJob, companyId: string, fetchedAt: s
 export async function fetchAshbyBoard(company: Company, fetchedAt: string) {
   const data = Feed.safeParse(await fetchBoardJson(`https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(company.board!)}?includeCompensation=true`, AbortSignal.timeout(BOARD_TIMEOUT)))
   if (!data.success) throw new BoardFetchError('Ashby 게시판의 공고 형식을 확인하지 못했어요.')
-  const listed = [...new Map(data.data.jobs.filter(job => job.isListed).map(job => [job.id, job])).values()]
+  assertUniquePostingIds(data.data.jobs)
+  const listed = data.data.jobs.filter(job => job.isListed)
   return includedJobs(listed.map(job => normalizeAshbyJob(job, company.id, fetchedAt)), listed.length, listed.map(job => `ashby-${company.id}-${job.id}`))
 }

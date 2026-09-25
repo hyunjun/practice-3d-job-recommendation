@@ -19,6 +19,14 @@ export async function fetchBoardJson(url: string, signal: AbortSignal): Promise<
   catch { throw new BoardFetchError('게시판 응답 형식을 확인하지 못했어요.') }
 }
 
+export function assertUniquePostingIds(postings: readonly { id: string | number }[]): void {
+  const ids = new Set<string | number>()
+  for (const { id } of postings) {
+    if (ids.has(id)) throw new BoardFetchError('게시판의 공고 목록이 중복되어 전체 조회를 확인하지 못했어요.')
+    ids.add(id)
+  }
+}
+
 export function includedJobs(normalized: (Job | null)[], total: number, publishedIds?: string[]): BoardResult {
   const jobs = normalized.filter((job): job is Job => job !== null)
   const unmappedCount = jobs.filter(isUnmappedJob).length

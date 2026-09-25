@@ -128,13 +128,20 @@ describe('saved posting evidence', () => {
 })
 
 describe('complete listing collection and reuse', () => {
-  it('collects all Greenhouse published IDs, retains unmapped developers and deduplicates repeated IDs', async () => {
+  it('collects unique Greenhouse published IDs, retains unmapped developers and rejects repeated IDs', async () => {
     const posting = { id: 1, title: 'Backend Engineer', absolute_url: 'https://example.com/1', location: { name: 'London, UK' }, content: '' }
     const fetcher = vi.fn(async () => Response.json({ jobs: [
       posting, posting, { ...posting, id: 2, title: 'Account Executive' },
       { ...posting, id: 3, location: { name: 'Unknown Office' } },
     ], meta: { total: 4 } }))
     vi.stubGlobal('fetch', fetcher)
+    const repeated = fetchGreenhouseBoard(company, iso(BASE))
+    await expect(repeated).rejects.toBeInstanceOf(BoardFetchError)
+    await expect(repeated).rejects.toThrow('게시판의 공고 목록이 중복되어 전체 조회를 확인하지 못했어요.')
+    fetcher.mockImplementationOnce(async () => Response.json({ jobs: [
+      posting, { ...posting, id: 2, title: 'Account Executive' },
+      { ...posting, id: 3, location: { name: 'Unknown Office' } },
+    ], meta: { total: 3 } }))
     const result = await fetchGreenhouseBoard(company, iso(BASE))
     expect(result.jobs.map(job => job.id)).toEqual([1, 3].map(id => `greenhouse-${company.id}-${id}`))
     expect(result.jobs[1]).toMatchObject({ cityIds: [], locationLabel: 'Unknown Office', workMode: 'unknown' })

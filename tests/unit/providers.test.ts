@@ -184,7 +184,7 @@ describe('public feed collection', () => {
 
   it('retains unmapped Ashby jobs and all published IDs while excluding non-developer and unlisted content', async () => {
     const fetcher = vi.fn(async () => Response.json({ apiVersion: '1', jobs: [
-      ashbyPosting(), ashbyPosting(),
+      ashbyPosting(),
       ashbyPosting({ id: 'non-developer', title: 'Account Executive' }),
       ashbyPosting({ id: 'unmapped', location: 'Unknown Office', address: null, secondaryLocations: [], workplaceType: 'OnSite' }),
       ashbyPosting({ id: 'unlisted', isListed: false }),
