@@ -8,13 +8,14 @@ import {
 } from '../fixtures/catalog-source-selection'
 import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
 import { readSavedJson } from './helpers/saved-store'
+import { expectSourceChoice, sourceChoice } from './helpers/source-choice'
 
 const ordinary = '/api/catalog?source=public'
 const forced = '/api/catalog?source=public&refresh=1'
 const monitor = '/api/catalog/progress?id=00000000-0000-4000-8000-000000000049&after=1'
 type Reply = (route: Route) => Promise<void> | void
-const sampleChoice = (page: Page) => page.getByRole('dialog').getByRole('button', { name: /샘플로 탐색/ })
-const publicChoice = (page: Page) => page.getByRole('dialog').getByRole('button', { name: /공개 채용공고/ })
+const sampleChoice = (page: Page) => sourceChoice(page, 'sample')
+const publicChoice = (page: Page) => sourceChoice(page, 'public')
 const query = (page: Page) => page.getByRole('textbox', { name: '도시, 회사 또는 포지션 검색', exact: true })
 const metric = (page: Page, label: string) => page.getByRole('row').filter({
   has: page.getByRole('rowheader').filter({ hasText: new RegExp(`^${label}`) }),
@@ -82,9 +83,39 @@ async function setup(page: Page, view: 'explore' | 'compare' = 'explore') {
   expect(traffic.requests).toEqual([])
   return {
     traffic, failures, before, expectedAborts: 0, seedWrites: 1,
+    sourceChoices: [] as Awaited<ReturnType<typeof expectSourceChoice>>[],
+    blockedInputs: [] as { phase: string; catalogRequests: number; keyboardFocusAfterTab: string }[],
     respond(handler: Reply) { reply = handler },
     monitor(handler: Reply) { progress = handler },
   }
+}
+
+async function selectedChoice(page: Page, state: Awaited<ReturnType<typeof setup>>, phase: string, selected: 'sample' | 'public', publicDisabled: boolean) {
+  state.sourceChoices.push(await expectSourceChoice(page, phase, selected, publicDisabled))
+}
+
+async function blockedPublicInput(page: Page, state: Awaited<ReturnType<typeof setup>>, phase: string, catalogRequests: number) {
+  const button = publicChoice(page)
+  await expect(button).toBeDisabled()
+  expect(state.traffic.catalog()).toHaveLength(catalogRequests)
+  await button.scrollIntoViewIfNeeded()
+  const box = await button.boundingBox()
+  expect(box).not.toBeNull()
+  // A native pointer click reaches the disabled control. Avoid locator.click(),
+  // which would wait for enabled actionability instead of testing the browser.
+  await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2)
+  await expect(button).toBeDisabled()
+  await page.getByRole('dialog').getByRole('button', { name: '닫기', exact: true }).focus()
+  await page.keyboard.press('Tab')
+  await expect(sampleChoice(page)).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(button).not.toBeFocused()
+  const keyboardFocusAfterTab = await page.evaluate(() => document.activeElement?.tagName ?? '')
+  // Native-disabled public is not keyboard-reachable; sample activation and an
+  // enabled retry are exercised with Space/Enter in the original flows below.
+  expect(state.traffic.catalog()).toHaveLength(catalogRequests)
+  state.blockedInputs.push({ phase, catalogRequests, keyboardFocusAfterTab })
+  await page.getByRole('dialog').getByRole('button', { name: '닫기', exact: true }).focus()
 }
 
 async function publicUnknown(page: Page) {
@@ -139,6 +170,8 @@ async function evidence(page: Page, info: TestInfo, state: Awaited<ReturnType<ty
     seededOnceBeforeApp: true, noReloadInitScript: true, realReloadUsedWhereSpecified: true,
     clock: 'Fixed Date only; native browser requests, timers and reloads',
     requests: state.traffic.requests, failures: state.failures, context: await contextState(page),
+    sourceChoices: state.sourceChoices, blockedInputs: state.blockedInputs,
+    boundary: 'Invented HTTP catalog replies for UI verification; not live provider collection',
   }, null, 2))
 }
 
@@ -153,11 +186,14 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
     state.respond(route => { held.push(route) })
     state.monitor(route => { monitors.push(route) })
     await page.getByRole('button', { name: '샘플 탐색', exact: true }).press('Enter')
+    await selectedChoice(page, state, 'initial-sample', 'sample', false)
     await publicChoice(page).click()
     await expect.poll(() => held.length).toBe(1)
     await publicUnknown(page)
     await expect(page.locator('.data-loading')).toBeVisible()
     await retainedContext(page, state.before, 'public')
+    await selectedChoice(page, state, 'pending-public', 'public', true)
+    await blockedPublicInput(page, state, 'pending-public', 1)
     await audit(page, info, width === 320 ? 'pending-public-selection-320.png' : undefined)
     await page.keyboard.press('Escape')
     await expect(page.getByRole('button', { name: '공개 공고 조회 중', exact: true })).toBeFocused()
@@ -169,7 +205,14 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
     await expect(metric(page, '추천 회사')).toHaveText(['1곳', '0곳', '—'])
     await expect(metric(page, '관련 채용공고')).toHaveText(['2개', '0개', '—'])
     await expect.poll(() => monitors.length).toBe(1)
-    await monitors[0].fulfill({ json: sourceDelta() })
+    await page.getByRole('button', { name: '공개 공고 조회 중', exact: true }).press('Enter')
+    await selectedChoice(page, state, 'partial-public', 'public', true)
+    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '2'])
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('button', { name: '공개 공고 조회 중', exact: true })).toBeFocused()
+    const complete = sourceDelta()
+    complete.catalog.refreshAfter = '2026-09-20T08:02:00.000Z'
+    await monitors[0].fulfill({ json: complete })
     await expect(metric(page, '추천 회사')).toHaveText(['1곳', '1곳', '—'])
     await expect(metric(page, '관련 채용공고')).toHaveText(['2개', '1개', '—'])
     await expect(page.locator('.comparison-source-note')).toHaveText('조회한 공개 채용공고의 비교 · 생활비와 세금은 반영하지 않습니다.')
@@ -177,6 +220,9 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
     await page.getByRole('button', { name: '공개 채용', exact: true }).click()
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '3'])
     await expect(publicChoice(page)).toHaveAttribute('aria-pressed', 'true')
+    await selectedChoice(page, state, 'successful-public-cooldown', 'public', true)
+    await blockedPublicInput(page, state, 'successful-public-cooldown', 1)
+    if (width === 320) await page.screenshot({ path: info.outputPath('successful-public-selection-320.png') })
     await evidence(page, info, state, [ordinary, monitor])
   })
 
@@ -186,17 +232,26 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
       error: 'Fictional source49 unavailable', code: 'CATALOG_UNAVAILABLE', retryAt: '2026-09-20T08:02:00.000Z',
     } }))
     await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
+    await selectedChoice(page, state, 'initial-sample', 'sample', false)
     await publicChoice(page).click()
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveText('Fictional source49 unavailable')
     await publicUnknown(page)
     await expect(page.getByRole('button', { name: '공개 공고 다시 조회', exact: true })).toBeDisabled()
     await retainedContext(page, state.before, 'public')
+    await selectedChoice(page, state, 'failed-public-cooldown', 'public', true)
+    await blockedPublicInput(page, state, 'failed-public-cooldown', 1)
     await audit(page, info, width === 320 ? 'failed-public-selection-320.png' : undefined)
     await page.keyboard.press('Escape')
     await expect(page.getByRole('button', { name: '공개 공고 연결 필요', exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: '공개 공고에 연결하지 못했어요', exact: true })).toBeVisible()
     await expect(query(page)).toHaveValue('Engineer')
     await expect(page.locator('.company-card, .flat-marker, .city-row')).toHaveCount(0)
+    await page.getByRole('button', { name: '공개 공고 연결 필요', exact: true }).press('Enter')
+    await selectedChoice(page, state, 'failed-public-return', 'public', true)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('button', { name: '공개 공고 연결 필요', exact: true })).toBeFocused()
+    expect(state.traffic.catalog()).toHaveLength(1)
+    await expect(page.getByRole('heading', { name: '공개 공고에 연결하지 못했어요', exact: true })).toBeVisible()
     state.respond(route => route.fulfill({ json: sourceCatalog() }))
     const reloadAttempts = await reloadPublic(page, state)
     await expect(page.locator('.company-card')).toHaveCount(1)
@@ -206,6 +261,7 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
     await retainedContext(page, state.before, 'public')
     state.respond(route => route.fulfill({ status: 503, json: { error: 'Fictional retained49 failure', code: 'CATALOG_UNAVAILABLE' } }))
     await page.getByRole('button', { name: '공개 채용', exact: true }).click()
+    await selectedChoice(page, state, 'reloaded-public', 'public', false)
     await page.getByRole('button', { name: '새로고침', exact: true }).click()
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveText('Fictional retained49 failure')
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '3'])
@@ -213,8 +269,47 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
     for (const time of await page.locator('.board-row time').all())
       await expect(time).toHaveAttribute('datetime', SOURCE_TIME)
     await expect(publicChoice(page)).toHaveAttribute('aria-pressed', 'true')
+    await selectedChoice(page, state, 'retained-public-after-refresh-error', 'public', false)
     await retainedContext(page, state.before, 'public')
     await evidence(page, info, state, [ordinary, ...Array<string>(reloadAttempts).fill(ordinary), forced])
+  })
+
+  test('a failed public source stays readable through its retry deadline and a keyboard retry preserves private context', async ({ page }, info) => {
+    const state = await setup(page)
+    state.respond(route => route.fulfill({ status: 503, json: {
+      error: 'Fictional source52 retry required', code: 'CATALOG_UNAVAILABLE', retryAt: '2026-09-20T08:02:00.000Z',
+    } }))
+    await page.getByRole('button', { name: '샘플 탐색', exact: true }).press('Enter')
+    await selectedChoice(page, state, 'retry-flow-initial-sample', 'sample', false)
+    await publicChoice(page).click()
+    await expect(page.getByRole('dialog').getByRole('alert')).toHaveText('Fictional source52 retry required')
+    await publicUnknown(page)
+    await expect(page.getByRole('button', { name: '공개 공고 다시 조회', exact: true })).toBeDisabled()
+    await selectedChoice(page, state, 'retry-flow-public-cooldown', 'public', true)
+    await blockedPublicInput(page, state, 'retry-flow-public-cooldown', 1)
+    await retainedContext(page, state.before, 'public')
+    await page.clock.setFixedTime(new Date('2026-09-20T08:01:59.000Z'))
+    await expect(page.getByRole('button', { name: '공개 공고 다시 조회', exact: true })).toBeDisabled()
+    await selectedChoice(page, state, 'one-second-before-retry', 'public', true)
+    expect(state.traffic.catalog()).toHaveLength(1)
+    await page.clock.setFixedTime(new Date('2026-09-20T08:02:00.000Z'))
+    await expect(page.getByRole('button', { name: '공개 공고 다시 조회', exact: true })).toBeEnabled()
+    await selectedChoice(page, state, 'retry-deadline-reached', 'public', false)
+    state.respond(route => route.fulfill({ json: sourceCatalog() }))
+    await page.getByRole('button', { name: '공개 공고 다시 조회', exact: true }).press('Enter')
+    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '3'])
+    await expect(page.getByRole('dialog').getByRole('alert')).toHaveCount(0)
+    expect(state.traffic.catalog()).toHaveLength(2)
+    await selectedChoice(page, state, 'explicit-keyboard-retry-complete', 'public', false)
+    await retainedContext(page, state.before, 'public')
+    await audit(page, info, width === 320 ? 'retry-public-selection-320.png' : undefined)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeFocused()
+    await expect(query(page)).toHaveValue('Engineer')
+    await expect(page.getByLabel('직무 필터', { exact: true })).toHaveValue('backend')
+    await expect(page.getByLabel('비자 지원 필터', { exact: true })).toHaveValue('yes')
+    await retainedContext(page, state.before, 'public')
+    await evidence(page, info, state, [ordinary, forced])
   })
 
   test('sample cancellation defeats an old response and later failure, and a real revisit keeps sample mode with the saved application record', async ({ page }, info) => {
@@ -222,15 +317,18 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
     const held: Route[] = []
     state.respond(route => { held.push(route) })
     await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
-    await publicChoice(page).click()
+    await selectedChoice(page, state, 'initial-sample', 'sample', false)
+    await publicChoice(page).press('Enter')
     await expect.poll(() => held.length).toBe(1)
     await publicUnknown(page)
-    await sampleChoice(page).click()
+    await selectedChoice(page, state, 'pending-before-sample-cancel', 'public', true)
+    await sampleChoice(page).press('Space')
     await expect(sampleChoice(page)).toHaveAttribute('aria-pressed', 'true')
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
     state.expectedAborts = 1
     await expect.poll(() => state.traffic.requests.filter(request => request.state === 'failed').length).toBe(1)
     await retainedContext(page, state.before, 'sample')
+    await selectedChoice(page, state, 'sample-keyboard-cancelled-public', 'sample', false)
     await publicChoice(page).click()
     await expect.poll(() => held.length).toBe(2)
     await publicUnknown(page)
@@ -238,16 +336,24 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
     await expect(page.locator('.data-loading')).toBeVisible()
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveCount(0)
     await publicUnknown(page)
+    await selectedChoice(page, state, 'new-public-ignores-old-success', 'public', true)
     await held[1].fulfill({ status: 503, json: { error: 'Only the latest49 request failed', code: 'CATALOG_UNAVAILABLE' } })
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveText('Only the latest49 request failed')
+    await selectedChoice(page, state, 'latest-public-error', 'public', false)
     await sampleChoice(page).click()
     await expect(sampleChoice(page)).toHaveAttribute('aria-pressed', 'true')
     await expect(publicChoice(page)).toHaveAttribute('aria-pressed', 'false')
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
     await retainedContext(page, state.before, 'sample')
+    await selectedChoice(page, state, 'sample-return-after-error', 'sample', false)
     await page.reload()
     await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
     await retainedContext(page, state.before, 'sample')
+    await page.getByRole('button', { name: '샘플 탐색', exact: true }).press('Enter')
+    await selectedChoice(page, state, 'sample-real-revisit', 'sample', false)
+    if (width === 320) await page.screenshot({ path: info.outputPath('sample-selected-after-revisit-320.png') })
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeFocused()
     await page.getByRole('button', { name: /저장한 기회/ }).click()
     await expect(page.locator('.saved-title')).toHaveText(['Backend Engineer Saved49'])
     await expect(page.locator('.saved-note-preview')).toHaveText(SOURCE_NOTE)
@@ -284,10 +390,12 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
     await privateMemory('sample')
     state.respond(route => route.fulfill({ status: 503, json: { error: 'Fictional private49 failure', code: 'CATALOG_UNAVAILABLE' } }))
     await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
+    await selectedChoice(page, state, 'memory-optout-sample', 'sample', false)
     await publicChoice(page).click()
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveText('Fictional private49 failure')
     await publicUnknown(page)
     await privateMemory('public')
+    await selectedChoice(page, state, 'memory-optout-public-error', 'public', false)
     await page.keyboard.press('Escape')
     await expect(query(page)).toHaveValue('PRIVATE_SOURCE_49_QUERY')
     state.respond(route => route.fulfill({ json: sourceCatalog() }))
@@ -307,6 +415,10 @@ for (const width of [1440, 320]) test.describe(`atomic source selection at ${wid
     await expect(page.getByRole('button', { name: '2D 지도', exact: true })).toHaveAttribute('aria-pressed', 'true')
     await privateMemory('public')
     await audit(page, info)
+    await page.getByRole('button', { name: '공개 채용', exact: true }).press('Enter')
+    await selectedChoice(page, state, 'memory-optout-public-reloaded', 'public', false)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeFocused()
     await evidence(page, info, state, [ordinary, ...Array<string>(reloadAttempts).fill(ordinary)])
   })
 })

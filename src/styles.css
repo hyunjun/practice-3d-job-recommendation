@@ -637,11 +637,12 @@ select option { background: #1e271c; color: var(--text); }
 .data-source-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .data-source-options > button { position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 7px; padding: 18px 15px; border: 1px solid #55713a; border-radius: 8px; background: #26381e; color: #c3d6ae; }
 .data-source-options > button.selected { border-color: #b7df80; background: #3b542773; }
+.data-source-options > button.selected:disabled { opacity: 1; }
 .data-option-icon { color: #b9dc94; margin-bottom: 9px; }
 .data-source-options strong { font-size: 13px; font-weight: 500; }
 .data-source-options button > span:not(.data-option-icon) { font-size: 9px; color: #b3c99b; }
 .data-source-options small { font-size: 8px; color: #91aa79; }
-.data-option-check { position: absolute; right: 12px; top: 13px; color: #c1e996; }
+.data-source-options .data-option-current { position: absolute; right: 15px; top: 18px; display: inline-flex; align-items: center; gap: 4px; padding: 3px 5px; border: 1px solid #789854; border-radius: 4px; background: #263b1b; color: #e6f4d5; font-size: 9px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
 .provider-coverage { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 18px 0 0; }
 .provider-coverage li { display: flex; align-items: center; gap: 7px; padding: 7px 9px; border: 1px solid #4b6138; border-radius: 5px; background: #1b2817; }
 .provider-coverage strong { font-size: 10px; font-weight: 500; color: #c9deb3; }
@@ -1264,6 +1265,7 @@ select option { background: #1e271c; color: var(--text); }
   .data-source-options strong { font-size: 12px; }
   .data-source-options button > span:not(.data-option-icon) { font-size: 8px; line-height: 1.8; }
   .data-source-options small { font-size: 7px; line-height: 1.7; }
+  .data-source-options .data-option-current { right: 11px; top: 14px; }
   .data-explanation p { font-size: 11px; }
   .collection-health { gap: 7px; }
   .collection-health > div { padding: 11px 8px; }
