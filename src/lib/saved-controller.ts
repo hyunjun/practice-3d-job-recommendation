@@ -23,6 +23,14 @@ interface Pending {
 export type SavedChangeResult = { accepted: true } | { accepted: false; reason: 'loading' | 'limit' | 'unreadable' | 'missing' | 'busy' }
 export type SavedBulkResult = { ok: true; refreshFailed?: boolean } | { ok: false; error: SavedStorageErrorCode }
 
+function reuseJobSnapshot(record: SavedJob, previous?: SavedJob): SavedJob {
+  // IndexedDB decodes fresh objects even for a note-only update. Retain an
+  // identical, validated JSON snapshot so job-keyed comparisons remain ready.
+  // A matching posting ID alone must never keep an older job's content.
+  if (!previous || record.job === previous.job || JSON.stringify(record.job) !== JSON.stringify(previous.job)) return record
+  return { ...record, job: previous.job }
+}
+
 /** The visible draft is separate from the last committed database state. */
 export class SavedController {
   private base: SavedJob[] = []
@@ -72,7 +80,8 @@ export class SavedController {
   }
 
   private accept(snapshot: SavedStoreSnapshot) {
-    this.base = snapshot.records
+    const previous = new Map(this.base.map(record => [record.job.id, record]))
+    this.base = snapshot.records.map(record => reuseJobSnapshot(record, previous.get(record.job.id)))
     this.recovery = snapshot.recovery
     this.unreadableIds = new Set(snapshot.unreadableIds)
     this.unreadableCount = snapshot.occupied - snapshot.records.length
@@ -161,7 +170,7 @@ export class SavedController {
         const id = current.operation.kind === 'add' ? current.operation.record.job.id : current.operation.id
         if (committed) {
           this.base = this.base.some(item => item.job.id === id)
-            ? this.base.map(item => item.job.id === id ? committed.record : item) : [committed.record, ...this.base]
+            ? this.base.map(item => item.job.id === id ? reuseJobSnapshot(committed.record, item) : item) : [committed.record, ...this.base]
         } else this.base = this.base.filter(item => item.job.id !== id)
         this.pending.shift()
         this.active = null

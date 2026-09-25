@@ -873,7 +873,15 @@ select option { background: #1e271c; color: var(--text); }
 .collection-search { position: relative; width: 250px; display: flex; align-items: center; }
 .collection-search input { padding-left: 34px; height: 35px; font-size: 10px; }
 .collection-search > svg { position: absolute; left: 11px; color: #92ae75; }
-.saved-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 19px; }
+.saved-results-summary { color: #bfd3ac; font-size: 12px; margin: 0 0 16px; font-variant-numeric: tabular-nums; scroll-margin-top: 16px; }
+.saved-comparison-pending { display: flex; align-items: flex-start; justify-content: center; padding-top: 40px; }
+.saved-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 0; margin: 0 0 16px; border-block: 1px solid #415535; }
+.saved-pagination > button { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; border: 1px solid #536d40; border-radius: 5px; color: #d6eac5; background: #293b21; }
+.saved-pagination > button:hover:not(:disabled) { background: #3c542e; border-color: #a0c77f; }
+.saved-pagination > span { min-width: 48px; text-align: center; font-size: 13px; color: #e0eecf; font-variant-numeric: tabular-nums; }
+.saved-pagination small { color: #b8cba6; font-size: 11px; }
+.saved-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 19px; scroll-margin-top: 16px; }
+.saved-grid + .saved-pagination { margin: 24px 0 0; }
 .saved-card { border: 1px solid #435d2f; border-radius: 8px; background: linear-gradient(130deg, #24331e, #1b2917); padding: 22px 20px 0; min-width: 0; }
 .saved-card > header { display: flex; align-items: center; gap: 11px; margin-bottom: 19px; }
 .saved-card header h2 { font-size: 12px; font-weight: 550; margin-bottom: 4px; }

@@ -12,7 +12,9 @@ export function usePostingStatus(saved: SavedJob[]) {
   const [retryAt, setRetryAt] = useState<string>()
   const deadlines = useMemo(() => index?.boards.flatMap(board => board.listing ? [Date.parse(board.listing.validUntil)] : []) ?? [], [index])
   const now = useDeadlineClock(deadlines)
-  const [localRevisions, setLocalRevisions] = useState(new Map<Job, JobRevision>())
+  // null means the comparison finished without a usable revision. Absence
+  // means it has not finished for this exact snapshot yet.
+  const [localRevisions, setLocalRevisions] = useState(new Map<Job, JobRevision | null>())
   const revisionCache = useRef(new WeakMap<Job, Promise<JobRevision>>())
   const request = useRef<AbortController | null>(null)
   const remaining = useRetryCountdown(retryAt)
@@ -68,16 +70,19 @@ export function usePostingStatus(saved: SavedJob[]) {
       }
       return revision.then(value => [job, value] as const)
     })).then(results => {
-      if (!cancelled) setLocalRevisions(new Map(results.flatMap(result => result.status === 'fulfilled' ? [result.value] : [])))
+      if (!cancelled) setLocalRevisions(new Map(results.map((result, index) => [
+        jobs[index], result.status === 'fulfilled' ? result.value[1] : null,
+      ])))
     })
     return () => { cancelled = true }
   }, [saved, index])
 
   const observations = useMemo(() => new Map(saved.map(item => [
-    item.job.id, observeSavedPosting(item, index, localRevisions.get(item.job), now, error),
+    item.job.id, observeSavedPosting(item, index, localRevisions.get(item.job) ?? undefined, now, error),
   ])), [saved, index, localRevisions, now, error])
+  const comparing = Boolean(index) && saved.some(item => item.job.source !== 'sample' && !localRevisions.has(item.job))
 
-  return { observations, check, loading, error, remaining, checked: Boolean(index || error) }
+  return { observations, check, loading, comparing, error, remaining, checked: Boolean(index || error) }
 }
 
 export type PostingStatusController = ReturnType<typeof usePostingStatus>
