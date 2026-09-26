@@ -23,9 +23,9 @@ import { decodeSavedJobs } from '../../shared/saved-jobs'
 import type { Company, Job, JobProvider, SavedJob } from '../../shared/types'
 import { SavedPostingNotice } from '../../src/components/SavedPostingNotice'
 import {
-  ADDED_PUBLIC_REGISTRATIONS, COVERAGE_NEW_URLS, COVERAGE_NOTE, COVERAGE_SENDBIRD_JOB_URL,
+  ADDED_PUBLIC_REGISTRATIONS, COVERAGE_EXPANSION_URLS, COVERAGE_NEW_URLS, COVERAGE_NOTE, COVERAGE_SENDBIRD_JOB_URL,
   COVERAGE_SENDBIRD_SOURCE_URL, COVERAGE_TITLES, COVERAGE_UPDATED_AT, ORIGINAL_PUBLIC_REGISTRATIONS,
-  coverageLegacyCache, publicCoverageResponses,
+  EXPANDED_PUBLIC_REGISTRATIONS, coverageLegacyCache, publicCoverageResponses,
 } from '../fixtures/public-coverage'
 
 const TIME = '2026-09-20T08:00:00.000Z'
@@ -43,6 +43,8 @@ const expectedDefaultIds = [
   'stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'airbnb', 'gitlab',
   'anthropic', 'intercom', 'asana', 'linear', 'deepl', 'n8n', 'supabase', 'mistral',
   'jane', 'spotify', 'contentsquare', 'canva', 'grab', 'wise', 'moloco', 'sendbird',
+  'openai', 'notion', 'reddit', 'discord', 'coinbase', 'dropbox', 'duolingo', 'roblox',
+  'spacex', 'pinterest', 'databricks', 'robinhood',
 ]
 const sha = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 
@@ -96,15 +98,17 @@ afterEach(async () => {
 })
 
 describe('default public coverage and sample isolation', () => {
-  it('preserves every original registration and appends only the two literal stable identities', () => {
-    expect(PUBLIC_COMPANIES).toHaveLength(24)
+  it('preserves all24 original registrations and appends only the twelve literal stable identities', () => {
+    expect(PUBLIC_COMPANIES).toHaveLength(36)
     expect(PUBLIC_COMPANIES.slice(0, 22)).toEqual(ORIGINAL_PUBLIC_REGISTRATIONS)
-    expect(PUBLIC_COMPANIES.slice(22)).toEqual(ADDED_PUBLIC_REGISTRATIONS)
+    expect(PUBLIC_COMPANIES.slice(22, 24)).toEqual(ADDED_PUBLIC_REGISTRATIONS)
+    expect(PUBLIC_COMPANIES.slice(24).map(({ id, name, careerUrl, provider, board }) =>
+      ({ id, name, careerUrl, provider, board }))).toEqual(EXPANDED_PUBLIC_REGISTRATIONS)
     expect(PUBLIC_COMPANIES.map(company => company.id)).toEqual(expectedDefaultIds)
-    expect(new Set(PUBLIC_COMPANIES.map(company => company.id)).size).toBe(24)
+    expect(new Set(PUBLIC_COMPANIES.map(company => company.id)).size).toBe(36)
     expect(Object.fromEntries(['greenhouse', 'ashby', 'lever', 'smartrecruiters'].map(provider =>
       [provider, PUBLIC_COMPANIES.filter(company => company.provider === provider).length])))
-      .toEqual({ greenhouse: 13, ashby: 6, lever: 2, smartrecruiters: 3 })
+      .toEqual({ greenhouse: 23, ashby: 8, lever: 2, smartrecruiters: 3 })
   })
 
   it('keeps all sample records, not merely their32/179/22 counts, identical to the frozen43 API', () => {
@@ -119,9 +123,13 @@ describe('default public coverage and sample isolation', () => {
     expect(sha(sample.cities)).toBe('f6ff919107cfd2d1b8469d06ba5780a91707567b160acd393fb14cf70f5891a5')
     expect(sample.companies.some(company => ['moloco', 'sendbird'].includes(company.id))).toBe(false)
     expect(sample.jobs.every(job => job.source === 'sample')).toBe(true)
+    expect(sample.companies.find(company => company.id === 'notion')).toMatchObject({
+      id: 'notion', name: 'Notion', board: 'notion', careerUrl: 'https://www.notion.com/careers',
+    })
+    expect(sample.companies.find(company => company.id === 'notion')).not.toHaveProperty('provider')
   })
 
-  it('loads the24 defaults without an environment/local configuration or filesystem side effects', async () => {
+  it('loads the36 defaults without an environment/local configuration or filesystem side effects', async () => {
     const cwd = await directory()
     const config = await loadBoardConfiguration({ cwd })
     expect(config.mode).toBe('default')
@@ -131,13 +139,13 @@ describe('default public coverage and sample isolation', () => {
     expect(await readdir(cwd)).toEqual([])
   })
 
-  it('collects all24 real default providers, retains a pool and full publication IDs, and derives only status links', async () => {
+  it('collects all36 real default providers, retains a pool and full publication IDs, and derives only status links', async () => {
     const network = transport()
     const config = await loadBoardConfiguration({ cwd: await directory() })
     const catalogService = service(config)
     const catalog = await catalogService.get()
     expect(catalog.companies.map(company => company.id)).toEqual(expectedDefaultIds)
-    expect(catalog.boards).toHaveLength(24)
+    expect(catalog.boards).toHaveLength(36)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.jobs.map(job => job.id)).toEqual(expectedJobIds)
     expect(catalog.jobs.map(job => job.cityIds)).toEqual([['seoul'], ['seoul'], ['seoul'], ['seoul'], ['seoul']])
@@ -159,12 +167,12 @@ describe('default public coverage and sample isolation', () => {
         ['greenhouse-sendbird-44201', 'https://delight.ai/job/44201'],
         ['greenhouse-sendbird-44202', 'https://delight.ai/job/44202'],
       ])
-    expect(network.requests).toHaveLength(24)
-    expect(new Set(network.requests.map(request => request.url)).size).toBe(24)
+    expect(network.requests).toHaveLength(36)
+    expect(new Set(network.requests.map(request => request.url)).size).toBe(36)
     expect(network.requests.every(request => request.method === 'GET')).toBe(true)
     expect(network.unexpected).toEqual([])
     const stored = JSON.parse(await readFile(config.cacheFile, 'utf8'))
-    expect(stored.boards).toHaveLength(24)
+    expect(stored.boards).toHaveLength(36)
     expect(stored.boards.find((board: { companyId: string }) => board.companyId === 'sendbird').snapshot.jobs[0].url)
       .toBe('https://sendbird.com/careers?gh_jid=44201')
   })
@@ -180,7 +188,7 @@ describe('default public coverage and sample isolation', () => {
     const config = await loadBoardConfiguration({ cwd })
     const first = await service(config).get()
     expect(first.jobs.map(job => job.id)).toEqual(expectedJobIds)
-    expect(network.requests.map(request => request.url).sort()).toEqual([...COVERAGE_NEW_URLS].sort())
+    expect(network.requests.map(request => request.url).sort()).toEqual([...COVERAGE_NEW_URLS, ...COVERAGE_EXPANSION_URLS].sort())
     expect(network.unexpected).toEqual([])
     const expanded = JSON.parse(await readFile(file, 'utf8'))
     expect(expanded.boards.map((board: { companyId: string }) => board.companyId)).toEqual(expectedDefaultIds)
@@ -198,7 +206,7 @@ describe('default public coverage and sample isolation', () => {
     const restarted = await service(await loadBoardConfiguration({ cwd })).get()
     expect(restarted.jobs).toEqual(first.jobs)
     expect(await readFile(file, 'utf8')).toBe(serialized)
-    expect(network.requests).toHaveLength(2)
+    expect(network.requests).toHaveLength(14)
     expect(await readdir(path.join(cwd, '.local'))).toEqual(['public-board-cache-v5.json'])
   })
 })

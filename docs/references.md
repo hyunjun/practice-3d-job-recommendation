@@ -673,3 +673,28 @@ CPU 프로파일에서는 검색 중 국가 경계의 투영 계산이 반복되
 2026-09-26에 위 문서를 확인했습니다. 앞 단계의 실제 수집 자료에서도 `Reykjavík`의 공고 4개가 `Reykjavik`으로는 검색되지 않았고, `Sao Paulo`와 `São Paulo`는 서로 다른 공고 2개씩을 반환했습니다. 정규화 후에는 각 표기에서 같은 공고를 찾습니다.
 
 악센트 구분을 없애는 것은 검색 편의를 위한 앱의 선택이며 모든 언어에서 같은 단어라는 뜻은 아닙니다. 결합 부호 제거는 라틴 문자에 한정해 일본어 탁음이나 인도계 문자의 모음 부호 등을 보존합니다. 기술 이름의 기호와 여러 검색어를 모두 포함하는 조건도 유지합니다. 도시의 좌표·국가·지원 자격을 추론하거나 오타·로마자 전사를 자동 보정하지 않습니다.
+
+## 유명 회사의 실제 공개 게시판 확장
+
+2026-09-26에 다음 회사의 채용 페이지·호스트형 게시판과 공개 API를 확인했습니다. 기존 24개 등록을 유지하고 12개를 추가했습니다. 게시판의 실제 공고 원문과 조회 기록은 `.local/research/57/`에 보관하며 공개 회귀 검사에는 가상 공고를 사용합니다.
+
+| 회사의 채용 페이지 | 공개 제공자 / 게시판 |
+| --- | --- |
+| [OpenAI](https://openai.com/careers/) · [호스트형 게시판](https://jobs.ashbyhq.com/openai) | Ashby / `openai` |
+| [Notion](https://www.notion.com/careers) | Ashby / `notion` |
+| [Reddit](https://redditinc.com/careers) | Greenhouse / `reddit` |
+| [Discord](https://discord.com/careers) | Greenhouse / `discord` |
+| [Coinbase](https://www.coinbase.com/careers) | Greenhouse / `coinbase` |
+| [Dropbox](https://www.dropbox.jobs/) | Greenhouse / `dropbox` |
+| [Duolingo](https://careers.duolingo.com/) | Greenhouse / `duolingo` |
+| [Roblox](https://careers.roblox.com/) | Greenhouse / `roblox` |
+| [SpaceX](https://www.spacex.com/careers/) | Greenhouse / `spacex` |
+| [Pinterest](https://www.pinterestcareers.com/) | Greenhouse / `pinterest` |
+| [Databricks](https://www.databricks.com/company/careers) | Greenhouse / `databricks` |
+| [Robinhood](https://careers.robinhood.com/) | Greenhouse / `robinhood` |
+
+Notion·Reddit의 공식 페이지에서 각 게시판의 공고 링크를 확인했고, Discord·Duolingo·Robinhood는 공식 페이지 또는 해당 페이지의 스크립트에 공개 게시판 주소가 명시돼 있었습니다. OpenAI의 Ashby 게시판에는 회사명과 공식 사이트·채용 페이지 연결 정보가 있었습니다. Coinbase·Dropbox·Pinterest의 호스트형 Greenhouse 게시판 주소는 해당 회사의 공식 채용 사이트로 연결됐습니다.
+
+일부 회사의 채용 홈페이지는 자동 조회에 `403`을 반환했지만, 위 12곳의 공개 게시판 API는 모두 정상 응답했습니다. 홈페이지의 HTML을 모두 읽었다고 간주하지 않으며, 로그인이나 접근 제한을 우회하지 않고 공개 API가 반환하는 현재 게시물만 수집합니다. 이 목록은 해당 기업의 모든 법인·별도 게시판이나 전체 채용 시장을 포괄한다는 뜻은 아닙니다.
+
+기존 Greenhouse·Ashby 수집기를 재사용해 전체 ID·응답 건수·필수 필드를 검증합니다. 공개된 전체 공고와 개발직 탐색 후보의 수를 구분하고, 공고 원문·게시 URL·조회 시각과 회사별 실패·갱신 상태를 함께 보존합니다.

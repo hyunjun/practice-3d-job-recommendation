@@ -50,7 +50,7 @@ npm run dev
 
 | 설정 | 동작 |
 | --- | --- |
-| 설정 파일 없음 | 기본 24개 회사 사용 |
+| 설정 파일 없음 | 기본 36개 회사 사용 |
 | `mode: "extend"` 또는 mode 생략 | 기본 목록에 추가. 같은 ID의 회사 객체는 해당 회사의 등록 정보 변경 |
 | `mode: "replace"` | `companies`에 적은 회사만 사용 |
 | 회사 ID 문자열 | 기본 목록의 등록 정보 재사용. `npm run boards:check -- --help`에서 ID 목록 확인 |
@@ -139,14 +139,16 @@ ORBIT_BOARDS_FILE="/absolute/path/my-boards.json" npm start
 
 데이터 화면의 **선택됨** 표시는 현재 사용하는 모드를 알려줍니다. 조회 중이거나 재조회 대기 중에도 선택한 카드의 제목과 표시를 읽을 수 있으며, 대기 중인 공개 조회는 반복 실행하지 않습니다.
 
-공개 모드의 기본 설정은 다음 **24개 회사의 공개 게시판 API**를 조회합니다. 로컬 설정으로 이 목록을 선택·확장할 수 있습니다.
+공개 모드의 기본 설정은 다음 **36개 회사의 공개 게시판 API**를 조회합니다. 로컬 설정으로 이 목록을 선택·확장할 수 있습니다.
 
 | 출처 | 대상 회사 |
 | --- | --- |
-| Greenhouse | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom, Asana, Moloco, Delight.ai (Sendbird) |
-| Ashby | Linear, DeepL, n8n, Supabase, Mistral AI, Jane |
+| Greenhouse | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom, Asana, Moloco, Delight.ai (Sendbird), Reddit, Discord, Coinbase, Dropbox, Duolingo, Roblox, SpaceX, Pinterest, Databricks, Robinhood |
+| Ashby | Linear, DeepL, n8n, Supabase, Mistral AI, Jane, OpenAI, Notion |
 | Lever | Spotify, Contentsquare |
 | SmartRecruiters | Canva, Grab, Wise |
+
+OpenAI·Notion·Reddit·Discord·Coinbase·Dropbox·Duolingo·Roblox·SpaceX·Pinterest·Databricks·Robinhood의 공개 게시판도 기본 목록에 포함합니다. **샘플 탐색 → 공개 채용공고**에서 현재 게시물을 수집하며, 다음 실행에서도 로컬 캐시를 재사용하고 회사별 갱신 정책에 따라 새로 조회합니다. 실제 공고 원문과 캐시는 `.local/`에만 저장하고 저장소에는 수집할 회사와 공개 게시판 정보만 포함합니다.
 
 Moloco와 Delight.ai의 공식 채용 페이지가 사용하는 게시판을 포함해 서울의 실제 개발·연구 공고도 탐색합니다. 회사명과 현재 게시판 이름이 다른 Delight.ai는 **Delight.ai (Sendbird)**로 표시하며 두 이름으로 검색할 수 있습니다. 해당 회사의 모든 공고가 서울 근무나 모든 사용자의 지원 조건에 맞는다는 뜻은 아닙니다.
 

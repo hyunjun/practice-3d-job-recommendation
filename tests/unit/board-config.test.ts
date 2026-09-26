@@ -18,12 +18,15 @@ import { fetchLeverBoard } from '../../server/providers/lever'
 import { fetchSmartRecruitersBoard } from '../../server/providers/smartrecruiters'
 import type { Company, Job, JobProvider } from '../../shared/types'
 import { BOARD_CONFIG_REGISTRATIONS, boardFixtureResponse, boardRegistration } from '../fixtures/board-config'
+import { EXPANDED_PUBLIC_REGISTRATIONS } from '../fixtures/public-coverage'
 
 const repository = fileURLToPath(new URL('../../', import.meta.url))
 const defaultIds = [
   'stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'airbnb', 'gitlab',
   'anthropic', 'intercom', 'asana', 'linear', 'deepl', 'n8n', 'supabase', 'mistral',
   'jane', 'spotify', 'contentsquare', 'canva', 'grab', 'wise', 'moloco', 'sendbird',
+  'openai', 'notion', 'reddit', 'discord', 'coinbase', 'dropbox', 'duolingo', 'roblox',
+  'spacex', 'pinterest', 'databricks', 'robinhood',
 ]
 const BASE = Date.parse('2026-09-20T06:00:00.000Z')
 const initialTime = '2026-09-20T06:00:00.000Z'
@@ -102,7 +105,7 @@ afterEach(async () => {
 })
 
 describe('board configuration resolution', () => {
-  it('keeps the 24 defaults in order without a file and leaves the filesystem untouched', async () => {
+  it('keeps the36 defaults in order without a file and leaves the filesystem untouched', async () => {
     const cwd = await directory()
     const resolved = await loadBoardConfiguration({ cwd })
     expect(resolved.mode).toBe('default')
@@ -148,6 +151,30 @@ describe('board configuration resolution', () => {
     expect(renamed.companies[0]).toMatchObject({ id: 'aurora-config', initials: 'AR', color: parsed.companies[1].color })
     parsed.companies[0].name = 'Local mutation'
     expect(parseBoardConfiguration(replacement(['gitlab'])).companies[0].name).toBe('GitLab')
+  })
+
+  it('resolves all twelve added curated references without requiring custom metadata or changing later defaults', () => {
+    const parsed = parseBoardConfiguration(replacement([
+      'openai', 'notion', 'reddit', 'discord', 'coinbase', 'dropbox', 'duolingo', 'roblox',
+      'spacex', 'pinterest', 'databricks', 'robinhood',
+    ]))
+    expect(parsed.companies).toHaveLength(12)
+    expect(parsed.companies.map(({ id, name, careerUrl, provider, board }) =>
+      ({ id, name, careerUrl, provider, board }))).toEqual(EXPANDED_PUBLIC_REGISTRATIONS)
+    parsed.companies[1].name = 'Synthetic local rename'
+    expect(parseBoardConfiguration(replacement(['notion'])).companies[0]).toMatchObject({
+      id: 'notion', name: 'Notion', provider: 'ashby', board: 'notion',
+      careerUrl: 'https://www.notion.com/careers',
+    })
+  })
+
+  it.each([
+    { provider: 'ashby', board: 'openai', message: /"openai".*"aurora-config"/ },
+    { provider: 'greenhouse', board: 'reddit', message: /"reddit".*"aurora-config"/ },
+  ] as const)('rejects a custom duplicate of the newly registered $provider/$board in extend mode', ({ provider, board, message }) => {
+    expect(() => parseBoardConfiguration({
+      version: 1, companies: [boardRegistration({ provider, board })],
+    })).toThrow(message)
   })
 
   it('trims boards without changing case, Unicode or spaces; provider and Lever region distinguish sources', () => {
@@ -524,9 +551,12 @@ describe('offline board-check CLI', () => {
     expect(result.code).toBe(0)
     expect(result.signal).toBeNull()
     expect(result.stdout).toContain('기본 공개 게시판 목록을 사용합니다.')
-    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 24개')
+    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 36개')
     expect(result.stdout).toContain('stripe · Stripe · Greenhouse · stripe')
     expect(result.stdout).toContain('wise · Wise · SmartRecruiters · Wise')
+    expect(result.stdout).toContain('openai · OpenAI · Ashby · openai')
+    expect(result.stdout).toContain('notion · Notion · Ashby · notion')
+    expect(result.stdout).toContain('robinhood · Robinhood · Greenhouse · robinhood')
     expect(result.stdout).toContain('네트워크 요청 없이 설정 형식을 확인했습니다.')
     expect(result.stdout).toContain('실제 게시판 연결은 앱의 공개 공고 조회에서 확인해 주세요.')
     expect(result.stderr).toBe('')

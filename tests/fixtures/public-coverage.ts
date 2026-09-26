@@ -32,6 +32,23 @@ export const ADDED_PUBLIC_REGISTRATIONS: Company[] = [
   { id: 'sendbird', name: 'Delight.ai (Sendbird)', initials: 'D', color: '#b6d9a2', industry: 'AI · 고객 경험', careerUrl: 'https://delight.ai/careers', provider: 'greenhouse', board: 'sendbird' },
 ]
 
+// Independent registration facts, including the canonical career-page URLs.
+// Display styling is not part of the added board-identity contract.
+export const EXPANDED_PUBLIC_REGISTRATIONS: Pick<Company, 'id' | 'name' | 'careerUrl' | 'provider' | 'board'>[] = [
+  { id: 'openai', name: 'OpenAI', careerUrl: 'https://openai.com/careers/', provider: 'ashby', board: 'openai' },
+  { id: 'notion', name: 'Notion', careerUrl: 'https://www.notion.com/careers', provider: 'ashby', board: 'notion' },
+  { id: 'reddit', name: 'Reddit', careerUrl: 'https://redditinc.com/careers', provider: 'greenhouse', board: 'reddit' },
+  { id: 'discord', name: 'Discord', careerUrl: 'https://discord.com/careers', provider: 'greenhouse', board: 'discord' },
+  { id: 'coinbase', name: 'Coinbase', careerUrl: 'https://www.coinbase.com/careers', provider: 'greenhouse', board: 'coinbase' },
+  { id: 'dropbox', name: 'Dropbox', careerUrl: 'https://www.dropbox.jobs/', provider: 'greenhouse', board: 'dropbox' },
+  { id: 'duolingo', name: 'Duolingo', careerUrl: 'https://careers.duolingo.com/', provider: 'greenhouse', board: 'duolingo' },
+  { id: 'roblox', name: 'Roblox', careerUrl: 'https://careers.roblox.com/', provider: 'greenhouse', board: 'roblox' },
+  { id: 'spacex', name: 'SpaceX', careerUrl: 'https://www.spacex.com/careers/', provider: 'greenhouse', board: 'spacex' },
+  { id: 'pinterest', name: 'Pinterest', careerUrl: 'https://www.pinterestcareers.com/', provider: 'greenhouse', board: 'pinterest' },
+  { id: 'databricks', name: 'Databricks', careerUrl: 'https://www.databricks.com/company/careers', provider: 'greenhouse', board: 'databricks' },
+  { id: 'robinhood', name: 'Robinhood', careerUrl: 'https://careers.robinhood.com/', provider: 'greenhouse', board: 'robinhood' },
+]
+
 export const COVERAGE_UPDATED_AT = '2026-09-19T08:00:00.000Z'
 export const COVERAGE_NOTE = '가상 지원 메모: 두 브랜드 이름과 원문 출처를 함께 확인\n서울 팀 질문 준비 🌱'
 export const COVERAGE_TITLES = {
@@ -64,13 +81,29 @@ export const COVERAGE_NEW_URLS = [
   'https://boards-api.greenhouse.io/v1/boards/sendbird/jobs?content=true&pay_transparency=true',
 ] as const
 
+export const COVERAGE_EXPANSION_URLS = [
+  'https://api.ashbyhq.com/posting-api/job-board/openai?includeCompensation=true',
+  'https://api.ashbyhq.com/posting-api/job-board/notion?includeCompensation=true',
+  'https://boards-api.greenhouse.io/v1/boards/reddit/jobs?content=true&pay_transparency=true',
+  'https://boards-api.greenhouse.io/v1/boards/discord/jobs?content=true&pay_transparency=true',
+  'https://boards-api.greenhouse.io/v1/boards/coinbase/jobs?content=true&pay_transparency=true',
+  'https://boards-api.greenhouse.io/v1/boards/dropbox/jobs?content=true&pay_transparency=true',
+  'https://boards-api.greenhouse.io/v1/boards/duolingo/jobs?content=true&pay_transparency=true',
+  'https://boards-api.greenhouse.io/v1/boards/roblox/jobs?content=true&pay_transparency=true',
+  'https://boards-api.greenhouse.io/v1/boards/spacex/jobs?content=true&pay_transparency=true',
+  'https://boards-api.greenhouse.io/v1/boards/pinterest/jobs?content=true&pay_transparency=true',
+  'https://boards-api.greenhouse.io/v1/boards/databricks/jobs?content=true&pay_transparency=true',
+  'https://boards-api.greenhouse.io/v1/boards/robinhood/jobs?content=true&pay_transparency=true',
+] as const
+
 /** Only exact upstream requests in this independent map can receive a response. */
 export function publicCoverageResponses(): Record<string, unknown> {
   const result: Record<string, unknown> = {}
-  for (const board of ['stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'airbnb', 'gitlab', 'anthropic', 'intercom', 'asana']) {
+  for (const board of ['stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'airbnb', 'gitlab', 'anthropic', 'intercom', 'asana',
+    'reddit', 'discord', 'coinbase', 'dropbox', 'duolingo', 'roblox', 'spacex', 'pinterest', 'databricks', 'robinhood']) {
     result[`https://boards-api.greenhouse.io/v1/boards/${board}/jobs?content=true&pay_transparency=true`] = { jobs: [], meta: { total: 0 } }
   }
-  for (const board of ['Linear', 'DeepL', 'n8n', 'supabase', 'mistral.ai', 'jane']) {
+  for (const board of ['Linear', 'DeepL', 'n8n', 'supabase', 'mistral.ai', 'jane', 'openai', 'notion']) {
     result[`https://api.ashbyhq.com/posting-api/job-board/${board}?includeCompensation=true`] = { apiVersion: '1', jobs: [] }
   }
   for (const board of ['spotify', 'contentsquare']) {
