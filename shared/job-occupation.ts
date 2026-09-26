@@ -13,6 +13,9 @@ const SUPPORT_DEPARTMENT = /\b(?:technical support|customer support|support engi
 const PHYSICAL_TITLE = /\b(?:mechanical|electrical|civil|structural|chemical|manufacturing|facilities|hardware)\b|\bdata[\s-]?cent(?:er|re)\s+(?:(?:design|systems?|operations?|infrastructure)\s+){0,2}engineers?\b/i
 const COMMERCIAL_TITLE = /\b(?:recruiter|recruiting|account executive|sales representative|pre[- ]sales|post[- ]sales)\b/i
 const WRITING_TITLE = /\b(?:copy[\s-]?writers?|writers?|(?:technical|content)\s+editors?)\b/i
+const NON_DEVELOPMENT_TITLE = /\b(?:designers?|(?:business|administrative) partners?|assistants?|representatives?|coordinators?)\b/i
+const PHYSICAL_SPECIALTY = /\b(?:aerodynamics?|aerothermal|aerospace|aerostructures?|propulsion|actuators?|fluids?|thermal|avionics|rfic|antennas?|analog|mixed[\s-]?signal|radio[\s-]?frequency)\b|\b(?:flight|launch|vehicle|materials?|metallurg(?:y|ical)|weld(?:ing)?|structures?|power electronics|pcb|pcba)(?:\s+[a-z-]+){0,2}\s+engineers?\b/i
+const COMPUTING_ROLE_TITLE = /\b(?:software|firmware|embedded|back[\s-]?end|front[\s-]?end|full[\s-]?stack|data|machine learning|ai|ml|computer|cyber[\s-]?security|security|devops|site reliability)(?:\s+[a-z][a-z-]*){0,3}\s+(?:engineers?|developers?|scientists?|researchers?)\b|\bsoftware architects?\b/i
 const OTHER_RESEARCH = /\b(?:ux|user experience|(?:user|market|people) research(?:ers?)?|recruit(?:ing|ment)?|medicinal chemistry|wet[- ]lab)\b|\blife sciences\b.*\bchemistry\b/i
 const SOFTWARE_TITLE = /\b(?:(?:software|firmware|embedded|back[\s-]?end|front[\s-]?end|full[\s-]?stack|data|machine learning|security|devops|site reliability)\s+(?:engineers?|developers?)|software architects?)\b/i
 const MAX_TEXT = 100000
@@ -81,11 +84,11 @@ export function occupationFacts(input: { title: string; description: string; dep
   // A suffix can name the product ("Software Engineer, Resource Manager").
   // A published people-manager field still takes precedence over that title.
   const primaryTitle = title.split(/[,;|]|\s-\s/)[0]
-  // Developers can be the writer's audience. Keep the stated writing role
-  // separate from product/audience qualifiers, while retaining explicit
-  // engineering or research roles such as "Software Engineer / Technical Writer".
+  // Engineering/developers can name the audience or supported department of
+  // a writer, designer or administrator. Keep the stated role separate from
+  // these qualifiers, while retaining explicit engineering/research co-roles.
   const roleTitle = primaryTitle.split(/\s+(?:for|serving|supporting)\s+|\(/i)[0]
-  if (WRITING_TITLE.test(roleTitle) && !MANAGEMENT_TITLE.test(roleTitle)
+  if ((WRITING_TITLE.test(roleTitle) || NON_DEVELOPMENT_TITLE.test(roleTitle)) && !MANAGEMENT_TITLE.test(roleTitle)
     && !SOFTWARE_TITLE.test(roleTitle) && !RESEARCH_TITLE.test(roleTitle) && !/\bengineers?\b/i.test(roleTitle)) {
     return assessment('other', [titleEvidence])
   }
@@ -94,6 +97,16 @@ export function occupationFacts(input: { title: string; description: string; dep
   }
   if (SUPPORT_TITLE.test(title)) return assessment('support', [titleEvidence])
   if ((PHYSICAL_TITLE.test(title) || COMMERCIAL_TITLE.test(title)) && !SOFTWARE_TITLE.test(title)) return assessment('other', [titleEvidence])
+  // Physical specialties describe the primary job, not its product/team suffix.
+  // In particular, EDA/RTL tools can serve an RFIC team, and flight software
+  // infrastructure remains computing even with words between software/engineer.
+  const analogVerification = /\bAMS\s+(?:verification|design)\s+engineers?\b/i.test(roleTitle)
+    && /\b(?:rfic|analog|mixed[\s-]?signal)\b/i.test(title)
+  if ((PHYSICAL_SPECIALTY.test(roleTitle) || analogVerification)
+    && !COMPUTING_ROLE_TITLE.test(roleTitle)
+    && !(RESEARCH_TITLE.test(roleTitle) && TECHNICAL_RESEARCH.test(roleTitle))) {
+    return assessment('other', [titleEvidence])
+  }
   if (!TECHNICAL_TITLE.test(title) && !RESEARCH_TITLE.test(title)) return assessment('unconfirmed', [titleEvidence])
 
   const paragraphs = scopeParagraphs(input.description)

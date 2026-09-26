@@ -289,6 +289,7 @@ describe('old records, source-preserving migration and meaningful revisions', ()
   })
   it.each([4, 5])('cache%i migration retains snapshot dates, IDs, retry state and raw source', version => {
     const job = legacyCollectedWorkTimeSaved().job
+    expect(job.occupation?.version).toBe(3)
     const old = { version, boards: [{
       companyId: 'time-dawn', provider: 'greenhouse', board: 'DawnWorkTime46',
       checkedAt: WORK_TIME_NOW, failures: 2, retryAt: '2026-09-20T10:45:00.000Z',
@@ -304,18 +305,25 @@ describe('old records, source-preserving migration and meaningful revisions', ()
       checkedAt: WORK_TIME_NOW, failures: 2, retryAt: '2026-09-20T10:45:00.000Z',
       snapshot: { fetchedAt: WORK_TIME_FETCHED_AT, total: 2, unmappedCount: 0,
         publishedIds: ['greenhouse-time-dawn-4601', 'greenhouse-time-dawn-nontechnical'],
-        jobs: [{ ...job, stale: true, workTimeRequirements: { version: 1, rules: originalRules } }] },
+        jobs: [{
+          ...job, stale: true, occupation: { ...job.occupation, version: 4 },
+          workTimeRequirements: { version: 1, rules: originalRules },
+        }] },
     })
     expect(parseCachedBoards({ version: 5, boards })).toEqual(boards)
     expect(old).toEqual(copy)
   })
   it('old saved JSON gains facts without changing note, status, source, body or timestamps', () => {
     const old = legacyCollectedWorkTimeSaved()
+    expect(old.job.occupation?.version).toBe(3)
     const copy = structuredClone(old)
     const result = decodeSavedJobs(JSON.stringify([old]))
     expect(result.omitted).toBe(0)
     expect(result.records).toHaveLength(1)
-    expect(result.records[0]).toMatchObject({ ...old, job: { ...old.job, workTimeRequirements: { version: 1, rules: originalRules } } })
+    expect(result.records[0]).toMatchObject({ ...old, job: {
+      ...old.job, occupation: { ...old.job.occupation, version: 4 },
+      workTimeRequirements: { version: 1, rules: originalRules },
+    } })
     const backup = createSavedBackup(result.records, 0, new Date(WORK_TIME_NOW))
     expect(JSON.parse(backup)).not.toHaveProperty('profile')
     const imported = parseSavedImport(backup)
