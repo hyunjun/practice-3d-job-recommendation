@@ -38,6 +38,13 @@ export const JobSchema = z.object({
     }).optional(),
   }).optional(),
   cityIds: z.array(z.string()).max(50), locationLabel: z.string().max(2000),
+  workplaceLocations: z.object({
+    version: z.literal(1),
+    locations: z.array(z.object({
+      label: z.string().max(2000), country: z.string().min(1).max(1000).optional(),
+    })).min(1).max(300),
+    truncated: z.boolean().optional(),
+  }).optional(),
   locationResolution: z.object({
     version: z.literal(1), status: z.enum(['relocation', 'conflict']),
     listedCityIds: z.array(z.string()).min(1).max(50), listedLabel: z.string().max(2000),

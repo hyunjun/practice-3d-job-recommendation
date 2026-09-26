@@ -35,9 +35,13 @@ describe('unmapped job discovery', () => {
     const catalog = searchCatalog(jobs)
     const index = createSearchIndex(catalog, SEARCH_PROFILE)
     expect(filterJobs(catalog, SEARCH_PROFILE, { ...SEARCH_FILTERS, query: 'gurugram' }).map(match => match.job.id)).toEqual([jobs[0].id])
-    for (const region of ['europe', 'americas', 'asia-pacific'] as const) {
-      expect(selectSearchJobs(index, { ...SEARCH_FILTERS, region })).toEqual([])
-      expect(countSearchJobs(index.entries, { kind: 'unmapped' }, region).jobs).toBe(0)
+    for (const { region, ids, count } of [
+      { region: 'europe', ids: ['greenhouse-search-fixture-a-country'], count: 1 },
+      { region: 'americas', ids: [], count: 0 },
+      { region: 'asia-pacific', ids: [], count: 0 },
+    ] as const) {
+      expect(selectSearchJobs(index, { ...SEARCH_FILTERS, region }).map(entry => entry.job.id)).toEqual(ids)
+      expect(countSearchJobs(index.entries, { kind: 'unmapped' }, region).jobs).toBe(count)
     }
     expect(selectSearchJobs(index, { ...SEARCH_FILTERS, workMode: 'remote', remoteEligibleOnly: false })).toEqual([])
     expect(selectSearchJobs(index, { ...SEARCH_FILTERS, workMode: 'unknown' }).map(entry => entry.job.id)).toEqual([jobs[0].id])

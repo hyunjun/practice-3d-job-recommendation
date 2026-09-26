@@ -117,11 +117,11 @@ function csvRows(text: string, count: number) {
   const boundary = text.indexOf('\r\n')
   const headers = cells(text.slice(0, boundary))
   const values = cells(text.slice(boundary + 2))
-  expect(headers).toHaveLength(45)
-  expect(headers.slice(-8)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거'])
+  expect(headers).toHaveLength(47)
+  expect(headers.slice(-10)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거', '근무 국가', '근무 국가 근거'])
   expect(headers).toContain('기술·경력 근거')
-  expect(values).toHaveLength(45 * count)
-  return Array.from({ length: count }, (_, row) => Object.fromEntries(headers.map((header, i) => [header, values[row * 45 + i]])))
+  expect(values).toHaveLength(47 * count)
+  return Array.from({ length: count }, (_, row) => Object.fromEntries(headers.map((header, i) => [header, values[row * 47 + i]])))
 }
 async function csvDownload(page: Page) {
   const event = page.waitForEvent('download')
@@ -281,6 +281,7 @@ for (const width of [1440, 320]) test.describe(`spoken languages through real fo
         '저장 내용의 조회 시각': LANGUAGE_FETCHED_AT, '채용 링크': 'https://example.com/jobs/language-aster-4501',
         '언어 조건': '필수로 명시: 영어\n우대 사항: 영어', '언어 조건 근거': mixedQuote,
         '공개 게시 상태': '게시 확인', '내용 비교': '표시 내용 일치', '저장 내용과 다른 항목': '',
+        '근무 국가': '독일', '근무 국가 근거': 'Berlin, Germany',
       })
       await page.getByRole('button', { name: '기록 백업·복원', exact: true }).click()
       const download = page.waitForEvent('download')
@@ -413,6 +414,7 @@ for (const width of [1440, 320]) test.describe(`spoken languages through real fo
         '언어 조건': '필수로 명시: 영어\n우대 사항: 영어', '언어 조건 근거': mixedQuote,
         '상태': '지원 완료', '메모': LANGUAGE_NOTE, '공개 게시 상태': '게시 확인',
         '내용 비교': '차이 있음', '저장 내용과 다른 항목': '기술·경력·언어 · 본문',
+        '근무 국가': '독일', '근무 국가 근거': 'Berlin, Germany',
       })
       await writeFile(info.outputPath('language-change.csv'), csvText)
       await writeFile(info.outputPath('same-id-language-change.json'), JSON.stringify({ before, after, saved, upstream: await syntheticTraffic(server, 10) }, null, 2))

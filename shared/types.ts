@@ -199,6 +199,11 @@ export interface Job {
   postingPurpose?: JobPostingPurpose
   cityIds: string[]
   locationLabel: string
+  workplaceLocations?: {
+    version: 1
+    locations: { label: string; country?: string }[]
+    truncated?: boolean
+  }
   locationResolution?: JobLocationResolution
   workMode: WorkMode
   employment: Employment

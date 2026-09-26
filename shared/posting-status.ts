@@ -4,6 +4,7 @@ import { jobRoleEvidence, jobRoles } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
 import { jobPostingUrl } from './job-links'
 import { upgradeJob } from './job-upgrade'
+import { workplaceCountryRevision } from './job-workplace'
 import type { Job, JobProvider, SavedJob } from './types'
 
 export const REVISION_FIELDS = ['title', 'location', 'conditions', 'compensation', 'qualifications', 'description', 'url'] as const
@@ -102,6 +103,7 @@ export async function createJobRevision(job: Job): Promise<JobRevision> {
     location: {
       cities: current.cityIds, label: current.locationLabel,
       ...(current.locationResolution ? { resolution: current.locationResolution } : {}),
+      ...(current.workMode !== 'remote' ? { countries: workplaceCountryRevision(current) } : {}),
     },
     conditions: {
       workMode: job.workMode, employment: current.employment, visa: current.visa,

@@ -1,6 +1,7 @@
 import { CITY_BY_ID, LOCATION_ALIASES } from './cities'
 import { locateCities } from './city-location'
 import { upgradeJobRemoteScope } from './job-remote'
+import { workplaceCountrySearchText } from './job-workplace'
 import type { Catalog, FactEvidence, Job } from './types'
 
 const ROLE_LOCATION = /\b(?:this|the)\s+(?:internship|role|position|job)\s+(?:is|will be)\s+(?:based|located)\s+(?:in|at)\s+/gi
@@ -89,7 +90,7 @@ export function upgradeJobLocation<T extends Job>(job: T, fullDescription?: stri
 
 export function jobLocationSearchText(job: Job): string {
   const conflict = job.locationResolution?.status === 'conflict' ? job.locationResolution : undefined
-  return [job.locationLabel, ...(conflict ? [
+  return [job.locationLabel, workplaceCountrySearchText(job), ...(conflict ? [
     conflict.statedLabel,
     ...[...conflict.listedCityIds, ...conflict.statedCityIds].flatMap(id => {
       const city = CITY_BY_ID.get(id)

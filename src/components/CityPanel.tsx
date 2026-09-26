@@ -89,7 +89,7 @@ export function CityPanel(props: Props) {
         <div className="results-heading unmapped-heading">
           <p className="eyebrow">BEYOND THE MAP</p><h2>그 밖의 근무지<span className="accent-dot">.</span></h2>
           <p>제공 도시 밖이거나 도시를 특정하기 어려운 공고예요. 공고에 적힌 근무지와 실제 근무 형태를 확인해 주세요.</p>
-          <p className="unmapped-range-note">기타 근무지는 ‘전 세계’에서만 표시해요. 공고에 적힌 지역명으로 검색할 수 있어요.</p>
+          <p className="unmapped-range-note">국가가 확인된 공고는 해당 지역에서도 표시해요. 국가가 미확인인 근무지는 ‘전 세계’에서 찾고, 공고에 적힌 지역명으로 검색할 수 있어요.</p>
           {(coverage.unavailable === null || coverage.unavailable > 0) && <div className="unmapped-previous-note">
             <p>{coverage.unavailable === null ? '일부 이전 조회에서는 목록에 포함하지 못한 공고 수를 확인할 수 없어요.'
               : `이전 조회에서 목록에 포함하지 못한 공고 ${coverage.unavailable}개가 더 있어요.`} 정상 조회 후 목록이 갱신됩니다.</p>

@@ -1,4 +1,6 @@
 import { MapPin, MapPinOff } from 'lucide-react'
+import { countryName } from '../../shared/countries'
+import { workplaceCountryInfo } from '../../shared/job-workplace'
 import type { Job } from '../../shared/types'
 
 export function JobLocationNotice({ job }: { job: Job }) {
@@ -11,7 +13,7 @@ export function JobLocationNotice({ job }: { job: Job }) {
   </p>
 }
 
-export function JobLocationDetails({ job }: { job: Job }) {
+function JobLocationResolutionDetails({ job }: { job: Job }) {
   const resolution = job.locationResolution
   if (!resolution) return null
   const conflict = resolution.status === 'conflict'
@@ -31,4 +33,27 @@ export function JobLocationDetails({ job }: { job: Job }) {
       </div>)}
     </details>
   </section>
+}
+
+export function JobLocationDetails({ job }: { job: Job }) {
+  const workplace = workplaceCountryInfo(job)
+  return <>
+    <JobLocationResolutionDetails job={job} />
+    {job.workMode !== 'remote' && <section className={`job-location-details${workplace.conflict ? ' conflict' : ''}`} aria-label="확인된 근무 국가">
+      <h4>확인된 근무 국가</h4>
+      <p>{workplace.countries.length ? workplace.countries.map(countryName).join(' · ') : '확인 필요'}</p>
+      {workplace.conflict
+        ? <p>일부 근무지의 국가 정보가 서로 달라요. 아래 근거와 원문을 확인해 주세요.</p>
+        : workplace.uncertain && workplace.countries.length > 0
+          ? <p>국가가 직접 표기되지 않았거나 미확인인 근무지도 있어요. 확인된 국가를 기준으로 표시해요.</p>
+          : null}
+      <p>국가가 확인된 기타 근무지는 해당 지역에서도 찾을 수 있어요. 국가가 미확인인 근무지는 ‘전 세계’에서 표시해요.</p>
+      {workplace.evidence.length > 0 && <details><summary>근무 국가의 근거</summary>
+        {workplace.evidence.map((evidence, index) => <div className="location-evidence" key={`${evidence.source}-${index}`}>
+          <strong>{evidence.source === 'title' ? '공고 제목' : evidence.source === 'description' ? '공고 본문' : '공고의 근무지 정보'}</strong>
+          <blockquote>{evidence.text}</blockquote>
+        </div>)}
+      </details>}
+    </section>}
+  </>
 }

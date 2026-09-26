@@ -2,6 +2,7 @@ import { CITY_BY_ID } from './cities'
 import { COUNTRY_BY_CODE, countrySearchText } from './countries'
 import { matchingSkills } from './qualification-matching'
 import { isUnmappedJob, jobLocationSearchText } from './job-location'
+import { workplaceCountryInfo } from './job-workplace'
 import { jobRoleLabel, matchesJobRole } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
 import { isTalentPoolJob } from './job-posting'
@@ -46,7 +47,9 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
     const regions = job.workMode === 'remote'
       ? [...(job.remoteScopeResolution?.status === 'description' ? [] : job.remoteRegions ?? []),
         ...job.remoteCountries.flatMap(code => COUNTRY_BY_CODE.get(code)?.region ?? [])]
-      : job.cityIds.flatMap(id => CITY_BY_ID.get(id)?.region ?? [])
+      : isUnmappedJob(job)
+        ? workplaceCountryInfo(job).countries.flatMap(code => COUNTRY_BY_CODE.get(code)?.region ?? [])
+        : job.cityIds.flatMap(id => CITY_BY_ID.get(id)?.region ?? [])
     return [{
       job, company,
       text: [company.name, company.industry, job.title, jobRoleLabel(job), MODE_LABELS[job.workMode],
@@ -92,7 +95,7 @@ export function selectSearchJobs(index: SearchIndex, filters: Filters): SearchEn
 
 export function inSearchScope(entry: SearchEntry, scope: SearchScope, region: Region = 'all'): boolean {
   if (scope.kind === 'remote') return entry.job.workMode === 'remote'
-  if (scope.kind === 'unmapped') return isUnmappedJob(entry.job) && region === 'all'
+  if (scope.kind === 'unmapped') return isUnmappedJob(entry.job) && (region === 'all' || entry.regions.has(region))
   return entry.job.workMode !== 'remote' && entry.cities.some(city =>
     (scope.kind !== 'city' || city.id === scope.cityId) && (region === 'all' || city.region === region),
   )

@@ -109,6 +109,7 @@ export function normalizeSmartRecruitersJob(raw: SmartRecruitersJob, companyId: 
     departments, management: managementFact(metadata),
     cityIds: mode.value === 'remote' ? [] : postingCities([location]),
     locationLabel: postingLocationLabel([location], mode.value), workMode: mode,
+    locations: [location],
     // SmartRecruiters' internal id "permanent" can have the public label "Full-time".
     employment: employmentFact(raw.name, [{ name: 'employmentType', value: raw.typeOfEmployment?.label }], text),
     ...(mode.value === 'remote' ? { scope: postingRemoteScope([location]) } : {}), ...salary,

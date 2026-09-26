@@ -65,6 +65,7 @@ export function normalizeAshbyJob(raw: AshbyJob, companyId: string, fetchedAt: s
     provider: 'ashby', id: raw.id, companyId, title: raw.title, text, url: raw.jobUrl, fetchedAt,
     departments: [raw.department, raw.team].filter((value): value is string => typeof value === 'string'),
     cityIds: mode.value === 'remote' ? [] : cities, locationLabel: postingLocationLabel(locations, mode.value),
+    locations,
     workMode: mode, employment, ...(mode.value === 'remote' ? { scope: postingRemoteScope(locations) } : {}), ...salary,
   })
 }

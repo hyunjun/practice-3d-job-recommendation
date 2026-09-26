@@ -53,6 +53,8 @@ export function normalizeLeverJob(raw: LeverJob, companyId: string, fetchedAt: s
     provider: 'lever', id: raw.id, companyId, title: raw.text, text, url: raw.hostedUrl, fetchedAt,
     departments: [raw.categories?.department, raw.categories?.team].filter((value): value is string => typeof value === 'string'),
     cityIds: workMode.value === 'remote' ? [] : cities, locationLabel: postingLocationLabel(locations, workMode.value),
+    locations: !primary && raw.country && labels.length
+      ? [{ label: '', address: { addressCountry: raw.country } }, ...locations] : locations,
     workMode, employment, ...(workMode.value === 'remote' ? { scope: postingRemoteScope(locations) } : {}), ...salary,
   })
 }

@@ -11,6 +11,8 @@ import { workTimeSummary } from '../../shared/job-work-time'
 import { isTalentPoolJob } from '../../shared/job-posting'
 import { POSTING_TYPE_LABELS } from '../../shared/types'
 import { upgradeJob } from '../../shared/job-upgrade'
+import { workplaceCountryInfo } from '../../shared/job-workplace'
+import { countryName } from '../../shared/countries'
 import { REMOTE_SCOPE_CAUTION, remoteScopeLabel, remoteScopeNote } from '../../shared/job-remote'
 import { jobFreshness } from '../../shared/catalog-freshness'
 import type { Filters, Profile, SavedJob, Source } from '../../shared/types'
@@ -120,7 +122,10 @@ export function deleteProfile(): void {
 
 export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<string, PostingObservation>): void {
   const exportedAt = new Date()
-  const current = saved.map(item => ({ ...item, job: upgradeJob(item.job, { preserveUnverifiablePay: true }) }))
+  const current = saved.map(item => {
+    const job = upgradeJob(item.job, { preserveUnverifiablePay: true })
+    return { ...item, job, workplace: workplaceCountryInfo(job) }
+  })
   // Neutralize spreadsheet formulas in imported job titles and user notes.
   const cell = (value: unknown) => {
     const text = String(value ?? '')
@@ -128,7 +133,7 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
     return `"${safe.replace(/"/g, '""')}"`
   }
   const rows = [
-    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목', '비자 지원', '취업 자격 조건', '취업 자격 근거', '직무 분류', '직무 분류 근거', '탐색 직군', '탐색 직군 근거', '저장 내용의 조회 시각', '내보낼 때의 조회 기록', '내보낸 시각', '근무지 판단', '원래 게시 위치', '본문의 근무지', '근무지 원문 근거', '명시된 원격근무 국가·지역', '원격근무 국가 코드', '원격근무 추가 확인', '고용 형태', '고용 형태 근거', '원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거'],
+    ['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거', '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목', '비자 지원', '취업 자격 조건', '취업 자격 근거', '직무 분류', '직무 분류 근거', '탐색 직군', '탐색 직군 근거', '저장 내용의 조회 시각', '내보낼 때의 조회 기록', '내보낸 시각', '근무지 판단', '원래 게시 위치', '본문의 근무지', '근무지 원문 근거', '명시된 원격근무 국가·지역', '원격근무 국가 코드', '원격근무 추가 확인', '고용 형태', '고용 형태 근거', '원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거', '근무 국가', '근무 국가 근거'],
     ...current.map(item => [
       item.company.name, item.job.title, item.job.locationLabel, JOB_SOURCE_LABELS[item.job.source],
       item.status === 'applied' ? '지원 완료' : '저장됨', item.savedAt, item.note, jobPostingUrl(item.job),
@@ -170,6 +175,8 @@ export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<str
       [...new Set(item.job.languageRequirements?.rules.map(rule => rule.evidence.text) ?? [])].join('\n\n'),
       workTimeSummary(item.job),
       item.job.source === 'sample' ? '' : [...new Set(item.job.workTimeRequirements?.rules.map(rule => rule.evidence.text) ?? [])].join('\n\n'),
+      item.job.workMode === 'remote' ? '' : item.workplace.countries.map(countryName).join(' · ') || '확인 필요',
+      item.job.workMode === 'remote' ? '' : item.workplace.evidence.map(evidence => evidence.text).join('\n\n'),
     ]),
   ]
   const blob = new Blob(['\ufeff', rows.map(row => row.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' })

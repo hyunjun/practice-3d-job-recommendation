@@ -198,7 +198,7 @@ function csvRecords(text: string) {
   const cells = (value: string) => [...value.matchAll(/"((?:[^"]|"")*)"(?:,|\r\n|$)/g)].map(match => match[1].replaceAll('""', '"'))
   const headerEnd = text.indexOf('\r\n')
   const headers = cells(text.slice(0, headerEnd))
-  expect(headers.slice(-8)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거'])
+  expect(headers.slice(-10)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거', '근무 국가', '근무 국가 근거'])
   const values = cells(text.slice(headerEnd + 2))
   expect(values).toHaveLength(headers.length * 2)
   return [0, 1].map(row => Object.fromEntries(headers.map((header, index) => [header, values[row * headers.length + index]])))
@@ -381,12 +381,14 @@ for (const width of [1440, 320]) test.describe(`posting purpose across real coll
       '저장일': JOB_POSTING_SAVED_AT, '저장 내용의 조회 시각': oldSourceTime,
       '상태': '지원 완료', '메모': JOB_POSTING_NOTE, '공개 게시 상태': '게시 확인',
       '내용 비교': '표시 내용 일치', '저장 내용과 다른 항목': '',
+      '근무 국가': '영국', '근무 국가 근거': 'London, United Kingdom',
     })
     expect(csv.find(record => record['회사'] === 'Alder Workshop')).toMatchObject({
       '포지션': JOB_POSTING_PROSPECT_TITLE, '모집 유형': '일반 채용 공고', '모집 유형 근거': '',
       '저장일': JOB_POSTING_SAVED_AT, '저장 내용의 조회 시각': oldSourceTime,
       '상태': '저장됨', '메모': ordinaryNote, '공개 게시 상태': '게시 확인',
       '내용 비교': '차이 있음', '저장 내용과 다른 항목': '모집·근무·고용·비자',
+      '근무 국가': '영국', '근무 국가 근거': 'London, United Kingdom',
     })
     await page.getByRole('button', { name: '기록 백업·복원', exact: true }).click()
     const jsonDownload = page.waitForEvent('download')

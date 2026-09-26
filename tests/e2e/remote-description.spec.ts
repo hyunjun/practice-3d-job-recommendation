@@ -135,7 +135,7 @@ function singleCsvRecord(text: string) {
     .map(match => match[1].replaceAll('""', '"'))
   const headers = cells(text.slice(0, text.indexOf('\r\n')))
   const values = cells(text).slice(headers.length)
-  expect(headers.slice(-8)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거'])
+  expect(headers.slice(-10)).toEqual(['원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거', '근무 국가', '근무 국가 근거'])
   expect(values).toHaveLength(headers.length)
   return Object.fromEntries(headers.map((header, index) => [header, values[index]]))
 }
@@ -257,6 +257,7 @@ for (const width of [1440, 320]) test.describe(`body-derived remote country cont
       '명시된 원격근무 국가·지역': '영국', '원격근무 국가 코드': 'GB',
       '원격근무 추가 확인': countryCaution, '원격근무 지역 판단': derivedNotice,
       '원격근무 지역 원문 근거': REMOTE_UK_PARAGRAPH,
+      '근무 국가': '', '근무 국가 근거': '',
     })
 
     await page.getByRole('button', { name: '기록 백업·복원', exact: true }).click()

@@ -2,6 +2,7 @@ import { CITY_BY_ID } from '../shared/cities'
 import { locateCities } from '../shared/city-location'
 export { locateCities } from '../shared/city-location'
 import { upgradeJobLocation } from '../shared/job-location'
+import { createWorkplaceLocations } from '../shared/job-workplace'
 import { classifyPostingPurpose } from '../shared/job-posting'
 import { classifyJobRoles } from '../shared/job-roles'
 import { isTechnicalOccupation, occupationFacts } from '../shared/job-occupation'
@@ -98,6 +99,7 @@ interface PostingInput extends Pick<Job, 'companyId' | 'title' | 'cityIds' | 'lo
   departments?: string[]
   management?: JobManagement
   greenhouseProspect?: boolean
+  locations?: PostingLocation[]
 }
 
 export function normalizePosting(input: PostingInput): Job | null {
@@ -110,11 +112,17 @@ export function normalizePosting(input: PostingInput): Job | null {
   const postingPurpose = classifyPostingPurpose({
     title, description: text, greenhouseProspect: input.provider === 'greenhouse' && input.greenhouseProspect === true,
   })
+  const workplaceLocations = workMode.value === 'remote' ? undefined : createWorkplaceLocations(
+    (input.locations ?? [{ label: input.locationLabel }]).map(location => ({
+      label: location.label, ...(location.address?.addressCountry ? { country: location.address.addressCountry } : {}),
+    })),
+  )
   const job: Job = {
     id: `${input.provider}-${companyId}-${input.id}`, companyId, title,
     role: roleClassification.roles[0] ?? 'unknown', roleClassification, occupation,
     ...(postingPurpose ? { postingPurpose } : {}),
     cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
+    ...(workplaceLocations ? { workplaceLocations } : {}),
     employment: employment.value, employmentVersion: EMPLOYMENT_VERSION, ...qualificationFacts(text, companyId), salary,
     languageRequirements: languageRequirements(text),
     workTimeRequirements: workTimeRequirements(text),
@@ -145,7 +153,8 @@ export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: s
   // Explicit job-posting metadata takes precedence over potentially broader office tags.
   const officeNames = raw.offices?.map(office => office.location || office.name || '').filter(Boolean) ?? []
   const genericLocation = !locationName || /^(?:hybrid|remote|in[- ]office|on[- ]site|multiple locations|various locations)$/i.test(locationName)
-  const locationDetails = explicitLocations.length ? explicitLocations.join(' · ') : genericLocation && officeNames.length ? officeNames.join(' · ') : locationName
+  const chosenLocations = explicitLocations.length ? explicitLocations : genericLocation && officeNames.length ? officeNames : [locationName]
+  const locationDetails = chosenLocations.join(' · ')
   const workMode = workModeFact(locationName, raw.metadata ?? [], text)
   const mode = workMode.value
   const isRemote = mode === 'remote'
@@ -162,6 +171,7 @@ export function normalizeJob(raw: GreenhouseJob, companyId: string, fetchedAt: s
     departments: Array.isArray(raw.departments) ? raw.departments.flatMap(department => typeof department?.name === 'string' ? [department.name] : []) : [],
     management: managementFact(raw.metadata ?? []),
     cityIds, locationLabel: location, workMode, employment, scope,
+    locations: chosenLocations.map(label => ({ label })),
     ...greenhouseCompensation(text, raw.pay_input_ranges),
     url: raw.absolute_url, updatedAt: raw.updated_at,
   })

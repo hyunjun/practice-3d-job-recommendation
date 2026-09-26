@@ -82,11 +82,11 @@ function csvRecord(text: string) {
   const cells = (value: string) => [...value.matchAll(/"((?:[^"]|"")*)"(?:,|\r\n|$)/g)].map(match => match[1].replaceAll('""', '"'))
   const end = text.indexOf('\r\n')
   const headers = cells(text.slice(0, end))
-  expect(headers).toHaveLength(45)
+  expect(headers).toHaveLength(47)
   expect(headers.slice(0, 8)).toEqual(['회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크'])
-  expect(headers.slice(-4)).toEqual(['언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거'])
+  expect(headers.slice(-6)).toEqual(['언어 조건', '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거', '근무 국가', '근무 국가 근거'])
   const values = cells(text.slice(end + 2))
-  expect(values).toHaveLength(45)
+  expect(values).toHaveLength(47)
   return Object.fromEntries(headers.map((header, index) => [header, values[index]]))
 }
 function expectSavedSource(records: SavedJob[]) {
@@ -274,6 +274,7 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
         '채용 링크': 'https://delight.ai/job/44201', '저장 내용의 조회 시각': fetchedAt,
         '공개 게시 상태': '게시 확인', '내용 비교': '표시 내용 일치', '저장 내용과 다른 항목': '',
         '모집 유형': '일반 채용 공고',
+        '근무 국가': '대한민국', '근무 국가 근거': 'Seoul, South Korea',
       })
       await page.getByRole('button', { name: '기록 백업·복원', exact: true }).click()
       const jsonDownload = page.waitForEvent('download')
