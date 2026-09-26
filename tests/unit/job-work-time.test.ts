@@ -306,7 +306,7 @@ describe('old records, source-preserving migration and meaningful revisions', ()
       snapshot: { fetchedAt: WORK_TIME_FETCHED_AT, total: 2, unmappedCount: 0,
         publishedIds: ['greenhouse-time-dawn-4601', 'greenhouse-time-dawn-nontechnical'],
         jobs: [{
-          ...job, stale: true, occupation: { ...job.occupation, version: 4 },
+          ...job, stale: true, occupation: { ...job.occupation, version: 5 },
           workTimeRequirements: { version: 1, rules: originalRules },
         }] },
     })
@@ -321,7 +321,7 @@ describe('old records, source-preserving migration and meaningful revisions', ()
     expect(result.omitted).toBe(0)
     expect(result.records).toHaveLength(1)
     expect(result.records[0]).toMatchObject({ ...old, job: {
-      ...old.job, occupation: { ...old.job.occupation, version: 4 },
+      ...old.job, occupation: { ...old.job.occupation, version: 5 },
       workTimeRequirements: { version: 1, rules: originalRules },
     } })
     const backup = createSavedBackup(result.records, 0, new Date(WORK_TIME_NOW))

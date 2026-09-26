@@ -14,7 +14,7 @@ import type { ScopeCase } from '../fixtures/occupation-title-scope'
 import { SEARCH_PROFILE, searchCatalog } from '../fixtures/search-catalog'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
 
-// Confirmed format: new assessments use v4; legacy v1/v2/v3 remain readable.
+// Confirmed format: new assessments use v5; legacy v1/v2/v3/v4 remain readable.
 const savedMenu = (page: Page) => page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ })
 const close = (page: Page) => page.getByRole('button', { name: '닫기', exact: true }).click()
 
@@ -138,7 +138,7 @@ for (const width of [1440, 320]) {
       job: {
         id: 'greenhouse-fable-orbit-106', title: 'Frontend Engineer, Developer Community',
         description: TECHNICAL_SCOPE_CASES[2].description,
-        fetchedAt: '2026-09-26T07:00:00.000Z', occupation: { version: 4, category: 'engineering' },
+        fetchedAt: '2026-09-26T07:00:00.000Z', occupation: { version: 5, category: 'engineering' },
         url: 'https://example.org/fable-orbit/106',
       },
     })
@@ -266,7 +266,7 @@ for (const width of [1440, 320]) {
         title: 'Administrative Business Partner - Engineering, Product and Design',
         description: OUTSIDE_SCOPE_CASES[1].description, requirements: [],
         url: 'https://example.org/fable-orbit/administrator', fetchedAt: '2026-09-26T07:00:00.000Z',
-        occupation: { version: 4, category: 'other', departments: ['Core Engineering'] },
+        occupation: { version: 5, category: 'other', departments: ['Core Engineering'] },
       },
     })
     await expect(page.locator('.saved-role')).toHaveText('기타 직군')

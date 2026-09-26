@@ -29,7 +29,7 @@ export const JobSchema = z.object({
     && value.roles.every(role => value.evidence.some(item => item.role === role))
     && value.evidence.every(item => value.roles.includes(item.role))).optional(),
   occupation: z.object({
-    version: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(OCCUPATION_VERSION)]),
+    version: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(OCCUPATION_VERSION)]),
     category: z.enum(['engineering', 'research', 'support', 'management', 'other', 'unconfirmed']),
     evidence: z.array(EvidenceSchema).min(1).max(8),
     departments: z.array(z.string().min(1).max(1000)).max(20),

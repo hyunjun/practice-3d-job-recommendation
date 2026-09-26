@@ -24,7 +24,7 @@ import type { ScopeCase } from '../fixtures/occupation-title-scope'
 import { smartRecruitersPosting } from '../fixtures/public-postings'
 import { SEARCH_PROFILE, searchCatalog } from '../fixtures/search-catalog'
 
-// Stage58 uses occupation v4 and must keep reading versions 1/2/3.
+// Current assessments use occupation v5 and must keep reading versions 1/2/3/4.
 // A general requirement for every Engineer to prove its duties is out of scope.
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
@@ -58,7 +58,7 @@ describe('the actual position, rather than its developer audience or engineering
       version: occupation.version, category: occupation.category, explorable: isTechnicalJob(job),
       allRoleFilter: matchesJobRole(job, 'all'), roles: jobRoles(job),
     }).toEqual({
-      version: 4, category: fixture.expectedCategory, explorable: fixture.expectedExplorable,
+      version: 5, category: fixture.expectedCategory, explorable: fixture.expectedExplorable,
       allRoleFilter: fixture.expectedExplorable, roles: fixture.expectedRoles,
     })
   })
@@ -70,7 +70,7 @@ describe('the actual position, rather than its developer audience or engineering
   it.each(TECHNICAL_SCOPE_CASES)('new collection retains the computing position $key', fixture => {
     const job = normalized(fixture)
     expect(job).not.toBeNull()
-    expect(job?.occupation?.version).toBe(4)
+    expect(job?.occupation?.version).toBe(5)
     expect(job?.occupation?.category).toBe(fixture.expectedCategory)
     expect(job?.title).toBe(fixture.title)
     expect(job?.fetchedAt).toBe('2026-09-26T07:00:00.000Z')
@@ -85,19 +85,19 @@ describe('the actual position, rather than its developer audience or engineering
     }
     expect(job).toMatchObject({
       title: fixture.title, fetchedAt: '2026-09-26T07:00:00.000Z',
-      occupation: { version: 4, category: fixture.expectedCategory },
+      occupation: { version: 5, category: fixture.expectedCategory },
     })
     expect(jobRoles(job!)).toEqual(fixture.expectedRoles)
   })
 
   it.each(['Engineer', 'Marketing Engineer', 'Developer Relations Engineer'])('preserves the existing title-only acceptance for %s', title => {
     const occupation = occupationFacts({ title, description: '', departments: ['Marketing'] })
-    expect(occupation).toMatchObject({ version: 4, category: 'engineering' })
+    expect(occupation).toMatchObject({ version: 5, category: 'engineering' })
     const job = normalized({
       key: 'title-only', title, description: '', departments: ['Marketing'],
       expectedCategory: 'engineering', expectedExplorable: true, expectedRoles: [],
     })
-    expect(job).toMatchObject({ title, occupation: { version: 4, category: 'engineering' } })
+    expect(job).toMatchObject({ title, occupation: { version: 5, category: 'engineering' } })
     expect(isTechnicalJob(job!)).toBe(true)
     expect(jobRoles(job!)).toEqual([])
   })
@@ -112,7 +112,7 @@ describe('the actual position, rather than its developer audience or engineering
     // Preserve the existing policy. This does not assert that every real EDA
     // or RTL vacancy has the same duties or settle the broader scope question.
     const occupation = occupationFacts({ title, description: '', departments: ['RFIC Engineering'] })
-    expect(occupation).toMatchObject({ version: 4, category: 'engineering' })
+    expect(occupation).toMatchObject({ version: 5, category: 'engineering' })
     expect(isTechnicalJob(scopeJob(TECHNICAL_SCOPE_CASES[0], { title, description: '', occupation }))).toBe(true)
   })
 
@@ -131,7 +131,7 @@ describe('the actual position, rather than its developer audience or engineering
 })
 
 describe('occupation v3 records, cache metadata and saved source material', () => {
-  it.each([1, 2, 3, 4] as const)('accepts the explicit occupation format v%s', version => {
+  it.each([1, 2, 3, 4, 5] as const)('accepts the explicit occupation format v%s', version => {
     const input = {
       ...scopeJob(TECHNICAL_SCOPE_CASES[0]),
       occupation: {
@@ -143,7 +143,7 @@ describe('occupation v3 records, cache metadata and saved source material', () =
     expect(JobSchema.safeParse(input).success).toBe(true)
   })
 
-  it.each([0, 5] as const)('rejects unsupported occupation format v%s', version => {
+  it.each([0, 6] as const)('rejects unsupported occupation format v%s', version => {
     const input = legacyScopeJob()
     expect(JobSchema.safeParse({ ...input, occupation: { ...input.occupation, version } }).success).toBe(false)
   })
@@ -153,7 +153,7 @@ describe('occupation v3 records, cache metadata and saved source material', () =
     const untouched = structuredClone(original)
     expect(JobSchema.safeParse(original).success).toBe(true)
     const current = upgradeJobOccupation(original)
-    expect(current.occupation).toMatchObject({ version: 4, category: 'other' })
+    expect(current.occupation).toMatchObject({ version: 5, category: 'other' })
     expect(JobSchema.safeParse(current).success).toBe(true)
     expect(isTechnicalJob(current)).toBe(false)
     expect({ ...current, occupation: original.occupation }).toEqual(original)
@@ -201,7 +201,7 @@ describe('occupation v3 records, cache metadata and saved source material', () =
     expect(loaded[0].snapshot?.jobs[0]).toMatchObject({
       fetchedAt: '2026-09-26T07:00:00.000Z', title: 'Software Engineer, Product Designer Tools',
       description: TECHNICAL_SCOPE_CASES[0].description,
-      occupation: { version: 4, category: 'engineering' },
+      occupation: { version: 5, category: 'engineering' },
     })
     expect(parseCachedBoards({ version: 5, boards: loaded })).toEqual(loaded)
     expect(entry).toEqual(untouched)
@@ -257,7 +257,7 @@ describe('occupation v3 records, cache metadata and saved source material', () =
         title: 'Administrative Business Partner - Engineering, Product and Design',
         description: OUTSIDE_SCOPE_CASES[1].description,
         url: 'https://example.org/fable-orbit/administrator',
-        fetchedAt: '2026-09-26T07:00:00.000Z', occupation: { version: 4, category: 'other' },
+        fetchedAt: '2026-09-26T07:00:00.000Z', occupation: { version: 5, category: 'other' },
       },
     })
     expect(saved.job.requirements).toEqual([])

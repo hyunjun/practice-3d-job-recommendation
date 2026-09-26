@@ -14,7 +14,7 @@ export const COMPENSATION_VERSION = 2 as const
 export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 2 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
-export const OCCUPATION_VERSION = 4 as const
+export const OCCUPATION_VERSION = 5 as const
 export const REMOTE_SCOPE_VERSION = 2 as const
 export const EMPLOYMENT_VERSION = 1 as const
 export const POSTING_PURPOSE_VERSION = 1 as const
@@ -154,8 +154,8 @@ export interface JobManagement {
 }
 
 export interface JobOccupation {
-  /** Versions 1 and 2 remain readable in saved records and cached snapshots. */
-  version: 1 | 2 | 3 | typeof OCCUPATION_VERSION
+  /** Versions 1–4 remain readable in saved records and cached snapshots. */
+  version: 1 | 2 | 3 | 4 | typeof OCCUPATION_VERSION
   category: 'engineering' | 'research' | 'support' | 'management' | 'other' | 'unconfirmed'
   evidence: FactEvidence[]
   departments: string[]
