@@ -11,6 +11,8 @@ import { fetchGreenhouseBoard, fetchGreenhousePresence } from '../../server/prov
 import { fetchAshbyBoard, fetchAshbyPresence } from '../../server/providers/ashby'
 import { fetchLeverBoard, fetchLeverPresence } from '../../server/providers/lever'
 import { createSmartRecruitersFetcher } from '../../server/providers/smartrecruiters'
+import type { Company, JobProvider } from '../../shared/types'
+import type { PresenceResult } from '../../server/posting-presence'
 import { expansionLegacy36Cache, expansionResponses } from '../fixtures/public-company-expansion'
 import {
   SURVEY_DETAIL_URLS, SURVEY_FULL_URLS, SURVEY_JOBS, SURVEY_NOW, SURVEY_OLD_SCOPE_KEY,
@@ -18,10 +20,23 @@ import {
   surveyOldHistory, surveyResponses,
 } from '../fixtures/public-company-survey'
 import { asCoverageReply } from '../fixtures/public-coverage-transport'
+import { isIntegrationRequest } from '../fixtures/source-integration-contract'
+import { withIntegrationEmptyBoards } from '../fixtures/source-integrations'
+
+// Keep the historical deterministic clock. Actual pacing and shared cooldowns
+// are exercised by source-integrations-providers with the real queue timers.
+vi.mock('../../server/providers/request-queue', async importOriginal => {
+  const actual = await importOriginal<typeof import('../../server/providers/request-queue')>()
+  return { ...actual, createBoardRequestQueue: (options: Parameters<typeof actual.createBoardRequestQueue>[0]) =>
+    actual.createBoardRequestQueue({ ...options, interval: 0 }) }
+})
 
 const directories: string[] = []
 let now: number
 beforeEach(() => {
+  // Each scenario starts at the same literal source time. Re-import providers
+  // so a previous scenario's later queue deadline cannot survive that reset.
+  vi.resetModules()
   now = Date.parse(SURVEY_NOW)
   vi.spyOn(Date, 'now').mockImplementation(() => now)
   vi.stubEnv('ORBIT_BOARDS_FILE', undefined)
@@ -34,6 +49,9 @@ afterEach(async () => {
 })
 
 async function fixture(options: { old36?: boolean; history?: boolean; failures?: boolean } = {}) {
+  const [{ fetchWorkableBoard, fetchWorkablePresence }, { fetchHimalayasBoard, fetchHimalayasPresence }] = await Promise.all([
+    import('../../server/providers/workable'), import('../../server/providers/himalayas'),
+  ])
   const cwd = await mkdtemp(path.join(tmpdir(), 'orbit-survey61-'))
   directories.push(cwd)
   const config = await loadBoardConfiguration({ cwd })
@@ -45,13 +63,14 @@ async function fixture(options: { old36?: boolean; history?: boolean; failures?:
     await mkdir(path.dirname(file), { recursive: true })
     await writeFile(file, JSON.stringify(surveyOldHistory()))
   }
-  let responses = surveyResponses({ failures: options.failures })
+  let responses = withIntegrationEmptyBoards(surveyResponses({ failures: options.failures }))
   const requests: { url: string; method: string; body: unknown }[] = []
+  const integrationRequests: { url: string; method: string; body: unknown }[] = []
   const unexpected: string[] = []
   vi.stubGlobal('fetch', vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
     const url = input instanceof Request ? input.url : String(input)
     const method = init?.method ?? (input instanceof Request ? input.method : 'GET')
-    requests.push({ url, method, body: init?.body ?? null })
+    ;(isIntegrationRequest(url) ? integrationRequests : requests).push({ url, method, body: init?.body ?? null })
     if (method !== 'GET' || init?.body || !Object.hasOwn(responses, url)) {
       unexpected.push(url)
       throw new Error(`Blocked unexpected fictional request: ${method} ${url}`)
@@ -64,15 +83,21 @@ async function fixture(options: { old36?: boolean; history?: boolean; failures?:
     // Queue timing has its own suite. These tests exercise real parsing, cache
     // identity and observations with no wall-clock delay under a controlled date.
     const smart = createSmartRecruitersFetcher({ concurrency: 4, interval: 0, timeout: 30_000 })
-    const full = { greenhouse: fetchGreenhouseBoard, ashby: fetchAshbyBoard, lever: fetchLeverBoard, smartrecruiters: smart }
-    const presence = { greenhouse: fetchGreenhousePresence, ashby: fetchAshbyPresence, lever: fetchLeverPresence, smartrecruiters: smart.fetchPresence }
+    const full = {
+      greenhouse: fetchGreenhouseBoard, ashby: fetchAshbyBoard, lever: fetchLeverBoard,
+      smartrecruiters: smart, workable: fetchWorkableBoard, himalayas: fetchHimalayasBoard,
+    }
+    const presence: Record<JobProvider, (company: Company, at: string) => Promise<PresenceResult>> = {
+      greenhouse: fetchGreenhousePresence, ashby: fetchAshbyPresence, lever: fetchLeverPresence,
+      smartrecruiters: smart.fetchPresence, workable: fetchWorkablePresence, himalayas: fetchHimalayasPresence,
+    }
     return createCatalogService({
       companies: config.companies,
       cache: createFileBoardCache(config.cacheFile, config.legacyCacheFiles, config.companies),
       fetchBoard: (company, at) => full[company.provider ?? 'greenhouse'](company, at),
       presence: {
         cache: createFilePresenceCache(presenceCacheFile(config.cacheFile)),
-        fetchBoard: company => presence[company.provider ?? 'greenhouse'](company),
+        fetchBoard: (company, at) => presence[company.provider ?? 'greenhouse'](company, at),
       },
       observations: createObservationStore({
         companies: config.companies, cache: createFileObservationCache(observationCacheFile(config.cacheFile)), now: () => now,
@@ -81,9 +106,14 @@ async function fixture(options: { old36?: boolean; history?: boolean; failures?:
     })
   }
   return {
-    config, old, requests, unexpected, service,
-    respond: (options: Parameters<typeof surveyResponses>[0] = {}) => { responses = surveyResponses(options) },
+    config, old, requests, integrationRequests, unexpected, service,
+    respond: (options: Parameters<typeof surveyResponses>[0] = {}) => { responses = withIntegrationEmptyBoards(surveyResponses(options)) },
   }
+}
+function extraRequests(state: Awaited<ReturnType<typeof fixture>>, himalayas: number, workable: number) {
+  expect(state.integrationRequests.filter(request => request.url.startsWith('https://himalayas.app/'))).toHaveLength(himalayas)
+  expect(state.integrationRequests.filter(request => request.url.startsWith('https://apply.workable.com/'))).toHaveLength(workable)
+  expect(state.integrationRequests.every(request => request.method === 'GET' && request.body === null)).toBe(true)
 }
 const positiveFields = (job: { id: string; companyId: string; source: string; title: string; role: string; cityIds: readonly string[]; url: string }) => ({
   id: job.id, companyId: job.companyId, source: job.source, title: job.title, role: job.role, cityIds: job.cityIds, url: job.url,
@@ -94,13 +124,13 @@ describe('independent47-company public survey', () => {
     const state = await fixture()
     const service = state.service()
     const catalog = await service.get()
-    expect(catalog.companies).toHaveLength(83)
-    expect(catalog.companies.slice(36).map(({ id, name, careerUrl, provider, board }) =>
+    expect(catalog.companies).toHaveLength(93)
+    expect(catalog.companies.slice(36, 83).map(({ id, name, careerUrl, provider, board }) =>
       ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
     expect(catalog.jobs).toHaveLength(65)
     expect(catalog.jobs.filter(job => SURVEY_REGISTRATIONS.some(company => company.id === job.companyId)
       && job.id !== 'greenhouse-xai-61901').map(positiveFields)).toEqual(SURVEY_JOBS.map(positiveFields))
-    expect(catalog.boards).toHaveLength(83)
+    expect(catalog.boards).toHaveLength(93)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.jobs.filter(job => job.postingPurpose).map(job => job.id)).toEqual([
       'greenhouse-moloco-44102', 'greenhouse-xai-61901',
@@ -118,6 +148,7 @@ describe('independent47-company public survey', () => {
       'smartrecruiters-servicenow-synthetic-61038', 'smartrecruiters-servicenow-synthetic-61904',
     ])
     expect(state.requests).toHaveLength(85)
+    extraRequests(state, 7, 3)
     expect(state.requests.map(request => request.url).sort()).toEqual([
       ...Object.keys(expansionResponses()), ...Object.values(SURVEY_FULL_URLS), ...SURVEY_DETAIL_URLS,
     ].sort())
@@ -128,7 +159,7 @@ describe('independent47-company public survey', () => {
     })
   })
 
-  it('fetches only47 missing boards plus two details from an old36 cache and preserves its original facts through reload', async () => {
+  it('fetches the missing47 historical boards plus ten empty integrations from an old36 cache and preserves its original facts through reload', async () => {
     const state = await fixture({ old36: true })
     expect(state.old.boards).toHaveLength(36)
     const before = await state.service().get()
@@ -138,10 +169,11 @@ describe('independent47-company public survey', () => {
       ['ashby-notion-synthetic-57102', '2026-09-26T09:59:55.000Z'],
     ])
     expect(state.requests).toHaveLength(49)
+    extraRequests(state, 7, 3)
     expect(state.requests.map(request => request.url).sort()).toEqual([...Object.values(SURVEY_FULL_URLS), ...SURVEY_DETAIL_URLS].sort())
     const bytes = await readFile(state.config.cacheFile, 'utf8')
     const cache = JSON.parse(bytes)
-    expect(cache.boards).toHaveLength(83)
+    expect(cache.boards).toHaveLength(93)
     for (const original of state.old.boards) {
       const kept = cache.boards.find((board: { companyId: string }) => board.companyId === original.companyId)
       expect(kept).toMatchObject(original)
@@ -152,13 +184,14 @@ describe('independent47-company public survey', () => {
     expect((await restarted.get()).jobs).toEqual(before.jobs)
     expect(await readFile(state.config.cacheFile, 'utf8')).toBe(bytes)
     expect(state.requests).toHaveLength(49)
+    extraRequests(state, 7, 3)
     expect(state.unexpected).toEqual([])
     expect((await restarted.getObservations()).days[0].complete).toMatchObject({
       comparable: false, stats: { published: 52, technical: 50, openings: 49, talentPools: 1 },
     })
   })
 
-  it('performs83 lightweight lists without details or renewed body evidence, then retrieves changed source content explicitly', async () => {
+  it('retains83 historical lightweight checks and the new provider deadlines without renewing body evidence', async () => {
     const state = await fixture()
     const service = state.service()
     await service.get()
@@ -166,6 +199,7 @@ describe('independent47-company public survey', () => {
     now += 61_000
     const listed = await service.getPostingStatus(true)
     expect(state.requests).toHaveLength(168)
+    extraRequests(state, 7, 6)
     expect(state.requests.slice(85)).toHaveLength(83)
     expect(state.requests.slice(85).some(request => SURVEY_DETAIL_URLS.includes(request.url as typeof SURVEY_DETAIL_URLS[number]))).toBe(false)
     expect(listed.boards.find(board => board.companyId === 'servicenow')!.listing!.content!.checkedAt).toBe(SURVEY_NOW)
@@ -178,9 +212,11 @@ describe('independent47-company public survey', () => {
     })
     expect(await readFile(state.config.cacheFile, 'utf8')).toBe(fullBytes)
     expect(state.requests).toHaveLength(251)
+    extraRequests(state, 7, 9)
     state.respond({ changedServiceNow: true })
     const changed = await service.getPostingStatus(true, true)
     expect(state.requests).toHaveLength(336)
+    extraRequests(state, 7, 12)
     expect(changed.boards.find(board => board.companyId === 'servicenow')!.listing!.jobs.map(job => [job.id, job.title, job.url])).toEqual([
       ['smartrecruiters-servicenow-synthetic-61038', SURVEY_SERVICE_CHANGED_TITLE, 'https://example.com/synthetic/stage61/servicenow-61038'],
     ])
@@ -220,11 +256,12 @@ describe('independent47-company public survey', () => {
       SURVEY_FULL_URLS.clickhouse, SURVEY_FULL_URLS.palantir, SURVEY_FULL_URLS.servicenow, SURVEY_FULL_URLS.xai, SURVEY_DETAIL_URLS[1],
     ].sort())
     expect(state.requests).toHaveLength(90)
+    extraRequests(state, 7, 3)
     expect((await restarted.getObservations()).days[0].complete?.stats).toMatchObject({ published: 69, technical: 65, openings: 63, talentPools: 2 })
     expect(state.unexpected).toEqual([])
   })
 
-  it('excludes a complete old36 cohort and compares only the expanded83-company days', async () => {
+  it('excludes a complete old36 cohort and compares only the current93-company days', async () => {
     const state = await fixture({ history: true })
     const service = state.service()
     const old = await service.getObservations()
@@ -255,6 +292,7 @@ describe('independent47-company public survey', () => {
     expect(persisted.series.find((series: { scope: { key: string } }) => series.scope.key === SURVEY_OLD_SCOPE_KEY))
       .toEqual(surveyOldHistory().series[0])
     expect(state.requests).toHaveLength(170)
+    extraRequests(state, 14, 6)
     expect(state.unexpected).toEqual([])
   })
 })

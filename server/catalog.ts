@@ -7,6 +7,8 @@ import { fetchAshbyBoard, fetchAshbyPresence } from './providers/ashby'
 import { fetchGreenhouseBoard, fetchGreenhousePresence } from './providers/greenhouse'
 import { fetchLeverBoard, fetchLeverPresence } from './providers/lever'
 import { fetchSmartRecruitersBoard, fetchSmartRecruitersPresence } from './providers/smartrecruiters'
+import { fetchWorkableBoard, fetchWorkablePresence } from './providers/workable'
+import { fetchHimalayasBoard, fetchHimalayasPresence } from './providers/himalayas'
 import { createFilePresenceCache, presenceCacheFile } from './posting-presence'
 import type { PresenceResult } from './posting-presence'
 import { createFileObservationCache, createObservationStore, observationCacheFile } from './catalog-observations'
@@ -16,10 +18,12 @@ export { fetchGreenhouseBoard } from './providers/greenhouse'
 const providers: Record<JobProvider, (company: Company, fetchedAt: string) => Promise<BoardResult>> = {
   greenhouse: fetchGreenhouseBoard, ashby: fetchAshbyBoard, lever: fetchLeverBoard,
   smartrecruiters: fetchSmartRecruitersBoard,
+  workable: fetchWorkableBoard, himalayas: fetchHimalayasBoard,
 }
-const presenceProviders: Record<JobProvider, (company: Company) => Promise<PresenceResult>> = {
+const presenceProviders: Record<JobProvider, (company: Company, fetchedAt: string) => Promise<PresenceResult>> = {
   greenhouse: fetchGreenhousePresence, ashby: fetchAshbyPresence, lever: fetchLeverPresence,
   smartrecruiters: fetchSmartRecruitersPresence,
+  workable: fetchWorkablePresence, himalayas: fetchHimalayasPresence,
 }
 
 let service: ReturnType<typeof createCatalogService> | undefined
@@ -33,7 +37,7 @@ export function initializePublicCatalog(): Promise<void> {
       fetchBoard: (company, fetchedAt) => providers[company.provider ?? 'greenhouse'](company, fetchedAt),
       presence: {
         cache: createFilePresenceCache(presenceCacheFile(config.cacheFile)),
-        fetchBoard: company => presenceProviders[company.provider ?? 'greenhouse'](company),
+        fetchBoard: (company, fetchedAt) => presenceProviders[company.provider ?? 'greenhouse'](company, fetchedAt),
       },
       observations: createObservationStore({
         companies: config.companies,

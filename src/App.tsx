@@ -14,6 +14,7 @@ import type { Filters, MatchedJob, Profile, Region } from '../shared/types'
 import type { SavedOperation } from '../shared/saved-jobs'
 import { CityPanel } from './components/CityPanel'
 import { CatalogStatus } from './components/CatalogStatus'
+import { CatalogSourceCredit } from './components/JobSourceCredit'
 import { SearchRecovery } from './components/SearchRecovery'
 import { ProfileDialog } from './components/ProfileDialog'
 import { FiltersDialog } from './components/FiltersDialog'
@@ -88,8 +89,8 @@ export default function App() {
   const catalogTimes = useMemo(() => catalogDeadlines(receivedCatalog), [receivedCatalog])
   const deadlines = useMemo(() => [
     ...catalogTimes,
-    ...saved.flatMap(item => item.job.source === 'sample' ? [] : snapshotDeadlines(item.job.fetchedAt)),
-    ...(openJob && openJob.job.source !== 'sample' ? snapshotDeadlines(openJob.job.fetchedAt) : []),
+    ...saved.flatMap(item => item.job.source === 'sample' ? [] : snapshotDeadlines(item.job.fetchedAt, item.job.source)),
+    ...(openJob && openJob.job.source !== 'sample' ? snapshotDeadlines(openJob.job.fetchedAt, openJob.job.source) : []),
   ], [catalogTimes, saved, openJob])
   const freshnessNow = useDeadlineClock(deadlines)
   // Resume events within the same age window should not rebuild the search index.
@@ -278,7 +279,7 @@ export default function App() {
     if (document.fullscreenElement) void document.exitFullscreen()
     else void mapStageRef.current?.requestFullscreen().catch(() => notify('이 브라우저에서는 전체 화면을 사용할 수 없어요.'))
   }
-  const catalogStatus = <CatalogStatus catalog={catalog} expired={catalogExpired} loading={loading} progress={progress} error={dataError} retryAt={retryAt} onRetry={retryCatalog} onData={showData} />
+  const catalogStatus = <><CatalogStatus catalog={catalog} expired={catalogExpired} loading={loading} progress={progress} error={dataError} retryAt={retryAt} onRetry={retryCatalog} onData={showData} /><CatalogSourceCredit catalog={catalog} /></>
 
   return <FreshnessTimeContext.Provider value={freshnessNow}><div className="app-shell">
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus() }}>본문으로 건너뛰기</a>

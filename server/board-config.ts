@@ -27,7 +27,7 @@ const Registration = z.object({
   id: CompanyId,
   name: singleLine(200),
   industry: singleLine(200).optional(),
-  provider: z.enum(PUBLIC_PROVIDERS, { error: '출처는 greenhouse, ashby, lever, smartrecruiters 중 하나여야 해요.' }),
+  provider: z.enum(PUBLIC_PROVIDERS, { error: `출처는 ${PUBLIC_PROVIDERS.join(', ')} 중 하나여야 해요.` }),
   board: singleLine(200).refine(value => !/[/?#\\]/.test(value) && value !== '.' && value !== '..',
     '전체 URL 대신 게시판 이름 하나를 입력해 주세요. /, \\, ?, #은 사용할 수 없어요.'),
   boardRegion: z.literal('eu', { error: 'Lever EU 게시판에만 eu를 지정할 수 있어요.' }).optional(),
@@ -40,6 +40,10 @@ const Registration = z.object({
 }).strict().superRefine((company, context) => {
   if (company.boardRegion && company.provider !== 'lever') {
     context.addIssue({ code: 'custom', path: ['boardRegion'], message: 'boardRegion은 Lever 게시판에만 지정할 수 있어요.' })
+  }
+  if ((company.provider === 'workable' || company.provider === 'himalayas')
+    && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(company.board)) {
+    context.addIssue({ code: 'custom', path: ['board'], message: '이 출처의 회사 계정은 소문자 영문·숫자와 단어 사이 하이픈으로 입력해 주세요.' })
   }
 })
 const Configuration = z.object({

@@ -61,6 +61,8 @@ const WORK_ASSERTION = new RegExp(`${ROLE_ASSERTION}(remote|hybrid|on[- ]?site|i
 // about this vacancy. Require the schedule clause, not a nearby company's
 // policy, hybrid cloud product, or remote colleagues.
 const LOCATED_WORK_ASSERTION = /\b(?:this|the)\s+(?:role|position|job)\s+(?:is|will be)\s+(?:based|located)\s+(?:in|at)\s+[^.!?\n;]{1,140}?\s+(?:with|on)\s+(?:(?:a|an|our)\s+)?(?:office[- ]centric\s+)?(remote|hybrid|on[- ]?site|in[- ]office|office[- ]based)\s+(?:work(?:ing)?\s+)?(?:schedule|arrangement|model)\b/i
+const FOLLOWED_WORK_ASSERTION = /\b(?:this|the)\s+(?:role|position|job)\s+(?:follows|will follow)\s+(?:(?:a|an|our)\s+)?(?:office[- ]centric\s+)?(remote|hybrid|on[- ]?site|in[- ]office|office[- ]based)\s+(?:work(?:ing)?\s+)?(?:schedule|arrangement)\b/i
+const NON_REMOTE_ASSERTION = new RegExp(`${ROLE_ASSERTION}(?:not\\s+(?:(?:a|an|fully|entirely)\\s+){0,2}remote|non[- ]remote)\\b`, 'i')
 
 export function workModeFact(location: string, metadata: BoardMetadata[], text: string): Fact<WorkMode> {
   const structured = metadataFacts(metadata, /^(?:workplace[\s_-]*type|work[\s_-]*arrangement|work[\s_-]*location[\s_-]*type|location[\s_-]*type)$/i, workModeValue)
@@ -68,8 +70,14 @@ export function workModeFact(location: string, metadata: BoardMetadata[], text: 
   const located = workModeValue(location)
   if (located !== 'unknown') return { value: located, evidence: evidence('board', location) }
   const statements = roleSentences(text).flatMap(sentence => {
+    // "Not remote" does not distinguish onsite from hybrid. Keep the explicit
+    // restriction so a remote-job feed cannot fill this unknown with "remote".
+    if (NON_REMOTE_ASSERTION.test(sentence) && !/\b(?:may|might|could|potential)\b/i.test(sentence)) {
+      return [{ value: 'unknown' as WorkMode, text: sentence }]
+    }
     if (/\b(?:may|might|could|potential|not|isn't|cannot)\b/i.test(sentence)) return []
     const assertion = sentence.match(WORK_ASSERTION)?.[1] ?? sentence.match(LOCATED_WORK_ASSERTION)?.[1]
+      ?? sentence.match(FOLLOWED_WORK_ASSERTION)?.[1]
     const value = workModeValue(assertion ?? (/^(?:workplace(?: type)?|work arrangement|location type)\s*:/i.test(sentence) ? sentence : ''))
     return value !== 'unknown' ? [{ value, text: sentence }] : []
   })

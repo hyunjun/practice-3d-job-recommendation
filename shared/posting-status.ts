@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { sourceFreshFor } from './catalog-freshness'
 import { PUBLIC_PROVIDERS } from './types'
 import { jobRoleEvidence, jobRoles } from './job-roles'
 import { isTechnicalJob } from './job-occupation'
@@ -84,7 +85,7 @@ export const PostingStatusIndexSchema = z.object({
       || board.listing.jobs.some(job => !ids.has(job.id))
       || new Set(board.listing.jobs.map(job => job.id)).size !== board.listing.jobs.length
       || Date.parse(board.listing.validUntil) <= Date.parse(board.lastSuccessAt)
-      || Date.parse(board.listing.validUntil) - Date.parse(board.lastSuccessAt) > 30 * 60 * 1000) {
+      || Date.parse(board.listing.validUntil) - Date.parse(board.lastSuccessAt) > sourceFreshFor(board.provider)) {
       context.addIssue({ code: 'custom', message: 'Invalid published listing' })
     }
     const unconfirmed = new Set(board.listing.unconfirmedIds)
@@ -97,7 +98,7 @@ export const PostingStatusIndexSchema = z.object({
     if (data.version === 2 && board.listing.jobs.length && (!content || content.status !== 'ok')
       || content && (Date.parse(content.checkedAt) > Date.parse(board.checkedAt)
         || Date.parse(content.validUntil) <= Date.parse(content.checkedAt)
-        || Date.parse(content.validUntil) - Date.parse(content.checkedAt) > 30 * 60 * 1000)) {
+        || Date.parse(content.validUntil) - Date.parse(content.checkedAt) > sourceFreshFor(board.provider))) {
       context.addIssue({ code: 'custom', message: 'Invalid content observation' })
     }
     const bodyIds = new Set(content?.jobIds)

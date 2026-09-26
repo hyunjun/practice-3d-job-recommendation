@@ -1,5 +1,5 @@
 import { CITIES } from '../shared/cities'
-import { CATALOG_LIFETIME } from '../shared/catalog-freshness'
+import { CATALOG_LIFETIME, sourceFreshFor, sourceRefreshInterval } from '../shared/catalog-freshness'
 import type { CatalogCollectionUpdate, CatalogProgress } from '../shared/catalog-progress'
 import { randomUUID } from 'node:crypto'
 import { createJobRevision } from '../shared/posting-status'
@@ -100,8 +100,8 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
   })
   const revisions = new WeakMap<BoardSnapshot, Promise<NonNullable<PostingBoard['listing']>['jobs']>>()
   const iso = (time: number) => new Date(time).toISOString()
-  const refreshAt = (entry: Pick<CachedBoard, 'checkedAt' | 'error' | 'retryAt'>) => Math.max(
-    Date.parse(entry.checkedAt) + CATALOG_POLICY.minRefreshInterval,
+  const refreshAt = (entry: Pick<CachedBoard, 'checkedAt' | 'error' | 'retryAt' | 'provider'>) => Math.max(
+    Date.parse(entry.checkedAt) + (entry.error ? CATALOG_POLICY.minRefreshInterval : sourceRefreshInterval(entry.provider)),
     entry.error && entry.retryAt ? Date.parse(entry.retryAt) : 0,
   )
   const identity = (company: Company) => ({
@@ -191,7 +191,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       const snapshot = entry?.snapshot
       const waiting = partial && collection?.waiting.has(company.id)
       const usable = snapshot && current - Date.parse(snapshot.fetchedAt) <= CATALOG_POLICY.maxFallbackAge
-      const dataStatus = !usable ? 'unavailable' : entry?.error || current - Date.parse(snapshot.fetchedAt) >= CATALOG_POLICY.freshFor ? 'stale' : 'fresh'
+      const dataStatus = !usable ? 'unavailable' : entry?.error || current - Date.parse(snapshot.fetchedAt) >= sourceFreshFor(company.provider) ? 'stale' : 'fresh'
       if (usable) {
         successfulDates.push(Date.parse(snapshot.fetchedAt))
         jobs.push(...snapshot.jobs.map(job => ({ ...job, stale: dataStatus === 'stale' })))
@@ -244,7 +244,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       let listing: PostingBoard['listing']
       if (usable && snapshot.publishedIds !== undefined) {
         listing = {
-          validUntil: iso(Date.parse(snapshot.fetchedAt) + CATALOG_POLICY.freshFor),
+          validUntil: iso(Date.parse(snapshot.fetchedAt) + sourceFreshFor(company.provider)),
           publishedIds: snapshot.publishedIds,
           jobs: await summariesFor(snapshot),
         }
@@ -276,17 +276,17 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       const usable = snapshot && current - Date.parse(snapshot.fetchedAt) <= CATALOG_POLICY.maxFallbackAge
       let listing: PostingBoard['listing']
       if (usable) {
-        const bodyFresh = body && !full.error && current < Date.parse(body.fetchedAt) + CATALOG_POLICY.freshFor
+        const bodyFresh = body && !full.error && current < Date.parse(body.fetchedAt) + sourceFreshFor(company.provider)
         const ids = new Set(snapshot.publishedIds)
         const unconfirmed = new Set(snapshot.unconfirmedIds)
         listing = {
-          validUntil: iso(Date.parse(snapshot.fetchedAt) + CATALOG_POLICY.freshFor),
+          validUntil: iso(Date.parse(snapshot.fetchedAt) + sourceFreshFor(company.provider)),
           publishedIds: snapshot.publishedIds,
           ...(unconfirmed.size ? { unconfirmedIds: [...unconfirmed] } : {}),
           jobs: bodyFresh ? (await summariesFor(body)).filter(job => ids.has(job.id) && !unconfirmed.has(job.id)) : [],
           ...(body ? { content: {
             checkedAt: body.fetchedAt,
-            validUntil: iso(Date.parse(body.fetchedAt) + CATALOG_POLICY.freshFor),
+            validUntil: iso(Date.parse(body.fetchedAt) + sourceFreshFor(company.provider)),
             status: full.error ? 'error' as const : 'ok' as const,
             jobIds: body.jobs.map(job => job.id),
           } } : {}),
@@ -414,7 +414,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       if (presence && current < nextRefresh(company.id, true)) return false
       if (!entry) return true
       if (entry.error) return current >= refreshAt(entry)
-      return current - Date.parse(entry.checkedAt) >= (force ? CATALOG_POLICY.minRefreshInterval : CATALOG_POLICY.freshFor)
+      return current - Date.parse(entry.checkedAt) >= (force ? sourceRefreshInterval(company.provider) : sourceFreshFor(company.provider))
     })
     if (!due.length) return
     const run: Collection = {
@@ -441,7 +441,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       if (current < nextRefresh(company.id, false)) return false
       const entry = presences.get(company.id)
       return !entry || Boolean(entry.error)
-        || current - Date.parse(entry.checkedAt) >= (force ? CATALOG_POLICY.minRefreshInterval : CATALOG_POLICY.freshFor)
+        || current - Date.parse(entry.checkedAt) >= (force ? sourceRefreshInterval(company.provider) : sourceFreshFor(company.provider))
     })
     if (!due.length) return
     presencePending = (async () => {

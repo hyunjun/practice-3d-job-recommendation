@@ -718,3 +718,20 @@ Notion·Reddit의 공식 페이지에서 각 게시판의 공고 링크를 확�
 Stability AI의 공개 응답은 6개 공고의 지원 URL을 HTTP로 반환해 현재 수집기의 HTTPS 검증에 실패했습니다. URL을 추정해 바꾸거나 검사를 완화하지 않았습니다. xAI의 `xai` 게시판 표시 이름은 SpaceXAI여서 앱에서는 두 이름을 함께 표시합니다.
 
 공개 잡 사이트의 API·RSS는 최신 피드, 회사별 전체 목록, 재사용 조건과 인증 필요 여부를 구분해 검토했습니다. 조회에 성공했다는 이유만으로 다른 제공자의 게시물을 자동 재배포하거나 누락된 공고를 종료로 처리하지 않습니다. 상세 원 응답·시각·실패 결과는 `.local/research/61/`에만 보존합니다.
+
+## Workable 공식 게시판과 Himalayas 보충 자료
+
+| 출처 | 확인한 내용 | 반영 |
+|---|---|---|
+| [Workable: Using the API to create a careers page](https://help.workable.com/hc/en-us/articles/115012771647-Using-the-Workable-API-to-create-a-careers-page) | 인증형 SPI 외에도 게시 중인 공고만 읽는 공개 `/api/accounts/{subdomain}` 경로와 `details=true`를 안내 | 공개 위젯 API를 사용하고 전체 회사 이름·ID·원문 주소를 대조. 목록 확인에서는 본문 옵션 생략 |
+| [Hugging Face 채용](https://huggingface.co/JOIN-US) · [SmartNews 채용](https://careers.smartnews.com/en/) · [Mercari 채용](https://careers.mercari.com/jobs/) | 공식 페이지가 연결하는 Workable 계정과 실제 공개 공고 | 세 회사를 공식 게시판으로 등록. 숨김 위치와 단순 `telecommuting: false`를 근무지·출근 확정 정보로 사용하지 않음 |
+| [Himalayas Remote Jobs API Reference](https://himalayas.app/docs/remote-jobs-api) · [공개 API 저장소](https://github.com/Himalayas-App/remote-jobs-api) | 인증 없는 회사별 검색, 출처와 원문 역링크를 전제로 한 앱·잡 보드 사용, 다른 잡 애그리게이터로 재배포 제한 | 화면·저장·가져오기·내보내기에 출처와 원문 링크 유지. 외부 잡 사이트로 공고를 전송하지 않음 |
+| [Himalayas OpenAPI](https://himalayas.app/docs/openapi.json) · [API 안내](https://himalayas.app/api) | 하루 단위 데이터 갱신과 조회 간격 안내, 429 응답 | 정상 결과는 24시간 동안 재사용하고 수동 재조회에도 같은 간격 적용. 제공자 공통 큐와 Retry-After 사용 |
+
+2026-09-26 UTC에 공식 설명과 실제 응답을 확인했습니다. Workable 도움말의 공개 경로는 `apply.workable.com/api/v1/widget/accounts/`로 연결됐고, 본문 옵션을 생략한 응답에서도 같은 공개 ID를 확인했습니다. 인증이 필요한 SPI나 지원자 정보 API를 사용한 결과는 아닙니다.
+
+Himalayas는 전체 회사 커리어 목록을 대신하지 않는 원격 공고 표본입니다. 전체 페이지와 회사별 공고 경로를 확인한 Microsoft·Adobe·Salesforce·Cisco·Qualcomm·Broadcom·Red Hat만 추가했습니다. NVIDIA·Netflix 등의 짧은 페이지와 AMD·Atlassian의 총수·배열 불일치는 정상 빈 목록으로 처리하지 않았습니다.
+
+실제 응답의 날짜는 Unix 초, 국가 제한은 문자열 배열, 시간대는 숫자 배열이었습니다. OpenAPI가 설명하는 밀리초·국가 객체·시간대 문자열 형식도 구분해 검증합니다. 페이지마다 다른 `updatedAt`이나 게시 날짜 `pubDate`를 본문 수정 시각으로 사용하지 않고, 실제 요청 시각을 별도로 보존합니다.
+
+지원 가능 국가·시간대를 오피스 도시로 사용하지 않으며, 외부 사이트의 seniority·category 태그로 회사의 관리직·부서를 추정하지 않습니다. 메타데이터 급여에 기본급 근거가 없으면 비교 연봉에서 제외하고, 출처의 `guid` 원문 링크를 유지합니다. 새 수집기로 받은 15개 원 응답과 실제 캐시 반영 근거는 `.local/research/63/`에 보존합니다.

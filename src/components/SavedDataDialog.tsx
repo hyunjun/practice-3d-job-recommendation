@@ -11,6 +11,7 @@ import type { SavedRecovery, SavedStorageErrorCode } from '../lib/saved-store'
 import { downloadSavedFile, downloadSavedRecovery } from '../lib/saved-files'
 import { Dialog, Spinner } from './ui'
 import { SavedStorageNotice } from './SavedStorageNotice'
+import { JobSourceCredit } from './JobSourceCredit'
 
 type Base = Pick<SavedState, 'records' | 'occupied' | 'unreadableIds'>
 interface Review {
@@ -185,6 +186,7 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
                 if (event.target.checked) selected.add(row.group.id); else selected.delete(row.group.id)
                 setReview({ ...review, selected })
               }} /><span><strong>{row.record.company.name} · {row.record.job.title}</strong><small>{row.record.job.locationLabel} · {JOB_SOURCE_LABELS[row.record.job.source]}</small></span></label>
+              <JobSourceCredit job={row.record.job} />
               <span className="saved-import-kind">{{ new: '새 공고', different: '현재 기록과 다름', same: '현재 기록과 같음', blocked: '원본 확인 필요' }[row.state]}</span>
               {row.group.variants.length > 1 && <label className="saved-import-variants">파일 안의 서로 다른 기록<select aria-label={`${row.record.company.name} ${row.record.job.title} 파일 기록 선택`} value={review.variants.get(row.group.id) ?? 0} disabled={storage.busy} onChange={event => {
                 const selected = new Set(review.selected)
@@ -220,7 +222,7 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
 }
 
 function RecordContents({ title, record }: { title: string; record: SavedJob }) {
-  return <section className="saved-record-contents"><h4>{title}</h4><dl>
+  return <section className="saved-record-contents"><h4>{title}</h4><JobSourceCredit job={record.job} /><dl>
     <div><dt>포지션</dt><dd>{record.company.name} · {record.job.title}</dd></div>
     <div><dt>근무지</dt><dd>{record.job.locationLabel}</dd></div>
     <div><dt>지원 상태</dt><dd>{record.status === 'applied' ? '지원 완료' : '검토 중'}</dd></div>

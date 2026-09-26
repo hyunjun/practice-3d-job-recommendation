@@ -12,11 +12,12 @@ import {
   SURVEY_SERVICE_CHANGED_TITLE, SURVEY_SERVICE_TITLE, surveyOldHistory, surveyOldSaved, surveyResponses,
 } from '../fixtures/public-company-survey'
 import { createPublicCoverageServer } from '../fixtures/public-coverage-server'
+import { isIntegrationRequest } from '../fixtures/source-integration-contract'
 import { expectInitialCatalogRequest, readServerMode } from './helpers/api-requests'
 import { readSaved } from './helpers/saved-store'
 import { sourceChoice } from './helpers/source-choice'
 import {
-  expectSurveyPrivacy, seedSurvey, surveyClose, surveyDataButton, surveyImage, surveyJson,
+  expectSurveyPrivacy, seedSurvey, surveyBoardHistory, surveyClose, surveyDataButton, surveyImage, surveyJson,
   surveyNavigation, surveyRole, surveySearch,
 } from './helpers/public-company-survey'
 
@@ -38,27 +39,32 @@ async function fixture(page: Page, info: TestInfo, baseURL: string | undefined, 
   })
 }
 
-async function requestsAre(server: Server, count: number) {
-  const requests = await server.requests()
+async function requestsAre(server: Server, count: number, additional: [number, number] = [7, 3]) {
+  const all = await server.requests()
+  // Keep the original83-provider wire assertions intact and account for each
+  // new provider separately, including its distinct successful-read deadline.
+  const requests = all.filter(request => !isIntegrationRequest(request.url))
   expect(requests).toHaveLength(count)
-  expect(requests.every(request => request.synthetic && !request.networkSent && request.method === 'GET' && request.body === null)).toBe(true)
+  expect(all.filter(request => request.url.startsWith('https://himalayas.app/'))).toHaveLength(additional[0])
+  expect(all.filter(request => request.url.startsWith('https://apply.workable.com/'))).toHaveLength(additional[1])
+  expect(all.every(request => request.synthetic && !request.networkSent && request.method === 'GET' && request.body === null)).toBe(true)
   await server.assertDefaultConfiguration()
   return requests
 }
 
 function expectRegistrations(catalog: Catalog, jobs: number) {
   expect(catalog.source).toBe('public')
-  expect(catalog.companies).toHaveLength(83)
-  expect(catalog.boards).toHaveLength(83)
+  expect(catalog.companies).toHaveLength(93)
+  expect(catalog.boards).toHaveLength(93)
   expect(catalog.jobs).toHaveLength(jobs)
-  expect(catalog.companies.slice(36).map(({ id, name, careerUrl, provider, board }) =>
+  expect(catalog.companies.slice(36, 83).map(({ id, name, careerUrl, provider, board }) =>
     ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
 }
 
 async function observations(page: Page) {
   const panel = page.getByRole('dialog').locator('.observation-panel')
   await panel.locator('> summary').click()
-  await expect(panel.locator('.observation-scope')).toHaveText('대상 83개 회사 · 최근 90일 이내 · UTC 날짜별 마지막 정상 집계')
+  await expect(panel.locator('.observation-scope')).toHaveText('대상 93개 회사 · 최근 90일 이내 · UTC 날짜별 마지막 정상 집계')
   return panel
 }
 
@@ -95,7 +101,7 @@ function expectSaved(records: SavedJob[]) {
   })
 }
 
-for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${width}px`, () => {
+for (const width of [1440, 320]) test.describe(`independent historical47 survey in93 defaults at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
   test('all47 new sources have literal positive jobs and search, role, region and sample selection retain their context', async ({ page, baseURL }, info) => {
@@ -123,13 +129,14 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
 
       await surveyDataButton(page).click()
       const dialog = page.getByRole('dialog')
-      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '83', '65'])
+      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '93', '65'])
       await expect(dialog.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
         'Greenhouse50개 회사', 'Ashby24개 회사', 'Lever4개 회사', 'SmartRecruiters5개 회사',
+        'Workable3개 회사', 'Himalayas7개 회사',
       ])
       await expect(dialog.locator('.posting-purpose-count')).toHaveText('조회된 개발 공고에 인재풀·관심 등록 2개가 포함되어 있어요. 기본 추천에서는 제외하며 모집 유형 필터로 따로 볼 수 있어요.')
-      await dialog.locator('.board-details > summary').click()
-      await expect(dialog.locator('.board-row')).toHaveCount(83)
+      await surveyBoardHistory(page)
+      await expect(dialog.locator('.board-row')).toHaveCount(93)
       for (const company of SURVEY_REGISTRATIONS) {
         const row = dialog.locator('.board-row').filter({ has: page.getByText(company.name, { exact: true }) })
         await expect(row).toHaveCount(1)
@@ -139,7 +146,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
       const xai = dialog.locator('.board-row').filter({ has: page.getByText('xAI (SpaceXAI)', { exact: true }) })
       await xai.scrollIntoViewIfNeeded()
       await expect(xai.locator('.board-name')).toBeInViewport()
-      await surveyImage(page, info, `83-source-xai-${width}`)
+      await surveyImage(page, info, `93-source-xai-${width}`)
       await surveyClose(page, surveyDataButton(page))
 
       await surveyRole(page, 'backend', 59)
@@ -176,7 +183,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
       await sourceChoice(page, 'sample').click()
       await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
       await sourceChoice(page, 'public').click()
-      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '83', '65'])
+      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '93', '65'])
       await surveyClose(page, surveyDataButton(page))
       await expect(page.locator('.company-card h3')).toHaveText('Miro')
       await expect(page.locator('.mini-job-title')).toHaveText('Frontend Engineer — Synthetic Willow Canvas61')
@@ -195,7 +202,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
     } finally { await page.close(); await server.stop() }
   })
 
-  test('an old36 cache collects only missing47 boards, then list and full checks preserve saved source facts through a real restart', async ({ page, baseURL }, info) => {
+  test('an old36 cache retains the missing47-board contract plus ten integrations, then list and full checks preserve saved facts through restart', async ({ page, baseURL }, info) => {
     test.setTimeout(120_000)
     const old = expansionLegacy36Cache(oldTime)
     expect(old.boards).toHaveLength(36)
@@ -211,7 +218,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
       expect(upstream.map(request => request.url).sort()).toEqual([...Object.values(SURVEY_FULL_URLS), ...SURVEY_DETAIL_URLS].sort())
       const initialBytes = await readFile(server.defaultCache, 'utf8')
       const expanded = JSON.parse(initialBytes)
-      expect(expanded.boards).toHaveLength(83)
+      expect(expanded.boards).toHaveLength(93)
       for (const original of old.boards)
         expect(expanded.boards.find((board: { companyId: string }) => board.companyId === original.companyId)).toMatchObject(original)
 
@@ -255,7 +262,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
       expect(listing.boards.find(board => board.companyId === 'servicenow')!.listing!.content!.checkedAt).toBe(serviceTime)
       expect(await readFile(server.defaultCache, 'utf8')).toBe(initialBytes)
       expect(await readSaved(page)).toEqual(saved)
-      const afterList = await requestsAre(server, 132)
+      const afterList = await requestsAre(server, 132, [7, 6])
       expect(afterList.slice(49)).toHaveLength(83)
       expect(afterList.slice(49).some(request => SURVEY_DETAIL_URLS.includes(request.url as typeof SURVEY_DETAIL_URLS[number]))).toBe(false)
 
@@ -282,7 +289,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
           } },
         ] },
       })
-      const afterFull = await requestsAre(server, 217)
+      const afterFull = await requestsAre(server, 217, [7, 9])
       expect(afterFull.slice(132).map(request => request.url).sort()).toEqual([...allFullUrls].sort())
       expect(await readSaved(page)).toEqual(saved)
       await page.getByRole('textbox', { name: '저장한 기회 검색', exact: true }).fill('café')
@@ -312,7 +319,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
       const reloaded = await surveyJson<Catalog>(page, server.origin, '/api/catalog?source=public')
       expect(reloaded.jobs).toEqual(current.jobs)
       expect(await readFile(server.defaultCache, 'utf8')).toBe(fullBytes)
-      await requestsAre(server, 217)
+      await requestsAre(server, 217, [7, 9])
       expectSurveyPrivacy(state, server.origin)
       await writeFile(info.outputPath('old36-list-body-restart.json'), JSON.stringify({
         old, catalog, listing, content, saved, reloaded, upstream: afterFull,
@@ -334,10 +341,11 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
         ['servicenow', 'unavailable', null], ['xai', 'unavailable', null],
       ])
       await surveyDataButton(page).click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '83', '60'])
-      await page.getByRole('dialog').locator('.board-details > summary').click()
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '93', '60'])
+      await surveyBoardHistory(page)
       for (const name of ['ClickHouse', 'Palantir', 'ServiceNow', 'xAI (SpaceXAI)']) {
         const row = page.getByRole('dialog').locator('.board-row').filter({ has: page.getByText(name, { exact: true }) })
+        await expect(row).toBeVisible()
         await expect(row.locator('.board-error')).toHaveText('데이터 미확인')
         await expect(row.locator('.board-ok')).toHaveCount(0)
         await expect(row).not.toContainText('0개 반영')
@@ -401,7 +409,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
         method: 'observations-1.occupation-4.roles-1.qualifications-1.remote-2.employment-1.purpose-1',
         firstDay: '2026-09-25', lastDay: '2026-09-25', companyCount: 36,
       }])
-      await requestsAre(server, 0)
+      await requestsAre(server, 0, [0, 0])
       const state = await seedSurvey(page, server.origin, { query: 'Coupang' })
       await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '1'])
       await surveyDataButton(page).click()
@@ -413,7 +421,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
       const excluded = panel.getByText('회사·게시판 구성 또는 분류 기준이 다른 이전 기록 1개 묶음은 현재 비교에서 제외했어요.', { exact: true })
       await expect(excluded).toBeVisible()
       await expect(panel.getByRole('combobox', { name: '관측 날짜 (UTC)', exact: true }).locator('option')).toHaveText(['2026-09-26'])
-      await expect(panel.locator('.observation-table tbody tr')).toHaveCount(83)
+      await expect(panel.locator('.observation-table tbody tr')).toHaveCount(93)
       await requestsAre(server, 85)
       await excluded.scrollIntoViewIfNeeded()
       await expect(excluded).toBeInViewport()
@@ -439,12 +447,12 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
       await expect(panel.locator('.observation-denominator')).toHaveText('분모: 일반 개발·컴퓨팅 공고 64개 · 인재풀 2개 제외')
       await panel.locator('.observation-comparison').scrollIntoViewIfNeeded()
       await expect(panel.locator('.observation-comparison strong')).toBeInViewport()
-      await surveyImage(page, info, `83-company-observation-delta-${width}`)
+      await surveyImage(page, info, `93-company-observation-delta-${width}`)
       const persisted = JSON.parse(await readFile(server.observationsFile, 'utf8'))
       expect(persisted.series.find((series: { scope: { key: string } }) => series.scope.key === SURVEY_OLD_SCOPE_KEY)).toEqual(historical.series[0])
       const history = await surveyJson<ObservationHistory>(page, server.origin, '/api/observations')
       expect(history.otherSeries).toEqual(old.otherSeries)
-      await requestsAre(server, 170)
+      await requestsAre(server, 170, [14, 6])
       expect(await readSaved(page)).toEqual([])
       expectSurveyPrivacy(state, server.origin)
       await writeFile(info.outputPath('observation-cohorts.json'), JSON.stringify({ old, history, persisted }, null, 2))
@@ -452,7 +460,7 @@ for (const width of [1440, 320]) test.describe(`independent Stage61 survey at ${
   })
 })
 
-test('the unconfigured83-source server retains real browser304 and file-cache behavior across its owned process restart', async ({ page, baseURL }, info) => {
+test('the unconfigured93-source server retains real browser304 and file-cache behavior across its owned process restart', async ({ page, baseURL }, info) => {
   test.setTimeout(90_000)
   const server = await fixture(page, info, baseURL)
   try {

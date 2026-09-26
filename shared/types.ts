@@ -5,7 +5,7 @@ export type Role = 'all' | KnownJobRole
 export type JobRole = KnownJobRole | 'unknown'
 export type WorkMode = 'remote' | 'hybrid' | 'onsite' | 'unknown'
 export type Visa = 'yes' | 'conditional' | 'no' | 'unknown'
-export const PUBLIC_PROVIDERS = ['greenhouse', 'ashby', 'lever', 'smartrecruiters'] as const
+export const PUBLIC_PROVIDERS = ['greenhouse', 'ashby', 'lever', 'smartrecruiters', 'workable', 'himalayas'] as const
 export type JobProvider = typeof PUBLIC_PROVIDERS[number]
 export type JobSource = 'sample' | JobProvider
 export type Source = 'sample' | 'public'
@@ -27,6 +27,7 @@ export type SpokenLanguageCode = typeof SPOKEN_LANGUAGE_CODES[number]
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever', smartrecruiters: 'SmartRecruiters',
+  workable: 'Workable', himalayas: 'Himalayas',
 }
 
 export interface FactEvidence {

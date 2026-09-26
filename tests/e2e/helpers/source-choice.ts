@@ -3,7 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 
 export const SOURCE_CHOICE_NAMES = {
   sample: '샘플로 탐색 설정 없이 전체 경험을 체험해요 가상의 공고 · 실제 회사 채용 페이지',
-  public: '공개 채용공고 회사의 공개 게시판을 함께 조회해요 API 키 없이 · 인터넷 연결 필요',
+  public: '공개 채용공고 공식 게시판과 공개 잡 사이트를 조회해요 API 키 없이 · 인터넷 연결 필요',
 } as const
 
 export function sourceChoice(page: Page, source: 'sample' | 'public') {

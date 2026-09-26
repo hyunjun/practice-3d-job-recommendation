@@ -21,6 +21,7 @@ import { PostingPurposeBadge } from './JobPostingPurpose'
 import { languageSearchText } from '../../shared/job-languages'
 import { workTimeSearchText } from '../../shared/job-work-time'
 import { normalizeSearchText, searchWords } from '../../shared/search-text'
+import { JobSourceCredit } from './JobSourceCredit'
 
 const SAVED_PAGE_SIZE = 12
 
@@ -137,6 +138,7 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
         <header><CompanyLogo company={item.company} /><div><h2>{item.company.name}</h2><span>{item.company.industry}</span></div><button className="icon-button" aria-label={`${item.company.name} 저장 취소`} onClick={() => onRemove(match)}><BookmarkCheck size={18} /></button></header>
         <button ref={index === 0 ? firstTitle : undefined} className="saved-title" data-saved-job-id={item.job.id} onClick={() => openSaved(match)}>{item.job.title}<ArrowUpRight size={17} /></button>
         {item.job.source !== 'sample' && <p className="saved-role">{jobRoleLabel(item.job)}</p>}
+        <JobSourceCredit job={item.job} />
         <PostingPurposeBadge job={item.job} />
         <p className="saved-location"><MapPin size={13} />{item.job.locationLabel}</p>
         <JobLocationNotice job={item.job} />

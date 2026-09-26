@@ -18,6 +18,7 @@ export function SavedPostingNotice({ observation, job, compact = false }: {
   return <div className={`posting-notice ${observation.state} ${changed ? 'changed' : ''} ${compact ? 'compact' : ''}`}>
     <div className="posting-notice-heading"><Icon size={14} /><strong>{POSTING_STATE_LABELS[observation.state]}</strong>{changed && <span>저장 내용과 차이</span>}</div>
     {observation.checkedAt && <p className="posting-check-time">{formatCollectionTime(observation.checkedAt)} 목록 기준</p>}
+    {job.source === 'himalayas' && <p>Himalayas의 게시 목록 기준입니다. 회사 공식 채용 페이지의 현재 모집 여부와 다를 수 있어요.</p>}
     {observation.contentCheckedAt && <p className="posting-check-time">{formatCollectionTime(observation.contentCheckedAt)} 본문 기준{observation.contentState === 'stale' ? ' · 다시 확인 필요' : ''}</p>}
     {changed && <p className="posting-changes">{observation.changedFields!.map(field => REVISION_LABELS[field]).join(' · ')} 확인 필요</p>}
     {changed && observation.changedFields?.includes('title') && <p className="posting-current-title">현재 포지션: {observation.currentTitle}</p>}

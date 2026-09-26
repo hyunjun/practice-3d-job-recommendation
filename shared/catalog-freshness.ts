@@ -8,33 +8,42 @@ export const CATALOG_LIFETIME = {
 
 export const PUBLIC_CATALOG_RECHECK_COOLDOWN = 60_000
 
+/** Himalayas documents daily feed updates; successful reads wait a full day. */
+export function sourceFreshFor(source?: Job['source']): number {
+  return source === 'himalayas' ? 24 * 60 * 60 * 1000 : CATALOG_LIFETIME.freshFor
+}
+
+export function sourceRefreshInterval(source?: Job['source']): number {
+  return source === 'himalayas' ? sourceFreshFor(source) : PUBLIC_CATALOG_RECHECK_COOLDOWN
+}
+
 export type SnapshotFreshness = 'fresh' | 'stale' | 'expired' | 'unknown'
 
-export function snapshotFreshness(fetchedAt: string | null | undefined, now: number): SnapshotFreshness {
+export function snapshotFreshness(fetchedAt: string | null | undefined, now: number, source?: Job['source']): SnapshotFreshness {
   const time = fetchedAt ? Date.parse(fetchedAt) : NaN
   if (!Number.isFinite(time)) return 'unknown'
   const age = now - time
-  return age > CATALOG_LIFETIME.maxFallbackAge ? 'expired' : age >= CATALOG_LIFETIME.freshFor ? 'stale' : 'fresh'
+  return age > CATALOG_LIFETIME.maxFallbackAge ? 'expired' : age >= sourceFreshFor(source) ? 'stale' : 'fresh'
 }
 
 export function jobFreshness(job: Job, now: number): SnapshotFreshness {
   if (job.source === 'sample') return 'fresh'
-  const age = snapshotFreshness(job.fetchedAt, now)
+  const age = snapshotFreshness(job.fetchedAt, now, job.source)
   return age === 'fresh' && job.stale ? 'stale' : age
 }
 
-export function snapshotDeadlines(fetchedAt: string | null | undefined): number[] {
+export function snapshotDeadlines(fetchedAt: string | null | undefined, source?: Job['source']): number[] {
   const time = fetchedAt ? Date.parse(fetchedAt) : NaN
   // The collector permits an age of exactly 24h; exclusion starts 1ms later.
-  return Number.isFinite(time) ? [time + CATALOG_LIFETIME.freshFor, time + CATALOG_LIFETIME.maxFallbackAge + 1] : []
+  return Number.isFinite(time) ? [time + sourceFreshFor(source), time + CATALOG_LIFETIME.maxFallbackAge + 1] : []
 }
 
 export function catalogDeadlines(catalog: Catalog): number[] {
   if (catalog.source === 'sample' || !catalog.fetchedAt) return []
   return [...new Set([
     ...snapshotDeadlines(catalog.fetchedAt),
-    ...catalog.boards.flatMap(board => snapshotDeadlines(board.lastSuccessAt)),
-    ...catalog.jobs.flatMap(job => snapshotDeadlines(job.fetchedAt)),
+    ...catalog.boards.flatMap(board => snapshotDeadlines(board.lastSuccessAt, board.provider)),
+    ...catalog.jobs.flatMap(job => snapshotDeadlines(job.fetchedAt, job.source)),
   ])].sort((a, b) => a - b)
 }
 
@@ -74,7 +83,7 @@ export function catalogNeedsRevalidation(catalog: Catalog, now: number): boolean
         && (!Number.isFinite(retryAt) || now >= retryAt)
     }
     return board.dataStatus === 'unavailable' || board.dataStatus === 'stale'
-      || snapshotFreshness(boardSnapshotTime(board, catalog, jobTimes), now) !== 'fresh'
+      || snapshotFreshness(boardSnapshotTime(board, catalog, jobTimes), now, board.provider) !== 'fresh'
   })
 }
 
@@ -88,7 +97,7 @@ export function ageCatalog(original: Catalog, now: number): { catalog: Catalog; 
   let expiredBoards = 0
   const boards = original.boards.map(board => {
     const snapshotTime = boardSnapshotTime(board, original, jobTimes)
-    const age = snapshotFreshness(snapshotTime, now)
+    const age = snapshotFreshness(snapshotTime, now, board.provider)
     const history = board.lastSuccessAt === undefined && snapshotTime ? { lastSuccessAt: snapshotTime } : {}
     if (age === 'expired') expiredBoards++
     if (age === 'expired' || age === 'unknown' || board.dataStatus === 'unavailable') {

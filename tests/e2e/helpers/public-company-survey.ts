@@ -62,6 +62,17 @@ export async function surveyClose(page: Page, opener: Locator) {
   await expect(opener).toBeFocused()
 }
 
+/** A collection may initially open this section. Never toggle it closed. */
+export async function surveyBoardHistory(page: Page) {
+  const dialog = page.getByRole('dialog')
+  await expect(page.locator('.data-status-button')).not.toContainText('공개 공고 조회 중')
+  await expect(dialog.locator('.collection-progress, .data-loading, .board-pending')).toHaveCount(0)
+  const details = dialog.locator('.board-details')
+  if (await details.getAttribute('open') === null) await details.locator('> summary').click()
+  await expect(details).toHaveAttribute('open', '')
+  return details
+}
+
 export async function surveyRole(page: Page, role: Filters['role'], openings: number) {
   const opener = page.getByRole('button', { name: /^모든 필터/ })
   await opener.click()

@@ -118,4 +118,15 @@ export const PUBLIC_COMPANIES: Company[] = [
   { id: 'wikimedia', name: 'Wikimedia Foundation', initials: 'WF', color: '#bb9dfb', industry: '오픈소스 · 소프트웨어', careerUrl: 'https://wikimediafoundation.org/about/jobs/', provider: 'greenhouse', board: 'wikimedia' },
   { id: 'xai', name: 'xAI (SpaceXAI)', initials: 'x', color: '#ffad88', industry: 'AI · 연구', careerUrl: 'https://x.ai/careers', provider: 'greenhouse', board: 'xai' },
   { id: 'zoox', name: 'Zoox', initials: 'Z', color: '#bb9dfb', industry: '자율주행 · 모빌리티', careerUrl: 'https://zoox.com/careers/', provider: 'lever', board: 'zoox' },
+  { ...publicCompany('hugging-face', 'workable', 'huggingface'), careerUrl: 'https://huggingface.co/JOIN-US' },
+  { ...publicCompany('smartnews', 'workable', 'smartnews'), careerUrl: 'https://careers.smartnews.com/en/' },
+  { ...publicCompany('mercari', 'workable', 'mercari'), careerUrl: 'https://careers.mercari.com/jobs/' },
+  // These are the company's listings on Himalayas, not its entire careers inventory.
+  { id: 'microsoft', name: 'Microsoft', initials: 'M', color: '#91bafd', industry: '클라우드 · 소프트웨어', careerUrl: 'https://careers.microsoft.com/v2/global/en/home.html', provider: 'himalayas', board: 'microsoft' },
+  { id: 'adobe', name: 'Adobe', initials: 'A', color: '#f6a7aa', industry: '디자인 · 크리에이티브', careerUrl: 'https://careers.adobe.com/us/en', provider: 'himalayas', board: 'adobe' },
+  { id: 'salesforce', name: 'Salesforce', initials: 'S', color: '#8cc9fa', industry: '클라우드 · 기업용 소프트웨어', careerUrl: 'https://www.salesforce.com/company/careers/', provider: 'himalayas', board: 'salesforce' },
+  { id: 'cisco', name: 'Cisco', initials: 'C', color: '#83d1c7', industry: '네트워크 · 보안', careerUrl: 'https://careers.cisco.com/global/en', provider: 'himalayas', board: 'cisco' },
+  { id: 'qualcomm', name: 'Qualcomm', initials: 'Q', color: '#a4a3ff', industry: '반도체 · 무선 통신', careerUrl: 'https://careers.qualcomm.com/careers', provider: 'himalayas', board: 'qualcomm' },
+  { id: 'broadcom', name: 'Broadcom', initials: 'B', color: '#f5a193', industry: '반도체 · 인프라 소프트웨어', careerUrl: 'https://www.broadcom.com/company/careers', provider: 'himalayas', board: 'broadcom' },
+  { id: 'redhat', name: 'Red Hat', initials: 'RH', color: '#ff929b', industry: '오픈소스 · 클라우드', careerUrl: 'https://www.redhat.com/en/jobs', provider: 'himalayas', board: 'red-hat' },
 ]

@@ -10,6 +10,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
 import { withSurveyEmptyBoards } from './public-company-survey'
+import { withIntegrationEmptyBoards } from './source-integrations'
 import type { CoverageEvent, CoverageRequest, CoverageWireResponse } from './public-coverage-transport'
 
 const repository = fileURLToPath(new URL('../../', import.meta.url))
@@ -142,7 +143,7 @@ export async function createPublicCoverageServer(directory: string, mode: Public
   if (!Number.isFinite(initialClock)) throw new Error('Invalid public coverage clock')
   await writeFile(clockFile, String(options.clock === undefined ? 0 : initialClock - Date.now()))
   async function respond(responses: Record<string, unknown>) {
-    await writeFile(`${responsesFile}.next`, JSON.stringify(responses))
+    await writeFile(`${responsesFile}.next`, JSON.stringify(withIntegrationEmptyBoards(responses)))
     await rename(`${responsesFile}.next`, responsesFile)
   }
   await respond(options.responses ?? withSurveyEmptyBoards())

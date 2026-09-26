@@ -82,6 +82,22 @@ describe('job-specific work and employment fields', () => {
   })
 
   it.each([
+    ['This role follows an office-centric hybrid schedule.', 'hybrid'],
+    ['This position follows an on-site work arrangement.', 'onsite'],
+  ])('retains an explicit role-specific follows statement: %s', (text, expected) => {
+    expect(workModeFact('', [], text)).toEqual({ value: expected, evidence: { source: 'description', text } })
+  })
+
+  it.each([
+    'Our company follows a hybrid schedule.',
+    'This role might follow a hybrid schedule.',
+    'This role does not follow an on-site work arrangement.',
+    'This role follows hybrid cloud architecture standards.',
+  ])('does not infer this vacancy arrangement from a nonassertive follows statement: %s', text => {
+    expect(workModeFact('', [], text).value).toBe('unknown')
+  })
+
+  it.each([
     'Our company has a Vancouver office with an office-centric hybrid schedule.',
     'This role might be based in Vancouver with a hybrid schedule.',
     'This role is not based in Vancouver with a hybrid schedule.',
