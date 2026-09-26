@@ -46,8 +46,12 @@ async function expectMapSpace(page: Page) {
 
 async function expectReachable(target: Locator) {
   await target.scrollIntoViewIfNeeded()
-  await target.focus()
+  // Return through the real tab order so a preceding touch does not leave
+  // this keyboard reachability check in pointer-focus modality.
+  await target.press('Shift+Tab')
+  await target.page().keyboard.press('Tab')
   await expect(target).toBeFocused()
+  await expect.poll(() => target.evaluate(element => element.matches(':focus-visible'))).toBe(true)
   await expect.poll(() => target.evaluate(element => {
     const box = (element.querySelector('.flat-marker-hit') || element).getBoundingClientRect()
     return [0.15, 0.5, 0.85].every(x => [0.15, 0.5, 0.85].every(y => {
