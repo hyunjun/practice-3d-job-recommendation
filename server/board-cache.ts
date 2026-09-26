@@ -19,6 +19,8 @@ export const BoardSnapshotSchema = z.object({
   unpublishedIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
   /** IDs whose detail explicitly confirmed active public posting. */
   verifiedActiveIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
+  /** Interpretation method at the time of a full collection, never renewed on cache read. */
+  observationMethod: z.string().min(1).max(200).optional(),
 }).refine(snapshot => {
   const retainedUnmapped = snapshot.jobs.filter(isUnmappedJob).length
   // Legacy snapshots omitted unmapped jobs; new snapshots include them. Preserve

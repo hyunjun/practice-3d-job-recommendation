@@ -9,6 +9,7 @@ import { fetchLeverBoard, fetchLeverPresence } from './providers/lever'
 import { fetchSmartRecruitersBoard, fetchSmartRecruitersPresence } from './providers/smartrecruiters'
 import { createFilePresenceCache, presenceCacheFile } from './posting-presence'
 import type { PresenceResult } from './posting-presence'
+import { createFileObservationCache, createObservationStore, observationCacheFile } from './catalog-observations'
 
 export { fetchGreenhouseBoard } from './providers/greenhouse'
 
@@ -34,6 +35,10 @@ export function initializePublicCatalog(): Promise<void> {
         cache: createFilePresenceCache(presenceCacheFile(config.cacheFile)),
         fetchBoard: company => presenceProviders[company.provider ?? 'greenhouse'](company),
       },
+      observations: createObservationStore({
+        companies: config.companies,
+        cache: createFileObservationCache(observationCacheFile(config.cacheFile)),
+      }),
       onCacheError: error => console.warn('Public job cache could not be saved:', error instanceof Error ? error.message : error),
     })
   })
@@ -54,4 +59,8 @@ export const getPublicCatalogProgress = (id: string, after: number) => {
 export const getPublicPostingStatus = async (refresh = false, content = false) => {
   await initializePublicCatalog()
   return service!.getPostingStatus(refresh, content)
+}
+export const getPublicObservations = async () => {
+  await initializePublicCatalog()
+  return service!.getObservations()
 }

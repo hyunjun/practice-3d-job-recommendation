@@ -6,6 +6,7 @@ import { createSampleCatalog } from '../shared/sample'
 import type { Catalog } from '../shared/types'
 import type { CatalogCollectionUpdate, CatalogProgress } from '../shared/catalog-progress'
 import type { PostingStatusIndex } from '../shared/posting-status'
+import type { ObservationHistory } from '../shared/catalog-observations'
 import { CatalogProgressGoneError, CatalogUnavailableError } from './catalog-service'
 
 const compress = compression({
@@ -26,9 +27,10 @@ interface PublicSources {
   getPostingStatus: (refresh: boolean, content?: boolean) => Promise<PostingStatusIndex>
   getProgressiveCatalog?: (refresh: boolean) => Promise<{ catalog: Catalog; progress: CatalogProgress | null }>
   getCatalogProgress?: (id: string, after: number) => CatalogCollectionUpdate | null
+  getObservations?: () => Promise<ObservationHistory>
 }
 
-export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCatalog, getCatalogProgress }: PublicSources): Router {
+export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCatalog, getCatalogProgress, getObservations }: PublicSources): Router {
   const router = Router()
   router.use(compressResponses)
   router.use((_request, response, next) => {
@@ -109,6 +111,22 @@ export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCa
           ...(error instanceof CatalogUnavailableError ? { code: error.code, retryAt } : {}),
         })
       }
+    }
+  })
+
+  // Reading aggregate history never schedules upstream collection.
+  router.get('/observations', async (_request, response) => {
+    if (!getObservations) {
+      response.status(404).json({ error: '관측 기록을 지원하지 않는 서버입니다.' })
+      return
+    }
+    try {
+      const history = await getObservations()
+      response.setHeader('Cache-Control', 'private, no-cache, must-revalidate')
+      response.json(history)
+    } catch {
+      response.setHeader('Cache-Control', 'no-store')
+      response.status(503).json({ error: '관측 기록을 불러오지 못했어요. 잠시 후 다시 확인해 주세요.' })
     }
   })
 

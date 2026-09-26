@@ -11,6 +11,7 @@ import { belongsToBoard, BoardSnapshotSchema, filterBoardSnapshot } from './boar
 import type { BoardCache, BoardSnapshot, CachedBoard } from './board-cache'
 import { parseCachedPresence, presenceBelongsToBoard, PresenceResultSchema } from './posting-presence'
 import type { CachedPresence, PresenceCache, PresenceResult } from './posting-presence'
+import type { ObservationStore } from './catalog-observations'
 
 export const CATALOG_POLICY = {
   ...CATALOG_LIFETIME,
@@ -66,12 +67,13 @@ interface Options {
     cache: PresenceCache
     fetchBoard: (company: Company, fetchedAt: string) => Promise<PresenceResult>
   }
+  observations?: ObservationStore
   now?: () => number
   random?: () => number
   onCacheError?: (error: unknown) => void
 }
 
-export function createCatalogService({ companies, cache, fetchBoard, presence, now = Date.now, random = Math.random, onCacheError = console.warn }: Options) {
+export function createCatalogService({ companies, cache, fetchBoard, presence, observations, now = Date.now, random = Math.random, onCacheError = console.warn }: Options) {
   if (!companies.length || companies.some(company => !company.board || !PUBLIC_PROVIDERS.includes(company.provider ?? 'greenhouse')
     || (company.boardRegion && company.provider !== 'lever')) || new Set(companies.map(company => company.id)).size !== companies.length) {
     throw new Error('Each configured job board must have a unique company and board name')
@@ -175,6 +177,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, n
       // their uncertainty instead of manufacturing a successful list check.
       if (entry.error && entry.errorPhase !== 'content') recordInventoryFailure(company, entry)
     }
+    await observations?.record(companies.flatMap(company => boards.get(company.id) ?? []), 'cache')
   }
 
   function compose(partial = false): Catalog {
@@ -332,6 +335,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, n
       const parsed = BoardSnapshotSchema.safeParse({
         ...result, fetchedAt: checkedAt,
         jobs: [...new Map(result.jobs.map(job => [job.id, job])).values()],
+        ...(observations ? { observationMethod: observations.method } : {}),
       })
       if (!parsed.success) throw new BoardFetchError('공고 정보를 확인하지 못했어요.')
       const snapshot = parsed.data
@@ -397,6 +401,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, n
     // Provider completion order must not reorder the persisted board inventory.
     try { await cache.save(companies.flatMap(company => boards.get(company.id) ?? [])) } catch (error) { onCacheError(error) }
     await persistPresence()
+    await observations?.record(companies.flatMap(company => boards.get(company.id) ?? []), 'collection')
   }
 
   async function startCollection(force: boolean): Promise<void> {
@@ -455,6 +460,11 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, n
   }
 
   return {
+    async getObservations() {
+      await (initialized ??= initialize())
+      if (!observations) throw new Error('관측 기록을 지원하지 않는 서버입니다.')
+      return observations.read()
+    },
     async get(force = false): Promise<Catalog> {
       await ensureFresh(force)
       return compose()

@@ -9,15 +9,14 @@ import { createServer } from 'node:net'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
-import { PRESENCE_NOW, PRESENCE_REGISTRATION, presenceResponses } from './posting-presence'
-import type { PresenceResponses } from './posting-presence'
+import { OBSERVATION_DAY_ONE, OBSERVATION_REGISTRATIONS, observationResponses } from './catalog-observations'
+import type { ObservationResponses } from './catalog-observations'
 
 const repository = fileURLToPath(new URL('../../', import.meta.url))
-export const PRESENCE_PRIVATE_ROOT = process.env.ORBIT_POSTING_PRESENCE_EVIDENCE_ROOT
-  ?? path.join(repository, '.local/research/59/independent')
+export const OBSERVATION_PRIVATE_ROOT = process.env.ORBIT_OBSERVATIONS_EVIDENCE ?? path.join(repository, '.local/research/60/independent')
 const exec = promisify(execFile)
-export type PresenceMode = 'development' | 'production'
-export interface PresenceRequest {
+export type ObservationMode = 'development' | 'production'
+export interface ObservationRequest {
   event: 'request'
   sequence: number
   at: string
@@ -89,16 +88,16 @@ async function hashes(root: string, names: string[]) {
 }
 
 /** A copied app/build, private board configuration, private cache and real HTTP. */
-export async function createPostingPresenceServer(directory: string, mode: PresenceMode, options: {
+export async function createObservationServer(directory: string, mode: ObservationMode, options: {
   sourceRoot?: string
   buildRoot?: string
-  responses?: PresenceResponses
+  responses?: ObservationResponses
   companies?: unknown[]
 } = {}) {
   directory = path.resolve(directory)
-  if (!directory.startsWith(`${PRESENCE_PRIVATE_ROOT}${path.sep}`)) throw new Error('Presence artifacts must stay in the Stage59 independent directory')
-  const sourceRoot = options.sourceRoot ?? process.env.ORBIT_POSTING_PRESENCE_SOURCE_ROOT ?? repository
-  const buildRoot = options.buildRoot ?? process.env.ORBIT_POSTING_PRESENCE_BUILD_ROOT ?? repository
+  if (!directory.startsWith(`${OBSERVATION_PRIVATE_ROOT}${path.sep}`)) throw new Error('Observation artifacts must stay in the Stage60 independent directory')
+  const sourceRoot = options.sourceRoot ?? process.env.ORBIT_OBSERVATIONS_SOURCE_ROOT ?? repository
+  const buildRoot = options.buildRoot ?? process.env.ORBIT_OBSERVATIONS_BUILD_ROOT ?? repository
   const cwd = path.join(directory, 'runtime')
   const port = await availablePort()
   let hmrPort = mode === 'development' ? await availablePort() : undefined
@@ -135,16 +134,16 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
     runtime: await hashes(cwd, mode === 'production' ? ['dist', 'dist-server'] : ['server', 'shared', 'src', 'index.html', 'package.json', 'tsconfig.json', 'vite.config.ts']),
   }, null, 2))
   const configFile = path.join(cwd, '.local/job-boards.json')
-  await writeFile(configFile, JSON.stringify({ version: 1, mode: 'replace', companies: options.companies ?? [PRESENCE_REGISTRATION] }))
+  await writeFile(configFile, JSON.stringify({ version: 1, mode: 'replace', companies: options.companies ?? [...OBSERVATION_REGISTRATIONS] }))
   const responsesFile = path.join(directory, 'upstream-responses.json')
-  const clockFile = path.join(directory, 'clock-offset.txt')
-  await writeFile(clockFile, String(Date.parse(PRESENCE_NOW) - Date.now()))
-  async function respond(responses: PresenceResponses) {
+  const clockFile = path.join(directory, 'clock-ms.txt')
+  await writeFile(clockFile, String(Date.parse(OBSERVATION_DAY_ONE)))
+  async function respond(responses: ObservationResponses) {
     const temporary = `${responsesFile}.next`
     await writeFile(temporary, JSON.stringify(responses, null, 2))
     await rename(temporary, responsesFile)
   }
-  await respond(options.responses ?? presenceResponses())
+  await respond(options.responses ?? observationResponses())
   const origin = `http://127.0.0.1:${port}`
   const runs: Run[] = []
   let child: ChildProcess | undefined
@@ -152,13 +151,13 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
   const receipt = () => writeFile(path.join(directory, 'processes.json'), JSON.stringify({ mode, origin, runs }, null, 2))
 
   async function start() {
-    if (child) throw new Error('This presence server is already running')
+    if (child) throw new Error('This observation server is already running')
     const requestLog = path.join(directory, `upstream-${runs.length + 1}.jsonl`)
     const log = path.join(directory, `server-${runs.length + 1}.log`)
     await writeFile(requestLog, '')
     const args = [
       '--import', pathToFileURL(createRequire(import.meta.url).resolve('tsx')).href,
-      '--import', pathToFileURL(path.join(repository, 'tests/fixtures/posting-presence-preload.ts')).href,
+      '--import', pathToFileURL(path.join(repository, 'tests/fixtures/catalog-observations-preload.ts')).href,
       path.join(cwd, mode === 'production' ? 'dist-server/index.mjs' : 'server/index.ts'),
       ...(mode === 'production' ? ['--production'] : []),
     ]
@@ -166,13 +165,13 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
     child = spawn(process.execPath, args, {
       cwd, env: {
         ...process.env, NODE_ENV: mode, PORT: String(port), HOST: '127.0.0.1',
-        ORBIT_BOARDS_FILE: configFile, ORBIT_POSTING_PRESENCE_RESPONSES: responsesFile,
-        ORBIT_POSTING_PRESENCE_REQUEST_LOG: requestLog, ORBIT_POSTING_PRESENCE_CLOCK: clockFile,
+        ORBIT_BOARDS_FILE: configFile, ORBIT_OBSERVATIONS_RESPONSES: responsesFile,
+        ORBIT_OBSERVATIONS_REQUEST_LOG: requestLog, ORBIT_OBSERVATIONS_CLOCK: clockFile,
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     })
     const running = child
-    if (!running.pid) throw new Error('The presence server did not spawn')
+    if (!running.pid) throw new Error('The observation server did not spawn')
     const run: Run = {
       pid: running.pid, command: [process.execPath, ...args], cwd, port, hmrPort,
       requestLog, log, startedAt: new Date().toISOString(),
@@ -196,9 +195,9 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
           const response = await fetch(`${origin}/api/health`, { signal: AbortSignal.timeout(1000) })
           return response.ok ? (await response.json() as { mode: string }).mode : `HTTP ${response.status}`
         } catch { return 'not listening' }
-      }, { message: 'The isolated presence server must become healthy', timeout: 20000 }).toBe(mode)
+      }, { message: 'The isolated observation server must become healthy', timeout: 20000 }).toBe(mode)
       run.owner = await owner(run.pid, port)
-      expect(run.owner.command).toContain('posting-presence-preload.ts')
+      expect(run.owner.command).toContain('catalog-observations-preload.ts')
       expect(run.owner.cwd).toContain(`n${cwd}`)
       expect(run.owner.listener).toContain(`p${run.pid}`)
       if (hmrPort) expect(await listener(hmrPort)).toContain(`p${run.pid}`)
@@ -215,7 +214,7 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
     if (running.exitCode === null && running.signalCode === null) {
       const current = await owner(run.pid, port)
       expect(current.cwd).toContain(`n${cwd}`)
-      expect(current.command).toContain('posting-presence-preload.ts')
+      expect(current.command).toContain('catalog-observations-preload.ts')
       running.kill('SIGTERM')
     }
     await terminal
@@ -234,25 +233,45 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
   async function verifyProductionBytes() {
     if (mode !== 'production') return
     const html = await (await fetch(origin)).text()
-    const entry = html.match(/src="(\/assets\/index-[^"]+\.js)"/)?.[1]
-    expect(entry).toBeTruthy()
-    const expected = await readFile(path.join(cwd, 'dist', entry!))
-    const response = await fetch(`${origin}${entry}`)
-    const served = Buffer.from(await response.arrayBuffer())
-    expect(response.status).toBe(200)
-    expect(served.equals(expected)).toBe(true)
+    const entries = [...new Set([...html.matchAll(/(?:src|href)="(\/assets\/[^"]+\.(?:js|css))"/g)].map(match => match[1]))]
+    expect(entries.some(entry => entry.endsWith('.js'))).toBe(true)
+    expect(entries.some(entry => entry.endsWith('.css'))).toBe(true)
+    const assets = []
+    for (const entry of entries) {
+      const expected = await readFile(path.join(cwd, 'dist', entry))
+      const response = await fetch(`${origin}${entry}`)
+      const served = Buffer.from(await response.arrayBuffer())
+      expect(response.status).toBe(200)
+      expect(served.equals(expected)).toBe(true)
+      assets.push({ entry, bytes: served.length, sha256: createHash('sha256').update(served).digest('hex') })
+    }
     await writeFile(path.join(directory, 'served-build.json'), JSON.stringify({
-      entry, bytes: served.length, sha256: createHash('sha256').update(served).digest('hex'),
+      assets,
     }, null, 2))
   }
   return {
     directory, cwd, origin, configFile, runs, start, stop, respond, events, verifyProductionBytes,
-    requests: async () => (await events()).filter(event => event.event === 'request') as unknown as PresenceRequest[],
+    requests: async () => (await events()).filter(event => event.event === 'request') as unknown as ObservationRequest[],
+    async at(value: string) {
+      const timestamp = Date.parse(value)
+      if (!Number.isFinite(timestamp)) throw new Error('Invalid fixture clock')
+      await writeFile(`${clockFile}.next`, String(timestamp))
+      await rename(`${clockFile}.next`, clockFile)
+    },
     async advance(milliseconds: number) {
       const offset = Number(await readFile(clockFile, 'utf8')) + milliseconds
       await writeFile(`${clockFile}.next`, String(offset))
       await rename(`${clockFile}.next`, clockFile)
-      return new Date(Date.now() + offset).toISOString()
+      return new Date(offset).toISOString()
+    },
+    async fullCacheFile() {
+      const files = (await readdir(path.join(cwd, '.local'))).filter(file => /^configured-board-cache-v5-[a-f0-9]+\.json$/.test(file))
+      expect(files).toHaveLength(1)
+      return path.join(cwd, '.local', files[0])
+    },
+    async seedFullCache(boards: unknown[]) {
+      if (child) throw new Error('Seed only a stopped, isolated fixture server')
+      await writeFile(path.join(cwd, '.local/public-board-cache-v5.json'), JSON.stringify({ version: 5, boards }))
     },
     async cacheFiles() {
       return (await readdir(path.join(cwd, '.local'))).filter(file => /cache.*\.json$/.test(file)).sort()

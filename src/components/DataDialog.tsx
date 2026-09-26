@@ -9,6 +9,7 @@ import { JOB_SOURCE_LABELS, PUBLIC_PROVIDERS } from '../../shared/types'
 import { useRetryCountdown } from '../hooks/useRetryCountdown'
 import { CompanyLogo, Dialog, Spinner } from './ui'
 import { CollectionProgress } from './CollectionProgress'
+import { ObservationPanel } from './ObservationPanel'
 
 export function DataDialog({ catalog, loading, progress, error, expired, retryAt, onSource, onRefresh, onClose }: { catalog: Catalog; loading: boolean; progress?: CatalogProgress | null; error: string; expired?: boolean; retryAt?: string; onSource: (source: Source) => void; onRefresh: () => void; onClose: () => void }) {
   const isSample = catalog.source === 'sample'
@@ -44,6 +45,7 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
         {!loading && health.pending > 0 && <p className="retry-note">{health.pending}개 회사의 진행 상태가 미확인입니다. 다시 조회하면 이어서 확인할 수 있어요.</p>}
       </>}
       {!isSample && catalog.boards.length > 0 && <BoardHistory catalog={catalog} loading={loading} retryIn={retryIn} onRefresh={onRefresh} />}
+      {!isSample && <ObservationPanel collectionStamp={catalog.checkedAt ?? catalog.fetchedAt} collecting={loading} />}
       <section className="data-explanation">
         <h3><CircleHelp size={16} />일반 채용과 인재풀의 차이</h3>
         <p>기본 추천과 회사 수에서는 인재풀·향후 관심 등록으로 확인된 공고를 제외해요. 모집 유형 필터에서 따로 보거나 함께 볼 수 있으며, 저장한 인재풀 기록은 계속 보관됩니다. 게시 중이라는 사실과 현재 특정 포지션을 채용한다는 사실은 다릅니다.</p>
