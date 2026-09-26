@@ -41,7 +41,11 @@ async function restorePublic(page: Page) {
 
 test('partial feed failures preserve dated jobs across exploration, comparison and saving, then recover visibly', async ({ page }) => {
   let degraded = true
-  await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: catalog(degraded) }))
+  let catalogRequests = 0
+  await page.route('**/api/catalog?source=public*', route => {
+    catalogRequests++
+    return route.fulfill({ json: catalog(degraded) })
+  })
   await restorePublic(page)
   await expect(page.locator('.company-card')).toHaveCount(2)
   await expect(page.locator('.stale-job-badge')).toHaveCount(1)
@@ -67,16 +71,20 @@ test('partial feed failures preserve dated jobs across exploration, comparison a
   await expect(page.getByRole('row').filter({ hasText: '공고 조회 상태' })).toContainText('1개 이전 조회 공고 포함')
   await expect(page.locator('.catalog-notice')).toBeVisible()
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  const requestsBeforeSavedReload = catalogRequests
   await page.reload()
   await expect(page.locator('.saved-card .stale-job-badge')).toHaveText('이전 조회 공고')
   await page.locator('.saved-title').click()
   await expect(page.locator('.job-freshness-notice time')).toHaveAttribute('datetime', previous)
   await page.getByRole('button', { name: '닫기', exact: true }).click()
+  expect(catalogRequests).toBe(requestsBeforeSavedReload)
 
   degraded = false
   await page.getByRole('button', { name: '공개 채용', exact: true }).click()
-  await page.getByRole('button', { name: '새로고침', exact: true }).click()
+  expect(catalogRequests).toBe(requestsBeforeSavedReload)
+  await page.getByRole('button', { name: '공개 공고 다시 조회', exact: true }).click()
   await expect(page.locator('.collection-health dd')).toHaveText(['2개 공고', '0개 공고', '0개'])
+  expect(catalogRequests).toBe(requestsBeforeSavedReload + 1)
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: '기회 탐색', exact: true }).click()
   await expect(page.locator('.company-card')).toHaveCount(2)

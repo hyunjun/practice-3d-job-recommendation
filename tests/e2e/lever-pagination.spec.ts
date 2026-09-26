@@ -237,7 +237,15 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       await expect(page.locator('.saved-card .posting-notice.unknown')).toContainText('회사 게시판 조회에 실패했어요. 이전 목록으로 게시 종료를 판단하지 않습니다.')
       await expect(page.locator('.posting-notice.missing')).toHaveCount(0)
       const status = await actual<PostingStatusIndex>(page, server, '/api/posting-status')
-      expect(status.boards[0]).toMatchObject({ status: 'error', lastSuccessAt: PAGINATION_TIME, listing: { publishedIds: initialIds } })
+      expect(status.version).toBe(2)
+      expect(status.boards[0]).toMatchObject({
+        status: 'error', lastSuccessAt: PAGINATION_TIME,
+        listing: { publishedIds: initialIds, jobs: [], content: {
+          checkedAt: PAGINATION_TIME, status: 'error',
+          jobIds: ['lever-pagination-alder-tracked', 'lever-pagination-alder-boundary'],
+        } },
+      })
+      expect(await cache(server)).toEqual(failedCache)
       expect(await readSaved(page)).toEqual(records)
       expect(await contextState(page)).toEqual(beforeContext)
       await page.locator('.saved-card .posting-notice').scrollIntoViewIfNeeded()
@@ -249,19 +257,17 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       await server.start()
       await server.verifyProductionBytes()
       await page.goto(`${server.origin}/#saved`)
-      state.expectedAborts += (await expectInitialCatalogRequest(page, {
-        requests: state.traffic.requests, catalog: () => state.traffic.catalog().slice(offset),
-      })).cancelled
       await expect(page.locator('.saved-card')).toHaveCount(1)
       expect(await readSaved(page)).toEqual(records)
       expect(await contextState(page)).toEqual(beforeContext)
       expect(await cache(server)).toEqual(failedCache)
+      expect(state.traffic.catalog().slice(offset)).toEqual([])
       await checkSaved(page)
       await expect(page.locator('.saved-card .posting-notice.unknown')).toHaveCount(1)
       expect(await server.requests()).toHaveLength(6)
 
       await change(page, server, 'recovered', PAGINATION_RECOVERY_TIME)
-      await refresh(page, ['22', '2', '5'])
+      await refresh(page, ['22', '2', '5'], true)
       await expect(firstTime(page, 'Alder Pagination')).toHaveAttribute('datetime', PAGINATION_RECOVERY_TIME)
       await expect(row(page, 'Alder Pagination')).toContainText('3개 반영')
       await closeData(page)
@@ -364,11 +370,14 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
       await savedView(page)
       await checkSaved(page)
-      await expect(page.locator('.saved-card .posting-notice.listed')).toContainText('게시판에는 있지만 현재 탐색 범위 밖의 공고라 내용은 원문에서 확인해야 합니다.')
-      await expect(page.locator('.posting-summary strong')).toHaveText(['1', '0', '0', '0'])
+      await expect(page.locator('.saved-card .posting-notice.listed')).toContainText('게시 여부는 확인했어요. 비교할 수 있는 최신 본문이 없어 내용의 차이는 미확인입니다. 공고 내용 확인이나 원문을 이용해 주세요.')
+      await expect(page.locator('.saved-card .posting-notice').getByText(/본문 기준/)).toHaveCount(0)
+      await expect(page.locator('.posting-summary strong')).toHaveText(['1', '0', '1', '0', '0'])
       const outside = await actual<PostingStatusIndex>(page, server, '/api/posting-status')
+      expect(outside.version).toBe(2)
       expect(outside.boards[0]).toMatchObject({
-        status: 'ok', lastSuccessAt: PAGINATION_CHANGE_TIME, listing: { publishedIds: initialIds, jobs: [] },
+        status: 'ok', lastSuccessAt: PAGINATION_CHANGE_TIME,
+        listing: { publishedIds: initialIds, jobs: [], content: { checkedAt: PAGINATION_CHANGE_TIME, status: 'ok', jobIds: [] } },
       })
       expect(await readSaved(page)).toEqual(records)
 

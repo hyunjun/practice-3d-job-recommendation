@@ -71,12 +71,23 @@ test('an open job ages and expires without changing saved notes, application sta
   await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
   const csv = await readFile((await (await downloading).path())!, 'utf8')
   for (const value of ['저장 내용의 조회 시각', '내보낼 때의 조회 기록', '내보낸 시각', SEARCH_TIME, '확인 기간 지남', 'Keep this private note after expiry', '지원 완료']) expect(csv).toContain(value)
+  expect(server.requests).toHaveLength(server.initialRequests)
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: '기회 탐색', exact: true }).click()
+  // Returning to exploration revalidates the expired public catalog once.
+  await expect.poll(() => server.requests.slice(server.initialRequests).map(request => ({
+    path: new URL(request.url).pathname + new URL(request.url).search, state: request.state,
+  }))).toEqual([{ path: '/api/catalog?source=public', state: 'finished' }])
+  await expect(page.getByRole('heading', { name: '공고를 다시 확인해 주세요' })).toBeVisible()
+  expect(await readSavedJson(page)).toBe(saved)
+  const beforeExplicitRefresh = server.requests.length
   server.replace(snapshot(await page.evaluate(() => Date.now())))
   await page.getByRole('button', { name: '다시 조회', exact: true }).click()
   await expect(page.locator('.company-card')).toHaveCount(1)
   await expect(page.locator('.catalog-placeholder, .company-card .stale-job-badge')).toHaveCount(0)
-  expect(server.requests).toHaveLength(server.initialRequests + 1)
+  expect(server.requests).toHaveLength(beforeExplicitRefresh + 1)
+  expect(server.requests.slice(server.initialRequests).map(request => new URL(request.url).pathname + new URL(request.url).search)).toEqual([
+    '/api/catalog?source=public', '/api/catalog?source=public&refresh=1',
+  ])
   expect(server.requests.every(request => /\/api\/catalog\?source=public(?:&refresh=1)?$/.test(request.url))).toBe(true)
   expect(await readSavedJson(page)).toBe(saved)
 })

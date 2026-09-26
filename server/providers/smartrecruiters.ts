@@ -9,7 +9,7 @@ import { employmentFact, managementFact, workModeFact } from '../job-facts'
 import type { Fact } from '../job-facts'
 import { normalizePosting, plainText, postingCities, postingLocationLabel, postingRemoteScope } from '../normalize'
 import type { PostingLocation } from '../normalize'
-import { MAX_POSTINGS, includedJobs } from './http'
+import { MAX_POSTINGS, includedJobs, readBoardInventory } from './http'
 import { createBoardRequestQueue } from './request-queue'
 
 const PAGE_SIZE = 100
@@ -117,42 +117,53 @@ export function normalizeSmartRecruitersJob(raw: SmartRecruitersJob, companyId: 
 }
 
 export function createSmartRecruitersFetcher(policy: { concurrency: number; interval: number; timeout: number } = SMARTRECRUITERS_POLICY) {
+  // Content and presence scans use the same provider-wide queue and cooldown.
   const request = createBoardRequestQueue(policy)
-  return async (company: Company, fetchedAt: string) => {
+  async function readListings(company: Company, signal: AbortSignal) {
     if (!company.board) throw new BoardFetchError('SmartRecruiters 게시판 이름을 확인하지 못했어요.')
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(new BoardFetchError('게시판의 전체 공고를 확인하는 시간이 초과됐어요.')), policy.timeout)
     const base = `https://api.smartrecruiters.com/v1/companies/${encodeURIComponent(company.board)}/postings`
     const postings = new Map<string, z.infer<typeof PostingSummary>>()
     let total: number | undefined
-    try {
-      for (let offset = 0; offset <= MAX_POSTINGS; offset += PAGE_SIZE) {
-        const parsed = Page.safeParse(await request(`${base}?limit=${PAGE_SIZE}&offset=${offset}&destination=PUBLIC`, controller.signal))
-        if (!parsed.success) throw new BoardFetchError('SmartRecruiters 게시판의 목록 형식을 확인하지 못했어요.')
-        const page = parsed.data
-        if (page.offset !== offset || page.limit !== PAGE_SIZE || total !== undefined && page.totalFound !== total
-          || page.content.length !== Math.min(PAGE_SIZE, page.totalFound - offset)) {
-          throw new BoardFetchError('게시판의 전체 공고 목록이 일치하지 않아요. 잠시 후 다시 확인해 주세요.')
-        }
-        total = page.totalFound
-        for (const posting of page.content) {
-          if (posting.company.identifier !== company.board || posting.visibility !== 'PUBLIC' || postings.has(posting.id)) {
-            throw new BoardFetchError('공개 공고의 회사·게시 상태 또는 목록이 일치하지 않아요.')
-          }
-          postings.set(posting.id, posting)
-        }
-        if (postings.size === total) break
+    for (let offset = 0; offset <= MAX_POSTINGS; offset += PAGE_SIZE) {
+      const parsed = Page.safeParse(await request(`${base}?limit=${PAGE_SIZE}&offset=${offset}&destination=PUBLIC`, signal))
+      if (!parsed.success) throw new BoardFetchError('SmartRecruiters 게시판의 목록 형식을 확인하지 못했어요.')
+      const page = parsed.data
+      if (page.offset !== offset || page.limit !== PAGE_SIZE || total !== undefined && page.totalFound !== total
+        || page.content.length !== Math.min(PAGE_SIZE, page.totalFound - offset)) {
+        throw new BoardFetchError('게시판의 전체 공고 목록이 일치하지 않아요. 잠시 후 다시 확인해 주세요.')
       }
-      if (postings.size !== total) throw new BoardFetchError('게시판의 전체 공고를 확인하지 못했어요.')
+      total = page.totalFound
+      for (const posting of page.content) {
+        if (posting.company.identifier !== company.board || posting.visibility !== 'PUBLIC' || postings.has(posting.id)) {
+          throw new BoardFetchError('공개 공고의 회사·게시 상태 또는 목록이 일치하지 않아요.')
+        }
+        postings.set(posting.id, posting)
+      }
+      if (postings.size === total) break
+    }
+    if (postings.size !== total) throw new BoardFetchError('게시판의 전체 공고를 확인하지 못했어요.')
+    return { base, postings }
+  }
+  async function withinTimeout<T>(read: (signal: AbortSignal) => Promise<T>): Promise<T> {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(new BoardFetchError('게시판의 전체 공고를 확인하는 시간이 초과됐어요.')), policy.timeout)
+    try { return await read(controller.signal) }
+    catch (cause) { controller.abort(cause); throw cause }
+    finally { clearTimeout(timer) }
+  }
+  const full = (company: Company, fetchedAt: string) => withinTimeout(async signal => {
+      const { base, postings } = await readBoardInventory(() => readListings(company, signal))
       const candidates = [...postings.values()].filter(posting => needsOccupationDescription(posting.name))
       const jobs: (Job | null)[] = new Array(candidates.length)
+      const unpublishedIds: string[] = []
+      const verifiedActiveIds: string[] = []
       let cursor = 0
       const workers = Array.from({ length: Math.min(policy.concurrency, candidates.length) }, async () => {
         while (cursor < candidates.length) {
           const index = cursor++
           const summary = candidates[index]
           // Never follow a response's ref/apply URL to fetch data.
-          const parsed = SmartRecruitersJobSchema.safeParse(await request(`${base}/${encodeURIComponent(summary.id)}`, controller.signal))
+          const parsed = SmartRecruitersJobSchema.safeParse(await request(`${base}/${encodeURIComponent(summary.id)}`, signal))
           if (!parsed.success) throw new BoardFetchError('SmartRecruiters 공고의 본문 형식을 확인하지 못했어요.')
           const detail = parsed.data
           if (detail.id !== summary.id || detail.company.identifier !== company.board) {
@@ -162,6 +173,7 @@ export function createSmartRecruitersFetcher(policy: { concurrency: number; inte
           // This is authoritative negative evidence, unlike a failed request.
           if (!detail.active || detail.visibility !== 'PUBLIC') {
             postings.delete(detail.id)
+            unpublishedIds.push(`smartrecruiters-${company.id}-${detail.id}`)
             jobs[index] = null
             continue
           }
@@ -170,18 +182,23 @@ export function createSmartRecruitersFetcher(policy: { concurrency: number; inte
             || summary.uuid && detail.uuid !== summary.uuid || summary.jobAdId && detail.jobAdId !== summary.jobAdId) {
             throw new BoardFetchError('조회 중 공고의 내용이나 공개 게시 상태가 바뀌었어요. 다시 확인해 주세요.')
           }
+          verifiedActiveIds.push(`smartrecruiters-${company.id}-${detail.id}`)
           jobs[index] = normalizeSmartRecruitersJob(detail, company.id, fetchedAt)
         }
       })
       await Promise.all(workers)
-      return includedJobs(jobs, postings.size, [...postings.keys()].map(id => `smartrecruiters-${company.id}-${id}`))
-    } catch (cause) {
-      controller.abort(cause)
-      throw cause
-    } finally {
-      clearTimeout(timer)
-    }
-  }
+      return {
+        ...includedJobs(jobs, postings.size, [...postings.keys()].map(id => `smartrecruiters-${company.id}-${id}`)),
+        ...(unpublishedIds.length ? { unpublishedIds } : {}),
+        verifiedActiveIds,
+      }
+  })
+  const fetchPresence = (company: Company) => withinTimeout(async signal => {
+    const { postings } = await readListings(company, signal)
+    return { total: postings.size, publishedIds: [...postings.keys()].map(id => `smartrecruiters-${company.id}-${id}`) }
+  })
+  return Object.assign(full, { fetchPresence })
 }
 
 export const fetchSmartRecruitersBoard = createSmartRecruitersFetcher()
+export const fetchSmartRecruitersPresence = fetchSmartRecruitersBoard.fetchPresence

@@ -1,5 +1,5 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, CheckCircle2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, GitCompareArrows, MapPin, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Bookmark, BookmarkCheck, CheckCircle2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, FileDiff, GitCompareArrows, MapPin, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 import { CITY_BY_ID } from '../../shared/cities'
 import { formatJobSalary, groupCompanies, matchJob, medianSalary } from '../../shared/matching'
 import { MODE_LABELS, POSTING_TYPE_LABELS } from '../../shared/types'
@@ -40,21 +40,23 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
   const previousPage = useRef(0)
   const wasComparing = useRef(false)
   const listId = useId()
-  const { observations, checked, loading, comparing, error, remaining, check } = postingStatus
+  const { observations, checked, loading, loadingContent, comparing, error, remaining, contentRemaining, check } = postingStatus
   const publicCount = saved.filter(item => item.job.source !== 'sample').length
   const counts = [...observations.values()].reduce((result, observation) => {
     if (observation.state === 'listed') result.listed++
     if (observation.changedFields?.length) result.changed++
+    if (observation.state === 'listed' && observation.contentState && !observation.changedFields) result.contentUnknown++
     if (observation.state === 'missing') result.missing++
     if (observation.state === 'unknown' || observation.state === 'unchecked') result.unknown++
     return result
-  }, { listed: 0, changed: 0, missing: 0, unknown: 0 })
+  }, { listed: 0, changed: 0, contentUnknown: 0, missing: 0, unknown: 0 })
   const matches = useMemo(() => {
     const words = searchWords(query)
     return saved.filter(item => {
       const observation = observations.get(item.job.id)
       const postingMatches = !publicCount || postingFilter === 'all'
         || (postingFilter === 'changed' ? Boolean(observation?.changedFields?.length)
+          : postingFilter === 'content-unknown' ? observation?.state === 'listed' && Boolean(observation.contentState) && !observation.changedFields
           : postingFilter === 'unknown' ? observation?.state === 'unknown' || observation?.state === 'unchecked'
             : observation?.state === postingFilter)
       const text = normalizeSearchText(`${item.company.name} ${item.job.title} ${jobRoleLabel(item.job)} ${jobLocationSearchText(item.job)} ${languageSearchText(item.job)} ${workTimeSearchText(item.job)} ${item.note}`)
@@ -117,9 +119,15 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
     <div className="page-heading"><div><p className="eyebrow">YOUR COLLECTION OF POSSIBILITIES</p><h1>가능성을 모아두는 곳<span className="accent-dot">.</span></h1><p>마음이 움직인 기회들. 이제 하나씩 다음 단계로 이어가 보세요.</p></div><div className="collection-file-actions"><button className="button secondary" onClick={onManage}>기록 백업·복원</button><button className="button secondary" disabled={!saved.length} onClick={() => exportSavedCsv(saved, observations)}><Download size={16} />CSV 내보내기</button></div></div>
     {showStorageStatus && <SavedStorageNotice storage={storage} onManage={onManage} />}
     {publicCount > 0 && <section className="posting-toolbar" aria-labelledby="posting-status-title">
-      <div className="posting-toolbar-top"><div><h2 id="posting-status-title">저장한 공고, 지금도 게시 중일까요?</h2><p>공개 공고 {publicCount}개의 게시 여부와 저장 내용의 차이를 확인해 보세요. 메모와 지원 기록은 그대로 보관돼요.</p></div><div className="posting-refresh"><button className="button secondary" disabled={loading || remaining > 0} onClick={() => void check()}><RefreshCw size={15} className={loading ? 'posting-refreshing' : ''} />{loading ? '게시 상태 확인 중' : checked ? '새로 확인' : '게시 상태 확인'}</button>{remaining > 0 && !loading && <small>{formatRetryWait(remaining)} 후 다시 확인 가능</small>}</div></div>
-      <div className="posting-summary" role="status">{loading ? <p>회사별 공개 게시판을 확인하고 있어요.</p> : error ? <p>{error}</p> : checked ? <p><span>게시 확인 <strong>{counts.listed}</strong></span><span>내용 차이 <strong>{counts.changed}</strong></span><span>목록에서 미확인 <strong>{counts.missing}</strong></span><span>확인 필요 <strong>{counts.unknown}</strong></span></p> : <p>직접 확인할 때만 조회해요. 저장한 공고·메모·프로필은 전송하지 않습니다.</p>}</div>
-      <div className="posting-toolbar-bottom"><p>공개 목록에서 찾지 못해도 채용 종료가 확정되는 것은 아니에요. 내용 차이는 원문 변경이나 정보 해석 방식에 따라 생길 수 있어요.</p><label className="posting-filter">게시 상태<select value={postingFilter} onChange={event => setPostingFilter(event.target.value)}><option value="all">전체 게시 상태</option><option value="listed">게시 확인</option><option value="changed">저장 내용과 차이</option><option value="missing">공개 목록에서 미확인</option><option value="unknown">확인 필요 · 미조회</option></select></label></div>
+      <div className="posting-toolbar-top">
+        <div><h2 id="posting-status-title">저장한 공고, 지금도 게시 중일까요?</h2><p>공개 공고 {publicCount}개의 게시 여부를 목록에서 확인해요. 저장 내용과 비교하려면 공고 내용을 따로 확인해 주세요.</p></div>
+        <div className="posting-actions">
+          <div className="posting-refresh"><button className="button secondary" disabled={loading || remaining > 0} onClick={() => void check()}><RefreshCw size={15} className={loading && !loadingContent ? 'posting-refreshing' : ''} />{loading && !loadingContent ? '게시 상태 확인 중' : checked ? '새로 확인' : '게시 상태 확인'}</button><small>{remaining > 0 && !loading ? `${formatRetryWait(remaining)} 후 다시 확인 가능` : '공개 목록의 게시 여부'}</small></div>
+          <div className="posting-refresh"><button className="button secondary" disabled={loading || contentRemaining > 0} onClick={() => void check(true)}><FileDiff size={15} className={loadingContent ? 'posting-refreshing' : ''} />{loadingContent ? '공고 내용 확인 중' : '공고 내용 확인'}</button><small>{contentRemaining > 0 && !loading ? `${formatRetryWait(contentRemaining)} 후 내용 확인 가능` : '본문 갱신 후 저장 내용과 비교'}</small></div>
+        </div>
+      </div>
+      <div className="posting-summary" role="status">{loading ? <p>{loadingContent ? '회사별 공개 공고의 내용을 확인하고 있어요. 목록 확인보다 시간이 더 걸릴 수 있습니다.' : '회사별 공개 게시판을 확인하고 있어요.'}</p> : error ? <p>{error}</p> : checked ? <p><span>게시 확인 <strong>{counts.listed}</strong></span><span>내용 차이 <strong>{counts.changed}</strong></span>{counts.contentUnknown > 0 && <span>내용 미확인 <strong>{counts.contentUnknown}</strong></span>}<span>목록에서 미확인 <strong>{counts.missing}</strong></span><span>확인 필요 <strong>{counts.unknown}</strong></span></p> : <p>직접 확인할 때만 조회해요. 저장한 공고·메모·프로필은 전송하지 않습니다.</p>}</div>
+      <div className="posting-toolbar-bottom"><p>공개 목록에서 찾지 못해도 채용 종료가 확정되는 것은 아니에요. 내용 차이는 원문 변경이나 정보 해석 방식에 따라 생길 수 있어요.</p><label className="posting-filter">게시 상태<select value={postingFilter} onChange={event => setPostingFilter(event.target.value)}><option value="all">전체 게시 상태</option><option value="listed">게시 확인</option><option value="changed">저장 내용과 차이</option><option value="content-unknown">게시 확인 · 내용 미확인</option><option value="missing">공개 목록에서 미확인</option><option value="unknown">확인 필요 · 미조회</option></select></label></div>
     </section>}
     {storage.ready && <div className="collection-toolbar"><div className="collection-tabs">{[['all', '전체', saved.length], ['saved', '검토 중', saved.filter(item => item.status === 'saved').length], ['applied', '지원 완료', saved.filter(item => item.status === 'applied').length]].map(([value, label, count]) => <button key={value} className={status === value ? 'active' : ''} onClick={() => setStatus(String(value))}>{label}<span>{count}</span></button>)}</div><label className="collection-search"><Search size={16} /><input ref={search} aria-label="저장한 기회 검색" title="회사·직무·언어·시간대·협업 시간·메모 검색" placeholder="회사·직무·언어·시간대·메모" value={query} onChange={event => setQuery(event.target.value)} /></label></div>}
     {storage.ready && <p ref={summary} className="saved-results-summary" role="status" aria-atomic="true" tabIndex={-1}>{awaitingComparison ? '저장한 공고 내용을 비교하고 있어요.' : `${matches.length}개 기회${matches.length > 0 ? ` 중 ${start + 1}–${start + visible.length}개 표시` : ''}`}</p>}

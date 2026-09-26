@@ -254,7 +254,12 @@ for (const subject of subjects) for (const width of [1440, 320]) test.describe(`
       await expect(page.locator('.saved-card .posting-notice.unknown')).toContainText('회사 게시판 조회에 실패했어요. 이전 목록으로 게시 종료를 판단하지 않습니다.')
       await expect(page.locator('.posting-notice.missing')).toHaveCount(0)
       const status = await actual<PostingStatusIndex>(page, server, '/api/posting-status')
-      expect(status.boards[0]).toMatchObject({ status: 'error', lastSuccessAt: BULK_TIME, listing: { publishedIds: subject.publishedIds } })
+      expect(status.version).toBe(2)
+      expect(status.boards[0]).toMatchObject({
+        status: 'error', lastSuccessAt: BULK_TIME,
+        listing: { publishedIds: subject.publishedIds, jobs: [], content: { checkedAt: BULK_TIME, status: 'error', jobIds: subject.technicalIds } },
+      })
+      expect(await cache(server)).toEqual(failedCache)
       expect(await readSaved(page)).toEqual(records)
       expect(await contextState(page)).toEqual(beforeContext)
       await page.locator('.saved-card .posting-notice').scrollIntoViewIfNeeded()
@@ -266,19 +271,19 @@ for (const subject of subjects) for (const width of [1440, 320]) test.describe(`
       await server.start()
       await server.verifyProductionBytes()
       await page.goto(`${server.origin}/#saved`)
-      state.expectedAborts += (await expectInitialCatalogRequest(page, {
-        requests: state.traffic.requests, catalog: () => state.traffic.catalog().slice(offset),
-      })).cancelled
       await expect(page.locator('.saved-card')).toHaveCount(1)
       expect(await readSaved(page)).toEqual(records)
       expect(await contextState(page)).toEqual(beforeContext)
       expect(await cache(server)).toEqual(failedCache)
+      expect(state.traffic.catalog().slice(offset)).toEqual([])
       await checkSaved(page)
       await expect(page.locator('.saved-card .posting-notice.unknown')).toHaveCount(1)
       expect(await server.requests()).toHaveLength(4)
 
       await change(page, server, subject.provider, 'recovered', BULK_RECOVERY_TIME)
-      await refresh(page, ['22', '2', '5'])
+      // Saved-only restart has not loaded a browser catalog. The explicit
+      // initial public action still performs the same full recollection.
+      await refresh(page, ['22', '2', '5'], true)
       await openHistory(page)
       await expect(firstTime(page, subject.companyName)).toHaveAttribute('datetime', BULK_RECOVERY_TIME)
       await expect(row(page, subject.companyName)).toContainText('3개 반영')

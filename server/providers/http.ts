@@ -1,6 +1,6 @@
 import type { Job } from '../../shared/types'
 import { isUnmappedJob } from '../../shared/job-location'
-import { BoardFetchError, parseRetryAfter } from '../catalog-service'
+import { BoardFetchError, BoardInventoryError, parseRetryAfter } from '../catalog-service'
 import type { BoardResult } from '../catalog-service'
 
 export const BOARD_TIMEOUT = 25000
@@ -8,6 +8,13 @@ export const MAX_POSTINGS = 20000
 
 export class BoardResponseError extends BoardFetchError {
   constructor(readonly status: number, retryAfter?: number) { super(`HTTP ${status}`, retryAfter) }
+}
+
+export async function readBoardInventory<T>(read: () => Promise<T>): Promise<T> {
+  try { return await read() }
+  // Do not annotate a shared queue's error in place: it can also reject
+  // another company's detail request, which is a different observation.
+  catch (cause) { throw cause instanceof BoardInventoryError ? cause : new BoardInventoryError(cause) }
 }
 
 export async function fetchBoardJson(url: string, signal: AbortSignal): Promise<unknown> {

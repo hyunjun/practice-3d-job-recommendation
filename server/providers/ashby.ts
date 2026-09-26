@@ -8,7 +8,7 @@ import type { Fact } from '../job-facts'
 import type { WorkMode } from '../../shared/types'
 import { normalizePosting, plainText, postingCities, postingLocationLabel, postingRemoteScope } from '../normalize'
 import type { PostingLocation } from '../normalize'
-import { BOARD_TIMEOUT, MAX_POSTINGS, assertUniquePostingIds, fetchBoardJson, includedJobs } from './http'
+import { BOARD_TIMEOUT, MAX_POSTINGS, assertUniquePostingIds, fetchBoardJson, includedJobs, readBoardInventory } from './http'
 
 const PostalAddress = z.object({
   addressLocality: z.string().nullish(), addressRegion: z.string().nullish(), addressCountry: z.string().nullish(),
@@ -34,6 +34,10 @@ export const AshbyJobSchema = z.object({
 })
 export type AshbyJob = z.infer<typeof AshbyJobSchema>
 const Feed = z.object({ apiVersion: z.literal('1'), jobs: z.array(AshbyJobSchema).max(MAX_POSTINGS) })
+const PresenceFeed = z.object({
+  apiVersion: z.literal('1'),
+  jobs: z.array(AshbyJobSchema.pick({ id: true, title: true, jobUrl: true, isListed: true })).max(MAX_POSTINGS),
+})
 
 function locationOf(label?: string | null, address?: z.infer<typeof Address> | null): PostingLocation {
   return { label: label?.trim() ?? '', address: address && 'postalAddress' in address ? address.postalAddress : address as PostingLocation['address'] }
@@ -71,9 +75,21 @@ export function normalizeAshbyJob(raw: AshbyJob, companyId: string, fetchedAt: s
 }
 
 export async function fetchAshbyBoard(company: Company, fetchedAt: string) {
-  const data = Feed.safeParse(await fetchBoardJson(`https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(company.board!)}?includeCompensation=true`, AbortSignal.timeout(BOARD_TIMEOUT)))
-  if (!data.success) throw new BoardFetchError('Ashby 게시판의 공고 형식을 확인하지 못했어요.')
-  assertUniquePostingIds(data.data.jobs)
-  const listed = data.data.jobs.filter(job => job.isListed)
+  const listed = await readBoardInventory(async () => {
+    const data = Feed.safeParse(await fetchBoardJson(`https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(company.board!)}?includeCompensation=true`, AbortSignal.timeout(BOARD_TIMEOUT)))
+    if (!data.success) throw new BoardFetchError('Ashby 게시판의 공고 형식을 확인하지 못했어요.')
+    assertUniquePostingIds(data.data.jobs)
+    return data.data.jobs.filter(job => job.isListed)
+  })
   return includedJobs(listed.map(job => normalizeAshbyJob(job, company.id, fetchedAt)), listed.length, listed.map(job => `ashby-${company.id}-${job.id}`))
+}
+
+export async function fetchAshbyPresence(company: Company) {
+  // Ashby returns descriptions in its list feed; omit compensation and avoid
+  // parsing/normalizing the bodies. There are no per-posting detail requests.
+  const parsed = PresenceFeed.safeParse(await fetchBoardJson(`https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(company.board!)}`, AbortSignal.timeout(BOARD_TIMEOUT)))
+  if (!parsed.success) throw new BoardFetchError('Ashby 게시판의 공고 목록을 확인하지 못했어요.')
+  assertUniquePostingIds(parsed.data.jobs)
+  const listed = parsed.data.jobs.filter(job => job.isListed)
+  return { total: listed.length, publishedIds: listed.map(job => `ashby-${company.id}-${job.id}`) }
 }

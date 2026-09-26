@@ -23,7 +23,7 @@ export const compressResponses: RequestHandler = (request, response, next) => {
 
 interface PublicSources {
   getCatalog: (refresh: boolean) => Promise<Catalog>
-  getPostingStatus: (refresh: boolean) => Promise<PostingStatusIndex>
+  getPostingStatus: (refresh: boolean, content?: boolean) => Promise<PostingStatusIndex>
   getProgressiveCatalog?: (refresh: boolean) => Promise<{ catalog: Catalog; progress: CatalogProgress | null }>
   getCatalogProgress?: (id: string, after: number) => CatalogCollectionUpdate | null
 }
@@ -115,7 +115,9 @@ export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCa
   // This fixed public-board index never receives saved job IDs or profile data.
   router.get('/posting-status', async (request, response) => {
     try {
-      const index = await getPostingStatus(request.query.refresh === '1')
+      const index = request.query.content === '1'
+        ? await getPostingStatus(request.query.refresh === '1', true)
+        : await getPostingStatus(request.query.refresh === '1')
       response.setHeader('Cache-Control', 'private, no-cache, must-revalidate')
       response.json(index)
     } catch {

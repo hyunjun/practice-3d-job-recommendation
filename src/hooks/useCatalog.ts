@@ -16,9 +16,9 @@ function initialCatalog(source: Source): Catalog {
   }
 }
 
-export function useCatalog(initialSource: Source, notify: (message: string, tone?: 'error') => void) {
+export function useCatalog(initialSource: Source, notify: (message: string, tone?: 'error') => void, automatic = true) {
   const [catalog, setCatalog] = useState<Catalog>(() => initialCatalog(initialSource))
-  const [loading, setLoading] = useState(initialSource !== 'sample')
+  const [loading, setLoading] = useState(initialSource !== 'sample' && automatic)
   const [progress, setProgress] = useState<CatalogProgress | null>(null)
   const [error, setError] = useState('')
   const [errorRetryAt, setErrorRetryAt] = useState<string>()
@@ -27,6 +27,7 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
   const lastAttemptRef = useRef<number | null>(null)
   const retryAtRef = useRef<string | undefined>(undefined)
   const failedRequestRef = useRef(false)
+  const automaticRef = useRef(automatic)
 
   const changeSource = useCallback(async (source: Source, { refresh = false, announce = true }: { refresh?: boolean; announce?: boolean } = {}) => {
     requestRef.current?.abort()
@@ -94,23 +95,29 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
   }, [notify])
 
   useEffect(() => {
-    if (initialSource !== 'sample') void changeSource(initialSource, { announce: false })
+    if (automaticRef.current && initialSource !== 'sample') void changeSource(initialSource, { announce: false })
     return () => {
       requestRef.current?.abort()
       requestRef.current = null
     }
   }, [initialSource, changeSource])
 
+  const revalidate = useCallback(() => {
+    if (!automaticRef.current || document.visibilityState !== 'visible' || catalogRef.current.source !== 'public' || requestRef.current) return
+    const now = Date.now()
+    if (lastAttemptRef.current !== null && now - lastAttemptRef.current < PUBLIC_CATALOG_RECHECK_COOLDOWN) return
+    const retryAt = Date.parse(retryAtRef.current ?? catalogRef.current.refreshAfter ?? '')
+    if (Number.isFinite(retryAt) && now < retryAt) return
+    if (!failedRequestRef.current && !catalogNeedsRevalidation(catalogRef.current, now)) return
+    void changeSource('public', { announce: false })
+  }, [changeSource])
+
   useEffect(() => {
-    const revalidate = () => {
-      if (document.visibilityState !== 'visible' || catalogRef.current.source !== 'public' || requestRef.current) return
-      const now = Date.now()
-      if (lastAttemptRef.current !== null && now - lastAttemptRef.current < PUBLIC_CATALOG_RECHECK_COOLDOWN) return
-      const retryAt = Date.parse(retryAtRef.current ?? catalogRef.current.refreshAfter ?? '')
-      if (Number.isFinite(retryAt) && now < retryAt) return
-      if (!failedRequestRef.current && !catalogNeedsRevalidation(catalogRef.current, now)) return
-      void changeSource('public', { announce: false })
-    }
+    automaticRef.current = automatic
+    if (automatic) revalidate()
+  }, [automatic, revalidate])
+
+  useEffect(() => {
     window.addEventListener('focus', revalidate)
     window.addEventListener('pageshow', revalidate)
     window.addEventListener('online', revalidate)
@@ -121,7 +128,7 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
       window.removeEventListener('online', revalidate)
       document.removeEventListener('visibilitychange', revalidate)
     }
-  }, [changeSource])
+  }, [revalidate])
 
   return { catalog, loading, progress, error, changeSource, ready: Boolean(catalog.fetchedAt),
     retryAt: errorRetryAt ?? (error && progress && !progress.done ? undefined : catalog.refreshAfter) }

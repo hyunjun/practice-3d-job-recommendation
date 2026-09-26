@@ -219,10 +219,13 @@ for (const width of [1440, 320]) test.describe(`configured real public boards at
       await server.stop()
       await server.start()
       await server.verifyProductionBytes()
+      const beforeSavedReopen = traffic.requests.length
       await page.goto(savedUrl)
       await expect(page.locator('.saved-card')).toHaveCount(2)
       await expect(page.getByRole('heading', { name: '가능성을 모아두는 곳.', exact: true })).toBeVisible()
       expect(await readSaved(page)).toEqual(original)
+      expect(traffic.requests.slice(beforeSavedReopen)).toEqual([])
+      expect(await server.requests()).toHaveLength(3)
       await page.getByRole('button', { name: '게시 상태 확인', exact: true }).click()
       await expect(page.locator('.posting-summary strong')).toHaveText(['0', '0', '0', '2'])
       await expect(page.locator('.posting-notice.unknown')).toHaveCount(2)
@@ -274,8 +277,14 @@ for (const width of [1440, 320]) test.describe(`configured real public boards at
       const persisted = JSON.parse(await readFile(path.join(server.cwd, '.local', cacheFiles[0]), 'utf8')) as { boards: { companyId: string }[] }
       expect(persisted.boards.map(board => board.companyId).sort()).toEqual(['aurora-config', 'birch-config'])
       const upstream = await server.requests()
-      expect(upstream).toHaveLength(4)
+      expect(upstream).toHaveLength(5)
       expect(upstream[3]).toEqual({
+        url: 'https://boards-api.greenhouse.io/v1/boards/Aurora.Next42/jobs?content=false',
+        method: 'GET', synthetic: true, networkSent: false,
+      })
+      const fullRequests = upstream.filter(item => !item.url.endsWith('?content=false'))
+      expect(fullRequests).toHaveLength(4)
+      expect(fullRequests[3]).toEqual({
         url: 'https://boards-api.greenhouse.io/v1/boards/Aurora.Next42/jobs?content=true&pay_transparency=true',
         method: 'GET', synthetic: true, networkSent: false,
       })

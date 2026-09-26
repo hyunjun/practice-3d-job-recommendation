@@ -836,6 +836,7 @@ select option { background: #1e271c; color: var(--text); }
 .posting-toolbar h2 { font-size: 14px; font-weight: 550; margin-bottom: 8px; }
 .posting-toolbar p { font-size: 11px; line-height: 1.8; color: #bdccae; margin: 0; }
 .posting-refresh { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+.posting-actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; flex-shrink: 0; }
 .posting-refresh small { font-size: 10px; color: #bdccae; }
 .posting-summary { margin-top: 18px; padding-top: 15px; border-top: 1px solid #425633; }
 .posting-summary p { display: flex; flex-wrap: wrap; gap: 5px 20px; }
@@ -864,6 +865,7 @@ select option { background: #1e271c; color: var(--text); }
   .posting-toolbar { padding: 18px; }
   .posting-toolbar-top, .posting-toolbar-bottom { flex-direction: column; align-items: stretch; gap: 14px; }
   .posting-refresh { align-items: flex-start; }
+  .posting-actions { flex-shrink: 1; }
   .posting-filter { flex-wrap: wrap; }
   .posting-filter select { flex: 1; min-width: 0; }
 }

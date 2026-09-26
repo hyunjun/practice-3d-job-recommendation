@@ -15,6 +15,10 @@ export const BoardSnapshotSchema = z.object({
   total: z.number().int().nonnegative(),
   unmappedCount: z.number().int().nonnegative().nullable(),
   publishedIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
+  /** Explicitly inactive/private detail responses, even if the list still contains them. */
+  unpublishedIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
+  /** IDs whose detail explicitly confirmed active public posting. */
+  verifiedActiveIds: z.array(z.string().min(1).max(500)).max(20000).optional(),
 }).refine(snapshot => {
   const retainedUnmapped = snapshot.jobs.filter(isUnmappedJob).length
   // Legacy snapshots omitted unmapped jobs; new snapshots include them. Preserve
@@ -25,8 +29,15 @@ export const BoardSnapshotSchema = z.object({
   .refine(snapshot => {
     if (!snapshot.publishedIds) return true
     const ids = new Set(snapshot.publishedIds)
+    const unpublished = new Set(snapshot.unpublishedIds)
+    const active = new Set(snapshot.verifiedActiveIds)
     return snapshot.publishedIds.length === snapshot.total && ids.size === snapshot.publishedIds.length
       && snapshot.jobs.every(job => ids.has(job.id))
+      && unpublished.size === (snapshot.unpublishedIds?.length ?? 0)
+      && [...unpublished].every(id => !ids.has(id))
+      && ids.size + unpublished.size <= 20000
+      && active.size === (snapshot.verifiedActiveIds?.length ?? 0)
+      && [...active].every(id => ids.has(id))
   })
   // Validate the stored counts first, then migrate locations and their count together.
   .transform(snapshot => upgradeJobCollection(snapshot))
@@ -40,6 +51,7 @@ const CachedBoardSchema = z.object({
   failures: z.number().int().min(0).max(1000),
   retryAt: Timestamp.nullable(),
   error: z.string().min(1).max(500).optional(),
+  errorPhase: z.enum(['inventory', 'content']).optional(),
   snapshot: BoardSnapshotSchema.optional(),
 })
 
@@ -56,6 +68,8 @@ export function belongsToBoard(snapshot: BoardSnapshot, company: Pick<Company, '
   return snapshot.jobs.every(job => job.companyId === company.id && job.source === provider
     && job.id.startsWith(prefix) && job.fetchedAt === snapshot.fetchedAt)
     && (snapshot.publishedIds?.every(id => id.startsWith(prefix)) ?? true)
+    && (snapshot.unpublishedIds?.every(id => id.startsWith(prefix)) ?? true)
+    && (snapshot.verifiedActiveIds?.every(id => id.startsWith(prefix)) ?? true)
 }
 export interface BoardCache {
   load: () => Promise<CachedBoard[]>

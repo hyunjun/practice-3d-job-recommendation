@@ -6,7 +6,7 @@ import { parseTextCompensation, payBasis } from '../../shared/pay-text'
 import { employmentFact, workModeFact } from '../job-facts'
 import { normalizePosting, plainText, postingCities, postingLocationLabel, postingRemoteScope } from '../normalize'
 import type { PostingLocation } from '../normalize'
-import { BOARD_TIMEOUT, MAX_POSTINGS, fetchBoardJson, includedJobs } from './http'
+import { BOARD_TIMEOUT, MAX_POSTINGS, fetchBoardJson, includedJobs, readBoardInventory } from './http'
 
 export const LeverJobSchema = z.object({
   id: z.string().min(1), text: z.string().min(1), hostedUrl: z.url().startsWith('https://'),
@@ -59,23 +59,36 @@ export function normalizeLeverJob(raw: LeverJob, companyId: string, fetchedAt: s
   })
 }
 
-export async function fetchLeverBoard(company: Company, fetchedAt: string) {
-  const signal = AbortSignal.timeout(BOARD_TIMEOUT)
-  const host = company.boardRegion === 'eu' ? 'api.eu.lever.co' : 'api.lever.co'
-  const jobs = new Map<string, LeverJob>()
-  for (let skip = 0; skip <= MAX_POSTINGS; skip += PAGE_SIZE) {
-    const url = `https://${host}/v0/postings/${encodeURIComponent(company.board!)}?mode=json&limit=${PAGE_SIZE}&skip=${skip}`
-    const parsed = z.array(LeverJobSchema).max(PAGE_SIZE).safeParse(await fetchBoardJson(url, signal))
-    if (!parsed.success) throw new BoardFetchError('Lever 게시판의 공고 형식을 확인하지 못했어요.')
-    for (const job of parsed.data) {
-      // An overlapping offset page can omit other postings; deduplication
-      // cannot establish a complete inventory for cache or posting status.
-      if (jobs.has(job.id)) throw new BoardFetchError('게시판의 공고 목록이 중복되어 전체 조회를 확인하지 못했어요.')
-      jobs.set(job.id, job)
+const LeverSummarySchema = LeverJobSchema.pick({ id: true, text: true, hostedUrl: true })
+async function readListings<T extends { id: string }>(company: Company, schema: z.ZodType<T>): Promise<T[]> {
+  return readBoardInventory(async () => {
+    const signal = AbortSignal.timeout(BOARD_TIMEOUT)
+    const host = company.boardRegion === 'eu' ? 'api.eu.lever.co' : 'api.lever.co'
+    const jobs = new Map<string, T>()
+    for (let skip = 0; skip <= MAX_POSTINGS; skip += PAGE_SIZE) {
+      const url = `https://${host}/v0/postings/${encodeURIComponent(company.board!)}?mode=json&limit=${PAGE_SIZE}&skip=${skip}`
+      const parsed = z.array(schema).max(PAGE_SIZE).safeParse(await fetchBoardJson(url, signal))
+      if (!parsed.success) throw new BoardFetchError('Lever 게시판의 공고 형식을 확인하지 못했어요.')
+      for (const job of parsed.data) {
+        // An overlapping offset page can omit other postings; deduplication
+        // cannot establish a complete inventory for cache or posting status.
+        if (jobs.has(job.id)) throw new BoardFetchError('게시판의 공고 목록이 중복되어 전체 조회를 확인하지 못했어요.')
+        jobs.set(job.id, job)
+      }
+      if (jobs.size > MAX_POSTINGS) throw new BoardFetchError('한 번에 확인할 수 있는 게시판 크기를 초과했어요.')
+      if (parsed.data.length < PAGE_SIZE) return [...jobs.values()]
     }
-    if (jobs.size > MAX_POSTINGS) throw new BoardFetchError('한 번에 확인할 수 있는 게시판 크기를 초과했어요.')
-    if (parsed.data.length < PAGE_SIZE) return includedJobs([...jobs.values()].map(job => normalizeLeverJob(job, company.id, fetchedAt)), jobs.size, [...jobs.keys()].map(id => `lever-${company.id}-${id}`))
-  }
-  // Never replace a complete snapshot with a truncated feed.
-  throw new BoardFetchError('게시판의 전체 공고를 확인하지 못했어요.')
+    // Never replace a complete snapshot with a truncated feed.
+    throw new BoardFetchError('게시판의 전체 공고를 확인하지 못했어요.')
+  })
+}
+
+export async function fetchLeverBoard(company: Company, fetchedAt: string) {
+  const jobs = await readListings(company, LeverJobSchema)
+  return includedJobs(jobs.map(job => normalizeLeverJob(job, company.id, fetchedAt)), jobs.length, jobs.map(job => `lever-${company.id}-${job.id}`))
+}
+
+export async function fetchLeverPresence(company: Company) {
+  const jobs = await readListings(company, LeverSummarySchema)
+  return { total: jobs.length, publishedIds: jobs.map(job => `lever-${company.id}-${job.id}`) }
 }

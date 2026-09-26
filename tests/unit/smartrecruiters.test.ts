@@ -196,7 +196,9 @@ describe('complete public SmartRecruiters collection', () => {
 
   it('treats a complete empty board as authoritative', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => Response.json(pageOf([]))))
-    expect(await fetchBoard()(company, POSTING_TIME)).toEqual({ total: 0, jobs: [], unmappedCount: 0, publishedIds: [] })
+    expect(await fetchBoard()(company, POSTING_TIME)).toEqual({
+      total: 0, jobs: [], unmappedCount: 0, publishedIds: [], verifiedActiveIds: [],
+    })
   })
 
   it.each([

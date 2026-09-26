@@ -28,14 +28,17 @@ export interface PostingBoard {
   listing?: {
     validUntil: string
     publishedIds: string[]
+    unconfirmedIds?: string[]
     jobs: { id: string; title: string; url: string; revision: JobRevision }[]
+    content?: { checkedAt: string; validUntil: string; status: 'ok' | 'error'; jobIds?: string[] }
   }
 }
 
 export interface PostingStatusIndex {
-  version: 1
+  version: 1 | 2
   checkedAt: string
   refreshAfter: string
+  contentRefreshAfter?: string
   boards: PostingBoard[]
 }
 
@@ -43,7 +46,8 @@ const Timestamp = z.iso.datetime({ offset: true })
 const Id = z.string().min(1).max(500)
 const RevisionSchema = z.object(Object.fromEntries(REVISION_FIELDS.map(field => [field, z.string().regex(/^[a-f0-9]{64}$/)])) as Record<RevisionField, z.ZodString>)
 export const PostingStatusIndexSchema = z.object({
-  version: z.literal(1), checkedAt: Timestamp, refreshAfter: Timestamp,
+  version: z.union([z.literal(1), z.literal(2)]), checkedAt: Timestamp, refreshAfter: Timestamp,
+  contentRefreshAfter: Timestamp.optional(),
   boards: z.array(z.object({
     companyId: z.string().min(1).max(100), provider: z.enum(PUBLIC_PROVIDERS),
     board: z.string().min(1).max(200), boardRegion: z.literal('eu').optional(),
@@ -52,10 +56,18 @@ export const PostingStatusIndexSchema = z.object({
     listing: z.object({
       validUntil: Timestamp,
       publishedIds: z.array(Id).max(20000),
+      unconfirmedIds: z.array(Id).max(20000).optional(),
       jobs: z.array(z.object({ id: Id, title: z.string().max(1000), url: z.string().max(2000), revision: RevisionSchema })).max(20000),
+      content: z.object({
+        checkedAt: Timestamp, validUntil: Timestamp, status: z.enum(['ok', 'error']),
+        jobIds: z.array(Id).max(20000).optional(),
+      }).optional(),
     }).optional(),
   })).max(1000),
 }).superRefine((data, context) => {
+  if (data.version === 2 && !data.contentRefreshAfter) {
+    context.addIssue({ code: 'custom', message: 'Missing content refresh deadline' })
+  }
   const companies = new Set<string>()
   for (const board of data.boards) {
     if (companies.has(board.companyId)) context.addIssue({ code: 'custom', message: 'Duplicate company' })
@@ -74,6 +86,25 @@ export const PostingStatusIndexSchema = z.object({
       || Date.parse(board.listing.validUntil) <= Date.parse(board.lastSuccessAt)
       || Date.parse(board.listing.validUntil) - Date.parse(board.lastSuccessAt) > 30 * 60 * 1000) {
       context.addIssue({ code: 'custom', message: 'Invalid published listing' })
+    }
+    const unconfirmed = new Set(board.listing.unconfirmedIds)
+    if (unconfirmed.size !== (board.listing.unconfirmedIds?.length ?? 0)
+      || [...unconfirmed].some(id => !ids.has(id))
+      || board.listing.jobs.some(job => unconfirmed.has(job.id))) {
+      context.addIssue({ code: 'custom', message: 'Invalid unconfirmed postings' })
+    }
+    const content = board.listing.content
+    if (data.version === 2 && board.listing.jobs.length && (!content || content.status !== 'ok')
+      || content && (Date.parse(content.checkedAt) > Date.parse(board.checkedAt)
+        || Date.parse(content.validUntil) <= Date.parse(content.checkedAt)
+        || Date.parse(content.validUntil) - Date.parse(content.checkedAt) > 30 * 60 * 1000)) {
+      context.addIssue({ code: 'custom', message: 'Invalid content observation' })
+    }
+    const bodyIds = new Set(content?.jobIds)
+    if (content?.jobIds && (bodyIds.size !== content.jobIds.length
+      || content.jobIds.some(id => !id.startsWith(prefix))
+      || board.listing.jobs.some(job => !bodyIds.has(job.id)))) {
+      context.addIssue({ code: 'custom', message: 'Invalid content inventory' })
     }
   }
 })
@@ -146,6 +177,8 @@ export interface PostingObservation {
   changedFields?: RevisionField[]
   currentTitle?: string
   currentUrl?: string
+  contentCheckedAt?: string
+  contentState?: 'checked' | 'stale' | 'unavailable'
 }
 
 export function observeSavedPosting(saved: SavedJob, index: PostingStatusIndex | null, revision: JobRevision | undefined, now: number, requestError = ''): PostingObservation {
@@ -169,6 +202,38 @@ export function observeSavedPosting(saved: SavedJob, index: PostingStatusIndex |
   if (!listing.publishedIds.includes(job.id)) {
     if (!saved.company.board) return { state: 'unknown', checkedAt, message: '이전 기록의 게시판을 확인할 수 없어 목록에서 사라졌는지 판단하지 않습니다.' }
     return { state: 'missing', checkedAt, message: '최근 공개 목록에서 찾지 못했어요. 채용 종료 여부는 원문에서 확인해 주세요.' }
+  }
+  if (index.version === 2) {
+    const content = listing.content
+    // A board scan does not imply every listing has a retained body (new or
+    // out-of-scope postings may have none). Do not invent their body timestamp.
+    const hasBody = Boolean(content?.jobIds?.includes(job.id) || listing.jobs.some(item => item.id === job.id))
+    const contentCheckedAt = hasBody ? content?.checkedAt : undefined
+    if (listing.unconfirmedIds?.includes(job.id)) {
+      return {
+        state: 'unknown', checkedAt, contentCheckedAt, contentState: 'unavailable',
+        message: '공개 목록과 마지막 본문의 게시 상태가 달라요. 공고 내용을 다시 확인하거나 원문에서 확인해 주세요.',
+      }
+    }
+    const stale = Boolean(hasBody && content && now >= Date.parse(content.validUntil))
+    const usable = content?.status === 'ok' && !stale
+      && Date.parse(content.checkedAt) <= now + 5 * 60 * 1000
+      && Date.parse(content.checkedAt) >= Date.parse(job.fetchedAt)
+    const current = usable ? listing.jobs.find(item => item.id === job.id) : undefined
+    if (!current) {
+      return {
+        state: 'listed', checkedAt, contentCheckedAt, contentState: stale ? 'stale' : 'unavailable',
+        message: stale
+          ? '게시 여부는 확인했어요. 본문 확인 시각이 오래되어 내용의 차이는 아직 판단하지 않습니다. 공고 내용 확인을 이용해 주세요.'
+          : '게시 여부는 확인했어요. 비교할 수 있는 최신 본문이 없어 내용의 차이는 미확인입니다. 공고 내용 확인이나 원문을 이용해 주세요.',
+      }
+    }
+    return {
+      state: 'listed', checkedAt, contentCheckedAt, contentState: 'checked',
+      currentTitle: current.title, currentUrl: jobPostingUrl({ ...job, url: current.url }),
+      ...(revision ? { changedFields: REVISION_FIELDS.filter(field => revision[field] !== current.revision[field]) }
+        : { message: '본문은 확인했지만 이 기록의 내용 비교를 완료하지 못했습니다.' }),
+    }
   }
   const current = listing.jobs.find(item => item.id === job.id)
   return {

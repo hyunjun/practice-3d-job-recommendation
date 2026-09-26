@@ -84,7 +84,7 @@ export default function App() {
   const closeNotice = useCallback(() => setNotice(null), [])
   const notify = useCallback((message: string, action?: Notice['action'], tone?: Notice['tone']) => setNotice({ message, action, tone }), [])
   const notifyCatalog = useCallback((message: string, tone?: Notice['tone']) => notify(message, undefined, tone), [notify])
-  const { catalog: receivedCatalog, loading, progress, error: dataError, changeSource, retryAt } = useCatalog(initial.exploration.source, notifyCatalog)
+  const { catalog: receivedCatalog, loading, progress, error: dataError, changeSource, retryAt } = useCatalog(initial.exploration.source, notifyCatalog, view !== 'saved')
   const catalogTimes = useMemo(() => catalogDeadlines(receivedCatalog), [receivedCatalog])
   const deadlines = useMemo(() => [
     ...catalogTimes,

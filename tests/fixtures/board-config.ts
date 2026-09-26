@@ -71,8 +71,18 @@ export function boardFixtureResponse(input: string | URL): unknown {
     && url.search === '?content=true&pay_transparency=true') {
     return { jobs: [greenhouse(pathname.includes('Aurora.Next42'))], meta: { total: 1 } }
   }
+  if (url.hostname === 'boards-api.greenhouse.io'
+    && ['/v1/boards/Aurora Private42/jobs', '/v1/boards/Aurora.Next42/jobs'].includes(pathname)
+    && url.search === '?content=false') {
+    const { id, title, absolute_url } = greenhouse(pathname.includes('Aurora.Next42'))
+    return { jobs: [{ id, title, absolute_url }], meta: { total: 1 } }
+  }
   if (url.hostname === 'api.ashbyhq.com' && pathname === '/posting-api/job-board/Birch.Private42'
     && url.search === '?includeCompensation=true') return { apiVersion: '1', jobs: [ashby] }
+  if (url.hostname === 'api.ashbyhq.com' && pathname === '/posting-api/job-board/Birch.Private42'
+    && !url.search) return { apiVersion: '1', jobs: [{
+    id: 'birch-4202', title: 'Backend Engineer Birch', jobUrl: 'https://example.com/jobs/birch', isListed: true,
+  }] }
   if (url.hostname === 'api.eu.lever.co' && pathname === '/v0/postings/Cedar-Private42'
     && url.search === '?mode=json&limit=50&skip=0') return [lever]
   if (url.hostname === 'api.smartrecruiters.com' && pathname === '/v1/companies/DunePrivate42/postings'

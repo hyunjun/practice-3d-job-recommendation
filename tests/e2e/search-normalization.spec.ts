@@ -303,7 +303,9 @@ for (const width of [1440, 320]) test.describe(`Unicode search continuity at ${w
     await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
     const [headers, ...csv] = parseSavedCsv(await readFile((await (await csvDownload).path())!, 'utf8'))
     expect(csv).toHaveLength(6)
-    expect(headers).toHaveLength(47)
+    expect(headers).toHaveLength(48)
+    expect(headers[47]).toBe('공고 내용 확인 시각')
+    expect(csv.map(row => row[47])).toEqual(['', '', '', '', '', ''])
     const column = (name: string) => {
       const index = headers.indexOf(name)
       expect(index, `CSV column ${name}`).toBeGreaterThanOrEqual(0)

@@ -202,7 +202,8 @@ export async function createBoardConfigServer(directory: string, mode: Mode, com
   return {
     cwd, origin, configFile, defaultCache, defaultBytes, runs, start, stop, configure, requests, verifyProductionBytes,
     async cacheFiles() {
-      return (await readdir(path.join(cwd, '.local'))).filter(file => file.startsWith('configured-board-cache-v5-')).sort()
+      // This existing helper returns full-body caches; presence has its own sidecar.
+      return (await readdir(path.join(cwd, '.local'))).filter(file => file.startsWith('configured-board-cache-v5-') && file.endsWith('.json') && !file.endsWith('.presence-v1.json')).sort()
     },
   }
 }

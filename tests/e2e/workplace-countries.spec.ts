@@ -141,8 +141,8 @@ function csvRows(text: string, count: number) {
   const end = text.indexOf('\r\n')
   const headers = cells(text.slice(0, end))
   const values = cells(text.slice(end + 2))
-  expect(headers).toHaveLength(47)
-  expect(headers).toEqual([
+  expect(headers).toHaveLength(48)
+  expect(headers.slice(0, 47)).toEqual([
     '회사', '포지션', '근무지', '데이터', '상태', '저장일', '메모', '채용 링크', '연봉', '보상 조건', '보상 근거',
     '기술 조건', '경력 조건', '기술·경력 근거', '공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '저장 내용과 다른 항목',
     '비자 지원', '취업 자격 조건', '취업 자격 근거', '직무 분류', '직무 분류 근거', '탐색 직군', '탐색 직군 근거',
@@ -151,8 +151,9 @@ function csvRows(text: string, count: number) {
     '고용 형태 근거', '원격근무 지역 판단', '원격근무 지역 원문 근거', '모집 유형', '모집 유형 근거', '언어 조건',
     '언어 조건 근거', '시간대·협업 시간', '시간대·협업 시간 근거', '근무 국가', '근무 국가 근거',
   ])
-  expect(values).toHaveLength(47 * count)
-  return Array.from({ length: count }, (_, row) => Object.fromEntries(headers.map((header, column) => [header, values[row * 47 + column]])))
+  expect(headers[47]).toBe('공고 내용 확인 시각')
+  expect(values).toHaveLength(48 * count)
+  return Array.from({ length: count }, (_, row) => Object.fromEntries(headers.map((header, column) => [header, values[row * 48 + column]])))
 }
 
 async function downloadCsv(page: Page) {
@@ -549,8 +550,16 @@ for (const width of [1440, 320]) test.describe(`confirmed workplace countries at
         saved: [original], filters: { ...WORKPLACE_COUNTRY_FILTERS, query: 'Ledger', region: 'europe' },
       })
       await page.goto(`${server.origin}/#saved`)
-      await expectInitialCatalogRequest(page, traffic)
       await expect(page.locator('.saved-title')).toHaveText(['Backend Engineer — Lantern Ledger'])
+      expect(traffic.requests).toEqual([])
+      expect(await server.requests()).toHaveLength(0)
+      await page.getByRole('button', { name: '데이터와 추천 방식', exact: true }).click()
+      await page.getByRole('dialog').getByRole('button', { name: '공개 공고 다시 조회', exact: true }).click()
+      // Ten Greenhouse, six Ashby, three Lever and three SmartRecruiters jobs;
+      // the separate Other locations result count is twenty.
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '4', '22'])
+      await expect(page.locator('.data-loading')).toHaveCount(0)
+      await page.getByRole('button', { name: '닫기', exact: true }).click()
       await savedSearch(page).fill('Ledger 에스토니아')
       await expect(page.locator('.saved-title')).toHaveText(['Backend Engineer — Lantern Ledger'])
       const before = await catalog(page, server.origin)

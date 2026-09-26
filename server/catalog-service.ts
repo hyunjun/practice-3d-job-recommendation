@@ -9,6 +9,8 @@ import { PUBLIC_PROVIDERS } from '../shared/types'
 import type { BoardStatus, Catalog, Company, Job } from '../shared/types'
 import { belongsToBoard, BoardSnapshotSchema, filterBoardSnapshot } from './board-cache'
 import type { BoardCache, BoardSnapshot, CachedBoard } from './board-cache'
+import { parseCachedPresence, presenceBelongsToBoard, PresenceResultSchema } from './posting-presence'
+import type { CachedPresence, PresenceCache, PresenceResult } from './posting-presence'
 
 export const CATALOG_POLICY = {
   ...CATALOG_LIFETIME,
@@ -19,6 +21,15 @@ export const CATALOG_POLICY = {
 
 export class BoardFetchError extends Error {
   constructor(message: string, readonly retryAfter?: number) { super(message) }
+}
+
+/** Inventory failure is different from failure to retrieve a posting's body. */
+export class BoardInventoryError extends BoardFetchError {
+  constructor(cause: unknown) {
+    super(cause instanceof Error ? cause.message : '전체 공개 목록을 확인하지 못했어요.',
+      cause instanceof BoardFetchError ? cause.retryAfter : undefined)
+    this.cause = cause
+  }
 }
 
 export class CatalogUnavailableError extends Error {
@@ -42,25 +53,34 @@ export interface BoardResult {
   unmappedCount: number
   /** Complete published feed, before occupation filtering. Absent for legacy snapshots. */
   publishedIds?: string[]
+  unpublishedIds?: string[]
+  verifiedActiveIds?: string[]
 }
 
 interface Options {
   companies: Company[]
   cache: BoardCache
   fetchBoard: (company: Company, fetchedAt: string) => Promise<BoardResult>
+  /** Omit only for integrations that still provide the legacy full-content index. */
+  presence?: {
+    cache: PresenceCache
+    fetchBoard: (company: Company, fetchedAt: string) => Promise<PresenceResult>
+  }
   now?: () => number
   random?: () => number
   onCacheError?: (error: unknown) => void
 }
 
-export function createCatalogService({ companies, cache, fetchBoard, now = Date.now, random = Math.random, onCacheError = console.warn }: Options) {
+export function createCatalogService({ companies, cache, fetchBoard, presence, now = Date.now, random = Math.random, onCacheError = console.warn }: Options) {
   if (!companies.length || companies.some(company => !company.board || !PUBLIC_PROVIDERS.includes(company.provider ?? 'greenhouse')
     || (company.boardRegion && company.provider !== 'lever')) || new Set(companies.map(company => company.id)).size !== companies.length) {
     throw new Error('Each configured job board must have a unique company and board name')
   }
   const boards = new Map<string, CachedBoard>()
+  const presences = new Map<string, CachedPresence>()
   let initialized: Promise<void> | null = null
   let pending: Promise<void> | null = null
+  let presencePending: Promise<void> | null = null
   interface Collection {
     id: string
     revision: number
@@ -78,19 +98,82 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
   })
   const revisions = new WeakMap<BoardSnapshot, Promise<NonNullable<PostingBoard['listing']>['jobs']>>()
   const iso = (time: number) => new Date(time).toISOString()
-  const refreshAt = (entry: CachedBoard) => Math.max(
+  const refreshAt = (entry: Pick<CachedBoard, 'checkedAt' | 'error' | 'retryAt'>) => Math.max(
     Date.parse(entry.checkedAt) + CATALOG_POLICY.minRefreshInterval,
     entry.error && entry.retryAt ? Date.parse(entry.retryAt) : 0,
   )
+  const identity = (company: Company) => ({
+    companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse',
+    ...(company.boardRegion ? { boardRegion: company.boardRegion } : {}),
+  })
+  function nextRefresh(companyId: string, content: boolean): number {
+    const own = (content ? boards : presences).get(companyId)
+    const other = (content ? presences : boards).get(companyId)
+    return Math.max(own ? refreshAt(own) : 0, other?.error && other.retryAt ? Date.parse(other.retryAt) : 0)
+  }
+  function refreshDeadline(companyId: string, content: boolean): number {
+    // An eligible deadline may be in the past. Keep it stable for conditional
+    // HTTP requests instead of changing the index every millisecond.
+    return nextRefresh(companyId, content)
+      || Date.parse(presences.get(companyId)?.checkedAt ?? boards.get(companyId)?.checkedAt ?? iso(now()))
+  }
+  function seedPresence(entry: CachedBoard) {
+    if (!presence || !entry.snapshot?.publishedIds) return
+    const snapshot = entry.snapshot
+    const previous = presences.get(entry.companyId)
+    if (previous && Date.parse(previous.checkedAt) > Date.parse(snapshot.fetchedAt)) return
+    // A successful full scan can still skip non-technical details. Do not
+    // interpret a skipped detail as an active posting.
+    const active = new Set(snapshot.verifiedActiveIds ?? snapshot.jobs.map(job => job.id))
+    const ids = new Set(snapshot.publishedIds)
+    // A complete full inventory supersedes IDs absent from that inventory.
+    // Retain conflicts still listed, keeping this bounded by one board feed.
+    const unpublishedIds = [...new Set([
+      ...(previous?.unpublishedIds?.filter(id => ids.has(id)) ?? []), ...(snapshot.unpublishedIds ?? []),
+    ])]
+      .filter(id => !active.has(id))
+    const unconfirmedIds = unpublishedIds.filter(id => ids.has(id))
+    presences.set(entry.companyId, {
+      companyId: entry.companyId, board: entry.board, provider: entry.provider, boardRegion: entry.boardRegion,
+      checkedAt: snapshot.fetchedAt, failures: 0, retryAt: null,
+      ...(unpublishedIds.length ? { unpublishedIds } : {}),
+      snapshot: {
+        fetchedAt: snapshot.fetchedAt, total: snapshot.total, publishedIds: snapshot.publishedIds!,
+        ...(unconfirmedIds.length ? { unconfirmedIds } : {}),
+      },
+    })
+  }
+  function recordInventoryFailure(company: Company, entry: CachedBoard) {
+    if (!presence || !entry.error) return
+    const previous = presences.get(company.id)
+    if (previous && Date.parse(previous.checkedAt) > Date.parse(entry.checkedAt)) return
+    presences.set(company.id, {
+      ...identity(company), checkedAt: entry.checkedAt,
+      failures: entry.failures, retryAt: entry.retryAt, error: entry.error,
+      ...(previous?.unpublishedIds?.length ? { unpublishedIds: previous.unpublishedIds } : {}),
+      ...(previous?.snapshot ? { snapshot: previous.snapshot } : {}),
+    })
+  }
   async function initialize() {
-    const loaded = await cache.load().catch(error => { onCacheError(error); return [] })
+    const [loaded, presenceEntries] = await Promise.all([
+      cache.load().catch(error => { onCacheError(error); return [] }),
+      presence?.cache.load().catch(error => { onCacheError(error); return [] }) ?? [],
+    ])
+    const loadedPresence = parseCachedPresence({ version: 1, boards: presenceEntries })
     for (const company of companies) {
+      const observation = loadedPresence.find(item => item.companyId === company.id && item.board === company.board
+        && item.provider === (company.provider ?? 'greenhouse') && item.boardRegion === company.boardRegion)
+      if (observation && Date.parse(observation.checkedAt) <= now() + 5 * 60 * 1000) presences.set(company.id, observation)
       const entry = loaded.find(item => item.companyId === company.id && item.board === company.board
         && item.provider === (company.provider ?? 'greenhouse') && item.boardRegion === company.boardRegion)
       if (!entry || Date.parse(entry.checkedAt) > now() + 5 * 60 * 1000) continue
       if (entry.snapshot && (Date.parse(entry.snapshot.fetchedAt) > Date.parse(entry.checkedAt)
         || !belongsToBoard(entry.snapshot, company))) continue
       boards.set(company.id, { ...entry, ...(entry.snapshot ? { snapshot: filterBoardSnapshot(entry.snapshot) } : {}) })
+      seedPresence(entry)
+      // Old full-cache failures do not identify the failing phase. Preserve
+      // their uncertainty instead of manufacturing a successful list check.
+      if (entry.error && entry.errorPhase !== 'content') recordInventoryFailure(company, entry)
     }
   }
 
@@ -120,7 +203,9 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
       })
     }
     const entries = [...boards.values()]
-    const refreshAfter = iso(entries.length ? Math.min(...entries.map(refreshAt)) : current + CATALOG_POLICY.minRefreshInterval)
+    const refreshAfter = iso(presence
+      ? Math.min(...companies.map(company => refreshDeadline(company.id, true)))
+      : entries.length ? Math.min(...entries.map(refreshAt)) : current + CATALOG_POLICY.minRefreshInterval)
     if (!successfulDates.length && !partial) {
       const expired = [...boards.values()].some(entry => entry.snapshot)
       throw new CatalogUnavailableError(expired
@@ -135,6 +220,18 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
     }
   }
 
+  function summariesFor(snapshot: BoardSnapshot) {
+    let summaries = revisions.get(snapshot)
+    if (!summaries) {
+      summaries = Promise.all(snapshot.jobs.map(async job => ({
+        id: job.id, title: job.title, url: jobPostingUrl(job), revision: await createJobRevision(job),
+      })))
+      revisions.set(snapshot, summaries)
+      void summaries.catch(() => revisions.delete(snapshot))
+    }
+    return summaries
+  }
+
   async function composePostingStatus(): Promise<PostingStatusIndex> {
     const current = now()
     const statuses = await Promise.all(companies.map(async (company): Promise<PostingBoard> => {
@@ -143,18 +240,10 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
       const usable = snapshot && current - Date.parse(snapshot.fetchedAt) <= CATALOG_POLICY.maxFallbackAge
       let listing: PostingBoard['listing']
       if (usable && snapshot.publishedIds !== undefined) {
-        let summaries = revisions.get(snapshot)
-        if (!summaries) {
-          summaries = Promise.all(snapshot.jobs.map(async job => ({
-            id: job.id, title: job.title, url: jobPostingUrl(job), revision: await createJobRevision(job),
-          })))
-          revisions.set(snapshot, summaries)
-          void summaries.catch(() => revisions.delete(snapshot))
-        }
         listing = {
           validUntil: iso(Date.parse(snapshot.fetchedAt) + CATALOG_POLICY.freshFor),
           publishedIds: snapshot.publishedIds,
-          jobs: await summaries,
+          jobs: await summariesFor(snapshot),
         }
       }
       return {
@@ -174,11 +263,72 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
     }
   }
 
+  async function composePresenceStatus(): Promise<PostingStatusIndex> {
+    const current = now()
+    const statuses = await Promise.all(companies.map(async (company): Promise<PostingBoard> => {
+      const entry = presences.get(company.id)
+      const snapshot = entry?.snapshot
+      const full = boards.get(company.id)
+      const body = full?.snapshot
+      const usable = snapshot && current - Date.parse(snapshot.fetchedAt) <= CATALOG_POLICY.maxFallbackAge
+      let listing: PostingBoard['listing']
+      if (usable) {
+        const bodyFresh = body && !full.error && current < Date.parse(body.fetchedAt) + CATALOG_POLICY.freshFor
+        const ids = new Set(snapshot.publishedIds)
+        const unconfirmed = new Set(snapshot.unconfirmedIds)
+        listing = {
+          validUntil: iso(Date.parse(snapshot.fetchedAt) + CATALOG_POLICY.freshFor),
+          publishedIds: snapshot.publishedIds,
+          ...(unconfirmed.size ? { unconfirmedIds: [...unconfirmed] } : {}),
+          jobs: bodyFresh ? (await summariesFor(body)).filter(job => ids.has(job.id) && !unconfirmed.has(job.id)) : [],
+          ...(body ? { content: {
+            checkedAt: body.fetchedAt,
+            validUntil: iso(Date.parse(body.fetchedAt) + CATALOG_POLICY.freshFor),
+            status: full.error ? 'error' as const : 'ok' as const,
+            jobIds: body.jobs.map(job => job.id),
+          } } : {}),
+        }
+      }
+      const error = entry?.error ?? (!entry ? full?.error ?? '전체 공개 목록을 아직 확인하지 못했어요.' : undefined)
+      return {
+        ...identity(company), status: error ? 'error' : 'ok',
+        checkedAt: entry?.checkedAt ?? full?.checkedAt ?? iso(current),
+        lastSuccessAt: snapshot?.fetchedAt ?? null,
+        retryAt: error ? iso(nextRefresh(company.id, false)) : null,
+        ...(error ? { message: error } : {}), ...(listing ? { listing } : {}),
+      }
+    }))
+    return {
+      version: 2,
+      checkedAt: iso(Math.max(...statuses.map(board => Date.parse(board.checkedAt)))),
+      refreshAfter: iso(Math.min(...companies.map(company => refreshDeadline(company.id, false)))),
+      contentRefreshAfter: iso(Math.min(...companies.map(company => refreshDeadline(company.id, true)))),
+      boards: statuses,
+    }
+  }
+
+  function failure(cause: unknown, previousFailures: number) {
+    const failures = Math.min(previousFailures + 1, 1000)
+    const backoff = Math.min(CATALOG_POLICY.minRefreshInterval * 2 ** Math.min(failures - 1, 10), CATALOG_POLICY.maxBackoff)
+    const delay = Math.min(CATALOG_POLICY.maxBackoff, backoff + Math.floor(backoff * 0.2 * random()))
+    return {
+      failures,
+      retryAt: iso(Math.max(now() + delay, cause instanceof BoardFetchError ? cause.retryAfter ?? 0 : 0)),
+      error: (cause instanceof Error ? cause.message : '조회 실패').slice(0, 500) || '조회 실패',
+    }
+  }
+
   async function collect(company: Company) {
     const previous = boards.get(company.id)
     const checkedAt = iso(now())
     try {
       const result = await fetchBoard(company, checkedAt)
+      if (presence) {
+        const inventory = PresenceResultSchema.safeParse(result)
+        if (!inventory.success || !presenceBelongsToBoard(inventory.data, company)) {
+          throw new BoardInventoryError(new BoardFetchError('게시판의 전체 공개 목록을 확인하지 못했어요.'))
+        }
+      }
       const parsed = BoardSnapshotSchema.safeParse({
         ...result, fetchedAt: checkedAt,
         jobs: [...new Map(result.jobs.map(job => [job.id, job])).values()],
@@ -192,18 +342,46 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
         companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', boardRegion: company.boardRegion,
         checkedAt, failures: 0, retryAt: null, snapshot: filterBoardSnapshot(snapshot),
       })
+      seedPresence(boards.get(company.id)!)
     } catch (cause) {
-      const failures = Math.min((previous?.failures ?? 0) + 1, 1000)
-      const backoff = Math.min(CATALOG_POLICY.minRefreshInterval * 2 ** Math.min(failures - 1, 10), CATALOG_POLICY.maxBackoff)
-      const delay = Math.min(CATALOG_POLICY.maxBackoff, backoff + Math.floor(backoff * 0.2 * random()))
-      const retryAt = Math.max(now() + delay, cause instanceof BoardFetchError ? cause.retryAfter ?? 0 : 0)
       boards.set(company.id, {
         companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', boardRegion: company.boardRegion,
-        checkedAt, failures, retryAt: iso(retryAt),
-        error: (cause instanceof Error ? cause.message : '조회 실패').slice(0, 500) || '조회 실패',
+        checkedAt, ...failure(cause, Math.max(previous?.failures ?? 0, presences.get(company.id)?.failures ?? 0)),
+        errorPhase: cause instanceof BoardInventoryError ? 'inventory' : 'content',
+        ...(previous?.snapshot ? { snapshot: previous.snapshot } : {}),
+      })
+      if (cause instanceof BoardInventoryError) recordInventoryFailure(company, boards.get(company.id)!)
+    }
+  }
+
+  async function collectPresence(company: Company) {
+    const previous = presences.get(company.id)
+    const checkedAt = iso(now())
+    try {
+      const parsed = PresenceResultSchema.safeParse(await presence!.fetchBoard(company, checkedAt))
+      if (!parsed.success || !presenceBelongsToBoard(parsed.data, company)) {
+        throw new BoardFetchError('게시판의 전체 공개 목록을 확인하지 못했어요.')
+      }
+      const published = new Set(parsed.data.publishedIds)
+      const unconfirmedIds = previous?.unpublishedIds?.filter(id => published.has(id)) ?? []
+      presences.set(company.id, {
+        ...identity(company), checkedAt, failures: 0, retryAt: null,
+        ...(previous?.unpublishedIds?.length ? { unpublishedIds: previous.unpublishedIds } : {}),
+        snapshot: { ...parsed.data, fetchedAt: checkedAt, ...(unconfirmedIds.length ? { unconfirmedIds } : {}) },
+      })
+    } catch (cause) {
+      presences.set(company.id, {
+        ...identity(company), checkedAt,
+        ...failure(cause, Math.max(previous?.failures ?? 0, boards.get(company.id)?.failures ?? 0)),
+        ...(previous?.unpublishedIds?.length ? { unpublishedIds: previous.unpublishedIds } : {}),
         ...(previous?.snapshot ? { snapshot: previous.snapshot } : {}),
       })
     }
+  }
+
+  async function persistPresence() {
+    if (!presence) return
+    try { await presence.cache.save(companies.flatMap(company => presences.get(company.id) ?? [])) } catch (error) { onCacheError(error) }
   }
 
   async function refresh(due: Company[], run: Collection): Promise<void> {
@@ -216,15 +394,19 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
         run.settled.set(company.id, ++run.revision)
       }
     }))
-    try { await cache.save([...boards.values()]) } catch (error) { onCacheError(error) }
+    // Provider completion order must not reorder the persisted board inventory.
+    try { await cache.save(companies.flatMap(company => boards.get(company.id) ?? [])) } catch (error) { onCacheError(error) }
+    await persistPresence()
   }
 
   async function startCollection(force: boolean): Promise<void> {
     await (initialized ??= initialize())
+    if (presencePending) await presencePending
     if (pending) return
     const current = now()
     const due = companies.filter(company => {
       const entry = boards.get(company.id)
+      if (presence && current < nextRefresh(company.id, true)) return false
       if (!entry) return true
       if (entry.error) return current >= refreshAt(entry)
       return current - Date.parse(entry.checkedAt) >= (force ? CATALOG_POLICY.minRefreshInterval : CATALOG_POLICY.freshFor)
@@ -243,6 +425,28 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
     // Provider failures are recorded per board. Do not leave a rejected
     // background promise unobserved if persistence/error reporting itself fails.
     void pending.catch(onCacheError)
+  }
+
+  async function ensurePresence(force: boolean): Promise<void> {
+    await (initialized ??= initialize())
+    if (pending) await pending
+    if (presencePending) return presencePending
+    const current = now()
+    const due = companies.filter(company => {
+      if (current < nextRefresh(company.id, false)) return false
+      const entry = presences.get(company.id)
+      return !entry || Boolean(entry.error)
+        || current - Date.parse(entry.checkedAt) >= (force ? CATALOG_POLICY.minRefreshInterval : CATALOG_POLICY.freshFor)
+    })
+    if (!due.length) return
+    presencePending = (async () => {
+      let cursor = 0
+      await Promise.all(Array.from({ length: Math.min(CATALOG_POLICY.concurrency, due.length) }, async () => {
+        while (cursor < due.length) await collectPresence(due[cursor++])
+      }))
+      await persistPresence()
+    })().finally(() => { presencePending = null })
+    await presencePending
   }
 
   async function ensureFresh(force: boolean): Promise<void> {
@@ -270,9 +474,14 @@ export function createCatalogService({ companies, cache, fetchBoard, now = Date.
       const { jobs, companies: _companies, cities: _cities, ...catalog } = compose(!run.done)
       return { progress: progress(run), companyIds, jobs: jobs.filter(job => changed.has(job.companyId)), catalog }
     },
-    async getPostingStatus(force = false): Promise<PostingStatusIndex> {
-      await ensureFresh(force)
-      return composePostingStatus()
+    async getPostingStatus(force = false, content = false): Promise<PostingStatusIndex> {
+      if (!presence) {
+        await ensureFresh(force)
+        return composePostingStatus()
+      }
+      if (content) await ensureFresh(force)
+      else await ensurePresence(force)
+      return composePresenceStatus()
     },
   }
 }
