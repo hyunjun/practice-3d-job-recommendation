@@ -448,6 +448,8 @@ CPU 프로파일에서는 검색 중 국가 경계의 투영 계산이 반복되
 
 앞 절의 초점 가림 기준을 참고해 여러 화면 크기에서 실제 Tab·Shift+Tab 이동과 포인터 입력 지점을 검사합니다. SVG 경계 안에 있다는 것만으로 사용자가 볼 수 있다고 판단하지 않습니다. 이 검사는 Chrome에서 확인한 지도 동작이며 앱 전체나 모든 보조 기술의 접근성 적합성을 선언하는 것은 아닙니다.
 
+2026-09-26에는 [Playwright의 `scrollIntoViewIfNeeded`](https://playwright.dev/docs/api/class-locator#locator-scroll-into-view-if-needed)와 `:focus-visible` 문서를 다시 확인했습니다. 전자는 IntersectionObserver의 교차 비율로 완전한 표시 여부를 판단하므로 다른 요소가 입력을 가로채는지까지 보장하지 않습니다. 터치 뒤 직접 초점을 지정하는 것과 실제 키보드 탐색도 구분합니다. 지도 배치 검사는 Shift+Tab·Tab으로 초점을 옮긴 뒤 키보드 초점 표시와 아홉 지점의 실제 입력 가능 여부를 함께 확인합니다.
+
 ## 도시 묶음 변경 뒤의 초점 유지
 
 | 레퍼런스 | 확인한 내용 | 반영 |
@@ -659,3 +661,15 @@ CPU 프로파일에서는 검색 중 국가 경계의 투영 계산이 반복되
 국가가 명확한 주소 끝의 표기와 구조화된 국가 필드를 사용합니다. 위치 문구의 `CA`·`Georgia`는 모호한 채로 두고, 구조화된 국가 필드의 `CA`는 캐나다로 읽습니다. `Lebanon, NH, United States`의 도시 이름을 레바논 국가로 해석하지 않습니다. 위치와 국가 필드가 충돌하면 해당 위치의 국가는 확인 필요로 유지하며, 다른 위치의 확인된 국가는 계속 사용할 수 있습니다.
 
 같은 실제 조회에는 `US, Canada`로 두 국가를 나열한 항목도 2개 있었습니다. 명확한 국가 코드나 미국·영국의 국가 표기로 시작하고 모든 항목이 국가로 확인되는 쉼표 목록은 복수 국가로 읽습니다. `Lebanon, Canada`나 `Mexico, United States`는 도시·국가 주소일 수 있어 끝의 국가만 사용합니다. 문구가 애매하면 국가 범위를 늘리지 않는 제품 판단이며, 제공자 문서가 요구하는 파싱 규칙은 아닙니다.
+
+## 표기 차이로 검색에서 빠지지 않는 공고
+
+| 참고 자료 | 확인한 내용 | 반영 |
+|---|---|---|
+| [Unicode Standard Annex #15: Normalization Forms](https://www.unicode.org/reports/tr15/) | 조합 문자와 완성 문자, 한글 자모의 정규 동등성 및 문자 폭 등의 호환 동등성을 정의 | 검색어와 검색 대상에 같은 정규화를 적용해 유니코드 표현 차이로 인한 누락을 방지 |
+| [MDN: String.prototype.normalize](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize) | 호환 정규화는 검색에 유용하지만 표시 모양을 바꿀 수 있어 화면 표시에는 적합하지 않을 수 있음 | 검색용 비교 값만 정규화하고 입력·원문·저장·내보내기는 보존 |
+| [Elasticsearch: ASCII folding token filter](https://www.elastic.co/docs/reference/text-analysis/analysis-asciifolding-tokenfilter) | `à`를 `a`처럼 비교해 악센트가 없는 입력으로도 검색하는 방법을 설명 | 라틴 문자의 결합 악센트를 검색에서 접어 비교. 검색 서버나 해당 라이브러리를 추가하는 대신 로컬 검색에 적용 |
+
+2026-09-26에 위 문서를 확인했습니다. 앞 단계의 실제 수집 자료에서도 `Reykjavík`의 공고 4개가 `Reykjavik`으로는 검색되지 않았고, `Sao Paulo`와 `São Paulo`는 서로 다른 공고 2개씩을 반환했습니다. 정규화 후에는 각 표기에서 같은 공고를 찾습니다.
+
+악센트 구분을 없애는 것은 검색 편의를 위한 앱의 선택이며 모든 언어에서 같은 단어라는 뜻은 아닙니다. 결합 부호 제거는 라틴 문자에 한정해 일본어 탁음이나 인도계 문자의 모음 부호 등을 보존합니다. 기술 이름의 기호와 여러 검색어를 모두 포함하는 조건도 유지합니다. 도시의 좌표·국가·지원 자격을 추론하거나 오타·로마자 전사를 자동 보정하지 않습니다.

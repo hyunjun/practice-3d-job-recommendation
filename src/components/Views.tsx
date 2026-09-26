@@ -20,7 +20,7 @@ import { SavedStorageNotice } from './SavedStorageNotice'
 import { PostingPurposeBadge } from './JobPostingPurpose'
 import { languageSearchText } from '../../shared/job-languages'
 import { workTimeSearchText } from '../../shared/job-work-time'
-import { searchWords } from '../../shared/job-search'
+import { normalizeSearchText, searchWords } from '../../shared/search-text'
 
 const SAVED_PAGE_SIZE = 12
 
@@ -57,7 +57,7 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
         || (postingFilter === 'changed' ? Boolean(observation?.changedFields?.length)
           : postingFilter === 'unknown' ? observation?.state === 'unknown' || observation?.state === 'unchecked'
             : observation?.state === postingFilter)
-      const text = `${item.company.name} ${item.job.title} ${jobRoleLabel(item.job)} ${jobLocationSearchText(item.job)} ${languageSearchText(item.job)} ${workTimeSearchText(item.job)} ${item.note}`.toLowerCase()
+      const text = normalizeSearchText(`${item.company.name} ${item.job.title} ${jobRoleLabel(item.job)} ${jobLocationSearchText(item.job)} ${languageSearchText(item.job)} ${workTimeSearchText(item.job)} ${item.note}`)
       return postingMatches && (status === 'all' || item.status === status) && words.every(word => text.includes(word))
     })
   }, [saved, status, query, postingFilter, observations, publicCount])

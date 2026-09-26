@@ -9,8 +9,11 @@ import { isTalentPoolJob } from './job-posting'
 import { languageSearchText } from './job-languages'
 import { workTimeSearchText } from './job-work-time'
 import { upgradeJob } from './job-upgrade'
+import { normalizeSearchText, searchWords } from './search-text'
 import { MODE_LABELS, POSTING_TYPE_LABELS, USD_RATES } from './types'
 import type { Catalog, City, Company, Filters, Job, Profile, Region } from './types'
+
+export { searchWords } from './search-text'
 
 export type FilterFailure = keyof Filters | 'profile'
 export type SearchScope = { kind: 'cities' } | { kind: 'city'; cityId: string } | { kind: 'remote' } | { kind: 'unmapped' }
@@ -52,9 +55,9 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
         : job.cityIds.flatMap(id => CITY_BY_ID.get(id)?.region ?? [])
     return [{
       job, company,
-      text: [company.name, company.industry, job.title, jobRoleLabel(job), MODE_LABELS[job.workMode],
+      text: normalizeSearchText([company.name, company.industry, job.title, jobRoleLabel(job), MODE_LABELS[job.workMode],
         isTalentPoolJob(job) ? POSTING_TYPE_LABELS['talent-pool'] : '', ...job.skills, ...locations,
-        ...countrySearchText(job.remoteCountries), jobLocationSearchText(job), languageSearchText(job), workTimeSearchText(job)].join(' ').toLowerCase(),
+        ...countrySearchText(job.remoteCountries), jobLocationSearchText(job), languageSearchText(job), workTimeSearchText(job)].join(' ')),
       profileMatches: !skills.length || !profileSkills.size || skills.some(skill => profileSkills.has(skill.toLowerCase())),
       residenceMatches: job.remoteWorldwide || job.remoteCountries.includes(profile.residence),
       salaryMax: job.salary ? job.salary.max * USD_RATES[job.salary.currency] : null,
@@ -62,10 +65,6 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
       cities: [...new Set(job.cityIds)].flatMap(id => cities.get(id) ?? []),
     }]
   }) }
-}
-
-export function searchWords(query: string): string[] {
-  return query.toLowerCase().trim().split(/\s+/).filter(Boolean)
 }
 
 export function failedSearchFilters(entry: SearchEntry, filters: Filters, words = searchWords(filters.query)): FilterFailure[] {
