@@ -19,15 +19,17 @@ import { fetchSmartRecruitersBoard } from '../../server/providers/smartrecruiter
 import type { Company, Job, JobProvider } from '../../shared/types'
 import { BOARD_CONFIG_REGISTRATIONS, boardFixtureResponse, boardRegistration } from '../fixtures/board-config'
 import { EXPANDED_PUBLIC_REGISTRATIONS } from '../fixtures/public-coverage'
+import { SURVEY_REGISTRATIONS } from '../fixtures/public-company-survey'
 
 const repository = fileURLToPath(new URL('../../', import.meta.url))
-const defaultIds = [
+const historical36Ids = [
   'stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'airbnb', 'gitlab',
   'anthropic', 'intercom', 'asana', 'linear', 'deepl', 'n8n', 'supabase', 'mistral',
   'jane', 'spotify', 'contentsquare', 'canva', 'grab', 'wise', 'moloco', 'sendbird',
   'openai', 'notion', 'reddit', 'discord', 'coinbase', 'dropbox', 'duolingo', 'roblox',
   'spacex', 'pinterest', 'databricks', 'robinhood',
 ]
+const defaultIds = [...historical36Ids, ...SURVEY_REGISTRATIONS.map(company => company.id)]
 const BASE = Date.parse('2026-09-20T06:00:00.000Z')
 const initialTime = '2026-09-20T06:00:00.000Z'
 const directories: string[] = []
@@ -105,12 +107,14 @@ afterEach(async () => {
 })
 
 describe('board configuration resolution', () => {
-  it('keeps the36 defaults in order without a file and leaves the filesystem untouched', async () => {
+  it('keeps the historical36 defaults before the47 additions without a file and leaves the filesystem untouched', async () => {
     const cwd = await directory()
     const resolved = await loadBoardConfiguration({ cwd })
     expect(resolved.mode).toBe('default')
     expect(resolved.filePath).toBeUndefined()
     expect(ids(resolved.companies)).toEqual(defaultIds)
+    expect(ids(resolved.companies.slice(0, 36))).toEqual(historical36Ids)
+    expect(resolved.companies).toHaveLength(83)
     expect(resolved.cacheFile).toBe(path.join(cwd, '.local/public-board-cache-v5.json'))
     expect(resolved.legacyCacheFiles).toEqual([
       path.join(cwd, '.local/greenhouse-cache-v4.json'), path.join(cwd, '.local/greenhouse-cache-v3.json'),
@@ -175,6 +179,25 @@ describe('board configuration resolution', () => {
     expect(() => parseBoardConfiguration({
       version: 1, companies: [boardRegistration({ provider, board })],
     })).toThrow(message)
+  })
+
+  it('resolves all47 newly approved curated references without custom metadata and rejects duplicate exact boards', () => {
+    const parsed = parseBoardConfiguration(replacement(SURVEY_REGISTRATIONS.map(company => company.id)))
+    expect(parsed.companies).toHaveLength(47)
+    expect(parsed.companies.map(({ id, name, careerUrl, provider, board }) =>
+      ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
+    expect(parsed.companies.find(company => company.id === 'xai')).toMatchObject({
+      id: 'xai', name: 'xAI (SpaceXAI)', provider: 'greenhouse', board: 'xai', careerUrl: 'https://x.ai/careers',
+    })
+    for (const [provider, board, company] of [
+      ['greenhouse', 'realtimeboardglobal', 'miro'],
+      ['ashby', 'ClickHouse', 'clickhouse'],
+      ['lever', 'palantir', 'palantir'],
+      ['smartrecruiters', 'ServiceNow', 'servicenow'],
+    ] as const) {
+      expect(() => parseBoardConfiguration({ version: 1, companies: [boardRegistration({ provider, board })] }))
+        .toThrow(`"${company}"와 "aurora-config"`)
+    }
   })
 
   it('trims boards without changing case, Unicode or spaces; provider and Lever region distinguish sources', () => {
@@ -551,12 +574,17 @@ describe('offline board-check CLI', () => {
     expect(result.code).toBe(0)
     expect(result.signal).toBeNull()
     expect(result.stdout).toContain('기본 공개 게시판 목록을 사용합니다.')
-    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 36개')
+    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 83개')
     expect(result.stdout).toContain('stripe · Stripe · Greenhouse · stripe')
     expect(result.stdout).toContain('wise · Wise · SmartRecruiters · Wise')
     expect(result.stdout).toContain('openai · OpenAI · Ashby · openai')
     expect(result.stdout).toContain('notion · Notion · Ashby · notion')
     expect(result.stdout).toContain('robinhood · Robinhood · Greenhouse · robinhood')
+    expect(result.stdout).toContain('miro · Miro · Greenhouse · realtimeboardglobal')
+    expect(result.stdout).toContain('clickhouse · ClickHouse · Ashby · ClickHouse')
+    expect(result.stdout).toContain('palantir · Palantir · Lever · palantir')
+    expect(result.stdout).toContain('servicenow · ServiceNow · SmartRecruiters · ServiceNow')
+    expect(result.stdout).toContain('xai · xAI (SpaceXAI) · Greenhouse · xai')
     expect(result.stdout).toContain('네트워크 요청 없이 설정 형식을 확인했습니다.')
     expect(result.stdout).toContain('실제 게시판 연결은 앱의 공개 공고 조회에서 확인해 주세요.')
     expect(result.stderr).toBe('')

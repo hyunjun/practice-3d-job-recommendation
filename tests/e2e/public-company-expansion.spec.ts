@@ -8,6 +8,7 @@ import {
   COVERAGE_UPDATED_AT, EXPANDED_PUBLIC_REGISTRATIONS,
 } from '../fixtures/public-coverage'
 import { EXPANSION_JOBS, EXPANSION_NOTE, expansionLegacyCache, expansionResponses } from '../fixtures/public-company-expansion'
+import { SURVEY_FULL_URLS, withSurveyEmptyBoards } from '../fixtures/public-company-survey'
 import { createPublicCoverageServer } from '../fixtures/public-coverage-server'
 import { expectInitialCatalogRequest, readServerMode, watchApiRequests } from './helpers/api-requests'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
@@ -54,10 +55,11 @@ async function catalog(page: Page, origin: string): Promise<Catalog> {
 
 function expectExpandedCatalog(value: Catalog, total: number) {
   expect(value.source).toBe('public')
-  expect(value.companies).toHaveLength(36)
-  expect(value.boards).toHaveLength(36)
+  expect(value.companies).toHaveLength(83)
+  expect(value.boards).toHaveLength(83)
+  expect(value.companies.slice(0, 36)).toHaveLength(36)
   expect(value.jobs).toHaveLength(total)
-  expect(value.companies.slice(24).map(({ id, name, careerUrl, provider, board }) =>
+  expect(value.companies.slice(24, 36).map(({ id, name, careerUrl, provider, board }) =>
     ({ id, name, careerUrl, provider, board }))).toEqual(EXPANDED_PUBLIC_REGISTRATIONS)
   expect(value.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
   const addedIds = new Set(['openai', 'notion', 'reddit', 'discord', 'coinbase', 'dropbox',
@@ -133,10 +135,10 @@ async function image(page: Page, info: TestInfo, name: string) {
 for (const width of [1440, 320]) test.describe(`expanded default public companies at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
-  test('all twelve added registrations collect fictional jobs through the36-source HTTP default and preserve query/filter context across sample selection', async ({ page, request, baseURL }, info) => {
+  test('the original twelve added registrations still collect fictional jobs through the83-source HTTP default and preserve query/filter context across sample selection', async ({ page, request, baseURL }, info) => {
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const server = await createPublicCoverageServer(info.outputPath('expanded-default-server'), mode)
-    const responses = expansionResponses()
+    const responses = withSurveyEmptyBoards(expansionResponses())
     await server.respond(responses)
     try {
       await server.start()
@@ -150,13 +152,13 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
         'greenhouse-sendbird-44201', 'greenhouse-sendbird-44202',
       ])
       await dataButton(page).click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '36', '17'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '83', '17'])
       await expect(page.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
-        'Greenhouse23개 회사', 'Ashby8개 회사', 'Lever2개 회사', 'SmartRecruiters3개 회사',
+        'Greenhouse50개 회사', 'Ashby24개 회사', 'Lever4개 회사', 'SmartRecruiters5개 회사',
       ])
       await page.getByRole('dialog').locator('.board-details > summary').click()
       for (const registration of EXPANDED_PUBLIC_REGISTRATIONS) {
-        const row = page.getByRole('dialog').locator('.board-row').filter({ hasText: registration.name })
+        const row = page.getByRole('dialog').locator('.board-row').filter({ has: page.getByText(registration.name, { exact: true }) })
         await expect(row).toHaveCount(1)
         await expect(row).toContainText(registration.provider === 'ashby' ? 'Ashby' : 'Greenhouse')
       }
@@ -178,7 +180,7 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
       await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
       await contextIs(page, 'sample', 'Notion', 'backend')
       await sourceChoice(page, 'public').click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '36', '17'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '83', '17'])
       await closeTo(page, dataButton(page))
       await expect(search(page)).toHaveValue('Notion')
       await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '1'])
@@ -193,8 +195,8 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
       const after = await catalog(page, server.origin)
       expect(after.jobs).toEqual(before.jobs)
       const upstream = await server.requests()
-      expect(upstream).toHaveLength(36)
-      expect(new Set(upstream.map(value => value.url)).size).toBe(36)
+      expect(upstream).toHaveLength(83)
+      expect(new Set(upstream.map(value => value.url)).size).toBe(83)
       expect(upstream.map(value => value.url).sort()).toEqual(Object.keys(responses).sort())
       expect(upstream.every(value => value.synthetic && !value.networkSent && value.method === 'GET')).toBe(true)
       await server.assertDefaultConfiguration()
@@ -206,13 +208,13 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
     }
   })
 
-  test('an old24-board cache fetches only the twelve missing sources and a saved public Notion remains unchanged across sample mode and a real restart', async ({ page, request, baseURL }, info) => {
+  test('an old24-board cache still fetches the original twelve plus47 missing sources and a saved public Notion remains unchanged across sample mode and a real restart', async ({ page, request, baseURL }, info) => {
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const oldTime = new Date(Date.now() - 5_000).toISOString()
     const old = expansionLegacyCache(oldTime)
     expect(old.boards).toHaveLength(24)
     const server = await createPublicCoverageServer(info.outputPath('expanded-cache-server'), mode, { cacheSeed: old })
-    await server.respond(expansionResponses())
+    await server.respond(withSurveyEmptyBoards(expansionResponses()))
     try {
       await server.start()
       await server.verifyProductionBytes()
@@ -224,10 +226,10 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
         id: 'greenhouse-stripe-44001', title: COVERAGE_TITLES.stripe, fetchedAt: oldTime,
         updatedAt: COVERAGE_UPDATED_AT, url: 'https://example.com/synthetic/stripe-44001',
       })
-      expect((await server.requests()).map(value => value.url).sort()).toEqual([...COVERAGE_EXPANSION_URLS].sort())
+      expect((await server.requests()).map(value => value.url).sort()).toEqual([...COVERAGE_EXPANSION_URLS, ...Object.values(SURVEY_FULL_URLS)].sort())
       const serializedCache = await readFile(server.defaultCache, 'utf8')
       const expanded = JSON.parse(serializedCache)
-      expect(expanded.boards).toHaveLength(36)
+      expect(expanded.boards).toHaveLength(83)
       for (const original of old.boards) {
         expect(expanded.boards.find((board: { companyId: string }) => board.companyId === original.companyId)).toMatchObject(original)
       }
@@ -281,7 +283,7 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
 
       await dataButton(page).click()
       await sourceChoice(page, 'public').click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '36', '13'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '83', '13'])
       await closeTo(page, dataButton(page))
       await contextIs(page, 'public', 'Notion', 'backend')
       const after = await catalog(page, server.origin)
@@ -289,8 +291,8 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
       expect(await readFile(server.defaultCache, 'utf8')).toBe(serializedCache)
       expect(await readSaved(page)).toEqual(records)
       const upstream = await server.requests()
-      expect(upstream).toHaveLength(12)
-      expect(upstream.map(value => value.url).sort()).toEqual([...COVERAGE_EXPANSION_URLS].sort())
+      expect(upstream).toHaveLength(59)
+      expect(upstream.map(value => value.url).sort()).toEqual([...COVERAGE_EXPANSION_URLS, ...Object.values(SURVEY_FULL_URLS)].sort())
       expect(upstream.every(value => value.synthetic && !value.networkSent && value.method === 'GET')).toBe(true)
       await server.assertDefaultConfiguration()
       privateTraffic(state, server.origin)

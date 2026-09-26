@@ -148,6 +148,31 @@ export function publicCoverageResponses(): Record<string, unknown> {
   return result
 }
 
+/**
+ * Add lightweight feeds from fictional raw inputs only. Lever and
+ * SmartRecruiters already use their list URL for both operations. Assertions
+ * must still name the expected request URLs, IDs and visible counts separately.
+ */
+export function coveragePresenceResponses(full: Record<string, unknown>): Record<string, unknown> {
+  const result = { ...full }
+  for (const [url, body] of Object.entries(full)) {
+    if (/^https:\/\/boards-api\.greenhouse\.io\/v1\/boards\/[^/]+\/jobs\?content=true&pay_transparency=true$/.test(url)) {
+      const raw = body as { jobs: { id: number; title: string; absolute_url: string }[]; meta?: { total?: number } }
+      result[url.replace('?content=true&pay_transparency=true', '?content=false')] = {
+        jobs: raw.jobs.map(({ id, title, absolute_url }) => ({ id, title, absolute_url })),
+        ...(raw.meta ? { meta: { ...raw.meta } } : {}),
+      }
+    } else if (/^https:\/\/api\.ashbyhq\.com\/posting-api\/job-board\/[^/]+\?includeCompensation=true$/.test(url)) {
+      const raw = body as { apiVersion: string; jobs: { id: string; title: string; jobUrl: string; isListed: boolean }[] }
+      result[url.replace('?includeCompensation=true', '')] = {
+        apiVersion: raw.apiVersion,
+        jobs: raw.jobs.map(({ id, title, jobUrl, isListed }) => ({ id, title, jobUrl, isListed })),
+      }
+    }
+  }
+  return result
+}
+
 export const COVERAGE_PROFILE: Profile = {
   kind: 'personal', name: '가상 서울 지원자', headline: 'Backend Engineer', desiredRole: 'backend',
   years: 5, skills: ['TypeScript', 'PostgreSQL'], residence: 'KR', linkedinUrl: '',

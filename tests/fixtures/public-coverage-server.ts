@@ -3,18 +3,18 @@ import { execFile, spawn } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createWriteStream } from 'node:fs'
-import { access, copyFile, cp, mkdir, readFile, readdir, symlink, writeFile } from 'node:fs/promises'
+import { access, copyFile, cp, mkdir, readFile, readdir, rename, stat, symlink, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { createServer } from 'node:net'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
-import { publicCoverageResponses } from './public-coverage'
+import { withSurveyEmptyBoards } from './public-company-survey'
+import type { CoverageEvent, CoverageRequest, CoverageWireResponse } from './public-coverage-transport'
 
 const repository = fileURLToPath(new URL('../../', import.meta.url))
 const exec = promisify(execFile)
-type Mode = 'development' | 'production'
-interface UpstreamRequest { url: string; method: string; synthetic: boolean; networkSent: false; error?: string }
+export type PublicCoverageMode = 'development' | 'production'
 interface Run {
   pid: number
   cwd: string
@@ -32,6 +32,7 @@ interface Run {
 }
 
 async function availablePort(requested = 0) {
+  if (requested === 8787) throw new Error('Port 8787 is reserved and must never be used by this fixture')
   const probe = createServer()
   await new Promise<void>((resolve, reject) => {
     probe.once('error', reject)
@@ -54,24 +55,49 @@ async function owner(pid: number, port: number) {
   return { command: values[0].stdout.trim(), cwd: values[1].stdout.trim(), listener: values[2].stdout.trim() }
 }
 
+async function hashes(root: string, names: string[]) {
+  const files: { path: string; bytes: number; sha256: string }[] = []
+  async function visit(name: string): Promise<void> {
+    const file = path.join(root, name)
+    if ((await stat(file)).isDirectory()) {
+      for (const entry of (await readdir(file)).sort()) await visit(path.join(name, entry))
+    } else {
+      const bytes = await readFile(file)
+      files.push({ path: name, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') })
+    }
+  }
+  for (const name of names) await visit(name)
+  return files.sort((left, right) => left.path.localeCompare(right.path, 'en'))
+}
+
 /** An unconfigured real default app: no environment or local board override. */
-export async function createPublicCoverageServer(directory: string, mode: Mode, options: {
+export async function createPublicCoverageServer(directory: string, mode: PublicCoverageMode, options: {
   cacheSeed?: unknown
+  observationsSeed?: unknown
+  responses?: Record<string, unknown>
+  sourceRoot?: string
   buildRoot?: string
   port?: number
+  clock?: string
 } = {}) {
+  directory = path.resolve(directory)
   const cwd = path.join(directory, 'runtime')
+  const sourceRoot = options.sourceRoot ?? repository
   const buildRoot = options.buildRoot ?? repository
   const port = await availablePort(options.port)
   let hmrPort = mode === 'development' ? await availablePort() : undefined
   while (hmrPort === port) hmrPort = await availablePort()
   await mkdir(path.join(cwd, '.local'), { recursive: true })
   if (mode === 'production') {
-    await symlink(path.join(buildRoot, 'dist'), path.join(cwd, 'dist'), 'dir')
+    await Promise.all([
+      ...['dist', 'dist-server'].map(name => cp(path.join(buildRoot, name), path.join(cwd, name), { recursive: true })),
+      symlink(path.join(repository, 'node_modules'), path.join(cwd, 'node_modules'), 'dir'),
+    ])
   } else {
     await Promise.all([
-      ...['index.html', 'package.json', 'tsconfig.json'].map(file => copyFile(path.join(repository, file), path.join(cwd, file))),
-      ...['src', 'shared'].map(file => cp(path.join(repository, file), path.join(cwd, file), { recursive: true })),
+      ...['index.html', 'package.json', 'tsconfig.json'].map(file => copyFile(path.join(sourceRoot, file), path.join(cwd, file))),
+      ...['src', 'shared', 'server'].map(file => cp(path.join(sourceRoot, file), path.join(cwd, file), { recursive: true })),
+      copyFile(path.join(sourceRoot, 'vite.config.ts'), path.join(cwd, 'vite.original.config.ts')),
       symlink(path.join(repository, 'public'), path.join(cwd, 'public'), 'dir'),
     ])
     await mkdir(path.join(cwd, 'node_modules'))
@@ -81,7 +107,7 @@ export async function createPublicCoverageServer(directory: string, mode: Mode, 
     // This fixture-only adapter isolates the second Vite's HMR/cache and font
     // transport. It preserves the repository plugins, app, default loader/API.
     await writeFile(path.join(cwd, 'vite.config.ts'), [
-      `import original from ${JSON.stringify(path.join(repository, 'vite.config.ts'))}`,
+      "import original from './vite.original.config'",
       "import { mergeConfig } from 'vite'",
       `export default mergeConfig(original, ${JSON.stringify({
         cacheDir: path.join(cwd, 'node_modules/.vite'),
@@ -90,17 +116,43 @@ export async function createPublicCoverageServer(directory: string, mode: Mode, 
       '',
     ].join('\n'))
   }
+  const sourceFiles = ['server', 'shared', 'src', 'index.html', 'package.json', 'tsconfig.json', 'vite.config.ts']
+  const source = await hashes(sourceRoot, sourceFiles)
+  const build = mode === 'production' ? await hashes(buildRoot, ['dist', 'dist-server']) : undefined
+  const runtime = await hashes(cwd, mode === 'production' ? ['dist', 'dist-server'] : [...sourceFiles, 'vite.original.config.ts'])
+  await writeFile(path.join(directory, 'input-hashes.json'), JSON.stringify({
+    mode, sourceRoot, buildRoot, capturedAt: new Date().toISOString(),
+    source, build, runtime,
+  }, null, 2))
+  if (mode === 'production') expect(runtime).toEqual(build)
+  else expect(runtime.filter(file => file.path !== 'vite.config.ts')
+    .map(file => ({ ...file, path: file.path === 'vite.original.config.ts' ? 'vite.config.ts' : file.path }))
+    .sort((left, right) => left.path.localeCompare(right.path, 'en'))).toEqual(source)
   const configFile = path.join(cwd, '.local/job-boards.json')
   const defaultCache = path.join(cwd, '.local/public-board-cache-v5.json')
+  const observationsFile = path.join(cwd, '.local/observations-v1/public-board-cache-v5.json')
   if (options.cacheSeed !== undefined) await writeFile(defaultCache, JSON.stringify(options.cacheSeed))
+  if (options.observationsSeed !== undefined) {
+    await mkdir(path.dirname(observationsFile), { recursive: true })
+    await writeFile(observationsFile, JSON.stringify(options.observationsSeed))
+  }
   const responsesFile = path.join(directory, 'upstream-responses.json')
-  const respond = (responses: Record<string, unknown>) => writeFile(responsesFile, JSON.stringify(responses))
-  await respond(publicCoverageResponses())
+  const clockFile = path.join(directory, 'clock-offset-ms.txt')
+  const initialClock = options.clock === undefined ? Date.now() : Date.parse(options.clock)
+  if (!Number.isFinite(initialClock)) throw new Error('Invalid public coverage clock')
+  await writeFile(clockFile, String(options.clock === undefined ? 0 : initialClock - Date.now()))
+  async function respond(responses: Record<string, unknown>) {
+    await writeFile(`${responsesFile}.next`, JSON.stringify(responses))
+    await rename(`${responsesFile}.next`, responsesFile)
+  }
+  await respond(options.responses ?? withSurveyEmptyBoards())
   const origin = `http://127.0.0.1:${port}`
   const runs: Run[] = []
   let child: ChildProcess | undefined
   let terminal: Promise<void> | undefined
-  const saveReceipt = () => writeFile(path.join(directory, 'processes.json'), JSON.stringify({ mode, origin, buildRoot, configFile, defaultCache, runs }, null, 2))
+  const saveReceipt = () => writeFile(path.join(directory, 'processes.json'), JSON.stringify({
+    mode, origin, sourceRoot, buildRoot, configFile, defaultCache, observationsFile, clockFile, runs,
+  }, null, 2))
 
   async function assertDefaultConfiguration() {
     await expect(access(configFile)).rejects.toMatchObject({ code: 'ENOENT' })
@@ -116,7 +168,7 @@ export async function createPublicCoverageServer(directory: string, mode: Mode, 
     const args = [
       '--import', pathToFileURL(createRequire(import.meta.url).resolve('tsx')).href,
       '--import', pathToFileURL(path.join(repository, 'tests/fixtures/public-coverage-preload.ts')).href,
-      path.join(mode === 'production' ? buildRoot : repository, mode === 'production' ? 'dist-server/index.mjs' : 'server/index.ts'),
+      path.join(cwd, mode === 'production' ? 'dist-server/index.mjs' : 'server/index.ts'),
       ...(mode === 'production' ? ['--production'] : []),
     ]
     const log = path.join(directory, `server-${index}.log`)
@@ -124,6 +176,7 @@ export async function createPublicCoverageServer(directory: string, mode: Mode, 
     const environment: NodeJS.ProcessEnv = {
       ...process.env, NODE_ENV: mode, PORT: String(port), HOST: '127.0.0.1',
       ORBIT_PUBLIC_COVERAGE_REQUEST_LOG: requestLog, ORBIT_PUBLIC_COVERAGE_RESPONSES: responsesFile,
+      ORBIT_PUBLIC_COVERAGE_CLOCK: clockFile,
     }
     delete environment.ORBIT_BOARDS_FILE
     expect(Object.hasOwn(environment, 'ORBIT_BOARDS_FILE')).toBe(false)
@@ -149,7 +202,7 @@ export async function createPublicCoverageServer(directory: string, mode: Mode, 
           const response = await fetch(`${origin}/api/health`, { signal: AbortSignal.timeout(1000) })
           return response.ok ? (await response.json() as { mode: string }).mode : `HTTP ${response.status}`
         } catch { return 'not listening' }
-      }, 'The unconfigured real default server must become healthy').toBe(mode)
+      }, { message: 'The unconfigured real default server must become healthy', timeout: 20_000 }).toBe(mode)
       run.owner = await owner(run.pid, port)
       expect(run.owner.command).toContain(mode === 'production' ? 'dist-server/index.mjs' : 'server/index.ts')
       expect(run.owner.command).toContain('public-coverage-preload.ts')
@@ -192,27 +245,42 @@ export async function createPublicCoverageServer(directory: string, mode: Mode, 
     await assertDefaultConfiguration()
   }
 
-  async function requests() {
+  async function events(): Promise<CoverageEvent[]> {
     const text = await Promise.all(runs.map(run => readFile(run.requestLog, 'utf8')))
-    return text.flatMap(lines => lines.trim() ? lines.trim().split('\n').map(line => JSON.parse(line) as UpstreamRequest) : [])
+    return text.flatMap(lines => lines.trim() ? lines.trim().split('\n').map(line => JSON.parse(line) as CoverageEvent) : [])
   }
 
   async function verifyProductionBytes() {
     if (mode !== 'production') return
     const html = await (await fetch(origin)).text()
-    const entry = html.match(/src="(\/assets\/index-[^"]+\.js)"/)?.[1]
-    expect(entry).toBeTruthy()
-    const expected = await readFile(path.join(buildRoot, 'dist', entry!))
-    const response = await fetch(`${origin}${entry}`)
-    expect(response.status).toBe(200)
-    const served = Buffer.from(await response.arrayBuffer())
-    expect(served.equals(expected)).toBe(true)
+    const entries = [...new Set([...html.matchAll(/(?:src|href)="(\/assets\/[^"]+\.(?:js|css))"/g)].map(match => match[1]))]
+    expect(entries.some(entry => entry.endsWith('.js'))).toBe(true)
+    expect(entries.some(entry => entry.endsWith('.css'))).toBe(true)
+    const assets = []
+    for (const entry of entries) {
+      const expected = await readFile(path.join(cwd, 'dist', entry))
+      const response = await fetch(`${origin}${entry}`)
+      expect(response.status).toBe(200)
+      const served = Buffer.from(await response.arrayBuffer())
+      expect(served.equals(expected)).toBe(true)
+      assets.push({ entry, bytes: served.length, sha256: createHash('sha256').update(served).digest('hex') })
+    }
     await writeFile(path.join(directory, 'served-build.json'), JSON.stringify({
-      entry, bytes: served.length, sha256: createHash('sha256').update(served).digest('hex'),
+      assets,
     }, null, 2))
   }
 
   return {
-    cwd, origin, configFile, defaultCache, runs, start, stop, respond, requests, verifyProductionBytes, assertDefaultConfiguration,
+    directory, cwd, origin, configFile, defaultCache, observationsFile, runs,
+    start, stop, respond, events, verifyProductionBytes, assertDefaultConfiguration,
+    requests: async () => (await events()).filter((event): event is CoverageRequest => event.event === 'request'),
+    wireResponses: async () => (await events()).filter((event): event is CoverageWireResponse => event.event === 'http-response'),
+    async advance(milliseconds: number) {
+      if (!Number.isFinite(milliseconds) || milliseconds < 0) throw new Error('Invalid public coverage clock advance')
+      const offset = Number(await readFile(clockFile, 'utf8')) + milliseconds
+      await writeFile(`${clockFile}.next`, String(offset))
+      await rename(`${clockFile}.next`, clockFile)
+      return new Date(Date.now() + offset).toISOString()
+    },
   }
 }

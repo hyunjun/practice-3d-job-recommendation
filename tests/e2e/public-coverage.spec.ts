@@ -8,6 +8,7 @@ import {
   COVERAGE_SENDBIRD_SOURCE_URL, COVERAGE_TITLES, COVERAGE_UPDATED_AT, coverageLegacyCache,
 } from '../fixtures/public-coverage'
 import { createPublicCoverageServer } from '../fixtures/public-coverage-server'
+import { SURVEY_FULL_URLS } from '../fixtures/public-company-survey'
 import { expectInitialCatalogRequest, readServerMode, watchApiRequests } from './helpers/api-requests'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
 
@@ -106,7 +107,7 @@ function expectSavedSource(records: SavedJob[]) {
 for (const width of [1440, 320]) test.describe(`unconfigured public coverage at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
-  test('the real36-board default collector groups Seoul openings, finds both brand names, retains the pool and keeps samples isolated', async ({ page, request, baseURL }, info) => {
+  test('the real83-board default collector still groups the original Seoul openings, finds both brand names, retains the pool and keeps samples isolated', async ({ page, request, baseURL }, info) => {
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const server = await createPublicCoverageServer(info.outputPath('default-server'), mode)
     const failures = browserFailures(page)
@@ -125,7 +126,7 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       await expect(company(page, 'Moloco').locator('header p')).toHaveText('AI · 광고 기술')
 
       const before = await catalog(page, server.origin)
-      expect(before.companies).toHaveLength(36)
+      expect(before.companies).toHaveLength(83)
       expect(before.companies.slice(22, 24).map(company => [company.id, company.name, company.provider, company.board, company.careerUrl])).toEqual([
         ['moloco', 'Moloco', 'greenhouse', 'moloco', 'https://www.moloco.com/company/careers'],
         ['sendbird', 'Delight.ai (Sendbird)', 'greenhouse', 'sendbird', 'https://delight.ai/careers'],
@@ -139,9 +140,9 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       await dataButton.click()
       const data = page.getByRole('dialog')
       await expect(data.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
-        'Greenhouse23개 회사', 'Ashby8개 회사', 'Lever2개 회사', 'SmartRecruiters3개 회사',
+        'Greenhouse50개 회사', 'Ashby24개 회사', 'Lever4개 회사', 'SmartRecruiters5개 회사',
       ])
-      await expect(data.locator('.coverage-stats > div').filter({ has: page.getByText('대상 회사', { exact: true }) }).locator('strong')).toHaveText('36')
+      await expect(data.locator('.coverage-stats > div').filter({ has: page.getByText('대상 회사', { exact: true }) }).locator('strong')).toHaveText('83')
       await expect(data.locator('.coverage-stats > div').filter({ has: page.getByText('조회된 개발 공고', { exact: true }) }).locator('strong')).toHaveText('5')
       await expect(data.locator('.posting-purpose-count')).toHaveText('조회된 개발 공고에 인재풀·관심 등록 1개가 포함되어 있어요. 기본 추천에서는 제외하며 모집 유형 필터로 따로 볼 수 있어요.')
       await data.locator('.board-details > summary').click()
@@ -198,8 +199,8 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       expect(JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.exploration')) || '{}').source).toBe('sample')
       await expect(page.locator('.company-card h3').filter({ hasText: /Moloco|Delight\.ai|Sendbird/ })).toHaveCount(0)
       const upstream = await server.requests()
-      expect(upstream).toHaveLength(36)
-      expect(new Set(upstream.map(request => request.url)).size).toBe(36)
+      expect(upstream).toHaveLength(83)
+      expect(new Set(upstream.map(request => request.url)).size).toBe(83)
       expect(upstream.every(request => request.synthetic && !request.networkSent && request.method === 'GET')).toBe(true)
       await server.assertDefaultConfiguration()
       expectPrivateTraffic(traffic, server.origin)
@@ -215,6 +216,7 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const oldTime = new Date(Date.now() - 5_000).toISOString()
     const originalCache = coverageLegacyCache(oldTime)
+    expect(originalCache.boards).toHaveLength(22)
     const server = await createPublicCoverageServer(info.outputPath('default-server'), mode, { cacheSeed: originalCache })
     const failures = browserFailures(page)
     const traffic = watchApiRequests(page)
@@ -227,9 +229,9 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       await expect(page.locator('.city-detail-count strong')).toHaveText(['3', '4'])
       const before = await catalog(page, server.origin)
       expect(before.jobs[0]).toMatchObject({ id: 'greenhouse-stripe-44001', fetchedAt: oldTime, updatedAt: COVERAGE_UPDATED_AT })
-      expect((await server.requests()).map(request => request.url).sort()).toEqual([...COVERAGE_NEW_URLS, ...COVERAGE_EXPANSION_URLS].sort())
+      expect((await server.requests()).map(request => request.url).sort()).toEqual([...COVERAGE_NEW_URLS, ...COVERAGE_EXPANSION_URLS, ...Object.values(SURVEY_FULL_URLS)].sort())
       const expanded = JSON.parse(await readFile(server.defaultCache, 'utf8'))
-      expect(expanded.boards).toHaveLength(36)
+      expect(expanded.boards).toHaveLength(83)
       for (const original of originalCache.boards) {
         expect(expanded.boards.find((board: { companyId: string }) => board.companyId === original.companyId)).toMatchObject(original)
       }
@@ -297,7 +299,7 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       expect(await readSaved(page)).toEqual(records)
       const after = await catalog(page, server.origin)
       expect(after.jobs).toEqual(before.jobs)
-      expect((await server.requests()).map(request => request.url).sort()).toEqual([...COVERAGE_NEW_URLS, ...COVERAGE_EXPANSION_URLS].sort())
+      expect((await server.requests()).map(request => request.url).sort()).toEqual([...COVERAGE_NEW_URLS, ...COVERAGE_EXPANSION_URLS, ...Object.values(SURVEY_FULL_URLS)].sort())
       const restartedCache = JSON.parse(await readFile(server.defaultCache, 'utf8'))
       expect(restartedCache).toEqual(expanded)
       expect(restartedCache.boards.find((board: { companyId: string }) => board.companyId === 'sendbird').snapshot.jobs[0].url)
@@ -340,7 +342,7 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
         expect(restoredFailures).toEqual({ errors: [], resources: [] })
       } finally { await destination.close() }
       const upstream = await server.requests()
-      expect(upstream).toHaveLength(14)
+      expect(upstream).toHaveLength(61)
       expect(upstream.every(request => request.synthetic && !request.networkSent && request.method === 'GET')).toBe(true)
       await writeFile(info.outputPath('cache-saved-identity.json'), JSON.stringify({ originalCache, before, after, records, upstream }, null, 2))
     } finally {

@@ -1,6 +1,7 @@
+import type { Job } from '../../shared/types'
 import {
   ADDED_PUBLIC_REGISTRATIONS, COVERAGE_EXPANSION_URLS, COVERAGE_QUALIFICATIONS,
-  coverageGreenhouseRaw, coverageLegacyCache, publicCoverageResponses,
+  EXPANDED_PUBLIC_REGISTRATIONS, coverageGreenhouseRaw, coverageLegacyCache, publicCoverageResponses,
 } from './public-coverage'
 
 // Every posting and application URL is invented. The native and normalized IDs
@@ -58,6 +59,36 @@ export function expansionLegacyCache(fetchedAt: string) {
         companyId: company.id, provider: 'greenhouse', board: company.board!,
         checkedAt: fetchedAt, failures: 0, retryAt: null,
         snapshot: { fetchedAt, jobs: [], total: 0, unmappedCount: 0, publishedIds: [] },
+      })),
+    ],
+  }
+}
+
+/** Frozen pre-Stage61 cohort: Stripe and Notion survive; the other34 boards are empty. */
+export function expansionLegacy36Cache(fetchedAt: string) {
+  const old = expansionLegacyCache(fetchedAt)
+  const notion: Job = {
+    id: 'ashby-notion-synthetic-57102', companyId: 'notion', source: 'ashby',
+    title: 'Backend Engineer — Synthetic Maple Index', role: 'backend',
+    cityIds: ['seoul'], locationLabel: 'Seoul, South Korea', workMode: 'onsite',
+    employment: 'fulltime', minExperience: 3, skills: ['TypeScript', 'PostgreSQL'],
+    salary: null, visa: 'unknown', requirements: [],
+    remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false, remoteScopeVersion: 2,
+    description: 'Synthetic test posting: develop backend software services with TypeScript and PostgreSQL in Seoul.\n\nQualifications: 3 years of software engineering experience with TypeScript and PostgreSQL.',
+    url: 'https://example.com/synthetic/notion-57102', fetchedAt, updatedAt: fetchedAt,
+  }
+  return {
+    ...old,
+    boards: [
+      ...old.boards,
+      ...EXPANDED_PUBLIC_REGISTRATIONS.map(company => ({
+        companyId: company.id, provider: company.provider!, board: company.board!,
+        checkedAt: fetchedAt, failures: 0, retryAt: null,
+        snapshot: {
+          fetchedAt, jobs: company.id === 'notion' ? [notion] : [],
+          total: company.id === 'notion' ? 1 : 0, unmappedCount: 0,
+          publishedIds: company.id === 'notion' ? ['ashby-notion-synthetic-57102'] : [],
+        },
       })),
     ],
   }
