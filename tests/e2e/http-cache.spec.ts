@@ -1,5 +1,6 @@
 import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { resourceCheckedTest as test } from './helpers/public-app'
 import type { Page } from '@playwright/test'
 import express from 'express'
 import { request as proxyRequest } from 'node:http'
@@ -170,7 +171,7 @@ test('the actual saved-status button revalidates across visits and never renews 
     await page.clock.install({ time: new Date(Date.parse(SEARCH_TIME) + 10_000) })
     await page.addInitScript(({ job, company }) => {
       localStorage.setItem('orbit.v1.saved', JSON.stringify([{ job, company, savedAt: job.fetchedAt, status: 'applied', note: 'Private cache fixture note' }]))
-      localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'sample', mapMode: 'flat' }))
+      localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'public', mapMode: 'flat' }))
     }, { job: server.catalog.jobs[0], company: SEARCH_COMPANIES[0] })
     await page.goto(`${server.origin}/#saved`)
     const before = await readSavedJson(page)

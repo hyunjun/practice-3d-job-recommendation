@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { classifyJobRoles, jobRoleLabel, jobRoles, matchesJobRole, upgradeJobRole } from '../../shared/job-roles'
 import { JobSchema } from '../../shared/schemas'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import { filterJobs, groupCities, matchJob } from '../../shared/matching'
 import { createSearchIndex } from '../../shared/job-search'
 import { analyzeSearchRecovery } from '../../shared/search-recovery'
@@ -156,7 +156,7 @@ describe('role filtering, matching and recovery', () => {
   })
 
   it('leaves the explicitly designed sample scenarios unchanged', () => {
-    const sample = createSampleCatalog()
+    const sample = createLegacyDemoCatalog()
     for (const job of sample.jobs) {
       expect(upgradeJobRole(job)).toBe(job)
       expect(jobRoles(job)).toEqual([job.role])

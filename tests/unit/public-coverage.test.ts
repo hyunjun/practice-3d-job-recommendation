@@ -20,7 +20,7 @@ import { fetchCareersBoard } from '../../server/providers/careers'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { jobPostingUrl } from '../../shared/job-links'
 import { createJobRevision, observeSavedPosting, PostingStatusIndexSchema } from '../../shared/posting-status'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import { createSavedBackup, parseSavedImport } from '../../shared/saved-backup'
 import { decodeSavedJobs } from '../../shared/saved-jobs'
 import type { Company, Job, JobProvider, SavedJob } from '../../shared/types'
@@ -119,7 +119,7 @@ afterEach(async () => {
   await Promise.all(directories.splice(0).map(directory => rm(directory, { recursive: true, force: true })))
 })
 
-describe('default public coverage and sample isolation', () => {
+describe('default public coverage and retired historical samples', () => {
   it('preserves the frozen93 registrations before the31 additions', () => {
     expect(PUBLIC_COMPANIES.slice(0, 83)).toHaveLength(83)
     expect(PUBLIC_COMPANIES).toHaveLength(124)
@@ -141,8 +141,8 @@ describe('default public coverage and sample isolation', () => {
       .toEqual({ greenhouse: 50, ashby: 24, lever: 4, smartrecruiters: 5 })
   })
 
-  it('keeps all sample records, not merely their32/179/22 counts, identical to the frozen43 API', () => {
-    const sample = createSampleCatalog()
+  it('keeps the historical32/179/22 fixture identical to the frozen43 API and excludes it from active saved records', () => {
+    const sample = createLegacyDemoCatalog()
     expect(sample.source).toBe('sample')
     expect(sample.companies).toHaveLength(32)
     expect(sample.jobs).toHaveLength(179)
@@ -157,6 +157,13 @@ describe('default public coverage and sample isolation', () => {
       id: 'notion', name: 'Notion', board: 'notion', careerUrl: 'https://www.notion.com/careers',
     })
     expect(sample.companies.find(company => company.id === 'notion')).not.toHaveProperty('provider')
+    const records = sample.jobs.map(job => ({
+      job, company: sample.companies.find(company => company.id === job.companyId)!,
+      savedAt: '2026-09-20T08:01:00.000Z', status: 'applied', note: 'Historical fixture only; never a public posting.',
+    }))
+    const before = JSON.stringify(records)
+    expect(decodeSavedJobs(before)).toEqual({ records: [], omitted: 179, reason: 'records' })
+    expect(JSON.stringify(records)).toBe(before)
   })
 
   it('loads the124 defaults without an environment/local configuration or filesystem side effects', async () => {

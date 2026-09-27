@@ -1,11 +1,12 @@
 import { readSavedJson } from './helpers/saved-store'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { DEFAULT_FILTERS } from '../../shared/types'
 import { COLLECTION_ID, progressSnapshot, progressUpdate } from '../fixtures/catalog-progress'
 import { SEARCH_TIME } from '../fixtures/search-catalog'
 import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
+import { expectPublicOnlyDialog, resourceCheckedTest as test } from './helpers/public-app'
 
 test.beforeEach(async ({ page }) => { await page.clock.install({ time: new Date(SEARCH_TIME) }) })
 
@@ -66,10 +67,14 @@ test('first arrivals can be searched and saved while remaining companies load, w
     || request.path.startsWith(`/api/catalog/progress?id=${COLLECTION_ID}&after=`))).toBe(true)
 })
 
-test('switching to sample cancels an in-flight monitor and an old response cannot replace the sample', async ({ page }) => {
+test('saved navigation cancels an in-flight monitor and its late response cannot replace the snapshot before rejoining', async ({ page }) => {
+  const traffic = watchApiRequests(page)
   let finish!: () => void
   let monitors = 0
-  await page.route('**/api/catalog?source=public*', route => route.fulfill({ status: 202, json: progressSnapshot(1) }))
+  let rejoined = false
+  await page.route('**/api/catalog?source=public*', route => route.fulfill({
+    status: rejoined ? 200 : 202, json: rejoined ? progressSnapshot(2).catalog : progressSnapshot(1),
+  }))
   await page.route('**/api/catalog/progress?*', async route => {
     monitors++
     await new Promise<void>(resolve => { finish = resolve })
@@ -77,19 +82,39 @@ test('switching to sample cancels an in-flight monitor and an old response canno
   })
   await restore(page)
   await expect(page.locator('.company-card')).toHaveCount(1)
+  const initial = await expectInitialCatalogRequest(page, traffic)
   await page.clock.fastForward(1100)
   await expect.poll(() => monitors).toBe(1)
   await page.getByRole('button', { name: '공개 공고 조회 중', exact: true }).click()
-  await page.getByRole('button', { name: /샘플로 탐색/ }).click()
-  await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
+  await expectPublicOnlyDialog(page)
+  await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '1'])
+  await page.getByRole('button', { name: '닫기', exact: true }).click()
+  await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await expect.poll(() => traffic.requests.filter(request => new URL(request.url).pathname === '/api/catalog/progress'
+    && request.state === 'failed' && request.error === 'net::ERR_ABORTED').length).toBe(1)
   finish()
   await page.clock.fastForward(120000)
-  await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
+  expect(new URL(page.url()).hash).toBe('#saved')
+  await expect(page.locator('.saved-card')).toHaveCount(0)
+  await page.getByRole('button', { name: '공개 채용', exact: true }).click()
+  await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '1'])
+  await expectPublicOnlyDialog(page)
   expect(monitors).toBe(1)
+  expect(traffic.catalog()).toHaveLength(initial.attempts)
   await page.getByRole('button', { name: '닫기', exact: true }).click()
-  await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
+  rejoined = true
+  await page.getByRole('button', { name: '기회 탐색', exact: true }).click()
+  await expect(page.locator('.company-card')).toHaveCount(2)
   await expect(page.locator('.collection-progress')).toHaveCount(0)
-  expect(JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.exploration')) || '{}').source).toBe('sample')
+  expect(monitors).toBe(1)
+  expect(traffic.catalog()).toHaveLength(initial.attempts + 1)
+  expect(JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.exploration')) || '{}').source).toBe('public')
+  for (const request of traffic.requests) {
+    expect(request.method).toBe('GET')
+    expect(request.body).toBeNull()
+    expect(['/api/catalog?source=public', `/api/catalog/progress?id=${COLLECTION_ID}&after=1`])
+      .toContain(new URL(request.url).pathname + new URL(request.url).search)
+  }
 })
 
 test('all-failed first collection shows a retryable connection error instead of empty successful recommendations', async ({ page }) => {

@@ -1,5 +1,5 @@
 import { readSavedJson } from './helpers/saved-store'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { readFile } from 'node:fs/promises'
@@ -8,6 +8,7 @@ import { DEFAULT_FILTERS } from '../../shared/types'
 import type { Catalog } from '../../shared/types'
 import { searchCatalog, searchJob, SEARCH_COMPANIES, SEARCH_PROFILE, SEARCH_TIME } from '../fixtures/search-catalog'
 import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
+import { expectPublicOnlyDialog, resourceCheckedTest as test } from './helpers/public-app'
 
 const base = Date.parse(SEARCH_TIME)
 const iso = (value: number) => new Date(value).toISOString()
@@ -142,7 +143,7 @@ for (const event of ['pageshow', 'focus', 'visibilitychange'] as const) {
   })
 }
 
-test('an expired empty collection asks for a new check and remains accessible at 320px with sample mode available', async ({ page }) => {
+test('an expired empty collection stays accessible at 320px and a public refresh restores current jobs', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 780 })
   const server = await restore(page, snapshot(base, base, true))
   await expect(page.locator('.catalog-placeholder')).toHaveCount(0)
@@ -150,13 +151,18 @@ test('an expired empty collection asks for a new check and remains accessible at
   await expect(page.getByRole('heading', { name: '공고를 다시 확인해 주세요' })).toBeVisible()
   expect(await page.locator('body').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
-  await page.getByRole('button', { name: '데이터 모드 선택', exact: true }).click()
+  await page.getByRole('button', { name: '공개 공고 확인 필요', exact: true }).click()
+  await expectPublicOnlyDialog(page)
   await expect(page.locator('.board-row')).toHaveCount(2)
   await expect(page.locator('.board-row .board-error')).toHaveText(['확인 기간 지남', '확인 기간 지남'])
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
-  await page.getByRole('button', { name: /샘플로 탐색/ }).click()
+  server.replace(snapshot(base + maxFallbackAge + 1))
+  await page.getByRole('button', { name: '새로고침', exact: true }).press('Enter')
+  await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '1'])
   await page.getByRole('button', { name: '닫기', exact: true }).click()
-  await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
   await expect(page.locator('.catalog-placeholder')).toHaveCount(0)
-  expect(server.requests).toHaveLength(server.initialRequests)
+  await expect(page.locator('.mini-job-title')).toHaveText(['Backend Engineer first'])
+  await expect(page.getByLabel('도시, 회사 또는 포지션 검색')).toHaveValue('Backend')
+  expect(server.requests).toHaveLength(server.initialRequests + 1)
 })

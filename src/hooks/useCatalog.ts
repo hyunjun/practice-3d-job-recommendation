@@ -2,23 +2,22 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CITIES } from '../../shared/cities'
 import { catalogNeedsAttention, collectionHealth } from '../../shared/catalog-health'
 import { catalogNeedsRevalidation, PUBLIC_CATALOG_RECHECK_COOLDOWN } from '../../shared/catalog-freshness'
-import { createSampleCatalog } from '../../shared/sample'
 import { upgradeCatalog } from '../../shared/job-upgrade'
-import type { Catalog, Source } from '../../shared/types'
+import type { Catalog } from '../../shared/types'
 import type { CatalogProgress } from '../../shared/catalog-progress'
 import { CatalogRequestError, requestPublicCatalog } from '../lib/catalog-request'
 
-function initialCatalog(source: Source): Catalog {
+function initialCatalog(): Catalog {
   // A blank timestamp marks a client-only placeholder, never a completed empty collection.
-  return source === 'sample' ? createSampleCatalog() : {
-    source, fetchedAt: '', stale: false, companies: [], cities: CITIES,
+  return {
+    source: 'public', fetchedAt: '', stale: false, companies: [], cities: CITIES,
     jobs: [], boards: [], unmappedCount: 0,
   }
 }
 
-export function useCatalog(initialSource: Source, notify: (message: string, tone?: 'error') => void, automatic = true) {
-  const [catalog, setCatalog] = useState<Catalog>(() => initialCatalog(initialSource))
-  const [loading, setLoading] = useState(initialSource !== 'sample' && automatic)
+export function useCatalog(notify: (message: string, tone?: 'error') => void, automatic = true) {
+  const [catalog, setCatalog] = useState<Catalog>(initialCatalog)
+  const [loading, setLoading] = useState(automatic)
   const [progress, setProgress] = useState<CatalogProgress | null>(null)
   const [error, setError] = useState('')
   const [errorRetryAt, setErrorRetryAt] = useState<string>()
@@ -29,7 +28,7 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
   const failedRequestRef = useRef(false)
   const automaticRef = useRef(automatic)
 
-  const changeSource = useCallback(async (source: Source, { refresh = false, announce = true }: { refresh?: boolean; announce?: boolean } = {}) => {
+  const reload = useCallback(async ({ refresh = false, announce = true }: { refresh?: boolean; announce?: boolean } = {}) => {
     requestRef.current?.abort()
     requestRef.current = null
     retryAtRef.current = undefined
@@ -37,19 +36,6 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
     setError('')
     setErrorRetryAt(undefined)
     setProgress(null)
-    if (source === 'sample') {
-      const sample = createSampleCatalog()
-      catalogRef.current = sample
-      setCatalog(sample)
-      setLoading(false)
-      return
-    }
-    // The selected source takes effect even if its first request fails.
-    if (catalogRef.current.source !== 'public') {
-      const pending = initialCatalog('public')
-      catalogRef.current = pending
-      setCatalog(pending)
-    }
     const controller = new AbortController()
     requestRef.current = controller
     lastAttemptRef.current = Date.now()
@@ -76,8 +62,8 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
         if (cause instanceof CatalogRequestError) {
           retryAtRef.current = cause.retryAt
           setErrorRetryAt(cause.retryAt)
-          if (cause.code === 'CATALOG_EXPIRED' && catalogRef.current.source === 'public') {
-            const expired = initialCatalog('public')
+          if (cause.code === 'CATALOG_EXPIRED') {
+            const expired = initialCatalog()
             catalogRef.current = expired
             setCatalog(expired)
           }
@@ -95,27 +81,39 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
   }, [notify])
 
   useEffect(() => {
-    if (automaticRef.current && initialSource !== 'sample') void changeSource(initialSource, { announce: false })
+    if (automaticRef.current) void reload({ announce: false })
     return () => {
       requestRef.current?.abort()
       requestRef.current = null
     }
-  }, [initialSource, changeSource])
+  }, [reload])
 
   const revalidate = useCallback(() => {
-    if (!automaticRef.current || document.visibilityState !== 'visible' || catalogRef.current.source !== 'public' || requestRef.current) return
+    if (!automaticRef.current || document.visibilityState !== 'visible' || requestRef.current) return
     const now = Date.now()
     if (lastAttemptRef.current !== null && now - lastAttemptRef.current < PUBLIC_CATALOG_RECHECK_COOLDOWN) return
     const retryAt = Date.parse(retryAtRef.current ?? catalogRef.current.refreshAfter ?? '')
     if (Number.isFinite(retryAt) && now < retryAt) return
     if (!failedRequestRef.current && !catalogNeedsRevalidation(catalogRef.current, now)) return
-    void changeSource('public', { announce: false })
-  }, [changeSource])
+    void reload({ announce: false })
+  }, [reload])
 
   useEffect(() => {
     automaticRef.current = automatic
-    if (automatic) revalidate()
-  }, [automatic, revalidate])
+    if (automatic) {
+      if (failedRequestRef.current && lastAttemptRef.current === null) void reload({ announce: false })
+      else revalidate()
+    }
+    else if (requestRef.current) {
+      // Saved records are local. Leaving exploration stops this browser's
+      // monitoring; returning can rejoin the server's shared collection.
+      requestRef.current.abort()
+      requestRef.current = null
+      lastAttemptRef.current = null
+      failedRequestRef.current = true
+      setLoading(false)
+    }
+  }, [automatic, revalidate, reload])
 
   useEffect(() => {
     window.addEventListener('focus', revalidate)
@@ -130,6 +128,6 @@ export function useCatalog(initialSource: Source, notify: (message: string, tone
     }
   }, [revalidate])
 
-  return { catalog, loading, progress, error, changeSource, ready: Boolean(catalog.fetchedAt),
+  return { catalog, loading, progress, error, reload, ready: Boolean(catalog.fetchedAt),
     retryAt: errorRetryAt ?? (error && progress && !progress.done ? undefined : catalog.refreshAfter) }
 }

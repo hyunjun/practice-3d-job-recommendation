@@ -8,7 +8,9 @@ import {
   sourceFreshFor, sourceRefreshInterval,
 } from '../../shared/catalog-freshness'
 import { PostingStatusIndexSchema } from '../../shared/posting-status'
-import { createSampleCatalog } from '../../shared/sample'
+import { createSearchIndex } from '../../shared/job-search'
+import { SAMPLE_PROFILE } from '../../shared/types'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import {
   CAREERS_NOW, CAREERS_REGISTRATIONS, careersCachedJob, careersCompany,
 } from '../fixtures/careers-contract'
@@ -76,13 +78,14 @@ describe('approved official-careers source and configuration policy', () => {
     })).toThrow(BoardConfigurationError)
   })
 
-  it('retains the Stage64 sample contract until its separate removal stage', () => {
-    const catalog = createSampleCatalog()
+  it('recognizes the frozen historical samples without exposing them as computing candidates', () => {
+    const catalog = createLegacyDemoCatalog()
     expect(catalog.source).toBe('sample')
     expect(catalog.companies).toHaveLength(32)
     expect(catalog.jobs).toHaveLength(179)
     expect(catalog.cities).toHaveLength(22)
     expect(catalog.jobs.every(job => job.source === 'sample')).toBe(true)
+    expect(createSearchIndex(catalog, SAMPLE_PROFILE).entries).toEqual([])
   })
 })
 

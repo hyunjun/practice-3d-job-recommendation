@@ -9,7 +9,7 @@ export const SOURCE_PROFILE = {
   ...SEARCH_PROFILE, name: 'PRIVATE_SOURCE_49', linkedinUrl: 'https://www.linkedin.com/in/private-source49',
 }
 export const SOURCE_EXPLORATION = {
-  source: 'sample', selectedId: 'london', panelTab: 'cities', mapMode: 'flat', citySort: 'salary', light: false,
+  source: 'public', selectedId: 'london', panelTab: 'cities', mapMode: 'flat', citySort: 'salary', light: false,
   filters: {
     ...DEFAULT_FILTERS, query: 'Engineer', region: 'europe', role: 'backend', workMode: 'onsite',
     visa: 'yes', employment: 'fulltime', salaryMin: 100000, includeUnknownSalary: false,

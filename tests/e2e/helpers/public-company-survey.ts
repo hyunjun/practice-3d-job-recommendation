@@ -13,7 +13,7 @@ export const surveyDataButton = (page: Page) => page.getByRole('button', { name:
 export const surveyNavigation = (page: Page) => page.getByRole('navigation', { name: '주요 메뉴' })
 
 export async function seedSurvey(page: Page, origin: string, options: {
-  saved?: SavedJob[]; source?: 'public' | 'sample'; clock?: string
+  saved?: SavedJob[]; legacySource?: 'sample' | 'greenhouse'; clock?: string
   selectedId?: string | null; query?: string; route?: boolean; hash?: string
 } = {}) {
   const traffic = watchApiRequests(page)
@@ -38,13 +38,17 @@ export async function seedSurvey(page: Page, origin: string, options: {
   }, {
     origin, profile: COVERAGE_PROFILE, saved: options.saved ?? [],
     exploration: {
-      source: options.source ?? 'public', selectedId: options.selectedId === undefined ? 'seoul' : options.selectedId,
+      // This optional value is a stored preference from an older installation,
+      // never a current source mode or a synthetic job's provider.
+      source: options.legacySource ?? 'public', selectedId: options.selectedId === undefined ? 'seoul' : options.selectedId,
       panelTab: 'cities', mapMode: 'flat', citySort: 'companies', light: false,
       filters: { ...COVERAGE_FILTERS, query: options.query ?? '' },
     },
   })
   await page.goto(`${origin}/${options.hash ?? ''}`)
   await waitForSavedCommit(page)
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.exploration') ?? '{}').source)).toBe('public')
+  if (options.hash === '#saved') expect(traffic.catalog()).toEqual([])
   return { traffic, errors, external, failedResources }
 }
 
@@ -99,16 +103,18 @@ export function expectSurveyPrivacy(state: Awaited<ReturnType<typeof seedSurvey>
 
 /** Save the actual viewport, never a stitched full-page image as mobile proof. */
 export async function surveyImage(page: Page, info: TestInfo, name: string) {
+  const visibleDialogs = await page.getByRole('dialog').count()
   const viewport = await page.evaluate(() => ({
     width: innerWidth, height: innerHeight, dpr: devicePixelRatio,
     documentWidth: document.documentElement.scrollWidth,
-    dialogs: [...document.querySelectorAll('[role="dialog"]')].map(element => ({
+    dialogs: [...document.querySelectorAll('dialog[open], [role="dialog"]')].map(element => ({
       width: element.clientWidth, scrollWidth: element.scrollWidth,
     })),
   }))
   expect(viewport.width).toBe(page.viewportSize()!.width)
   expect(viewport.height).toBe(page.viewportSize()!.height)
   expect(viewport.documentWidth).toBeLessThanOrEqual(viewport.width)
+  expect(viewport.dialogs).toHaveLength(visibleDialogs)
   for (const dialog of viewport.dialogs) expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.width)
   const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()
   await writeFile(info.outputPath(`${name}-viewport.json`), JSON.stringify({ viewport, axe }, null, 2))

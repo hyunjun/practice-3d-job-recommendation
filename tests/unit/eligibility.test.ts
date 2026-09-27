@@ -3,7 +3,8 @@ import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { eligibilityFacts, eligibilitySummary, upgradeJobEligibility, visaFact } from '../../shared/job-eligibility'
 import { filterJobs, matchJob } from '../../shared/matching'
 import { createJobRevision, REVISION_FIELDS } from '../../shared/posting-status'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
+import { publicProtocolCatalog } from '../fixtures/public-protocol'
 import { JobSchema } from '../../shared/schemas'
 import { DEFAULT_FILTERS, ELIGIBILITY_VERSION, SAMPLE_PROFILE } from '../../shared/types'
 import type { Job, SavedJob } from '../../shared/types'
@@ -174,7 +175,7 @@ describe('normalization, persistence and matching', () => {
 
   it('excludes country-limited support from the unconditional filter but keeps it when conditional support is requested', () => {
     const job = makeJob(countryPolicy)
-    const catalog = { ...createSampleCatalog(), companies: [company], jobs: [job] }
+    const catalog = publicProtocolCatalog({ companies: [company], jobs: [job], fetchedAt: POSTING_TIME })
     expect(filterJobs(catalog, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, visa: 'yes' })).toEqual([])
     expect(filterJobs(catalog, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, visa: 'supported' })).toHaveLength(1)
   })
@@ -200,7 +201,7 @@ describe('normalization, persistence and matching', () => {
     expect(snapshot.jobs[0]).toMatchObject({ id: oldJob.id, fetchedAt: POSTING_TIME, visa: 'conditional' })
     expect(snapshot.publishedIds).toEqual([oldJob.id])
     expect(upgradeJobEligibility(restored.job)).toBe(restored.job)
-    const sample = createSampleCatalog().jobs[0]
+    const sample = createLegacyDemoCatalog().jobs[0]
     expect(upgradeJobEligibility(sample)).toBe(sample)
   })
 

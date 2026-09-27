@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { expectPublicOnlyDialog, resourceCheckedTest as test } from './helpers/public-app'
 import type { Page, TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { readFile, writeFile } from 'node:fs/promises'
@@ -85,7 +86,7 @@ function browserFailures(page: Page) {
 for (const width of [1440, 320]) test.describe(`configured real public boards at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
-  test('unknown coverage becomes the configured four-provider scope, while sample coverage stays separate', async ({ page, request, baseURL }, info) => {
+  test('unknown coverage becomes the configured four-provider public scope and stays accurate on reopening the data dialog', async ({ page, request, baseURL }, info) => {
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const server = await createBoardConfigServer(info.outputPath('configured-server'), mode, [...BOARD_CONFIG_REGISTRATIONS])
     const failures = browserFailures(page)
@@ -142,10 +143,11 @@ for (const width of [1440, 320]) test.describe(`configured real public boards at
         'lever-cedar-config-cedar-4203', 'smartrecruiters-dune-config-dune-4204',
       ])
       await opener.click()
-      await page.getByRole('button', { name: '샘플로 탐색', exact: false }).click()
-      await expect(coverage(page, '대상 회사')).toHaveText('32')
-      await expect(page.locator('.provider-coverage')).toHaveCount(0)
-      await expect(coverage(page, '샘플 공고')).not.toHaveText('—')
+      await expectPublicOnlyDialog(page)
+      await expect(coverage(page, '대상 회사')).toHaveText('4')
+      await expect(page.locator('.provider-coverage li')).toHaveCount(4)
+      await expect(coverage(page, '조회된 개발 공고')).toHaveText('4')
+      expect(await page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.exploration') || '{}').source)).toBe('public')
       const upstream = await server.requests()
       expect(upstream).toHaveLength(5)
       expect(upstream.every(item => item.synthetic && !item.networkSent && item.method === 'GET')).toBe(true)

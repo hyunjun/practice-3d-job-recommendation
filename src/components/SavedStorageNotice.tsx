@@ -42,7 +42,8 @@ export function SavedStorageNotice({ storage, issuesOnly = false, onManage }: { 
     {failed && <div className="saved-storage-actions"><button className="button secondary" onClick={retry}><RefreshCw size={14} />{pending ? '저장 다시 시도' : '저장소 다시 연결'}</button>{pending > 0 && records.length > 0 && <button className="text-button" onClick={() => exportSavedCsv(records)}><Download size={14} />현재 내용 CSV로 보관</button>}{onManage && ready && <button className="text-button" onClick={onManage}>JSON 백업·복원</button>}</div>}
     {recovery.length > 0 && <details className="saved-recovery">
       <summary>따로 보관한 원본이 있어요</summary>
-      <p>일부 기록을 읽거나 합칠 수 없어 이전 데이터의 원본을 따로 보관했어요. 정상 기록은 계속 사용할 수 있어요.</p>
+      {recovery.some(source => source.kind === 'retired-samples') && <p>이전 가상 공고의 메모·지원 상태·원본을 따로 보관했어요. 실제 공고 목록에서는 제외했으며, 보관한 기록은 파일로 내려받을 수 있어요.</p>}
+      {recovery.some(source => source.kind !== 'retired-samples') && <p>일부 기록을 읽거나 합칠 수 없어 이전 데이터의 원본을 따로 보관했어요. 정상 기록은 계속 사용할 수 있어요.</p>}
       <button className="text-button" onClick={downloadOriginals}><Download size={14} />보관한 원본 내려받기</button>
       <small>원본에는 현재 목록의 메모도 포함될 수 있고, 목록에서 삭제해도 원본은 남아요. 파일에서 필요한 기록을 가져오거나 보관본을 따로 정리할 수 있어요.</small>
       {onManage && <button className="text-button" onClick={onManage}>원본 가져오기·정리</button>}

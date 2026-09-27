@@ -70,6 +70,9 @@
 - [Ashby Public Job Posting API](https://developers.ashbyhq.com/docs/public-job-posting-api): 회사별 공개 공고.
 - [Lever Postings API](https://github.com/lever/postings-api): 공개 공고와 페이지 조회.
 - [SmartRecruiters Posting API](https://developers.smartrecruiters.com/docs/posting-api): Canva·Grab·Wise의 공개 게시 목록과 공고 상세.
+- [Workable 공개 채용 API 안내](https://help.workable.com/hc/en-us/articles/115012771647-Using-the-Workable-API-to-create-a-careers-page): 공식 회사 페이지에서 연결한 공개 게시판.
+- [Himalayas Remote Jobs API](https://himalayas.app/docs/remote-jobs-api): 회사별 공개 원격 공고 표본. 화면·저장·내보내기에 제공자와 원문 링크를 유지하며, 사용 조건과 수집 범위는 [출처 조사](source-survey.md)에 기록했습니다.
+- [Booking.com Jobs](https://jobs.booking.com/booking/jobs), [Zalando Jobs](https://jobs.zalando.com/en/jobs), [Starbucks Technology](https://careers.starbucks.com/discover-opportunities/technology/): 회사 공식 사이트의 공개 목록과 공고 본문. 추가 회사의 공식 주소·수집 경로·반영 범위는 [지역·산업별 조사](regional-industry-sources.md)에 정리했습니다.
 - [Asana 공식 채용 페이지](https://asana.com/jobs)와 [Greenhouse 게시판](https://boards.greenhouse.io/asana), [Jane 공식 채용 페이지](https://jane.app/careers)와 [Ashby 게시판](https://jobs.ashbyhq.com/jane): 추가 공개 수집 대상. 회사 이니셜은 직접 만든 배지이며 공식 로고를 복사하지 않았습니다.
 - 원문 URL, 조회 시각, 회사와 근무지를 보존합니다. 공개 게시 여부는 조회 시점의 상태입니다.
-- 샘플 데이터는 ORBIT의 기능 체험용으로 작성한 가상 시나리오입니다.
+- 가상 공고는 제품에서 제거했습니다. 공개 회귀 검사의 가상 자료와 이전 기록 검사용 시나리오는 테스트 전용이며 실제 채용 사실을 나타내지 않습니다.

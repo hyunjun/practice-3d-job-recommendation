@@ -16,7 +16,7 @@ import { isIntegrationRequest } from '../fixtures/source-integration-contract'
 import { isSourceExpansionRequest, SOURCE_EXPANSION_EMPTY_FULL_URLS } from '../fixtures/source-expansion-empty'
 import { expectInitialCatalogRequest, readServerMode } from './helpers/api-requests'
 import { readSaved } from './helpers/saved-store'
-import { sourceChoice } from './helpers/source-choice'
+import { expectPublicSourceOverview } from './helpers/source-choice'
 import {
   expectSurveyPrivacy, seedSurvey, surveyBoardHistory, surveyClose, surveyDataButton, surveyImage, surveyJson,
   surveyNavigation, surveyRole, surveySearch,
@@ -107,7 +107,7 @@ function expectSaved(records: SavedJob[]) {
 for (const width of [1440, 320]) test.describe(`independent historical47 survey in124 defaults at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
-  test('all47 new sources have literal positive jobs and search, role, region and sample selection retain their context', async ({ page, baseURL }, info) => {
+  test('all47 new sources have literal positive jobs and search, role and region survive saved exploration in public-only startup', async ({ page, baseURL }, info) => {
     test.setTimeout(120_000)
     const server = await fixture(page, info, baseURL)
     try {
@@ -183,11 +183,12 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       await surveySearch(page).fill('Miro')
       await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '1'])
       await surveyDataButton(page).click()
-      await sourceChoice(page, 'sample').click()
-      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
-      await sourceChoice(page, 'public').click()
+      await expectPublicSourceOverview(page)
       await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '124', '65'])
       await surveyClose(page, surveyDataButton(page))
+      await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
+      await expect(page.locator('.saved-card')).toHaveCount(0)
+      await surveyNavigation(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
       await expect(page.locator('.company-card h3')).toHaveText('Miro')
       await expect(page.locator('.mini-job-title')).toHaveText('Frontend Engineer — Synthetic Willow Canvas61')
       await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.exploration') ?? '{}'))).toMatchObject({
@@ -306,11 +307,14 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       await surveyImage(page, info, `saved-source-body-change-${width}`)
 
       await surveyDataButton(page).click()
-      await sourceChoice(page, 'sample').click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
+      await expectPublicSourceOverview(page)
+      // Saved-content checks updated the server to65 jobs. The separate browser
+      // catalog remains its original50 until the user rejoins exploration.
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '124', '50'])
       await surveyClose(page, surveyDataButton(page))
       expect(await readSaved(page)).toEqual(saved)
       const fullBytes = await readFile(server.defaultCache, 'utf8')
+      const catalogAttempts = state.traffic.catalog().length
       await page.goto('about:blank')
       await server.stop()
       await server.start()
@@ -319,8 +323,18 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       await expect(page.locator('.saved-card')).toHaveCount(2)
       expectSaved(await readSaved(page))
       expect(await readSaved(page)).toEqual(saved)
+      expect(state.traffic.catalog()).toHaveLength(catalogAttempts)
       const reloaded = await surveyJson<Catalog>(page, server.origin, '/api/catalog?source=public')
       expect(reloaded.jobs).toEqual(current.jobs)
+      await surveyNavigation(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
+      await expect(page.locator('.mini-job-title')).toHaveText(SURVEY_SERVICE_CHANGED_TITLE)
+      await expect(surveySearch(page)).toHaveValue('ServiceNow')
+      await expect(page.getByLabel('직무 필터', { exact: true })).toHaveValue('backend')
+      await surveyDataButton(page).click()
+      await expectPublicSourceOverview(page)
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '124', '65'])
+      await surveyClose(page, surveyDataButton(page))
+      expect(await readSaved(page)).toEqual(saved)
       expect(await readFile(server.defaultCache, 'utf8')).toBe(fullBytes)
       await requestsAre(server, 217, [7, 9])
       expectSurveyPrivacy(state, server.origin)
@@ -471,7 +485,7 @@ test('the unconfigured124-source server retains real browser304 and file-cache b
   try {
     await server.start()
     await server.verifyProductionBytes()
-    const state = await seedSurvey(page, server.origin, { source: 'sample', hash: '#saved', route: false })
+    const state = await seedSurvey(page, server.origin, { legacySource: 'sample', hash: '#saved', route: false })
     const fetchCatalog = () => page.evaluate(async () => {
       const response = await fetch('/api/catalog?source=public')
       return { status: response.status, catalog: await response.json() }

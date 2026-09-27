@@ -9,7 +9,7 @@ import { countSearchJobs, createSearchIndex, inSearchScope, selectSearchJobs } f
 import { upgradeCatalog, upgradeJob } from '../../shared/job-upgrade'
 import { matchJob } from '../../shared/matching'
 import { createJobRevision } from '../../shared/posting-status'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import { createSavedBackup, parseSavedImport } from '../../shared/saved-backup'
 import { decodeSavedJobs, SavedJobSchema } from '../../shared/saved-jobs'
 import { JobSchema } from '../../shared/schemas'
@@ -348,7 +348,7 @@ describe('old records, exact source evidence and revisions', () => {
     expect(languageSummary(job)).toBe('필수로 명시: 독일어 · 적용 항목: Senior Software Engineer\n필수로 명시: 독일어 · 적용 항목: Software Engineer II')
   })
   it('leaves the32-company179-job22-city sample unchanged and without public language facts', () => {
-    const sample = createSampleCatalog()
+    const sample = createLegacyDemoCatalog()
     const copy = structuredClone(sample)
     expect(sample.companies).toHaveLength(32)
     expect(sample.jobs).toHaveLength(179)

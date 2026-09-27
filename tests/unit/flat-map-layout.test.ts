@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { geoNaturalEarth1 } from 'd3-geo'
-import { CITIES } from '../../shared/cities'
+import { PUBLIC_TEST_CITIES as CITIES } from '../fixtures/public-geography'
 import { flatMapScale, flatMapZoomLimit, groupFlatMapPoints, revealFlatMapMarker } from '../../src/lib/flat-map-layout'
 
 const project = geoNaturalEarth1().scale(176).translate([500, 340])

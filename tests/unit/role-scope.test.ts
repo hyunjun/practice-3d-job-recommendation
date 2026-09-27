@@ -4,7 +4,7 @@ import { jobOccupationLabel, upgradeJobOccupation } from '../../shared/job-occup
 import { matchJob } from '../../shared/matching'
 import { createSavedBackup, parseSavedImport } from '../../shared/saved-backup'
 import { decodeSavedJobs } from '../../shared/saved-jobs'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import { createJobRevision } from '../../shared/posting-status'
 import { normalizeJob } from '../../server/normalize'
 import { JOB_ROLES, SAMPLE_PROFILE } from '../../shared/types'
@@ -53,7 +53,7 @@ describe('applicable developer roles and preserved public snapshots', () => {
     expect(matchesJobRole(generic, 'unknown')).toBe(true)
     expect(matchesJobRole(generic, 'all')).toBe(true)
     expect(matchJob(generic, SAMPLE_PROFILE).cautions.join(' ')).toContain('세부 직무를 확인하지 못했어요')
-    for (const job of createSampleCatalog().jobs) {
+    for (const job of createLegacyDemoCatalog().jobs) {
       expect(jobRoles(job)).toEqual([job.role])
       expect(matchesJobRole(job, job.role)).toBe(true)
     }

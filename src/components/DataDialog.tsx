@@ -3,7 +3,7 @@ import { catalogNeedsAttention, collectionHealth, formatCollectionTime, formatRe
 import { snapshotFreshness } from '../../shared/catalog-freshness'
 import { unmappedCoverage } from '../../shared/job-location'
 import { isTalentPoolJob } from '../../shared/job-posting'
-import type { Catalog, Source } from '../../shared/types'
+import type { Catalog } from '../../shared/types'
 import type { CatalogProgress } from '../../shared/catalog-progress'
 import { JOB_SOURCE_LABELS, PUBLIC_PROVIDERS } from '../../shared/types'
 import { useRetryCountdown } from '../hooks/useRetryCountdown'
@@ -11,15 +11,14 @@ import { CompanyLogo, Dialog, Spinner } from './ui'
 import { CollectionProgress } from './CollectionProgress'
 import { ObservationPanel } from './ObservationPanel'
 
-export function DataDialog({ catalog, loading, progress, error, expired, retryAt, onSource, onRefresh, onClose }: { catalog: Catalog; loading: boolean; progress?: CatalogProgress | null; error: string; expired?: boolean; retryAt?: string; onSource: (source: Source) => void; onRefresh: () => void; onClose: () => void }) {
-  const isSample = catalog.source === 'sample'
+export function DataDialog({ catalog, loading, progress, error, expired, retryAt, onRefresh, onClose }: { catalog: Catalog; loading: boolean; progress?: CatalogProgress | null; error: string; expired?: boolean; retryAt?: string; onRefresh: () => void; onClose: () => void }) {
   const ready = Boolean(catalog.fetchedAt)
-  const coverageKnown = isSample || ready || catalog.companies.length > 0
+  const coverageKnown = ready || catalog.companies.length > 0
   const health = collectionHealth(catalog)
   const coverage = unmappedCoverage(catalog)
   const talentPools = catalog.jobs.filter(isTalentPoolJob).length
-  const hasHimalayas = !isSample && catalog.companies.some(company => company.provider === 'himalayas')
-  const hasCareers = !isSample && catalog.companies.some(company => company.provider === 'careers')
+  const hasHimalayas = catalog.companies.some(company => company.provider === 'himalayas')
+  const hasCareers = catalog.companies.some(company => company.provider === 'careers')
   const hasStarbucks = catalog.companies.some(company => company.provider === 'careers' && company.board === 'starbucks-technology')
   const retryIn = useRetryCountdown(retryAt)
   const providers = PUBLIC_PROVIDERS.map(provider => ({
@@ -27,18 +26,17 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
   })).filter(item => item.count)
   return <Dialog title="기회의 지도, 그 안의 데이터." eyebrow="TRANSPARENT BY DESIGN" onClose={onClose} className="data-dialog">
     <div className="dialog-body">
-      <div className="data-source-options">
-        <button className={isSample ? 'selected' : ''} aria-pressed={isSample} onClick={() => onSource('sample')}><span className="data-option-icon"><Globe2 size={21} /></span><strong>샘플로 탐색</strong><span>설정 없이 전체 경험을 체험해요</span><small>가상의 공고 · 실제 회사 채용 페이지</small>{isSample && <small className="data-option-current" aria-hidden="true"><CheckCircle2 size={12} />선택됨</small>}</button>
-        <button disabled={loading || retryIn > 0} className={!isSample ? 'selected' : ''} aria-pressed={!isSample} onClick={() => onSource('public')}><span className="data-option-icon"><Database size={21} /></span><strong>공개 채용공고</strong><span>공식 게시판과 공개 잡 사이트를 조회해요</span><small>API 키 없이 · 인터넷 연결 필요</small>{!isSample && <small className="data-option-current" aria-hidden="true"><CheckCircle2 size={12} />선택됨</small>}</button>
-      </div>
-      {!isSample && providers.length > 0 && <ul className="provider-coverage" aria-label="공개 공고 출처">{providers.map(item => <li key={item.provider}><strong>{item.provider === 'himalayas' ? <a href="https://himalayas.app" target="_blank" rel="noopener noreferrer">Himalayas</a> : JOB_SOURCE_LABELS[item.provider]}</strong><span>{item.count}개 회사</span></li>)}</ul>}
-      {loading && (progress ? <CollectionProgress catalog={catalog} progress={progress} /> : <div className="data-loading"><Spinner label="회사별 공개 채용공고를 가져오고 있어요…" /><p>첫 조회에는 1분 이상 걸릴 수 있어요. 먼저 확인된 회사부터 표시하며, 샘플로도 탐색할 수 있습니다.</p></div>)}
+      <section className="data-source-overview" aria-labelledby="public-data-title">
+        <Database size={22} aria-hidden="true" /><div><h3 id="public-data-title">공개 채용공고</h3><p>회사 공식 게시판과 공개 잡 사이트에서 수집한 공고로 탐색해요. 각 공고의 출처·원문·조회 시각을 확인할 수 있어요.</p><small>새 공고를 조회하려면 인터넷 연결이 필요해요.</small></div>
+      </section>
+      {providers.length > 0 && <ul className="provider-coverage" aria-label="공개 공고 출처">{providers.map(item => <li key={item.provider}><strong>{item.provider === 'himalayas' ? <a href="https://himalayas.app" target="_blank" rel="noopener noreferrer">Himalayas</a> : JOB_SOURCE_LABELS[item.provider]}</strong><span>{item.count}개 회사</span></li>)}</ul>}
+      {loading && (progress ? <CollectionProgress catalog={catalog} progress={progress} /> : <div className="data-loading"><Spinner label="회사별 공개 채용공고를 가져오고 있어요…" /><p>첫 조회에는 1분 이상 걸릴 수 있어요. 먼저 확인된 회사부터 표시합니다.</p></div>)}
       {error && <p className="form-error" role="alert">{error}</p>}
       {expired && <p className="retry-note" role="status">마지막 정상 조회가 24시간을 지나 추천을 비웠어요. 검색 조건과 저장 기록은 유지하며, 다시 조회하면 현재 공고로 갱신됩니다.</p>}
       {!loading && retryIn > 0 && <p className="retry-note">다음 조회 가능 시각: <time dateTime={retryAt}>{formatCollectionTime(retryAt)}</time>. 게시판별 대기 시간을 지키며 다시 확인해요.</p>}
-      {!isSample && !ready && !loading && <button className="button secondary" disabled={retryIn > 0} onClick={onRefresh}><RefreshCw size={14} />공개 공고 다시 조회{retryIn > 0 && <span aria-hidden="true"> · {formatRetryWait(retryIn)} 후</span>}</button>}
-      <div className="coverage-stats"><div><strong>{catalog.cities.length}</strong><span>제공 도시</span></div><div><strong>{coverageKnown ? catalog.companies.length : '—'}</strong><span>대상 회사</span></div><div><strong>{ready ? catalog.jobs.length.toLocaleString() : '—'}</strong><span>{isSample ? '샘플 공고' : '조회된 개발 공고'}</span></div></div>
-      {!isSample && ready && <>
+      {!ready && !loading && <button className="button secondary" disabled={retryIn > 0} onClick={onRefresh}><RefreshCw size={14} />공개 공고 다시 조회{retryIn > 0 && <span aria-hidden="true"> · {formatRetryWait(retryIn)} 후</span>}</button>}
+      <div className="coverage-stats"><div><strong>{catalog.cities.length}</strong><span>제공 도시</span></div><div><strong>{coverageKnown ? catalog.companies.length : '—'}</strong><span>대상 회사</span></div><div><strong>{ready ? catalog.jobs.length.toLocaleString() : '—'}</strong><span>조회된 개발 공고</span></div></div>
+      {ready && <>
         {talentPools > 0 && <p className="inline-note posting-purpose-count">조회된 개발 공고에 인재풀·관심 등록 {talentPools}개가 포함되어 있어요. 기본 추천에서는 제외하며 모집 유형 필터로 따로 볼 수 있어요.</p>}
         <dl className="collection-health" aria-label="공고 조회 상태 요약">
           <div><dt>최근 조회</dt><dd>{health.recent}<small>개 공고</small></dd></div>
@@ -47,8 +45,8 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
         </dl>
         {!loading && health.pending > 0 && <p className="retry-note">{health.pending}개 회사의 진행 상태가 미확인입니다. 다시 조회하면 이어서 확인할 수 있어요.</p>}
       </>}
-      {!isSample && catalog.boards.length > 0 && <BoardHistory catalog={catalog} loading={loading} retryIn={retryIn} onRefresh={onRefresh} />}
-      {!isSample && <ObservationPanel collectionStamp={catalog.checkedAt ?? catalog.fetchedAt} collecting={loading} />}
+      {catalog.boards.length > 0 && <BoardHistory catalog={catalog} loading={loading} retryIn={retryIn} onRefresh={onRefresh} />}
+      <ObservationPanel collectionStamp={catalog.checkedAt ?? catalog.fetchedAt} collecting={loading} />
       {hasHimalayas && <section className="data-explanation">
         <h3><Globe2 size={16} />Himalayas 공개 원격 공고</h3>
         <p>Himalayas에서 제공하는 해당 회사의 원격 공고를 보충합니다. 회사 공식 채용 사이트의 전체 목록과 수집 범위가 다르며, 게시 여부도 Himalayas 목록을 기준으로 확인해요. 각 공고에서 출처와 원문 링크를 확인할 수 있습니다.</p>
@@ -68,7 +66,7 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
         <p>기본 추천과 회사 수에서는 인재풀·향후 관심 등록으로 확인된 공고를 제외해요. 모집 유형 필터에서 따로 보거나 함께 볼 수 있으며, 저장한 인재풀 기록은 계속 보관됩니다. 게시 중이라는 사실과 현재 특정 포지션을 채용한다는 사실은 다릅니다.</p>
         <p>공개 게시판의 관심 등록 표기나 본문에 명시된 등록 목적을 근거로 구분해요. 제목의 “Expression of Interest”만으로는 제외하지 않으며, 모든 인재풀을 식별한 결과는 아닙니다. 실제 모집 내용은 원문에서 확인해 주세요.</p>
       </section>
-      {!isSample && ready && <section className="data-explanation">
+      {ready && <section className="data-explanation">
         <h3><CheckCircle2 size={16} />수집된 조건 정보</h3>
         <dl className="data-quality-list">
           <div><dt>비자 지원 명시</dt><dd>{catalog.jobs.filter(job => job.visa === 'yes').length}<small>개</small></dd></div>
@@ -85,15 +83,14 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
       </section>}
       <section className="data-explanation"><h3><Database size={16} />어떤 직군을 탐색하나요?</h3><p>개발·컴퓨팅 엔지니어링과 컴퓨터·AI 연구 공고를 대상으로 해요. 제목·공개 부서·직급을 확인하고, 일반적인 연구직 제목은 업무·자격 항목의 컴퓨팅 근거도 확인합니다. 고객 지원·솔루션, 관리직, 기계·제조 등 다른 직군은 탐색에서 제외해요.</p><p>전체 직업을 검증한 분류 체계는 아니며 정보가 부족한 공고를 놓칠 수 있어요. 회사가 AI 기업이라는 이유로 연구직을 포함하거나, Lead·멘토링 표현만으로 관리직으로 판단하지 않습니다. 이전 조회에 부서·직급 정보가 없었다면 다음 정상 조회에서 보완돼요. 탐색 범위가 바뀌어도 저장한 기록은 유지됩니다.</p></section>
       <section className="data-explanation"><h3><CircleHelp size={16} />도시의 숫자는 무엇을 뜻하나요?</h3><p>내 경력과 현재 조건에 맞는 공고가 1개 이상 있는 <strong>회사 수</strong>예요. 같은 회사의 여러 공고는 한 곳으로 세고, 여러 도시에서 채용하는 회사는 각 도시에 표시합니다. 전체 회사 수에는 원격 기회와 기타 근무지도 포함하며 중복을 제거해요.</p><p>멀리서 볼 때는 가까운 도시를 묶고, 그 안의 회사도 중복을 제거해 표시해요. 묶음을 선택하면 확대해서 도시별 결과를 볼 수 있어요.</p><p>원격근무와 지도에 연결되지 않은 공고는 각각 별도로 보여줘요. 지도에 표시가 없다고 채용 기회가 없는 것은 아닙니다.</p></section>
-      <section className="data-explanation"><h3><Globe2 size={16} />지도에 표시하는 도시</h3><div className="coverage-city-list">{catalog.cities.map(city => <span key={city.id}>{city.name}</span>)}</div><p>{isSample ? '샘플의 채용 여부, 보상, 비자 조건은 모두 체험을 위한 예시입니다. 실제 지원 전 회사 채용 페이지를 확인해 주세요.'
-        : ready ? coverage.available > 0 ? `지도에 연결되지 않은 ${coverage.available}개 개발 공고도 ‘기타 근무지’에서 검색·열람·저장할 수 있어요. 국가가 확인된 공고는 해당 지역에서도 표시하고, 국가가 미확인인 공고는 ‘전 세계’에서 찾을 수 있어요. 도시와 원격 기회에 임의로 포함하지 않아요.`
+      <section className="data-explanation"><h3><Globe2 size={16} />지도에 표시하는 도시</h3><div className="coverage-city-list">{catalog.cities.map(city => <span key={city.id}>{city.name}</span>)}</div><p>{ready ? coverage.available > 0 ? `지도에 연결되지 않은 ${coverage.available}개 개발 공고도 ‘기타 근무지’에서 검색·열람·저장할 수 있어요. 국가가 확인된 공고는 해당 지역에서도 표시하고, 국가가 미확인인 공고는 ‘전 세계’에서 찾을 수 있어요. 도시와 원격 기회에 임의로 포함하지 않아요.`
           : '이번에 불러온 목록에는 지도에 연결되지 않은 개발 공고가 없어요.'
           : '공개 공고를 조회하면 도시별 채용 정보와 기타 근무지를 확인할 수 있어요.'}</p>
-        {!isSample && ready && (coverage.unavailable === null || coverage.unavailable > 0) && <p>{coverage.unavailable === null
+        {ready && (coverage.unavailable === null || coverage.unavailable > 0) && <p>{coverage.unavailable === null
           ? '일부 이전 조회에서는 목록에 포함하지 못한 공고 수를 확인할 수 없어요.'
           : `이전 조회에서 목록에 포함하지 못한 공고 ${coverage.unavailable}개가 더 있어요.`} 정상 조회 후 목록과 집계가 갱신됩니다.</p>}
       </section>
-      <section className="data-explanation"><h3><ShieldCheck size={16} />추천과 개인정보</h3><p>기술 키워드, 희망 직무, 경력 연수를 기준으로 공고를 정렬해요. 비자는 지원 명시·조건부·지원 없음·미확인을 구분하고, 발급 가능성을 보장하지 않아요. 풀타임은 근무 시간, 기간 제한 없음은 공고에 명시된 계약 기간 분류입니다. 지역·경력별 보상 구간은 상세에서 따로 확인할 수 있어요. 하나의 연봉으로 비교할 수 없는 금액은 연봉 집계에서 제외합니다.</p><p>연봉 비교에는 고정 참고 환율을 사용하며 생활비나 합격 확률을 추정하지 않아요. 이력서 파일과 원문은 서버나 외부 AI로 전송하지 않아요. 기억하기를 선택하면 확인한 프로필을 이 브라우저에 저장합니다. 프로필 화면에서 언제든 삭제할 수 있어요.</p><p>데이터 모드·검색 조건·선택 도시·지도 보기는 다시 방문할 때 이어집니다. 프로필 기억하기를 끄거나 프로필을 삭제하면 개인 탐색 조건도 지워지고, 데이터 모드와 표시 설정만 유지돼요.</p></section>
+      <section className="data-explanation"><h3><ShieldCheck size={16} />추천과 개인정보</h3><p>기술 키워드, 희망 직무, 경력 연수를 기준으로 공고를 정렬해요. 비자는 지원 명시·조건부·지원 없음·미확인을 구분하고, 발급 가능성을 보장하지 않아요. 풀타임은 근무 시간, 기간 제한 없음은 공고에 명시된 계약 기간 분류입니다. 지역·경력별 보상 구간은 상세에서 따로 확인할 수 있어요. 하나의 연봉으로 비교할 수 없는 금액은 연봉 집계에서 제외합니다.</p><p>연봉 비교에는 고정 참고 환율을 사용하며 생활비나 합격 확률을 추정하지 않아요. 이력서 파일과 원문은 서버나 외부 AI로 전송하지 않아요. 기억하기를 선택하면 확인한 프로필을 이 브라우저에 저장합니다. 프로필 화면에서 언제든 삭제할 수 있어요.</p><p>검색 조건·선택 도시·지도 보기는 다시 방문할 때 이어집니다. 프로필 기억하기를 끄거나 프로필을 삭제하면 개인 탐색 조건도 지워지고 표시 설정은 유지돼요.</p></section>
     </div>
   </Dialog>
 }

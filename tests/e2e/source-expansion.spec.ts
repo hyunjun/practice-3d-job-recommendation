@@ -15,7 +15,7 @@ import {
 } from '../fixtures/source-expansion-wire'
 import { readServerMode } from './helpers/api-requests'
 import { readSaved } from './helpers/saved-store'
-import { sourceChoice } from './helpers/source-choice'
+import { expectPublicSourceOverview } from './helpers/source-choice'
 import { csvRows, downloadText, saveWithNote, statusAction } from './helpers/source-integrations'
 import {
   expectSurveyPrivacy, seedSurvey, surveyBoardHistory, surveyClose, surveyDataButton, surveyImage,
@@ -91,7 +91,7 @@ async function syntheticRequests(server: Awaited<ReturnType<typeof fixture>>) {
 
 for (const width of [1440, 320]) test.describe(`two expansion cohorts at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
-  test('literal new companies survive region/role search, save, source switching, import and an owned restart', async ({ page, browser, baseURL }, info) => {
+  test('literal new companies survive region/role search, saved exploration, import and an owned public-only restart', async ({ page, browser, baseURL }, info) => {
     test.setTimeout(180_000)
     const server = await fixture(page, info, baseURL)
     let destination: BrowserContext | undefined
@@ -178,11 +178,13 @@ for (const width of [1440, 320]) test.describe(`two expansion cohorts at ${width
       await surveyImage(page, info, `starbucks-detail-${width}`)
       await surveyClose(page, starbucks)
       await surveyDataButton(page).click()
-      await sourceChoice(page, 'sample').click()
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
-      await sourceChoice(page, 'public').click()
+      await expectPublicSourceOverview(page)
       await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '124', '36'])
       await surveyClose(page, surveyDataButton(page))
+      await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
+      await expect(page.locator('.saved-card')).toHaveCount(2)
+      savedFacts(await readSaved(page))
+      await surveyNavigation(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
       await expect(page.locator('.mini-job-title')).toHaveText(starbucksTitle)
       await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.exploration') ?? '{}')))
         .toMatchObject({ source: 'public', selectedId: 'seattle', filters: { query: 'Starbucks', role: 'backend', region: 'americas' } })
@@ -207,7 +209,7 @@ for (const width of [1440, 320]) test.describe(`two expansion cohorts at ${width
 
       destination = await browser.newContext({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
       const target = await destination.newPage()
-      const imported = await seedSurvey(target, server.origin, { source: 'sample', hash: '#saved', clock: SOURCE_EXPANSION_NOW })
+      const imported = await seedSurvey(target, server.origin, { legacySource: 'sample', hash: '#saved', clock: SOURCE_EXPANSION_NOW })
       await target.getByRole('button', { name: '기록 백업·복원', exact: true }).click()
       await target.getByLabel('백업 또는 복구 파일', { exact: true }).setInputFiles({ name: 'source64-backup.json', mimeType: 'application/json', buffer: Buffer.from(backup) })
       await expect(target.locator('.saved-import-row')).toHaveCount(2)

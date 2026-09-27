@@ -1,21 +1,25 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import AxeBuilder from '@axe-core/playwright'
-import { createSampleCatalog } from '../../shared/sample'
+import { PUBLIC_PROTOCOL_COMPANIES, PUBLIC_PROTOCOL_TIME, publicProtocolJob } from '../fixtures/public-protocol'
+import { publicAppTest as test } from './helpers/public-app'
 import type { SavedJob } from '../../shared/types'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
 
-const sample = createSampleCatalog()
 const saved: SavedJob = {
-  job: sample.jobs[0], company: sample.companies.find(company => company.id === sample.jobs[0].companyId)!,
+  job: publicProtocolJob('saved-storage'), company: PUBLIC_PROTOCOL_COMPANIES[0],
   note: 'Original saved note', savedAt: '2026-09-19T08:00:00.000Z', status: 'saved',
 }
+
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date(PUBLIC_PROTOCOL_TIME))
+})
 
 async function seed(page: Page, records: unknown[] = [saved]) {
   await page.addInitScript(raw => {
     localStorage.setItem('orbit.v1.saved', raw)
-    localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'sample', mapMode: 'flat' }))
+    localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'public', mapMode: 'flat' }))
   }, JSON.stringify(records))
 }
 

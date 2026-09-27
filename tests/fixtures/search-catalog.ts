@@ -1,12 +1,11 @@
-import { createSampleCatalog } from '../../shared/sample'
 import { isUnmappedJob } from '../../shared/job-location'
 import { COMPENSATION_VERSION, DEFAULT_FILTERS, ELIGIBILITY_VERSION, QUALIFICATIONS_VERSION, SAMPLE_PROFILE } from '../../shared/types'
 import type { Catalog, Company, Filters, Job, Profile } from '../../shared/types'
+import { PUBLIC_TEST_CITIES } from './public-geography'
 
-const sample = createSampleCatalog()
 export const SEARCH_TIME = '2026-09-19T08:00:00.000Z'
 export const SEARCH_COMPANIES: Company[] = ['a', 'b'].map((letter, index) => ({
-  ...sample.companies[index], id: `search-fixture-${letter}`, name: `Fixture ${letter.toUpperCase()}`,
+  id: `search-fixture-${letter}`, name: `Fixture ${letter.toUpperCase()}`, color: index ? '#497b55' : '#3974cc',
   initials: `F${letter.toUpperCase()}`, industry: 'Search verification',
   careerUrl: `https://example.com/careers/${letter}`, provider: 'greenhouse', board: `search-fixture-${letter}`,
 }))
@@ -24,7 +23,7 @@ export function searchJob(id: string, overrides: Partial<Job> = {}): Job {
   const years = overrides.minExperience === undefined ? 3 : overrides.minExperience
   const companyId = overrides.companyId ?? SEARCH_COMPANIES[0].id
   return {
-    ...sample.jobs[0], id: `greenhouse-${companyId}-${id}`, companyId,
+    id: `greenhouse-${companyId}-${id}`, companyId, updatedAt: null,
     title: `Backend Engineer ${id}`, role: 'backend', cityIds: ['london'], locationLabel: 'London',
     source: 'greenhouse', fetchedAt: SEARCH_TIME, stale: false, url: `https://example.com/jobs/${id}`,
     workMode: 'onsite', employment: 'fulltime', visa: 'yes', skills, minExperience: years,
@@ -45,7 +44,7 @@ export function searchJob(id: string, overrides: Partial<Job> = {}): Job {
 
 export function searchCatalog(jobs: Job[]): Catalog {
   return {
-    source: 'public', fetchedAt: SEARCH_TIME, stale: false, cities: sample.cities,
+    source: 'public', fetchedAt: SEARCH_TIME, stale: false, cities: structuredClone(PUBLIC_TEST_CITIES),
     companies: SEARCH_COMPANIES, jobs, unmappedCount: jobs.filter(isUnmappedJob).length,
     boards: SEARCH_COMPANIES.map(company => ({
       companyId: company.id, provider: 'greenhouse', board: company.board!, status: 'ok', dataStatus: 'fresh',

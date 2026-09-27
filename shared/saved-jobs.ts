@@ -6,7 +6,7 @@ import type { SavedJob } from './types'
 export const MAX_SAVED_JOBS = 500
 
 export const SavedJobSchema = z.object({
-  job: JobSchema.transform(job => upgradeJob(job, { preserveUnverifiablePay: true })),
+  job: JobSchema.safeExtend({ source: JobProviderSchema }).transform(job => upgradeJob(job, { preserveUnverifiablePay: true })),
   company: z.object({
     id: z.string(), name: z.string().max(200), color: z.string().regex(/^#[0-9a-f]{6}$/i),
     initials: z.string().max(8), industry: z.string().max(200), careerUrl: z.string().max(2000),
@@ -17,6 +17,14 @@ export const SavedJobSchema = z.object({
   note: z.string().max(5000),
 })
 
+/** Recognize old records before validation/grouping so they cannot hide a
+ * public record with the same ID. Their raw contents belong in recovery only. */
+export function isSampleSavedRecord(value: unknown): boolean {
+  return value !== null && typeof value === 'object' && 'job' in value
+    && value.job !== null && typeof value.job === 'object'
+    && 'source' in value.job && value.job.source === 'sample'
+}
+
 export type SavedPatch = Partial<Pick<SavedJob, 'note' | 'status'>>
 export type SavedOperation =
   | { kind: 'add'; record: SavedJob }
@@ -24,6 +32,8 @@ export type SavedOperation =
   | { kind: 'update'; id: string; patch: SavedPatch }
 
 export function applySavedOperation(records: SavedJob[], operation: SavedOperation): SavedJob[] {
+  if (records.some(isSampleSavedRecord)) records = records.filter(record => !isSampleSavedRecord(record))
+  if (operation.kind === 'add' && isSampleSavedRecord(operation.record)) return records
   if (operation.kind === 'add') return records.some(item => item.job.id === operation.record.job.id)
     ? records : [operation.record, ...records]
   if (operation.kind === 'remove') return records.filter(item => item.job.id !== operation.id)
@@ -47,6 +57,7 @@ export function decodeSavedJobs(raw: string): DecodedSavedJobs {
   for (const value of values.slice(0, 5000)) {
     if (records.length >= MAX_SAVED_JOBS) break
     processed++
+    if (isSampleSavedRecord(value)) continue
     const parsed = SavedJobSchema.safeParse(value)
     if (!parsed.success || ids.has(parsed.data.job.id)) continue
     ids.add(parsed.data.job.id)

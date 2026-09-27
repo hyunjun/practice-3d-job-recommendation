@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ageCatalog, catalogDeadlines, CATALOG_LIFETIME, jobFreshness, snapshotDeadlines } from '../../shared/catalog-freshness'
 import { collectionHealth } from '../../shared/catalog-health'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import { searchCatalog, searchJob, SEARCH_COMPANIES, SEARCH_TIME } from '../fixtures/search-catalog'
 
 const base = Date.parse(SEARCH_TIME)
@@ -109,7 +109,7 @@ describe('the age of displayed public snapshots', () => {
   })
 
   it('keeps samples and not-yet-loaded placeholders outside public expiry and rejects invalid record dates', () => {
-    const sample = createSampleCatalog()
+    const sample = createLegacyDemoCatalog()
     expect(ageCatalog(sample, base + maxFallbackAge * 365).catalog).toBe(sample)
     expect(jobFreshness(sample.jobs[0], base + maxFallbackAge * 365)).toBe('fresh')
     expect(catalogDeadlines(sample)).toEqual([])

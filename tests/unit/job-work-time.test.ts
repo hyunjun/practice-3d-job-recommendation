@@ -9,7 +9,7 @@ import { countSearchJobs, createSearchIndex, inSearchScope, selectSearchJobs } f
 import { upgradeCatalog, upgradeJob } from '../../shared/job-upgrade'
 import { matchJob } from '../../shared/matching'
 import { createJobRevision } from '../../shared/posting-status'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import { createSavedBackup, parseSavedImport } from '../../shared/saved-backup'
 import { decodeSavedJobs, SavedJobSchema } from '../../shared/saved-jobs'
 import { JobSchema } from '../../shared/schemas'
@@ -371,7 +371,7 @@ describe('old records, source-preserving migration and meaningful revisions', ()
     expect(Object.keys(before).filter(key => before[key as keyof typeof before] !== after[key as keyof typeof after])).toEqual(['conditions'])
   })
   it('all32-company179-job22-city sample data stays unchanged and helpers return no time facts', () => {
-    const sample = createSampleCatalog()
+    const sample = createLegacyDemoCatalog()
     const copy = structuredClone(sample)
     expect(sample.companies).toHaveLength(32)
     expect(sample.jobs).toHaveLength(179)

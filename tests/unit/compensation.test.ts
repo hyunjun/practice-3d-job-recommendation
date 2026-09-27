@@ -5,7 +5,7 @@ import { parseTextCompensation } from '../../shared/pay-text'
 import { upgradeJobCompensation } from '../../shared/job-compensation'
 import { formatCompensation, formatJobSalary, filterJobs, medianSalary } from '../../shared/matching'
 import { JobSchema } from '../../shared/schemas'
-import { createSampleCatalog } from '../../shared/sample'
+import { publicProtocolCatalog } from '../fixtures/public-protocol'
 import { COMPENSATION_VERSION, DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Job } from '../../shared/types'
 import { geographicPayText } from '../fixtures/geographic-pay'
@@ -64,7 +64,11 @@ describe('amounts, currencies and payment periods from posting text', () => {
     ])
     expect(job.compensationRanges?.every(range => range.scope && range.evidence?.text.includes(range.scope))).toBe(true)
     expect(JobSchema.safeParse(job).success).toBe(true)
-    const catalog = { ...createSampleCatalog(), jobs: [job] }
+    const catalog = publicProtocolCatalog({ jobs: [job], fetchedAt: timestamp, companies: [{
+      id: 'stripe', name: 'Compensation Fixture', initials: 'CF', color: '#3974cc',
+      industry: 'Synthetic pay verification', provider: 'greenhouse', board: 'stripe',
+      careerUrl: 'https://example.test/compensation/careers',
+    }] })
     const matches = filterJobs(catalog, SAMPLE_PROFILE, DEFAULT_FILTERS)
     expect(matches).toHaveLength(1)
     expect(medianSalary(matches)).toBeNull()

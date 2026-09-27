@@ -1,17 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { IDBFactory, IDBObjectStore as FakeObjectStore } from 'fake-indexeddb'
-import { createSampleCatalog } from '../../shared/sample'
+import { PUBLIC_PROTOCOL_COMPANIES, publicProtocolJob } from '../fixtures/public-protocol'
 import { decodeSavedJobs, MAX_SAVED_JOBS } from '../../shared/saved-jobs'
 import type { SavedJob } from '../../shared/types'
 import { openSavedStore, SAVED_RECORD_STORE } from '../../src/lib/saved-store'
 import type { SavedStore } from '../../src/lib/saved-store'
 
-const sample = createSampleCatalog()
 const name = 'saved-storage-test'
 const time = '2026-09-19T10:00:00.000Z'
 function item(id: string, note = ''): SavedJob {
-  const job = { ...sample.jobs[0], id }
-  return { job, company: sample.companies.find(company => company.id === job.companyId)!, savedAt: time, status: 'applied', note }
+  const job = publicProtocolJob(id, { id })
+  return { job, company: PUBLIC_PROTOCOL_COMPANIES[0], savedAt: time, status: 'applied', note }
 }
 let factory: IDBFactory
 let values: Map<string, string>

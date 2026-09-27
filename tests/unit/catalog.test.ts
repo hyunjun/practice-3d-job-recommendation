@@ -3,7 +3,7 @@ import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
-import { createSampleCatalog } from '../../shared/sample'
+import { publicProtocolJob } from '../fixtures/public-protocol'
 import { isUnmappedJob, unmappedCoverage } from '../../shared/job-location'
 import type { Company, Job, JobProvider } from '../../shared/types'
 import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, OCCUPATION_VERSION } from '../../shared/types'
@@ -15,10 +15,9 @@ import { geographicPayText } from '../fixtures/geographic-pay'
 
 const BASE = Date.parse('2026-09-19T06:00:00.000Z')
 const companies = PUBLIC_COMPANIES.slice(0, 2)
-const demoJob = createSampleCatalog().jobs[0]
 const iso = (value: number) => new Date(value).toISOString()
-const job = (company: Company, fetchedAt: string, suffix = 'one'): Job & { source: JobProvider } => ({
-  ...demoJob, id: `${company.provider ?? 'greenhouse'}-${company.id}-${suffix}`, companyId: company.id, source: company.provider ?? 'greenhouse', fetchedAt, compensationVersion: COMPENSATION_VERSION,
+const job = (company: Company, fetchedAt: string, suffix = 'one'): Job & { source: JobProvider } => publicProtocolJob(suffix, {
+  id: `${company.provider ?? 'greenhouse'}-${company.id}-${suffix}`, companyId: company.id, source: company.provider ?? 'greenhouse', fetchedAt, compensationVersion: COMPENSATION_VERSION,
   qualifications: { version: 1, skills: [], experience: [] },
 })
 const snapshot = (company: Company, time = BASE): CachedBoard => ({
@@ -332,6 +331,14 @@ describe('cache validation and migration', () => {
     const previousFile = path.join(directory, 'v4.json')
     try {
       const { provider: _provider, boardRegion: _region, ...previous } = snapshot(companies[0])
+      // This pre-provider cache must also exercise interpretation upgrades.
+      // A current PUBLIC fixture would otherwise bypass these legacy reads.
+      const legacyJob = previous.snapshot!.jobs[0]
+      delete legacyJob.eligibility
+      delete legacyJob.languageRequirements
+      delete legacyJob.workTimeRequirements
+      delete legacyJob.roleClassification
+      delete legacyJob.occupation
       await writeFile(previousFile, JSON.stringify({ version: 4, boards: [previous] }))
       const cache = createFileBoardCache(currentFile, [previousFile, path.join(directory, 'v3.json')], companies)
       const loaded = await cache.load()

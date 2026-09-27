@@ -1,38 +1,35 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-import { normalizeJob } from '../../server/normalize'
-import { createSampleCatalog } from '../../shared/sample'
+import { PUBLIC_PROTOCOL_COMPANIES, publicProtocolCatalog, publicProtocolJob } from '../fixtures/public-protocol'
+import { publicAppTest as test, readyPublic, expectPublicOnlyDialog } from './helpers/public-app'
 import { DEFAULT_FILTERS } from '../../shared/types'
 import { readServerMode, watchApiRequests } from './helpers/api-requests'
 
-const demo = createSampleCatalog()
 const fetchedAt = '2026-09-19T06:00:00.000Z'
-test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(fetchedAt)) })
-const publicCatalog = {
-  ...demo, source: 'public', fetchedAt,
-  companies: demo.companies.filter(company => company.id === 'stripe'),
-  jobs: ['London, UK', 'Berlin, Germany'].map((location, index) => normalizeJob({
-    id: 800 + index, title: `Backend Engineer — restore fixture ${index}`,
-    absolute_url: `https://example.com/jobs/restore-${index}`, location: { name: location },
-    content: '<p>3 years of software engineering experience. Python and AWS.</p><p>We provide visa sponsorship.</p>',
-    metadata: [{ name: 'Location Type', value: 'Hybrid' }, { name: 'Time Type', value: 'Full time' }],
-    pay_input_ranges: [{ title: 'Annual Base Salary Range', min_cents: 15000000, max_cents: 18000000, currency_type: 'USD' }],
-  }, 'stripe', fetchedAt)!),
-  boards: [{ companyId: 'stripe', board: 'stripe', status: 'ok', total: 2, included: 2 }],
-}
+const publicCatalog = publicProtocolCatalog({
+  fetchedAt, companies: [PUBLIC_PROTOCOL_COMPANIES[0]],
+  jobs: [['london', 'London, UK'], ['berlin', 'Berlin, Germany']].map(([cityId, locationLabel], index) => publicProtocolJob(`restore-${index}`, {
+    title: `Backend Engineer — restore fixture ${index}`, cityIds: [cityId], locationLabel,
+    workMode: 'hybrid', minExperience: 3, skills: ['Python', 'AWS'],
+    salary: { min: 150000, max: 180000, currency: 'USD' }, fetchedAt,
+    evidence: { visa: { source: 'description', text: 'We provide visa sponsorship.' } },
+  })),
+})
 
-async function choosePublic(page: Page) {
-  await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
-  await page.getByRole('button', { name: /공개 채용공고/ }).click()
-  await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
-  await page.getByRole('button', { name: '닫기', exact: true }).click()
+test.beforeEach(async ({ page, context }) => {
+  await page.clock.setFixedTime(new Date(fetchedAt))
+  await context.route('**/api/catalog?source=public*', route => route.fulfill({ json: publicCatalog }))
+})
+
+async function publicReady(page: Page) {
+  await readyPublic(page)
 }
 
 test('public data, every search condition, city selection and map preferences survive reload and a new visit', async ({ page, context }) => {
   await context.route('**/api/catalog?source=public*', route => route.fulfill({ json: publicCatalog }))
   await page.goto('/')
-  await choosePublic(page)
+  await publicReady(page)
   await page.getByRole('button', { name: '주간 지구로 전환', exact: true }).click()
   await page.getByRole('button', { name: '2D 지도', exact: true }).click()
   await page.getByRole('button', { name: '유럽', exact: true }).click()
@@ -47,12 +44,12 @@ test('public data, every search condition, city selection and map preferences su
   await page.getByRole('checkbox', { name: /연봉 미공개·별도 보상 공고도 포함/ }).uncheck()
   await page.getByRole('checkbox', { name: /거주 국가가 포함된 원격근무만/ }).uncheck()
   await page.getByRole('button', { name: /개 공고 보기$/ }).click()
-  await page.getByLabel('도시, 회사 또는 포지션 검색').fill('런던 Stripe')
+  await page.getByLabel('도시, 회사 또는 포지션 검색').fill('런던 Aster Transit')
   await page.getByRole('button', { name: '런던, 추천 회사 1곳 보기', exact: true }).click()
 
   await page.reload()
   await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
-  await expect(page.getByLabel('도시, 회사 또는 포지션 검색')).toHaveValue('런던 Stripe')
+  await expect(page.getByLabel('도시, 회사 또는 포지션 검색')).toHaveValue('런던 Aster Transit')
   await expect(page.getByLabel('직무 필터')).toHaveValue('backend')
   await expect(page.getByLabel('근무 형태 필터')).toHaveValue('hybrid')
   await expect(page.getByLabel('비자 지원 필터')).toHaveValue('supported')
@@ -73,7 +70,7 @@ test('public data, every search condition, city selection and map preferences su
   await revisit.goto('/')
   await expect(revisit.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
   await expect(revisit.locator('.city-hero-caption h2')).toContainText('런던')
-  await expect(revisit.getByLabel('도시, 회사 또는 포지션 검색')).toHaveValue('런던 Stripe')
+  await expect(revisit.getByLabel('도시, 회사 또는 포지션 검색')).toHaveValue('런던 Aster Transit')
   await revisit.getByRole('button', { name: '모든 도시', exact: true }).click()
   await expect(revisit.getByRole('combobox', { name: '도시 정렬', exact: true })).toHaveValue('salary')
   await revisit.getByRole('button', { name: '3D 지구', exact: true }).click()
@@ -123,7 +120,7 @@ test('a failed restored feed keeps public mode and search context, distinguishes
   await expect(page.locator('.map-stats strong').first()).toContainText('0')
 })
 
-test('restored loading state shows no sample jobs and switching to sample cancels the pending response', async ({ page, context }) => {
+test('restored loading shows no fictional jobs and saved navigation cancels a pending catalog without applying its late response', async ({ page, context }) => {
   const traffic = watchApiRequests(page)
   let release!: () => void
   const gate = new Promise<void>(resolve => { release = resolve })
@@ -145,22 +142,29 @@ test('restored loading state shows no sample jobs and switching to sample cancel
     await page.getByRole('button', { name: '공개 공고 조회 중', exact: true }).click()
     await expect(page.locator('.coverage-stats strong').last()).toHaveText('—')
     await expect(page.getByRole('dialog')).not.toContainText('Invalid Date')
-    await page.getByRole('button', { name: /샘플로 탐색/ }).click()
-    await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
-    await expect.poll(() => traffic.catalog().filter(request => request.state === 'failed').length).toBe(attempts)
+    await expectPublicOnlyDialog(page)
     await page.getByRole('button', { name: '닫기', exact: true }).click()
+    await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+    await expect.poll(() => traffic.catalog().filter(request => request.state === 'failed').length).toBe(attempts)
     release()
     await page.waitForLoadState('networkidle')
-    await expect(page.locator('.city-row')).toHaveCount(22)
-    await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
+    expect(new URL(page.url()).hash).toBe('#saved')
+    await expect(page.locator('.saved-card, .city-row, .company-card')).toHaveCount(0)
+    await page.getByRole('button', { name: '공개 채용', exact: true }).click()
+    await expectPublicOnlyDialog(page)
+    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
+    await page.getByRole('button', { name: '닫기', exact: true }).click()
     expect(traffic.requests).toHaveLength(attempts)
     for (const request of traffic.requests) expect(request).toMatchObject({
       url: new URL('/api/catalog?source=public', page.url()).href,
       method: 'GET', body: null, state: 'failed', error: 'net::ERR_ABORTED',
     })
     const revisit = await context.newPage()
+    await revisit.clock.setFixedTime(new Date(fetchedAt))
     await revisit.goto('/')
-    await expect(revisit.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
+    await readyPublic(revisit)
+    await expect(revisit.locator('.city-row')).toHaveCount(2)
+    expect(await revisit.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.exploration') || '{}').source)).toBe('public')
     await revisit.close()
   } finally { release() }
 })

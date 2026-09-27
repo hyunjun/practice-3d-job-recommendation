@@ -1,4 +1,4 @@
-import { applySavedOperation, MAX_SAVED_JOBS } from '../../shared/saved-jobs'
+import { applySavedOperation, isSampleSavedRecord, MAX_SAVED_JOBS } from '../../shared/saved-jobs'
 import type { SavedOperation } from '../../shared/saved-jobs'
 import type { SavedJob } from '../../shared/types'
 import type { SavedImportPlan } from '../../shared/saved-backup'
@@ -81,7 +81,7 @@ export class SavedController {
 
   private accept(snapshot: SavedStoreSnapshot) {
     const previous = new Map(this.base.map(record => [record.job.id, record]))
-    this.base = snapshot.records.map(record => reuseJobSnapshot(record, previous.get(record.job.id)))
+    this.base = snapshot.records.filter(record => !isSampleSavedRecord(record)).map(record => reuseJobSnapshot(record, previous.get(record.job.id)))
     this.recovery = snapshot.recovery
     this.unreadableIds = new Set(snapshot.unreadableIds)
     this.unreadableCount = snapshot.occupied - snapshot.records.length
@@ -127,6 +127,7 @@ export class SavedController {
   }
 
   change(operation: SavedOperation): SavedChangeResult {
+    if (operation.kind === 'add' && isSampleSavedRecord(operation.record)) return { accepted: false, reason: 'unreadable' }
     if (!this.ready) return { accepted: false, reason: 'loading' }
     if (this.exclusive) return { accepted: false, reason: 'busy' }
     const id = operation.kind === 'add' ? operation.record.job.id : operation.id

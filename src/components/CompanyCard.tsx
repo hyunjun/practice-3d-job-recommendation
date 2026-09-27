@@ -81,7 +81,7 @@ export function CompanyCard({ matches, savedIds, saveReady, onOpen, onSave }: Pr
   </nav>
 
   return <article className="company-card" ref={card} aria-labelledby={`${id}-company`}>
-    <header><CompanyLogo company={company} /><div><h3 id={`${id}-company`}>{company.name}</h3><p>{company.industry}</p></div>{matches[0].job.source === 'sample' && <span className="sample-label">샘플</span>}</header>
+    <header><CompanyLogo company={company} /><div><h3 id={`${id}-company`}>{company.name}</h3><p>{company.industry}</p></div></header>
     {matches.length > 1 && <div className="company-job-toolbar">
       <p role={expanded ? 'status' : undefined}>{expanded ? `${start + 1}–${start + visible.length}` : '1'} / {matches.length}개 공고</p>
       <button ref={toggle} className="more-jobs" aria-expanded={expanded} aria-controls={listId} onClick={changeExpanded}>{expanded ? '공고 접기' : `전체 ${matches.length}개 공고 보기`}<ChevronDown size={13} className={expanded ? 'rotated' : ''} /></button>
@@ -90,7 +90,7 @@ export function CompanyCard({ matches, savedIds, saveReady, onOpen, onSave }: Pr
     <div id={listId} className="company-jobs">
       {visible.map((match, index) => <div key={match.job.id} className="mini-job">
         <button ref={index === 0 ? firstJob : undefined} className="mini-job-title" onClick={() => onOpen(match)}>{match.job.title}<ArrowUpRight size={14} /></button>
-        {match.job.source !== 'sample' && <p className="mini-job-role">{jobRoleLabel(match.job)}</p>}
+        <p className="mini-job-role">{jobRoleLabel(match.job)}</p>
         <JobSourceCredit job={match.job} />
         <PostingPurposeBadge job={match.job} />
         {isUnmappedJob(match.job) && <p className="mini-job-location"><MapPinOff size={12} /><span>{match.job.locationLabel}</span></p>}

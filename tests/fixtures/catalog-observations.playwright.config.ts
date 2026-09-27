@@ -14,6 +14,8 @@ export default defineConfig({
   testDir: path.join(repository, 'tests/e2e'),
   testMatch: 'catalog-observations.spec.ts',
   webServer: [],
+  // This configuration creates its own synthetic processes inside the tests.
+  globalSetup: undefined,
   workers: 1,
   fullyParallel: false,
   retries: 0,

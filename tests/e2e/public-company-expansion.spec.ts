@@ -14,10 +14,11 @@ import { isSourceExpansionRequest, SOURCE_EXPANSION_EMPTY_FULL_URLS } from '../f
 import { createPublicCoverageServer } from '../fixtures/public-coverage-server'
 import { expectInitialCatalogRequest, readServerMode, watchApiRequests } from './helpers/api-requests'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
-import { sourceChoice } from './helpers/source-choice'
+import { expectPublicSourceOverview } from './helpers/source-choice'
 
 const search = (page: Page) => page.getByRole('textbox', { name: '도시, 회사 또는 포지션 검색', exact: true })
 const dataButton = (page: Page) => page.getByRole('button', { name: '데이터와 추천 방식', exact: true })
+const navigation = (page: Page) => page.getByRole('navigation', { name: '주요 메뉴' })
 
 async function setup(page: Page, origin: string) {
   const traffic = watchApiRequests(page)
@@ -93,10 +94,10 @@ async function role(page: Page, value: Filters['role'], count: number) {
   await expect(opener).toBeFocused()
 }
 
-async function contextIs(page: Page, source: 'sample' | 'public', query: string, expectedRole: Filters['role']) {
+async function contextIs(page: Page, query: string, expectedRole: Filters['role']) {
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.profile') ?? '{}'))).toEqual(COVERAGE_PROFILE)
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.exploration') ?? '{}')))
-    .toMatchObject({ source, filters: { query, role: expectedRole, region: 'all' } })
+    .toMatchObject({ source: 'public', filters: { query, role: expectedRole, region: 'all' } })
 }
 
 function expectSavedNotion(records: SavedJob[]) {
@@ -137,7 +138,7 @@ async function image(page: Page, info: TestInfo, name: string) {
 for (const width of [1440, 320]) test.describe(`expanded default public companies at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
-  test('the original twelve added registrations still collect fictional jobs through the124-source HTTP default and preserve query/filter context across sample selection', async ({ page, request, baseURL }, info) => {
+  test('the original twelve registrations collect synthetic public jobs through the124-source HTTP default and preserve query/filter context through saved exploration', async ({ page, request, baseURL }, info) => {
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const server = await createPublicCoverageServer(info.outputPath('expanded-default-server'), mode)
     const responses = withSurveyEmptyBoards(expansionResponses())
@@ -176,20 +177,20 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
       await expect(page.locator('.mini-job-title')).toHaveText('Backend Engineer — Synthetic Willow Queue')
       await search(page).fill('Notion')
       await expect(page.locator('.mini-job-title')).toHaveText('Backend Engineer — Synthetic Maple Index')
-      await contextIs(page, 'public', 'Notion', 'backend')
+      await contextIs(page, 'Notion', 'backend')
 
       await dataButton(page).click()
-      await sourceChoice(page, 'sample').click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
-      await contextIs(page, 'sample', 'Notion', 'backend')
-      await sourceChoice(page, 'public').click()
+      await expectPublicSourceOverview(page)
       await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '124', '17'])
       await closeTo(page, dataButton(page))
+      await navigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
+      await expect(page.locator('.saved-card')).toHaveCount(0)
+      await navigation(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
       await expect(search(page)).toHaveValue('Notion')
       await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '1'])
       await expect(page.locator('.company-card h3')).toHaveText('Notion')
       await expect(page.locator('.mini-job-title')).toHaveText('Backend Engineer — Synthetic Maple Index')
-      await contextIs(page, 'public', 'Notion', 'backend')
+      await contextIs(page, 'Notion', 'backend')
       expect(await readSaved(page)).toEqual([])
       await page.locator('.company-card').evaluate(element => element.scrollIntoView({ block: 'center' }))
       await expect(page.locator('.mini-job-title')).toBeInViewport({ ratio: 1 })
@@ -217,7 +218,7 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
     }
   })
 
-  test('an old24-board cache still fetches the original twelve plus47 missing sources and a saved public Notion remains unchanged across sample mode and a real restart', async ({ page, request, baseURL }, info) => {
+  test('an old24-board cache still fetches the original twelve plus47 missing sources and preserves saved Notion through a saved-only restart and public rejoin', async ({ page, request, baseURL }, info) => {
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const oldTime = new Date(Date.now() - 5_000).toISOString()
     const old = expansionLegacyCache(oldTime)
@@ -276,12 +277,13 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
       await image(page, info, `new-default-saved-notion-${width}.png`)
 
       await dataButton(page).click()
-      await sourceChoice(page, 'sample').click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
+      await expectPublicSourceOverview(page)
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '124', '13'])
       await closeTo(page, dataButton(page))
-      await contextIs(page, 'sample', 'Notion', 'backend')
+      await contextIs(page, 'Notion', 'backend')
       expectSavedNotion(await readSaved(page))
       expect(await readSaved(page)).toEqual(records)
+      const catalogAttempts = state.traffic.catalog().length
       await page.goto('about:blank')
       await server.stop()
       await server.start()
@@ -290,14 +292,17 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
       await expect(page.locator('.saved-card h2')).toHaveText('Notion')
       await expect(page.locator('.saved-title')).toHaveText('Backend Engineer — Synthetic Maple Index')
       await expect(page.locator('.saved-note-preview')).toHaveText(EXPANSION_NOTE)
-      await contextIs(page, 'sample', 'Notion', 'backend')
+      await contextIs(page, 'Notion', 'backend')
       expect(await readSaved(page)).toEqual(records)
+      expect(state.traffic.catalog()).toHaveLength(catalogAttempts)
 
+      await navigation(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
+      await expect(page.locator('.mini-job-title')).toHaveText('Backend Engineer — Synthetic Maple Index')
       await dataButton(page).click()
-      await sourceChoice(page, 'public').click()
+      await expectPublicSourceOverview(page)
       await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '124', '13'])
       await closeTo(page, dataButton(page))
-      await contextIs(page, 'public', 'Notion', 'backend')
+      await contextIs(page, 'Notion', 'backend')
       const after = await catalog(page, server.origin)
       expect(after.jobs).toEqual(before.jobs)
       expect(await readFile(server.defaultCache, 'utf8')).toBe(serializedCache)

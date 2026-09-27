@@ -2,7 +2,6 @@ import compression from 'compression'
 import { Router } from 'express'
 import type { RequestHandler } from 'express'
 import { constants } from 'node:zlib'
-import { createSampleCatalog } from '../shared/sample'
 import type { Catalog } from '../shared/types'
 import type { CatalogCollectionUpdate, CatalogProgress } from '../shared/catalog-progress'
 import type { PostingStatusIndex } from '../shared/posting-status'
@@ -40,7 +39,7 @@ export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCa
 
   router.get('/catalog', async (request, response) => {
     if (getProgressiveCatalog) response.vary('Prefer')
-    const source = request.query.source ?? 'sample'
+    const source = request.query.source ?? 'public'
     if (source !== 'sample' && source !== 'public' && source !== 'greenhouse') {
       response.status(400).json({ error: '지원하지 않는 데이터 소스입니다.' })
       return
@@ -48,7 +47,9 @@ export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCa
     try {
       // Existing clients retain the blocking JSON/ETag contract. The browser
       // opts into an immediate snapshot and a read-only progress resource.
-      if (source !== 'sample' && getProgressiveCatalog && getCatalogProgress
+      // Legacy source names use the same public collector; no fictional
+      // postings are generated, including for clients using the old URL.
+      if (getProgressiveCatalog && getCatalogProgress
         && request.get('Prefer')?.split(',').some(value => /^respond-async(?:\s*;|$)/i.test(value.trim()))) {
         const result = await getProgressiveCatalog(request.query.refresh === '1')
         if (result.progress) {
@@ -64,8 +65,8 @@ export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCa
       }
       // Always run the collector's refresh/failure/expiry policy before Express
       // compares ETags. A conditional request is never a shortcut around it.
-      const catalog = source === 'sample' ? createSampleCatalog() : await getCatalog(request.query.refresh === '1')
-      if (source !== 'sample') response.setHeader('Cache-Control', 'private, no-cache, must-revalidate')
+      const catalog = await getCatalog(request.query.refresh === '1')
+      response.setHeader('Cache-Control', 'private, no-cache, must-revalidate')
       response.json(catalog)
     } catch (error) {
       response.setHeader('Cache-Control', 'no-store')

@@ -1,21 +1,20 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-import { normalizeJob } from '../../server/normalize'
-import { CITIES } from '../../shared/cities'
-import { PUBLIC_COMPANIES } from '../../shared/companies'
+import { PUBLIC_TEST_CITIES as CITIES } from '../fixtures/public-geography'
+import { PUBLIC_PROTOCOL_COMPANIES, publicProtocolJob } from '../fixtures/public-protocol'
+import { expectPublicOnlyDialog, resourceCheckedTest as test } from './helpers/public-app'
 import type { Catalog } from '../../shared/types'
 
 const previous = '2026-09-19T06:00:00.000Z'
 const current = '2026-09-19T07:00:00.000Z'
 test.beforeEach(async ({ page }) => { await page.clock.install({ time: new Date(current) }) })
-const companies = PUBLIC_COMPANIES.slice(0, 3)
-const jobs = companies.slice(0, 2).map((company, index) => normalizeJob({
-  id: 700 + index, title: `Backend Engineer — ${company.name} feed fixture`,
-  absolute_url: `https://example.com/jobs/feed-${index}`, location: { name: 'London, UK' },
-  content: '<p>3 years of software engineering experience. Python and AWS.</p><p>We provide visa sponsorship.</p>',
-  metadata: [{ name: 'Location Type', value: 'Hybrid' }, { name: 'Time Type', value: 'Full time' }],
-}, company.id, index === 0 ? previous : current)!)
+const companies = PUBLIC_PROTOCOL_COMPANIES
+const jobs = companies.slice(0, 2).map((company, index) => publicProtocolJob(`feed-${index}`, {
+  id: `greenhouse-${company.id}-feed-${index}`, companyId: company.id,
+  title: `Backend Engineer — ${company.name} feed fixture`, workMode: 'hybrid',
+  skills: ['Python', 'AWS'], minExperience: 3, fetchedAt: index === 0 ? previous : current,
+}))
 
 function catalog(degraded: boolean): Catalog {
   return {
@@ -53,15 +52,15 @@ test('partial feed failures preserve dated jobs across exploration, comparison a
   await expect(page.locator('.catalog-notice')).toContainText('1개 회사는 확인 가능한 공고가 없어요')
   await page.getByRole('button', { name: '조회 상태', exact: true }).click()
   await expect(page.locator('.collection-health dd')).toHaveText(['1개 공고', '1개 공고', '1개'])
-  const stripe = page.locator('.board-row').filter({ hasText: 'Stripe' })
+  const stripe = page.locator('.board-row').filter({ hasText: 'Aster Transit' })
   await expect(stripe).toContainText('이전 1개 유지')
   await expect(stripe.locator('time').first()).toHaveAttribute('datetime', previous)
   await expect(stripe).toContainText('HTTP 503')
-  await expect(page.locator('.board-row').filter({ hasText: 'Vercel' })).toContainText('확인 기록 없음')
+  await expect(page.locator('.board-row').filter({ hasText: 'Mosaic Clinic' })).toContainText('확인 기록 없음')
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
   await page.getByRole('button', { name: '닫기', exact: true }).click()
 
-  await page.locator('.mini-job-title').filter({ hasText: 'Stripe' }).click()
+  await page.locator('.mini-job-title').filter({ hasText: 'Aster Transit' }).click()
   await expect(page.locator('.job-freshness-notice')).toContainText('이전 조회 결과를 보고 있어요')
   await expect(page.locator('.job-freshness-notice time')).toHaveAttribute('datetime', previous)
   await page.getByRole('button', { name: '기회 저장', exact: true }).click()
@@ -89,11 +88,11 @@ test('partial feed failures preserve dated jobs across exploration, comparison a
   await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: '기회 탐색', exact: true }).click()
   await expect(page.locator('.company-card')).toHaveCount(2)
   await expect(page.locator('.catalog-notice, .company-card .stale-job-badge')).toHaveCount(0)
-  await page.locator('.mini-job-title').filter({ hasText: 'Stripe' }).click()
+  await page.locator('.mini-job-title').filter({ hasText: 'Aster Transit' }).click()
   await expect(page.locator('.job-freshness-notice')).toHaveCount(0)
 })
 
-test('retry deadlines disable repeated requests, expire without a reload and still allow sample exploration', async ({ page }) => {
+test('retry deadlines disable repeated public requests, expire without reload and preserve navigation', async ({ page }) => {
   const start = Date.parse(current)
   let available = false
   let requests = 0
@@ -107,9 +106,8 @@ test('retry deadlines disable repeated requests, expire without a reload and sti
   const retry = page.getByRole('button', { name: '다시 조회', exact: true })
   await expect(retry).toBeDisabled()
   const initialRequests = requests
-  await page.getByRole('button', { name: '데이터 모드 선택', exact: true }).click()
-  await expect(page.getByRole('button', { name: /공개 채용공고/ })).toBeDisabled()
-  await expect(page.getByRole('button', { name: /샘플로 탐색/ })).toBeEnabled()
+  await page.getByRole('button', { name: '공개 공고 연결 필요', exact: true }).click()
+  await expectPublicOnlyDialog(page)
   await expect(page.getByRole('button', { name: '공개 공고 다시 조회', exact: true })).toBeDisabled()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.clock.fastForward(60000)
@@ -123,9 +121,13 @@ test('retry deadlines disable repeated requests, expire without a reload and sti
   expect(requests).toBe(initialRequests + 1)
   await page.getByRole('button', { name: '공개 채용', exact: true }).click()
   await expect(page.getByRole('button', { name: '새로고침', exact: true })).toBeDisabled()
-  await page.getByRole('button', { name: /샘플로 탐색/ }).click()
+  await expectPublicOnlyDialog(page)
   await page.getByRole('button', { name: '닫기', exact: true }).click()
-  await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
+  await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+  await expect(page.locator('.saved-card')).toHaveCount(0)
+  await page.getByRole('button', { name: '기회 탐색', exact: true }).click()
+  await expect(page.locator('.company-card')).toHaveCount(2)
+  await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
   expect(requests).toBe(initialRequests + 1)
 })
 
@@ -155,14 +157,14 @@ test.describe('mobile feed status', () => {
     await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: catalog(true) }))
     await restorePublic(page)
     await page.getByRole('button', { name: '공개 채용', exact: true }).click()
-    const stripe = page.locator('.board-row').filter({ hasText: 'Stripe' })
+    const stripe = page.locator('.board-row').filter({ hasText: 'Aster Transit' })
     await stripe.scrollIntoViewIfNeeded()
     await expect(stripe).toBeVisible()
     await expect(stripe.locator('time').first()).toHaveAttribute('datetime', previous)
     expect(await page.locator('.dialog').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
     expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
     await page.getByRole('button', { name: '닫기', exact: true }).click()
-    await page.locator('.mini-job-title').filter({ hasText: 'Stripe' }).click()
+    await page.locator('.mini-job-title').filter({ hasText: 'Aster Transit' }).click()
     await expect(page.locator('.job-freshness-notice')).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   })

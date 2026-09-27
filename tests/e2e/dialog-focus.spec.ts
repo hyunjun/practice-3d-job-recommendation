@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { resourceCheckedTest as test } from './helpers/public-app'
 import type { Locator, Page } from '@playwright/test'
 import {
   FIRST_TITLES, SAVED_PAGES_TIME, SECOND_TITLES, UNDO_SECOND_TITLES,
@@ -21,6 +22,14 @@ const AFTER_SEVENTEEN_AND_EIGHTEEN = [
 ]
 
 const search = (page: Page) => page.getByRole('textbox', { name: '저장한 기회 검색', exact: true })
+async function expectExplorationRequest(traffic: ReturnType<typeof watchApiRequests>) {
+  await expect.poll(() => traffic.requests.map(request => ({
+    path: new URL(request.url).pathname + new URL(request.url).search,
+    method: request.method, body: request.body, state: request.state, status: request.status, error: request.error,
+  }))).toEqual([{
+    path: '/api/catalog?source=public', method: 'GET', body: null, state: 'finished', status: 200, error: null,
+  }])
+}
 const title = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
 const footer = (page: Page, name: string) => savedCard(page, name).getByRole('button', { name: '자세히', exact: true })
 const nextPage = (page: Page) => savedPager(page).getByRole('button', { name: '다음 저장 페이지', exact: true })
@@ -336,11 +345,12 @@ for (const viewport of [{ width: 1440, height: 960 }, { width: 320, height: 800 
       await expectVisibleFocus(explore)
       await expect(search(page)).not.toBeFocused()
       expect(await readSaved(page)).toEqual([])
+      expect(traffic.requests).toEqual([])
       if (viewport.width === 320) await testInfo.attach('empty-collection-focus-320', { body: await page.screenshot(), contentType: 'image/png' })
       await page.keyboard.press('Enter')
       await expect(page.getByRole('textbox', { name: '도시, 회사 또는 포지션 검색', exact: true })).toBeVisible()
       await expect(page.locator('.main-nav').getByRole('button', { name: '기회 탐색', exact: true })).toHaveAttribute('aria-current', 'page')
-      expect(traffic.requests).toEqual([])
+      await expectExplorationRequest(traffic)
     })
 
     test('another tab removing the opener and its next neighbour restores Fable 19 on the still-valid current page', async ({ page }) => {
@@ -385,6 +395,7 @@ for (const viewport of [{ width: 1440, height: 960 }, { width: 320, height: 800 
       await openSavedPages(page)
       const before = await readSaved(page)
       await openDetail(page, 'Fable 01 · Backend Engineer', 'footer')
+      expect(traffic.requests).toEqual([])
       await page.goto('/#explore')
       await expect(page.getByRole('dialog').getByRole('heading', { name: 'Fable 01 · Backend Engineer', exact: true })).toBeVisible()
       await expect(page.locator('#main-content')).toHaveClass('explore-layout')
@@ -400,7 +411,7 @@ for (const viewport of [{ width: 1440, height: 960 }, { width: 320, height: 800 
       await closeDetail(page)
       await expectVisibleFocus(profile)
       expect(await readSaved(page)).toEqual(before)
-      expect(traffic.requests).toEqual([])
+      await expectExplorationRequest(traffic)
     })
 
     test('a real detail-to-recovery-dialog handoff keeps focus inside the replacement modal through keyboard navigation', async ({ page }) => {
@@ -408,7 +419,7 @@ for (const viewport of [{ width: 1440, height: 960 }, { width: 320, height: 800 
       await page.clock.setFixedTime(new Date(SAVED_PAGES_TIME))
       await page.addInitScript(records => {
         localStorage.setItem('orbit.v1.saved', JSON.stringify([...records, { invalid: 'PRIVATE-RECOVERY54 preserved original' }]))
-        localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'sample', mapMode: 'flat' }))
+        localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'public', mapMode: 'flat' }))
       }, savedPageRecords(1))
       await page.goto('/#saved')
       await waitForSavedCommit(page)
@@ -527,7 +538,7 @@ test.describe('wrapped notification clearance at 320px', () => {
     await page.clock.setFixedTime(new Date(SAVED_PAGES_TIME))
     await page.addInitScript(item => {
       localStorage.setItem('orbit.v1.saved', JSON.stringify([item]))
-      localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'sample', mapMode: 'flat' }))
+      localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'public', mapMode: 'flat' }))
     }, fictional)
     await page.goto('/#saved')
     await waitForSavedCommit(page)

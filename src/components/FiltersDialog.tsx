@@ -3,17 +3,17 @@ import { ArrowRight, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { selectSearchJobs } from '../../shared/job-search'
 import { DEFAULT_FILTERS, EMPLOYMENT_LABELS, MODE_LABELS, POSTING_TYPE_LABELS, ROLE_FILTER_LABELS, VISA_FILTER_LABELS } from '../../shared/types'
 import type { SearchIndex } from '../../shared/job-search'
-import type { Filters, Source } from '../../shared/types'
+import type { Filters } from '../../shared/types'
 import { Dialog, Toggle } from './ui'
 
-export function FiltersDialog({ filters, searchIndex, source, onApply, onClose }: { filters: Filters; searchIndex: SearchIndex; source: Source; onApply: (filters: Filters) => void; onClose: () => void }) {
+export function FiltersDialog({ filters, searchIndex, onApply, onClose }: { filters: Filters; searchIndex: SearchIndex; onApply: (filters: Filters) => void; onClose: () => void }) {
   const [draft, setDraft] = useState(filters)
   const matchCount = useMemo(() => selectSearchJobs(searchIndex, draft).length, [searchIndex, draft])
   const update = <K extends keyof Filters>(key: K, value: Filters[K]) => setDraft(previous => ({ ...previous, [key]: value }))
   return <Dialog title="내게 중요한 조건으로." eyebrow="REFINE YOUR ORBIT" onClose={onClose} className="filters-dialog">
     <div className="dialog-body">
       <p className="dialog-intro">경험과 맞는 기회 중, 원하는 조건을 더해보세요.</p>
-      <div className="field-group"><label htmlFor="filter-role">직무</label><select id="filter-role" aria-describedby="filter-role-help" value={draft.role} onChange={event => update('role', event.target.value as Filters['role'])}>{Object.entries(ROLE_FILTER_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><p id="filter-role-help" className="field-description">{source === 'sample' ? '샘플 시나리오에 설정된 직무를 기준으로 보여줘요.' : '공고 제목을 우선하고 공개 부서·팀 표기를 보조로 분류해요. 특정 직무를 선택하면 세부 직무 미확인 공고는 제외됩니다.'}{draft.role === 'unknown' && ' 미확인 공고에도 프로필의 기술 조건을 적용해요.'}</p></div>
+      <div className="field-group"><label htmlFor="filter-role">직무</label><select id="filter-role" aria-describedby="filter-role-help" value={draft.role} onChange={event => update('role', event.target.value as Filters['role'])}>{Object.entries(ROLE_FILTER_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><p id="filter-role-help" className="field-description">공고 제목을 우선하고 공개 부서·팀 표기를 보조로 분류해요. 특정 직무를 선택하면 세부 직무 미확인 공고는 제외됩니다.{draft.role === 'unknown' && ' 미확인 공고에도 프로필의 기술 조건을 적용해요.'}</p></div>
       <div className="field-group"><label htmlFor="filter-posting-type">모집 유형</label><select id="filter-posting-type" aria-describedby="filter-posting-type-help" value={draft.postingType} onChange={event => update('postingType', event.target.value as Filters['postingType'])}>{Object.entries(POSTING_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><p id="filter-posting-type-help" className="field-description">일반 채용 공고에서는 인재풀·향후 관심 등록으로 확인된 공고를 제외해요. 인재풀에는 현재 채용 중인 특정 포지션이 없을 수 있습니다.</p></div>
       <div className="field-group"><label>근무 형태</label><div className="filter-options">{Object.entries(MODE_LABELS).map(([value, label]) => <button key={value} className={draft.workMode === value ? 'selected' : ''} aria-pressed={draft.workMode === value} onClick={() => update('workMode', value as Filters['workMode'])}>{label}</button>)}</div></div>
       <div className="form-grid preference-grid">

@@ -13,6 +13,7 @@ import { INTEGRATION_EMPTY_FULL_URLS, isIntegrationRequest } from '../fixtures/s
 import { isSourceExpansionRequest, SOURCE_EXPANSION_EMPTY_FULL_URLS } from '../fixtures/source-expansion-empty'
 import { expectInitialCatalogRequest, readServerMode, watchApiRequests } from './helpers/api-requests'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
+import { expectPublicSourceOverview } from './helpers/source-choice'
 
 const filtersButton = (page: Page) => page.getByRole('button', { name: /^모든 필터/ })
 const navigation = (page: Page) => page.getByRole('navigation', { name: '주요 메뉴' })
@@ -109,7 +110,7 @@ function expectSavedSource(records: SavedJob[]) {
 for (const width of [1440, 320]) test.describe(`unconfigured public coverage at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
-  test('the real124-board default collector still groups the original Seoul openings, finds both brand names, retains the pool and keeps samples isolated', async ({ page, request, baseURL }, info) => {
+  test('the real124-board default collector groups the original Seoul openings, finds both brand names and retains the pool through public-only saved exploration', async ({ page, request, baseURL }, info) => {
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const server = await createPublicCoverageServer(info.outputPath('default-server'), mode)
     const failures = browserFailures(page)
@@ -196,11 +197,20 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       expect(JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.exploration')) || '{}').selectedId).toBe('seoul')
 
       await dataButton.click()
-      await page.getByRole('button', { name: /샘플로 탐색/ }).click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
+      await expectPublicSourceOverview(page)
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '124', '5'])
       await escapeTo(page, dataButton)
-      expect(JSON.parse(await page.evaluate(() => localStorage.getItem('orbit.v1.exploration')) || '{}').source).toBe('sample')
-      await expect(page.locator('.company-card h3').filter({ hasText: /Moloco|Delight\.ai|Sendbird/ })).toHaveCount(0)
+      await navigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
+      await expect(page.locator('.saved-card')).toHaveCount(0)
+      await navigation(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
+      await expect(page.locator('.city-detail-count strong')).toHaveText(['3', '5'])
+      expect((await page.locator('.company-card h3').allTextContents()).sort()).toEqual(['Delight.ai (Sendbird)', 'Moloco', 'Stripe'])
+      await company(page, 'Moloco').getByRole('button', { name: '전체 2개 공고 보기', exact: true }).click()
+      await expect(company(page, 'Moloco').getByRole('button', { name: COVERAGE_TITLES.pool, exact: true })).toBeVisible()
+      await expect(page.locator('.posting-purpose-badge')).toHaveText('인재풀·관심 등록')
+      await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.exploration') ?? '{}')))
+        .toMatchObject({ source: 'public', selectedId: 'seoul', filters: { query: '', postingType: 'all' } })
+      expect(await readSaved(page)).toEqual([])
       const upstream = await server.requests()
       expect(upstream.filter(value => isSourceExpansionRequest(value.url)).map(value => value.url).sort())
         .toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())

@@ -137,12 +137,12 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
       return <article className="saved-card" key={item.job.id}>
         <header><CompanyLogo company={item.company} /><div><h2>{item.company.name}</h2><span>{item.company.industry}</span></div><button className="icon-button" aria-label={`${item.company.name} 저장 취소`} onClick={() => onRemove(match)}><BookmarkCheck size={18} /></button></header>
         <button ref={index === 0 ? firstTitle : undefined} className="saved-title" data-saved-job-id={item.job.id} onClick={() => openSaved(match)}>{item.job.title}<ArrowUpRight size={17} /></button>
-        {item.job.source !== 'sample' && <p className="saved-role">{jobRoleLabel(item.job)}</p>}
+        <p className="saved-role">{jobRoleLabel(item.job)}</p>
         <JobSourceCredit job={item.job} />
         <PostingPurposeBadge job={item.job} />
         <p className="saved-location"><MapPin size={13} />{item.job.locationLabel}</p>
         <JobLocationNotice job={item.job} />
-        <div className="saved-card-tags"><span>{formatJobSalary(item.job)}</span><span>{MODE_LABELS[item.job.workMode]}</span>{item.job.source === 'sample' && <span className="sample-label">샘플</span>}</div>
+        <div className="saved-card-tags"><span>{formatJobSalary(item.job)}</span><span>{MODE_LABELS[item.job.workMode]}</span></div>
         <JobFreshnessNotice job={item.job} compact />
         <SavedPostingNotice observation={observations.get(item.job.id)} job={item.job} compact />
         <JobOccupationNotice job={item.job} compact />
@@ -166,7 +166,6 @@ export function CompareView({ catalog, results, postingType, compareIds, status,
     { label: '추천 회사', note: '조건에 맞는 공고가 있는 회사', render: (result?: CityResult) => <strong className="metric-primary">{result?.companyCount ?? 0}<small>곳</small></strong> },
     { label: '관련 채용공고', note: '현재 검색 조건 기준', render: (result?: CityResult) => <strong>{result?.matches.length ?? 0}<small>개</small></strong> },
     { label: '공고 조회 상태', note: '이전 결과는 원문 확인 필요', render: (result?: CityResult) => {
-      if (catalog.source === 'sample') return <small>체험용 샘플 공고</small>
       const retained = result?.matches.filter(match => match.job.stale).length ?? 0
       return <><strong>{(result?.matches.length ?? 0) - retained}<small>개 최근 조회</small></strong><small>{retained}개 이전 조회 공고 포함</small></>
     } },
@@ -182,7 +181,7 @@ export function CompareView({ catalog, results, postingType, compareIds, status,
   ]
   return <main id="main-content" className="collection-page compare-page" tabIndex={-1}>
     <div className="page-heading"><div><p className="eyebrow">DIFFERENT CITIES. YOUR POSSIBILITIES.</p><h1>어느 도시에서 시작할까요<span className="accent-dot">?</span></h1><p>최대 3개 도시를 나란히 놓고, 중요한 조건을 비교해 보세요.</p></div><button className="button secondary" onClick={onAuto} disabled={!results.length}><GitCompareArrows size={16} />회사 많은 3개 도시</button></div>
-    <div className="comparison-source-note"><span className={`source-status-dot ${catalog.source === 'sample' ? 'sample' : catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>{catalog.source === 'sample' ? '샘플 시나리오로 비교 중 · 보상 및 채용 조건은 예시입니다.' : '조회한 공개 채용공고의 비교 · 생활비와 세금은 반영하지 않습니다.'}{postingType !== 'opening' && ` · 모집 유형: ${POSTING_TYPE_LABELS[postingType]}`}</span></div>
+    <div className="comparison-source-note"><span className={`source-status-dot ${catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>조회한 공개 채용공고의 비교 · 생활비와 세금은 반영하지 않습니다.{postingType !== 'opening' && ` · 모집 유형: ${POSTING_TYPE_LABELS[postingType]}`}</span></div>
     {status}
     {selected.length > 0 ? <div className="comparison-scroll"><div className="comparison-table" role="table" aria-label="도시별 채용 조건 비교" style={{ '--city-columns': 3 } as React.CSSProperties}>
       <div className="comparison-row" role="row">

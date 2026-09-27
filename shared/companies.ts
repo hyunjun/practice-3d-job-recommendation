@@ -41,7 +41,7 @@ function publicCompany(id: string, provider: JobProvider, board: string): Compan
   return { ...company, provider, board }
 }
 
-// Public coverage is independent of the 32 hand-authored sample scenarios.
+// Only these registered public sources participate in collection.
 export const PUBLIC_COMPANIES: Company[] = [
   ...['stripe', 'figma', 'vercel', 'cloudflare', 'datadog', 'mongodb', 'airbnb', 'gitlab', 'anthropic', 'intercom']
     .map(id => publicCompany(id, 'greenhouse', id)),

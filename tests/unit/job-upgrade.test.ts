@@ -5,7 +5,7 @@ import { createSearchIndex, selectSearchJobs } from '../../shared/job-search'
 import { matchJob, formatJobSalary } from '../../shared/matching'
 import { createJobRevision } from '../../shared/posting-status'
 import { SavedJobSchema } from '../../shared/saved-jobs'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import { DEFAULT_FILTERS } from '../../shared/types'
 import { currentUpgradeJob, legacyUpgradeJob } from '../fixtures/job-upgrade'
 import { SEARCH_COMPANIES, SEARCH_PROFILE, SEARCH_TIME, searchCatalog } from '../fixtures/search-catalog'
@@ -93,7 +93,7 @@ describe('shared job read migration', () => {
   })
 
   it('preserves authored sample conditions and the original sample catalog', () => {
-    const sample = createSampleCatalog()
+    const sample = createLegacyDemoCatalog()
     expect(upgradeCatalog(sample)).toBe(sample)
     expect(sample.jobs.every(job => upgradeJob(job) === job)).toBe(true)
   })

@@ -1,4 +1,4 @@
-import { SavedJobSchema } from './saved-jobs'
+import { isSampleSavedRecord, SavedJobSchema } from './saved-jobs'
 import type { SavedJob } from './types'
 
 export const SAVED_BACKUP_FORMAT = 'orbit-saved-backup'
@@ -21,6 +21,7 @@ export interface ParsedSavedImport {
   invalid: number
   unreadableSources: number
   duplicates: number
+  excludedSamples: number
 }
 export interface SavedImportItem {
   record: SavedJob
@@ -46,7 +47,7 @@ export function sameSavedRecord(first: SavedJob, second: SavedJob): boolean {
 export function createSavedBackup(records: SavedJob[], pending = 0, now = new Date()): string {
   return `${JSON.stringify({
     format: SAVED_BACKUP_FORMAT, version: 1, exportedAt: now.toISOString(),
-    includesUnsavedChanges: pending > 0, records,
+    includesUnsavedChanges: pending > 0, records: records.filter(record => !isSampleSavedRecord(record)),
   }, null, 2)}\n`
 }
 
@@ -59,12 +60,13 @@ export function parseSavedImport(text: string): ParsedSavedImport {
   if (new TextEncoder().encode(text).byteLength > MAX_SAVED_FILE_BYTES) throw new SavedFileError('size')
   let root: unknown
   try { root = JSON.parse(text.replace(/^\uFEFF/, '')) } catch { throw new SavedFileError('format') }
-  const result: ParsedSavedImport = { format: 'legacy', exportedAt: null, groups: [], invalid: 0, unreadableSources: 0, duplicates: 0 }
+  const result: ParsedSavedImport = { format: 'legacy', exportedAt: null, groups: [], invalid: 0, unreadableSources: 0, duplicates: 0, excludedSamples: 0 }
   const groups = new Map<string, SavedImportGroup>()
   const variants = new Map<string, Set<string>>()
   let inspected = 0
   const add = (value: unknown) => {
     if (++inspected > MAX_IMPORT_RECORDS) throw new SavedFileError('count')
+    if (isSampleSavedRecord(value)) { result.excludedSamples++; return }
     const parsed = SavedJobSchema.safeParse(value)
     if (!parsed.success || parsed.data.company.id !== parsed.data.job.companyId) { result.invalid++; return }
     const record = parsed.data
@@ -105,7 +107,7 @@ export function parseSavedImport(text: string): ParsedSavedImport {
           let values: unknown
           try { values = JSON.parse(source.original) } catch { result.unreadableSources++; continue }
           addArray(values)
-        } else if (source.kind === 'records' && Array.isArray(source.original)) {
+        } else if ((source.kind === 'records' || source.kind === 'retired-samples') && Array.isArray(source.original)) {
           for (const entry of source.original) {
             if (!object(entry) || !object(entry.record) || !object(entry.record.job) || entry.id !== entry.record.job.id) add(null)
             else add(entry.record)

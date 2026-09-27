@@ -174,7 +174,7 @@ export async function openSavedPages(page: Page, count: SavedPageCount = 25) {
     if (!sessionStorage.getItem('saved-pages-fixture-seeded')) {
       localStorage.setItem('orbit.v1.saved', JSON.stringify(records))
       localStorage.setItem('orbit.v1.profile', JSON.stringify(profile))
-      localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'sample', mapMode: 'flat' }))
+      localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'public', mapMode: 'flat' }))
       sessionStorage.setItem('saved-pages-fixture-seeded', '1')
     }
   }, { records: savedPageRecords(count), profile: privateProfile })

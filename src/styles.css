@@ -66,7 +66,6 @@ input[type="range"] { accent-color: var(--accent); cursor: pointer; }
 .data-status-button { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #bec7b6; }
 .data-status-button:hover { color: var(--accent); }
 .source-status-dot { display: inline-block; width: 6px; height: 6px; background: #9bdd93; border-radius: 50%; box-shadow: 0 0 0 3px #9bdd9310; flex-shrink: 0; }
-.source-status-dot.sample { background: #d4b987; box-shadow: 0 0 0 3px #d4b9870c; }
 .source-status-dot.attention { background: #e1be79; box-shadow: 0 0 0 3px #e1be7914; }
 .job-source-credit { margin: 8px 0; color: var(--muted); font-size: 11px; line-height: 1.65; overflow-wrap: anywhere; }
 .job-source-credit p + p { margin-top: 6px; }
@@ -209,7 +208,7 @@ select option { background: #1e271c; color: var(--text); }
 .city-row h3 { font-size: 15px; letter-spacing: -.4px; font-weight: 500; color: #e2ead8; line-height: 1.5; white-space: nowrap; }
 .city-row-copy > p { font-size: 10px; color: #a0ad92; display: flex; align-items: center; gap: 5px; margin-top: 3px; }
 .city-company-preview { display: flex; align-items: center; margin-top: 10px; }
-.company-logo { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; color: var(--company-color); background: color-mix(in srgb, var(--company-color) 12%, #151915); border: 1px solid color-mix(in srgb, var(--company-color) 22%, #262f22); font-family: "Geist Variable", sans-serif; font-size: 21px; font-weight: 650; line-height: 1; }
+.company-logo { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; color: color-mix(in srgb, var(--company-color) 30%, #fff); background: color-mix(in srgb, var(--company-color) 12%, #151915); border: 1px solid color-mix(in srgb, var(--company-color) 22%, #262f22); font-family: "Geist Variable", sans-serif; font-size: 21px; font-weight: 650; line-height: 1; }
 .company-logo.small { width: 21px; height: 21px; border-radius: 50%; font-size: 10px; border: 2px solid #1b2419; }
 .company-logo.logo-notion { font-family: Georgia, serif; font-weight: 800; }
 .company-logo.logo-stripe { font-style: italic; font-weight: 750; }
@@ -521,9 +520,6 @@ select option { background: #1e271c; color: var(--text); }
 .job-detail-heading p svg { margin-top: 2px; flex-shrink: 0; }
 .job-meta-pills { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin: 22px 0; }
 .job-meta-pills > span { display: flex; align-items: center; gap: 5px; color: #bbd0a3; border: 1px solid #4b6438; border-radius: 4px; padding: 6px 8px; font-size: 9px; background: #2b3b23; }
-.sample-notice { display: flex; align-items: flex-start; gap: 9px; border: 1px solid #93793f55; background: #786b2430; border-radius: 5px; padding: 12px; margin: 0 0 22px; font-size: 11px; color: #c6c2a0; line-height: 1.8; }
-.sample-notice strong { font-weight: 500; display: block; color: #dbd2a8; margin-bottom: 2px; }
-.sample-dot { display: inline-block; width: 5px; height: 5px; background: #d4bc75; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
 .job-key-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #293a2066; border: 1px solid #4c633637; border-radius: 7px; padding: 18px; margin-bottom: 23px; }
 .job-key-facts > div { display: flex; flex-direction: column; gap: 7px; }
 .job-key-facts > div > span { font-size: 9px; color: #a7ba91; }
@@ -639,15 +635,11 @@ select option { background: #1e271c; color: var(--text); }
 .source-line svg { margin-top: 2px; }
 .job-footer .primary { min-width: 175px; }
 .data-dialog { width: min(720px, calc(100vw - 40px)); }
-.data-source-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.data-source-options > button { position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 7px; padding: 18px 15px; border: 1px solid #55713a; border-radius: 8px; background: #26381e; color: #c3d6ae; }
-.data-source-options > button.selected { border-color: #b7df80; background: #3b542773; }
-.data-source-options > button.selected:disabled { opacity: 1; }
-.data-option-icon { color: #b9dc94; margin-bottom: 9px; }
-.data-source-options strong { font-size: 13px; font-weight: 500; }
-.data-source-options button > span:not(.data-option-icon) { font-size: 9px; color: #b3c99b; }
-.data-source-options small { font-size: 8px; color: #91aa79; }
-.data-source-options .data-option-current { position: absolute; right: 15px; top: 18px; display: inline-flex; align-items: center; gap: 4px; padding: 3px 5px; border: 1px solid #789854; border-radius: 4px; background: #263b1b; color: #e6f4d5; font-size: 9px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
+.data-source-overview { display: flex; align-items: flex-start; gap: 14px; padding: 20px; border: 1px solid #789854; border-radius: 8px; background: #3b542773; color: #d3e4c1; }
+.data-source-overview > svg { flex-shrink: 0; color: #b9dc94; margin-top: 2px; }
+.data-source-overview h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+.data-source-overview p { margin: 0 0 8px; font-size: 12px; line-height: 1.8; word-break: keep-all; overflow-wrap: anywhere; }
+.data-source-overview small { color: #abc68e; font-size: 10px; line-height: 1.8; }
 .provider-coverage { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 18px 0 0; }
 .provider-coverage li { display: flex; align-items: center; gap: 7px; padding: 7px 9px; border: 1px solid #4b6138; border-radius: 5px; background: #1b2817; }
 .provider-coverage strong { font-size: 10px; font-weight: 500; color: #c9deb3; }
@@ -1330,12 +1322,7 @@ select option { background: #1e271c; color: var(--text); }
   .saved-note-section label { font-size: 11px; }
   .job-footer .primary { min-width: 0; padding: 0 12px; flex: 1; }
   .job-footer > .button { font-size: 10px; }
-  .data-source-options { gap: 9px; }
-  .data-source-options > button { padding: 14px 11px; }
-  .data-source-options strong { font-size: 12px; }
-  .data-source-options button > span:not(.data-option-icon) { font-size: 8px; line-height: 1.8; }
-  .data-source-options small { font-size: 7px; line-height: 1.7; }
-  .data-source-options .data-option-current { right: 11px; top: 14px; }
+  .data-source-overview { gap: 10px; padding: 16px 13px; }
   .data-explanation p { font-size: 11px; }
   .collection-health { gap: 7px; }
   .collection-health > div { padding: 11px 8px; }

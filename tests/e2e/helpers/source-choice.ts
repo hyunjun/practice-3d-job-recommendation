@@ -1,15 +1,6 @@
 import { expect } from '@playwright/test'
 import type { Locator, Page } from '@playwright/test'
 
-export const SOURCE_CHOICE_NAMES = {
-  sample: '샘플로 탐색 설정 없이 전체 경험을 체험해요 가상의 공고 · 실제 회사 채용 페이지',
-  public: '공개 채용공고 공식 게시판과 공개 잡 사이트를 조회해요 API 키 없이 · 인터넷 연결 필요',
-} as const
-
-export function sourceChoice(page: Page, source: 'sample' | 'public') {
-  return page.getByRole('dialog').getByRole('button', { name: SOURCE_CHOICE_NAMES[source], exact: true })
-}
-
 type Color = [number, number, number, number]
 type Layer = {
   tag: string; color: string; background: string; opacity: number
@@ -108,54 +99,30 @@ export async function measureTextContrast(locator: Locator) {
   return { ...measured, effective: compositeTextContrast(measured.foreground, measured.layers) }
 }
 
-export async function expectSourceChoice(page: Page, phase: string, selected: 'sample' | 'public', publicDisabled: boolean) {
+/** The source disclosure replaces the retired mode selector. */
+export async function expectPublicSourceOverview(page: Page, phase = 'public source disclosure') {
   const dialog = page.getByRole('dialog')
-  const sample = sourceChoice(page, 'sample'), publicButton = sourceChoice(page, 'public')
-  await expect(dialog.locator('button[aria-pressed]')).toHaveCount(2)
-  await expect(dialog.locator('button[aria-pressed="true"]')).toHaveCount(1)
-  await expect(sample).toHaveAccessibleName(SOURCE_CHOICE_NAMES.sample)
-  await expect(publicButton).toHaveAccessibleName(SOURCE_CHOICE_NAMES.public)
-  await expect(sample).toHaveAttribute('aria-pressed', selected === 'sample' ? 'true' : 'false')
-  await expect(publicButton).toHaveAttribute('aria-pressed', selected === 'public' ? 'true' : 'false')
-  await expect(sample).toBeEnabled()
-  if (publicDisabled) await expect(publicButton).toBeDisabled()
-  else await expect(publicButton).toBeEnabled()
-
-  const chosen = selected === 'sample' ? sample : publicButton
-  const other = selected === 'sample' ? publicButton : sample
-  await chosen.scrollIntoViewIfNeeded()
-  const badge = chosen.getByText('선택됨', { exact: true })
-  const title = chosen.getByText(selected === 'sample' ? '샘플로 탐색' : '공개 채용공고', { exact: true })
-  await expect(dialog.getByText('선택됨', { exact: true })).toHaveCount(1)
-  await expect(other.getByText('선택됨', { exact: true })).toHaveCount(0)
-  await expect(badge).toBeVisible()
-  await expect(badge).toBeInViewport()
-  await expect(badge).toHaveAttribute('aria-hidden', 'true')
-  await expect(title).toBeVisible()
-  await expect(title).toBeInViewport()
-  const titleEvidence = await measureTextContrast(title)
-  const badgeEvidence = await measureTextContrast(badge)
-  // Inactive controls are exempt from WCAG1.4.3. This fixed4.5 threshold is the
-  // application's explicit readability policy for its current-source state.
-  expect(titleEvidence.effective.ratio, `${phase}: current-source title contrast`).toBeGreaterThanOrEqual(4.5)
-  expect(badgeEvidence.effective.ratio, `${phase}: current-source badge contrast`).toBeGreaterThanOrEqual(4.5)
-  const box = await chosen.boundingBox()
-  expect(box).not.toBeNull()
-  for (const { rect } of [titleEvidence, badgeEvidence]) {
-    expect(rect.width).toBeGreaterThan(0)
-    expect(rect.height).toBeGreaterThan(0)
-    expect(rect.x).toBeGreaterThanOrEqual(box!.x)
-    expect(rect.y).toBeGreaterThanOrEqual(box!.y)
-    expect(rect.x + rect.width).toBeLessThanOrEqual(box!.x + box!.width)
-    expect(rect.y + rect.height).toBeLessThanOrEqual(box!.y + box!.height)
+  const overview = dialog.getByRole('region', { name: '공개 채용공고', exact: true })
+  await expect(overview).toHaveCount(1)
+  await expect(dialog.locator('.data-source-options, button[aria-pressed]')).toHaveCount(0)
+  await expect(dialog.getByRole('button', { name: /샘플로 탐색|샘플 탐색/ })).toHaveCount(0)
+  await expect(dialog.getByText('선택됨', { exact: true })).toHaveCount(0)
+  const title = overview.getByRole('heading', { name: '공개 채용공고', exact: true })
+  const description = overview.locator('p')
+  const connectivity = overview.locator('small')
+  await expect(description).toHaveText('회사 공식 게시판과 공개 잡 사이트에서 수집한 공고로 탐색해요. 각 공고의 출처·원문·조회 시각을 확인할 수 있어요.')
+  await expect(connectivity).toHaveText('새 공고를 조회하려면 인터넷 연결이 필요해요.')
+  const evidence = []
+  for (const text of [title, description, connectivity]) {
+    await text.scrollIntoViewIfNeeded()
+    await expect(text).toBeVisible()
+    await expect(text).toBeInViewport()
+    const measured = await measureTextContrast(text)
+    expect(measured.effective.ratio, `${phase}: ${measured.text}`).toBeGreaterThanOrEqual(4.5)
+    expect(measured.rect.width).toBeGreaterThan(0)
+    expect(measured.rect.height).toBeGreaterThan(0)
+    evidence.push(measured)
   }
-  const first = titleEvidence.rect, second = badgeEvidence.rect
-  expect(first.x + first.width <= second.x || second.x + second.width <= first.x
-    || first.y + first.height <= second.y || second.y + second.height <= first.y,
-  `${phase}: current title and selected badge must not overlap`).toBe(true)
-  return {
-    phase, selected, publicDisabled, minimumContrast: 4.5,
-    policy: 'App readability requirement; inactive-control WCAG contrast exemption retained',
-    title: titleEvidence, badge: badgeEvidence,
-  }
+  expect(await overview.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+  return { phase, minimumContrast: 4.5, evidence }
 }

@@ -36,6 +36,7 @@ export function createSearchIndex(catalog: Catalog, profile: Profile): SearchInd
   const cities = new Map(catalog.cities.map(city => [city.id, city]))
   const profileSkills = new Set(profile.skills.map(skill => skill.toLowerCase()))
   return { entries: catalog.jobs.flatMap(previous => {
+    if (previous.source === 'sample') return []
     const job = upgradeJob(previous)
     if (!isTechnicalJob(job)) return []
     const company = companies.get(job.companyId)

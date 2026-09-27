@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import type { Page, Route, TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { writeFile } from 'node:fs/promises'
@@ -8,6 +8,7 @@ import {
 } from '../fixtures/catalog-revalidation'
 import { expectInitialCatalogRequest, watchApiRequests } from './helpers/api-requests'
 import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
+import { expectPublicOnlyDialog, resourceCheckedTest as test } from './helpers/public-app'
 
 const start = Date.parse(REVALIDATION_TIME)
 const iso = (offset: number) => new Date(start + offset).toISOString()
@@ -18,7 +19,7 @@ const note = 'PRIVATE_REVALIDATION_48_NOTE 다음 주 지원 준비 🌱'
 const query = (page: Page) => page.getByRole('textbox', { name: '도시, 회사 또는 포지션 검색', exact: true })
 type Reply = (route: Route) => Promise<void> | void
 
-async function setup(page: Page, catalog = revalidationCatalog(), source: 'public' | 'sample' = 'public') {
+async function setup(page: Page, catalog = revalidationCatalog(), view: 'explore' | 'saved' = 'explore') {
   let reply: Reply = route => route.fulfill({ json: catalog })
   let progressReply: Reply = route => route.fulfill({ status: 500, json: { error: 'Unexpected fictional progress request' } })
   const failures = { pageErrors: [] as string[], failedResources: [] as string[], externalRequests: [] as string[] }
@@ -48,17 +49,18 @@ async function setup(page: Page, catalog = revalidationCatalog(), source: 'publi
   await page.addInitScript(({ profile, exploration }) => {
     localStorage.setItem('orbit.v1.profile', JSON.stringify(profile))
     localStorage.setItem('orbit.v1.exploration', JSON.stringify(exploration))
-  }, { profile: REVALIDATION_PROFILE, exploration: { ...REVALIDATION_EXPLORATION, source } })
-  await page.goto('/')
+  }, { profile: REVALIDATION_PROFILE, exploration: { ...REVALIDATION_EXPLORATION, source: 'public' } })
+  await page.goto(view === 'saved' ? '/#saved' : '/')
   let initialAttempts = 0
   let initialCancelled = 0
-  if (source === 'public') {
+  if (view === 'explore') {
     const initial = await expectInitialCatalogRequest(page, traffic)
     initialAttempts = initial.attempts
     initialCancelled = initial.cancelled
     await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
   } else {
-    await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
+    await waitForSavedCommit(page)
+    await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
     expect(traffic.requests).toEqual([])
   }
   return {
@@ -227,7 +229,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await evidence(page, info, state, [ordinary, ordinary])
   })
 
-  test('manual refresh owns its monitor, a lost monitor recovers on return, and later sample and public choices defeat an older response', async ({ page }, info) => {
+  test('manual refresh owns its monitor, a lost monitor recovers on return, and saved navigation defeats an older response before public rejoin', async ({ page }, info) => {
     const state = await setup(page)
     const heldMonitors: Route[] = []
     state.respond(route => route.fulfill({ status: 202, headers: { 'Retry-After': '1' }, json: revalidationPartial(REVALIDATION_TIME) }))
@@ -249,23 +251,27 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await expect(page.getByRole('dialog').getByRole('progressbar')).toHaveAttribute('value', '1')
     await page.clock.fastForward(1000)
     await expect.poll(() => heldMonitors.length).toBe(2)
-    await page.getByRole('button', { name: /샘플로 탐색/ }).click()
-    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
+    await expectPublicOnlyDialog(page)
+    await page.getByRole('button', { name: '닫기', exact: true }).click()
+    await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ }).click()
+    await expect(page.locator('.saved-card')).toHaveCount(0)
     await expect.poll(() => state.traffic.requests.filter(request => request.error === 'net::ERR_ABORTED').length).toBe(state.initialCancelled + 1)
     await wallTime(page, 300000)
     await hint(page)
     expect(state.traffic.catalog()).toHaveLength(state.initialAttempts + 2)
     const latest: Route[] = []
     state.respond(route => { latest.push(route) })
-    await page.getByRole('button', { name: /공개 채용공고/ }).click()
+    await page.getByRole('button', { name: '기회 탐색', exact: true }).click()
     await expect.poll(() => latest.length).toBe(1)
+    await page.getByRole('button', { name: '공개 공고 조회 중', exact: true }).click()
     await heldMonitors[1].fulfill({ json: revalidationDelta(REVALIDATION_TIME) })
     await page.clock.runFor(20)
     await expect(page.locator('.data-loading')).toHaveCount(1)
     await expect(page.getByRole('dialog').getByRole('progressbar')).toHaveCount(0)
-    await expect(page.getByRole('button', { name: /공개 채용공고/ })).toHaveAttribute('aria-pressed', 'true')
-    await expect(page.getByRole('button', { name: /샘플로 탐색/ })).toHaveAttribute('aria-pressed', 'false')
-    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
+    await expectPublicOnlyDialog(page)
+    // Rejoining keeps only the previously received public partial snapshot.
+    // The canceled monitor's second company must not leak into this request.
+    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '1'])
     await latest[0].fulfill({ json: revalidationCatalog([revalidationJob('FinalChoice48', { fetchedAt: iso(300000) })], iso(300000)) })
     await expect(page.locator('.data-loading')).toHaveCount(0)
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '1'])
@@ -278,17 +284,21 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await evidence(page, info, state, [forced, monitor, ordinary, monitor, ordinary], 1)
   })
 
-  test('a failed switch keeps public selected with unknown counts, and a malformed refresh can recover while retained data is still fresh', async ({ page }, info) => {
-    const state = await setup(page, revalidationCatalog(), 'sample')
+  test('an explicit check from lazy saved storage keeps unknown counts on failure, then foreground and malformed-refresh recovery preserve public context', async ({ page }, info) => {
+    const state = await setup(page, revalidationCatalog(), 'saved')
     state.respond(route => route.fulfill({ status: 503, headers: { 'Retry-After': '120' }, json: {
       error: 'Fictional public retry48', code: 'CATALOG_UNAVAILABLE', retryAt: iso(120000),
     } }))
-    await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
-    await page.getByRole('button', { name: /공개 채용공고/ }).click()
+    await page.getByRole('button', { name: '공개 채용', exact: true }).click()
+    await expectPublicOnlyDialog(page)
+    await page.getByRole('button', { name: '공개 공고 다시 조회', exact: true }).click()
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveText('Fictional public retry48')
-    await expect(page.getByRole('button', { name: /공개 채용공고/ })).toHaveAttribute('aria-pressed', 'true')
-    await expect(page.getByRole('button', { name: /샘플로 탐색/ })).toHaveAttribute('aria-pressed', 'false')
+    await expectPublicOnlyDialog(page)
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
+    expect(state.traffic.catalog()).toHaveLength(1)
+    await page.getByRole('button', { name: '닫기', exact: true }).click()
+    await page.getByRole('button', { name: '기회 탐색', exact: true }).click()
+    await page.getByRole('button', { name: '공개 공고 연결 필요', exact: true }).click()
     expect(state.traffic.catalog()).toHaveLength(1)
     await page.clock.fastForward(8000)
     for (const offset of [60000, 119000]) {
@@ -326,6 +336,6 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     expect((await contextState(page)).exploration).toMatchObject(REVALIDATION_EXPLORATION)
     expect(state.traffic.requests.filter(request => request.status === 503)).toHaveLength(1)
     await audit(page, info)
-    await evidence(page, info, state, [ordinary, ordinary, forced, ordinary])
+    await evidence(page, info, state, [forced, ordinary, forced, ordinary])
   })
 })

@@ -50,7 +50,25 @@ export function Dialog({ title, eyebrow, children, onClose, fallbackFocus, class
     }
   }, [])
 
-  return createPortal(<dialog ref={ref} className={`dialog ${className}`} onCancel={event => { event.preventDefault(); closeRef.current() }} onClick={event => {
+  return createPortal(<dialog ref={ref} className={`dialog ${className}`} onCancel={event => { event.preventDefault(); closeRef.current() }} onKeyDown={event => {
+    if (event.key !== 'Tab' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.nativeEvent.isComposing) return
+    const dialog = event.currentTarget
+    // Native dialogs make the page inert, but Chromium can move Tab focus to
+    // browser chrome at a boundary. Keep the cycle in the current modal.
+    const targets = [...dialog.querySelectorAll<HTMLElement>(
+      'a[href], area[href], button, input, select, textarea, summary, [tabindex], [contenteditable]',
+    )].filter(target => target.tabIndex >= 0 && !target.matches(':disabled') && !target.closest('[inert]')
+      && target.getClientRects().length > 0 && getComputedStyle(target).visibility === 'visible')
+      .sort((left, right) => left.tabIndex === right.tabIndex ? 0 : (left.tabIndex || Infinity) - (right.tabIndex || Infinity))
+    const first = targets[0] ?? dialog
+    const last = targets[targets.length - 1] ?? dialog
+    const active = dialog.ownerDocument.activeElement
+    if (!targets.length || active === dialog || active === (event.shiftKey ? first : last)) {
+      event.preventDefault()
+      const next = event.shiftKey ? last : first
+      next.focus()
+    }
+  }} onClick={event => {
     if (event.target !== ref.current) return
     const rect = ref.current.getBoundingClientRect()
     if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeRef.current()

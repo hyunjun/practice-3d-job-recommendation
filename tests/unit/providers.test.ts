@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { JobSchema } from '../../shared/schemas'
-import { createSampleCatalog } from '../../shared/sample'
+import { publicProtocolCatalog } from '../fixtures/public-protocol'
 import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import { filterJobs, formatCompensation, formatJobSalary } from '../../shared/matching'
 import { BoardFetchError, CATALOG_POLICY, createCatalogService } from '../../server/catalog-service'
@@ -75,7 +75,7 @@ describe('provider-specific facts and common job identity', () => {
   it('separates regional discovery from country eligibility and does not turn office addresses into eligibility', () => {
     const job = normalizeAshbyJob(ashbyPosting({ location: 'Europe', workplaceType: 'Remote', isRemote: true }), ashby.id, POSTING_TIME)!
     expect(job).toMatchObject({ cityIds: [], remoteCountries: [], remoteScopeUnknown: true, remoteRegions: ['europe'] })
-    const catalog = { ...createSampleCatalog(), jobs: [job], companies: [ashby] }
+    const catalog = publicProtocolCatalog({ jobs: [job], companies: [ashby], fetchedAt: POSTING_TIME })
     expect(filterJobs(catalog, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, region: 'europe' })).toHaveLength(0)
     expect(filterJobs(catalog, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, region: 'europe', remoteEligibleOnly: false })).toHaveLength(1)
     expect(filterJobs(catalog, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, region: 'americas', remoteEligibleOnly: false })).toHaveLength(0)
@@ -103,7 +103,7 @@ describe('conditional and non-annual compensation', () => {
     expect(formatCompensation(salary.compensationRanges![1])).toBe('GBP 110,000–150,000 / 년')
     const job = { ...normalizeAshbyJob(ashbyPosting(), ashby.id, POSTING_TIME)!, ...salary }
     expect(formatJobSalary(job)).toBe('별도 보상 조건')
-    const catalog = { ...createSampleCatalog(), jobs: [job], companies: [ashby] }
+    const catalog = publicProtocolCatalog({ jobs: [job], companies: [ashby], fetchedAt: POSTING_TIME })
     expect(filterJobs(catalog, SAMPLE_PROFILE, DEFAULT_FILTERS)).toHaveLength(1)
     expect(filterJobs(catalog, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, includeUnknownSalary: false })).toHaveLength(0)
   })

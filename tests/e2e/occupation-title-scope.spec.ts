@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { sourceUiTest as test } from './helpers/source-public-page'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { readFile } from 'node:fs/promises'
@@ -14,7 +15,7 @@ import type { ScopeCase } from '../fixtures/occupation-title-scope'
 import { SEARCH_PROFILE, searchCatalog } from '../fixtures/search-catalog'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
 
-// Confirmed format: new assessments use v5; legacy v1/v2/v3/v4 remain readable.
+// Current assessments use v6; saved v1/v2/v3/v4 snapshots remain readable.
 const savedMenu = (page: Page) => page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: /저장한 기회/ })
 const close = (page: Page) => page.getByRole('button', { name: '닫기', exact: true }).click()
 

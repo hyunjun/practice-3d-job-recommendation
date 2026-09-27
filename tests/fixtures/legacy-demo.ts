@@ -1,8 +1,12 @@
-import { CITIES, CITY_BY_ID } from './cities'
-import { COMPANIES } from './companies'
-import type { Catalog, Job, Role, Salary, Visa, WorkMode } from './types'
+/** Prepared Stage65 historical fixture; move into tests/fixtures only after ownership transfers.
+ * Captured from authored source, never from a collected feed/cache. */
+import { CITIES, CITY_BY_ID, COMPANIES } from './legacy-demo-metadata'
+import type { Catalog, Job, Role, Salary, Visa, WorkMode } from '../../shared/types'
 
-// Hand-authored demonstration scenarios, not a representation of real vacancies.
+export type LegacyDemoJob = Omit<Job, 'source'> & { source: 'sample' }
+export type LegacyDemoCatalog = Omit<Catalog, 'source' | 'jobs'> & { source: 'sample'; jobs: LegacyDemoJob[] }
+
+// Historical hand-authored scenarios for migration tests, never runtime vacancies.
 // Every demo job points to the company's careers page, never to an invented application.
 const SCENARIOS: [string, string[]][] = [
   ['stripe', ['san-francisco', 'new-york', 'london', 'dublin', 'singapore']],
@@ -70,9 +74,9 @@ const COUNTRY_SALARIES: Record<string, Salary> = {
   IN: { min: 55000, max: 85000, currency: 'USD' },
 }
 
-export function createSampleCatalog(): Catalog {
+export function createLegacyDemoCatalog(): LegacyDemoCatalog {
   const fetchedAt = '2026-09-18T00:00:00.000Z'
-  const jobs: Job[] = []
+  const jobs: LegacyDemoJob[] = []
   SCENARIOS.forEach(([companyId, cityIds], companyIndex) => {
     const company = COMPANIES.find(item => item.id === companyId)!
     cityIds.forEach((cityId, cityIndex) => {
@@ -137,5 +141,5 @@ export function createSampleCatalog(): Catalog {
       source: 'sample', updatedAt: null, fetchedAt,
     })
   })
-  return { source: 'sample', fetchedAt, stale: false, companies: COMPANIES, cities: CITIES, jobs, boards: [], unmappedCount: 0 }
+  return structuredClone<LegacyDemoCatalog>({ source: 'sample', fetchedAt, stale: false, companies: COMPANIES, cities: CITIES, jobs, boards: [], unmappedCount: 0 })
 }

@@ -1,5 +1,6 @@
 import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { sourceUiTest as test } from './helpers/source-public-page'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { readFile } from 'node:fs/promises'
@@ -14,6 +15,7 @@ import type { PostingStatusIndex } from '../../shared/posting-status'
 import { DEFAULT_FILTERS } from '../../shared/types'
 import type { Catalog, Job, SavedJob } from '../../shared/types'
 import { ashbyPosting, leverPosting, POSTING_TIME, smartRecruitersPosting } from '../fixtures/public-postings'
+import { expectPublicSourceOverview } from './helpers/source-choice'
 
 test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(POSTING_TIME)) })
 
@@ -74,6 +76,7 @@ test('mixed public sources preserve legacy exploration, saved jobs, conditional 
   await expect(page.getByRole('button', { name: '2D 지도', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('orbit.v1.exploration') || '{}').source)).toBe('public')
   await page.getByRole('button', { name: '공개 채용', exact: true }).click()
+  await expectPublicSourceOverview(page)
   await expect(page.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText(['Ashby1개 회사', 'Lever1개 회사'])
   await page.locator('.board-details > summary').click()
   await expect(page.locator('.board-row').filter({ hasText: 'Supabase' })).toContainText('Ashby')

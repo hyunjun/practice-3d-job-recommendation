@@ -79,23 +79,31 @@ describe('public HTTP transfer and revalidation', () => {
     expect(head.headers.vary).toBe('Accept-Encoding')
   })
 
-  it('preserves sample mode, the legacy public alias and no-store on invalid or failed requests', async () => {
+  it('routes omitted and legacy source names to public collection, preserving no-store errors', async () => {
     const getCatalog = vi.fn(async () => catalog)
     const getPostingStatus = vi.fn(async () => index)
     const origin = await start({ getCatalog, getPostingStatus })
-    const sample = await requestBytes(origin, '/api/catalog')
-    expect(JSON.parse(sample.body.toString()).source).toBe('sample')
-    expect(sample.headers['cache-control']).toBe('no-store')
-    expect(getCatalog).not.toHaveBeenCalled()
-    const alias = await requestBytes(origin, '/api/catalog?source=greenhouse')
-    expect(JSON.parse(alias.body.toString())).toEqual(catalog)
-    expect(getCatalog).toHaveBeenCalledWith(false)
+    for (const path of ['/api/catalog', '/api/catalog?source=sample', '/api/catalog?source=greenhouse', '/api/catalog?source=public']) {
+      const response = await requestBytes(origin, path)
+      expect(response.status).toBe(200)
+      expect(JSON.parse(response.body.toString())).toEqual(catalog)
+      expect(JSON.parse(response.body.toString()).source).toBe('public')
+      expect(response.headers['cache-control']).toBe('private, no-cache, must-revalidate')
+      const conditional = await requestBytes(origin, path, { 'If-None-Match': response.headers.etag })
+      expect(conditional.status).toBe(304)
+      expect(conditional.body.length).toBe(0)
+      expect(conditional.headers.etag).toBe(response.headers.etag)
+      expect(conditional.headers.vary).toBe(response.headers.vary)
+      expect(conditional.headers['cache-control']).toBe(response.headers['cache-control'])
+    }
+    expect(getCatalog.mock.calls).toEqual(Array.from({ length: 8 }, () => [false]))
     for (const [path, status] of [['/api/catalog?source=other', 400], ['/api/catalog?source=public&source=sample', 400], ['/api/unknown', 404]] as const) {
       const result = await requestBytes(origin, path, { 'Accept-Encoding': 'br' })
       expect(result.status).toBe(status)
       expect(result.headers['cache-control']).toBe('no-store')
       expect(result.headers['content-encoding']).toBeUndefined()
     }
+    expect(getCatalog).toHaveBeenCalledTimes(8)
     getPostingStatus.mockRejectedValueOnce(new Error('unavailable'))
     const failed = await requestBytes(origin, '/api/posting-status', { 'If-None-Match': '*' })
     expect(failed.status).toBe(503)
@@ -179,6 +187,24 @@ describe('public HTTP transfer and revalidation', () => {
 })
 
 describe('opt-in asynchronous catalog HTTP contract', () => {
+  it.each(['', '?source=sample', '?source=greenhouse'])('uses public progressive collection for legacy request %s', async query => {
+    const getCatalog = vi.fn(async () => catalog)
+    const getProgressiveCatalog = vi.fn(async () => progressSnapshot(1))
+    const origin = await start({
+      getCatalog, getPostingStatus: async () => index, getProgressiveCatalog, getCatalogProgress: () => null,
+    })
+    const separator = query ? '&' : '?'
+    const response = await requestBytes(origin, `/api/catalog${query}${separator}refresh=1`, { Prefer: 'respond-async' })
+    expect(response.status).toBe(202)
+    expect(response.headers['cache-control']).toBe('no-store')
+    expect(response.headers.vary).toBe('Accept-Encoding, Prefer')
+    expect(response.headers.location).toBe(`/api/catalog/progress?id=${COLLECTION_ID}&after=1`)
+    expect(JSON.parse(response.body.toString())).toEqual(progressSnapshot(1))
+    expect(JSON.parse(response.body.toString()).catalog.source).toBe('public')
+    expect(getProgressiveCatalog.mock.calls).toEqual([[true]])
+    expect(getCatalog).not.toHaveBeenCalled()
+  })
+
   it('returns an immediate snapshot, empty unchanged progress and compressed company deltas without invoking the blocking collector', async () => {
     const getCatalog = vi.fn(async () => progressSnapshot(2).catalog)
     const getProgressiveCatalog = vi.fn(async () => ({ ...progressSnapshot() }))

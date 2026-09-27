@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { resourceCheckedTest as test } from './helpers/public-app'
 import type { Page, TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { writeFile } from 'node:fs/promises'
@@ -9,6 +10,7 @@ import {
   resumeReadEvents, afterResumeReadDelivery,
 } from '../fixtures/resume-import'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
+import { PUBLIC_PROTOCOL_TIME, publicProtocolCatalog } from '../fixtures/public-protocol'
 
 const CURRENT_FILENAME = 'current-resume-with-a-deliberately-long-filename-for-narrow-screens47.md'
 const SAVED_NOTE = '취소된 파일로 이 지원 기록을 바꾸지 않기 🌱'
@@ -17,7 +19,7 @@ const STORED_PROFILE = {
   skills: ['TypeScript', 'React'], desiredRole: 'frontend', residence: 'KR', linkedinUrl: '',
 }
 const EXPLORATION = {
-  source: 'sample', selectedId: 'london', panelTab: 'cities', mapMode: 'flat', citySort: 'salary', light: false,
+  source: 'public', selectedId: 'london', panelTab: 'cities', mapMode: 'flat', citySort: 'salary', light: false,
   filters: {
     query: 'React', region: 'europe', role: 'all', workMode: 'all', visa: 'all', employment: 'all',
     postingType: 'opening', salaryMin: 0, includeUnknownSalary: true, remoteEligibleOnly: true,
@@ -33,6 +35,7 @@ const cancel = (page: Page) => page.getByRole('button', { name: '파일 읽기 �
 const payload = (name: string, contents: string) => ({ name, mimeType: 'text/plain', buffer: Buffer.from(contents) })
 
 async function setup(page: Page, personal = false) {
+  await page.clock.setFixedTime(new Date(PUBLIC_PROTOCOL_TIME))
   const failures = { pageErrors: [] as string[], failedResources: [] as string[], blockedRequests: [] as string[] }
   const requests: {
     url: string; method: string; body: string | null; resourceType: string; mainDocument: boolean
@@ -66,6 +69,8 @@ async function setup(page: Page, personal = false) {
     failures.blockedRequests.push(target.href)
     return route.abort('blockedbyclient')
   })
+  // Install before the first navigation: automatic public startup must stay synthetic.
+  await page.route('**/api/catalog?source=public*', route => route.fulfill({ json: publicProtocolCatalog() }))
   await page.goto('/')
   await expect(profileButton(page)).toBeVisible()
   return { failures, requests }
@@ -110,6 +115,9 @@ async function privacy(page: Page, state: Awaited<ReturnType<typeof setup>>, inf
   expect(state.failures).toEqual({ pageErrors: [], failedResources: [], blockedRequests: [] })
   expect(state.requests.length).toBeGreaterThan(0)
   expect(state.requests.every(request => request.method === 'GET' && request.body === null)).toBe(true)
+  for (const request of state.requests.filter(request => new URL(request.url).pathname.startsWith('/api/'))) {
+    expect(new URL(request.url).pathname + new URL(request.url).search).toBe('/api/catalog?source=public')
+  }
   expect(state.requests).toContainEqual({
     url: new URL('/', info.project.use.baseURL!).href, method: 'GET', body: null,
     resourceType: 'document', mainDocument: true,

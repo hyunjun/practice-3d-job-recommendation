@@ -14,7 +14,7 @@ import {
   surveyImage, surveyJson, surveyNavigation, surveyRole, surveySearch,
 } from './helpers/public-company-survey'
 import { readSaved } from './helpers/saved-store'
-import { sourceChoice } from './helpers/source-choice'
+import { expectPublicSourceOverview } from './helpers/source-choice'
 import {
   assertSynthetic, catalog124, csvRows, downloadText, integrationServer,
   saveWithNote, sourceCredit, statusAction,
@@ -79,11 +79,12 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
         const row = data.locator('.board-row').filter({ has: page.getByText(name, { exact: true }) })
         await expect(row.getByRole('link', { name: `${name} 채용 페이지`, exact: true })).toHaveAttribute('href', WORKABLE_CAREER_URLS[id])
       }
-      await sourceChoice(page, 'sample').click()
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
-      await sourceChoice(page, 'public').click()
+      await expectPublicSourceOverview(page)
       await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '124', '75'])
       await surveyClose(page, surveyDataButton(page))
+      await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
+      await expect(page.locator('.saved-card')).toHaveCount(0)
+      await surveyNavigation(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
 
       await openRemote(page, 'Microsoft')
       await surveyRole(page, 'backend', 1)
@@ -174,7 +175,7 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
 
       destination = await browser.newContext({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
       const target = await destination.newPage()
-      const importedState = await seedSurvey(target, server.origin, { source: 'sample', hash: '#saved', clock: INTEGRATION_NOW })
+      const importedState = await seedSurvey(target, server.origin, { legacySource: 'sample', hash: '#saved', clock: INTEGRATION_NOW })
       await target.getByRole('button', { name: '기록 백업·복원', exact: true }).click()
       await target.getByLabel('백업 또는 복구 파일', { exact: true }).setInputFiles({
         name: 'source63-backup.json', mimeType: 'application/json', buffer: Buffer.from(backup),
@@ -335,7 +336,7 @@ test('real HTTP304 remains stable before each provider expiry and after an owned
     await server.verifyProductionBytes()
     // No page routing: exercise the real Chromium HTTP cache. The independent
     // launch configuration blocks external DNS and uses a fresh browser profile.
-    const state = await seedSurvey(page, server.origin, { source: 'sample', hash: '#saved', route: false, clock: INTEGRATION_NOW })
+    const state = await seedSurvey(page, server.origin, { legacySource: 'sample', hash: '#saved', route: false, clock: INTEGRATION_NOW })
     const fetchCatalog = () => page.evaluate(async () => {
       const response = await fetch('/api/catalog?source=public')
       return { status: response.status, catalog: await response.json() as Catalog }

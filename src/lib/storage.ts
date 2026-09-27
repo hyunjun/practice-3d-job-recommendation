@@ -72,13 +72,13 @@ export function loadCompare(): string[] {
 export function loadExploration(profile: Profile): ExplorationState {
   const filters: Filters = { ...DEFAULT_FILTERS, ...profile.preferences, role: profile.desiredRole }
   const fallback: ExplorationState = {
-    source: 'sample', filters, selectedId: null,
+    source: 'public', filters, selectedId: null,
     panelTab: filters.workMode === 'remote' ? 'remote' : 'cities',
     mapMode: 'globe', light: false, citySort: 'companies',
   }
   // Recover fields independently so an obsolete option does not discard a valid data source.
   const schema = z.object({
-    source: z.enum(['sample', 'public', 'greenhouse']).transform(source => source === 'greenhouse' ? 'public' as const : source).catch(fallback.source),
+    source: z.enum(['sample', 'public', 'greenhouse']).transform(() => 'public' as const).catch('public'),
     filters: z.object({
       query: z.string().max(500).catch(filters.query),
       region: z.enum(['all', 'americas', 'europe', 'asia-pacific']).catch(filters.region),
@@ -105,8 +105,8 @@ export function loadExploration(profile: Profile): ExplorationState {
 }
 
 export function persistExploration(state: ExplorationState, rememberConditions: boolean): boolean {
-  return persist(STORAGE_KEYS.exploration, rememberConditions ? state : {
-    ...state, filters: { ...DEFAULT_FILTERS }, selectedId: null, panelTab: 'cities',
+  return persist(STORAGE_KEYS.exploration, rememberConditions ? { ...state, source: 'public' } : {
+    ...state, source: 'public', filters: { ...DEFAULT_FILTERS }, selectedId: null, panelTab: 'cities',
   })
 }
 
@@ -122,7 +122,7 @@ export function deleteProfile(): void {
 
 export function exportSavedCsv(saved: SavedJob[], observations?: ReadonlyMap<string, PostingObservation>): void {
   const exportedAt = new Date()
-  const current = saved.map(item => {
+  const current = saved.filter(item => item.job.source !== 'sample').map(item => {
     const job = upgradeJob(item.job, { preserveUnverifiablePay: true })
     return { ...item, job, workplace: workplaceCountryInfo(job) }
   })

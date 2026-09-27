@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { createSampleCatalog } from '../../shared/sample'
+import { PUBLIC_PROTOCOL_COMPANIES, publicProtocolJob } from '../fixtures/public-protocol'
 import { createSavedBackup, MAX_IMPORT_RECORDS, MAX_SAVED_FILE_BYTES, parseSavedImport, savedDifferences } from '../../shared/saved-backup'
 import type { SavedJob } from '../../shared/types'
 
-const sample = createSampleCatalog()
 const record: SavedJob = {
-  job: sample.jobs[0], company: sample.companies.find(company => company.id === sample.jobs[0].companyId)!,
+  job: publicProtocolJob('backup'), company: PUBLIC_PROTOCOL_COMPANIES[0],
   savedAt: '2026-09-19T08:10:00.000Z', status: 'applied', note: '지원 준비\n=SUM(A1:A2)\n따옴표 "기록"과 이모지 🌏',
 }
 const backup = (records: unknown[]) => JSON.stringify({ format: 'orbit-saved-backup', version: 1, records })
@@ -15,7 +14,7 @@ describe('portable saved record files', () => {
     const records = [record, { ...record, job: { ...record.job, id: 'second' }, note: 'Latest draft', status: 'saved' as const }]
     const text = createSavedBackup(records, 1, new Date('2026-09-19T10:00:00.000Z'))
     const parsed = parseSavedImport(`\uFEFF${text}`)
-    expect(parsed).toMatchObject({ format: 'backup', exportedAt: '2026-09-19T10:00:00.000Z', invalid: 0, unreadableSources: 0, duplicates: 0 })
+    expect(parsed).toMatchObject({ format: 'backup', exportedAt: '2026-09-19T10:00:00.000Z', invalid: 0, unreadableSources: 0, duplicates: 0, excludedSamples: 0 })
     expect(parsed.groups.map(group => group.variants[0])).toEqual(records)
     expect(JSON.parse(text)).toMatchObject({ includesUnsavedChanges: true })
     expect(Object.keys(JSON.parse(text))).toEqual(['format', 'version', 'exportedAt', 'includesUnsavedChanges', 'records'])

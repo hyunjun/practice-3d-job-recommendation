@@ -9,7 +9,6 @@ interface Props {
   analysis: RecoveryAnalysis | null
   filters: Filters
   scope: SearchScope
-  sample: boolean
   onApply: (suggestion: RecoverySuggestion) => void
   onNavigate: (scope: SearchScope) => void
   onFilters: () => void
@@ -17,7 +16,7 @@ interface Props {
   onData: () => void
 }
 
-export function SearchRecovery({ analysis, filters, scope, sample, onApply, onNavigate, onFilters, onProfile, onData }: Props) {
+export function SearchRecovery({ analysis, filters, scope, onApply, onNavigate, onFilters, onProfile, onData }: Props) {
   const id = useId()
   if (!analysis) return null
   return <section className="search-recovery" aria-labelledby={`${id}-title`}>
@@ -64,7 +63,7 @@ export function SearchRecovery({ analysis, filters, scope, sample, onApply, onNa
           </button>
         </article>
       })}
-      <p className="recovery-count-note">{sample ? '샘플 시나리오' : '현재 불러온 대상 게시판 공고'} 기준입니다. 다른 조건과 프로필은 유지하며, 조회 결과가 바뀌면 후보 수도 달라집니다.</p>
+      <p className="recovery-count-note">현재 불러온 대상 게시판 공고 기준입니다. 다른 조건과 프로필은 유지하며, 조회 결과가 바뀌면 후보 수도 달라집니다.</p>
     </div>}
     <div className="recovery-actions">
       <button className="button secondary" onClick={onFilters}><SlidersHorizontal size={14} />조건 직접 조정</button>

@@ -1,22 +1,24 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { resourceCheckedTest as test } from './helpers/public-app'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { readFile } from 'node:fs/promises'
-import { createSampleCatalog } from '../../shared/sample'
+import { PUBLIC_PROTOCOL_COMPANIES, PUBLIC_PROTOCOL_TIME, publicProtocolJob } from '../fixtures/public-protocol'
 import { createSavedBackup } from '../../shared/saved-backup'
 import { SAMPLE_PROFILE } from '../../shared/types'
 import type { SavedJob } from '../../shared/types'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
 
-const sample = createSampleCatalog()
+test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(PUBLIC_PROTOCOL_TIME)) })
+
 function record(id: string, note = '', status: SavedJob['status'] = 'saved'): SavedJob {
-  const job = { ...sample.jobs[0], id, title: `Backup fixture ${id}` }
-  return { job, company: sample.companies.find(company => company.id === job.companyId)!, savedAt: '2026-09-19T08:00:00.000Z', status, note }
+  const job = publicProtocolJob(id, { id, title: `Backup fixture ${id}` })
+  return { job, company: PUBLIC_PROTOCOL_COMPANIES[0], savedAt: '2026-09-19T08:00:00.000Z', status, note }
 }
 async function seed(page: Page, records: unknown[]) {
   await page.addInitScript(records => {
     localStorage.setItem('orbit.v1.saved', JSON.stringify(records))
-    localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'sample', mapMode: 'flat' }))
+    localStorage.setItem('orbit.v1.exploration', JSON.stringify({ source: 'public', mapMode: 'flat' }))
   }, records)
   await page.goto('/#saved')
   await waitForSavedCommit(page)
@@ -56,7 +58,8 @@ test('round-trips full records into a fresh browser context without transferring
     await target.reload()
     expect(await readSaved(target)).toEqual(records)
     expect(await target.evaluate(() => localStorage.getItem('orbit.v1.profile'))).toBeNull()
-    expect(requests.every(request => request.body === null && !request.url.includes('PRIVATE-BACKUP-NOTE'))).toBe(true)
+    // Direct saved-only import, backup and reload must make no API attempt at all.
+    expect(requests).toEqual([])
   } finally { await destination.close() }
 })
 

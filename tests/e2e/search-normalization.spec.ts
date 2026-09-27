@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { resourceCheckedTest as test } from './helpers/public-app'
 import type { Page, TestInfo } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import { DEFAULT_FILTERS } from '../../shared/types'
@@ -57,7 +58,7 @@ async function setup(page: Page, options: {
   }, {
     origin, profile: NORMALIZATION_PROFILE, records: options.saved ?? [],
     filters: options.filters ?? NORMALIZATION_FILTERS,
-    panelTab: options.panelTab ?? 'unmapped', source: options.savedOnly ? 'sample' : 'public',
+    panelTab: options.panelTab ?? 'unmapped', source: 'public',
   })
   await page.goto(options.savedOnly ? '/#saved' : '/')
   await waitForSavedCommit(page)

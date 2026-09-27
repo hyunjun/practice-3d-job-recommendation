@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { qualificationFacts, upgradeJobQualifications, formatExperienceYears } from '../../shared/job-qualifications'
 import { matchJob, filterJobs } from '../../shared/matching'
 import { JobSchema } from '../../shared/schemas'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
+import { publicProtocolCatalog, publicProtocolJob } from '../fixtures/public-protocol'
 import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Job } from '../../shared/types'
 import { normalizeJob } from '../../server/normalize'
@@ -10,9 +11,7 @@ import { normalizeAshbyJob } from '../../server/providers/ashby'
 import { normalizeLeverJob } from '../../server/providers/lever'
 
 const now = '2026-09-19T07:00:00.000Z'
-const demo = createSampleCatalog()
-const makeJob = (text: string): Job => ({
-  ...demo.jobs[0], id: 'greenhouse-stripe-qualifications', companyId: 'stripe', source: 'greenhouse',
+const makeJob = (text: string): Job => publicProtocolJob('qualifications', {
   workMode: 'hybrid', cityIds: ['london'], fetchedAt: now, description: text, ...qualificationFacts(text),
 })
 const rules = (text: string) => qualificationFacts(text).qualifications!
@@ -197,8 +196,8 @@ describe('ranking and explanations follow the kind of qualification', () => {
     const match = matchJob(job, SAMPLE_PROFILE)
     expect(match.matchedSkills).toEqual([])
     expect(match.skillSummary).toBe('기술 자격 요건 확인 필요')
-    expect(filterJobs({ ...demo, jobs: [job] }, SAMPLE_PROFILE, DEFAULT_FILTERS)).toHaveLength(1)
-    expect(filterJobs({ ...demo, jobs: [job] }, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, query: 'Python' })).toHaveLength(1)
+    expect(filterJobs(publicProtocolCatalog({ jobs: [job], fetchedAt: now }), SAMPLE_PROFILE, DEFAULT_FILTERS)).toHaveLength(1)
+    expect(filterJobs(publicProtocolCatalog({ jobs: [job], fetchedAt: now }), SAMPLE_PROFILE, { ...DEFAULT_FILTERS, query: 'Python' })).toHaveLength(1)
   })
 
   it('does not double-count the same required skill just because it is repeated', () => {
@@ -229,6 +228,7 @@ describe('provider and snapshot integration', () => {
     expect(updated).toMatchObject({ id: old.id, fetchedAt: now, minExperience: 3, skills: ['Python', 'Rust'], description: old.description })
     expect(upgradeJobQualifications(updated)).toBe(updated)
     expect(old.minExperience).toBe(5)
-    expect(upgradeJobQualifications(demo.jobs[0])).toBe(demo.jobs[0])
+    const historical = createLegacyDemoCatalog().jobs[0]
+    expect(upgradeJobQualifications(historical)).toBe(historical)
   })
 })

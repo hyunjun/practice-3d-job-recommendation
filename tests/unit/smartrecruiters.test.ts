@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { needsOccupationDescription, upgradeJobOccupation } from '../../shared/job-occupation'
 import { JobSchema } from '../../shared/schemas'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import { OCCUPATION_VERSION } from '../../shared/types'
 import type { Company, Job, SavedJob } from '../../shared/types'
 import { decodeSavedJobs } from '../../shared/saved-jobs'
@@ -109,7 +109,7 @@ describe('SmartRecruiters public facts', () => {
     expect(normalize({ customField: [{ fieldLabel: 'Management Level', valueLabel: 'People Manager' }] })).toBeNull()
     expect(normalize({ active: false })).toBeNull()
     expect(normalize({ visibility: 'INTERNAL' })).toBeNull()
-    const sample = createSampleCatalog()
+    const sample = createLegacyDemoCatalog()
     expect(sample.companies).toHaveLength(32)
     expect(sample.jobs).toHaveLength(179)
   })

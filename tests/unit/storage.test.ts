@@ -26,8 +26,8 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('restoring exploration without changing profile preferences', () => {
-  it('migrates Greenhouse mode to public mode without resetting search and display preferences', () => {
-    values.set(STORAGE_KEYS.exploration, JSON.stringify({ ...exploration, source: 'greenhouse' }))
+  it.each(['greenhouse', 'sample'])('migrates legacy %s mode to public without resetting search and display preferences', source => {
+    values.set(STORAGE_KEYS.exploration, JSON.stringify({ ...exploration, source }))
     expect(loadExploration(personal)).toEqual(exploration)
   })
 
@@ -36,7 +36,7 @@ describe('restoring exploration without changing profile preferences', () => {
     const restored = loadExploration(loadProfile())
     expect(restored.filters).toMatchObject({ role: 'backend', workMode: 'remote', visa: 'supported', salaryMin: 130000 })
     expect(restored.panelTab).toBe('remote')
-    expect(restored.source).toBe('sample')
+    expect(restored.source).toBe('public')
   })
 
   it('retains an explicit filter reset instead of reapplying the old preferred role', () => {
@@ -65,7 +65,7 @@ describe('restoring exploration without changing profile preferences', () => {
   it('does not restore a city outside the selected region or an unknown data source', () => {
     values.set(STORAGE_KEYS.exploration, JSON.stringify({ ...exploration, source: 'unknown-provider', selectedId: 'seoul' }))
     const restored = loadExploration(SAMPLE_PROFILE)
-    expect(restored.source).toBe('sample')
+    expect(restored.source).toBe('public')
     expect(restored.selectedId).toBeNull()
     expect(restored.filters.region).toBe('europe')
   })

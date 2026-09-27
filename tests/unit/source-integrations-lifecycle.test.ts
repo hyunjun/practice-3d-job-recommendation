@@ -5,7 +5,6 @@ import path from 'node:path'
 import type { Catalog, Company, Job, JobProvider } from '../../shared/types'
 import { ageCatalog, catalogNeedsRevalidation, jobFreshness } from '../../shared/catalog-freshness'
 import { PostingStatusIndexSchema } from '../../shared/posting-status'
-import { createSampleCatalog } from '../../shared/sample'
 import { createFileBoardCache } from '../../server/board-cache'
 import type { CachedBoard } from '../../server/board-cache'
 import { loadBoardConfiguration } from '../../server/board-config'
@@ -113,7 +112,7 @@ async function lifecycle(companies = [integrationCompany('microsoft'), integrati
 }
 
 describe('daily source registration, cache and visible age', () => {
-  it('adds exactly the approved ten defaults after the unchanged old36 and approved47, leaving samples32/179/22', async () => {
+  it('keeps the approved ten after the unchanged old36 and approved47 within the124 public-only defaults', async () => {
     const cwd = await directory()
     const configuration = await loadBoardConfiguration({ cwd })
     const identity = ({ id, name, board, provider }: Company) => ({ id, name, board, provider })
@@ -131,8 +130,7 @@ describe('daily source registration, cache and visible age', () => {
       expect(configuration.companies.some(company => company.id === excluded)).toBe(false)
     for (const [id, url] of Object.entries(WORKABLE_CAREER_URLS))
       expect(configuration.companies.find(company => company.id === id)!.careerUrl).toBe(url)
-    const sample = createSampleCatalog()
-    expect([sample.companies.length, sample.jobs.length, sample.cities.length]).toEqual([32, 179, 22])
+    expect(configuration.companies.every(company => company.provider && company.board)).toBe(true)
   })
 
   it('collects only the ten missing companies from an old83 cache and keeps old clocks and records on disk', async () => {

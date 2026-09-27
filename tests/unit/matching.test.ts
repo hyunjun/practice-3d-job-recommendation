@@ -1,21 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { CITIES } from '../../shared/cities'
-import { COMPANIES } from '../../shared/companies'
+import { PUBLIC_PROTOCOL_COMPANIES as COMPANIES, publicProtocolCatalog, publicProtocolJob } from '../fixtures/public-protocol'
 import { filterJobs, groupCities, groupCompanies, isRemoteEligible, matchJob, medianSalary, safeExternalUrl, toUsd } from '../../shared/matching'
-import { createSampleCatalog } from '../../shared/sample'
+import { createLegacyDemoCatalog } from '../fixtures/legacy-demo'
 import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Catalog, Job } from '../../shared/types'
 
-const demo = createSampleCatalog()
-const job = (overrides: Partial<Job>): Job => ({ ...demo.jobs[0], id: 'test-job', skills: ['Python', 'AWS'], minExperience: 3, visa: 'unknown', ...overrides })
-const catalog = (jobs: Job[]): Catalog => ({ ...demo, jobs, companies: COMPANIES, cities: CITIES })
+const job = (overrides: Partial<Job>): Job => publicProtocolJob('test-job', {
+  id: 'test-job', skills: ['Python', 'AWS'], minExperience: 3, visa: 'unknown', ...overrides, source: 'greenhouse',
+})
+const catalog = (jobs: Job[]): Catalog => publicProtocolCatalog({ jobs, companies: COMPANIES })
 
 describe('company counts and actual workplaces', () => {
   it('deduplicates a company within a city and globally, while including each hiring city', () => {
     const data = catalog([
-      job({ id: 'one', companyId: 'stripe', cityIds: ['london', 'berlin'] }),
-      job({ id: 'two', companyId: 'stripe', cityIds: ['london'] }),
-      job({ id: 'three', companyId: 'figma', cityIds: ['london'] }),
+      job({ id: 'one', companyId: 'fixture-aster-transit', cityIds: ['london', 'berlin'] }),
+      job({ id: 'two', companyId: 'fixture-aster-transit', cityIds: ['london'] }),
+      job({ id: 'three', companyId: 'fixture-cedar-loom', cityIds: ['london'] }),
     ])
     const matches = filterJobs(data, SAMPLE_PROFILE, DEFAULT_FILTERS)
     const cities = groupCities(data, matches, DEFAULT_FILTERS)
@@ -87,9 +87,9 @@ describe('hard conditions and unknown information', () => {
   })
 
   it('searches translated city names as well as company and position names', () => {
-    const data = catalog([job({ cityIds: ['london'], companyId: 'stripe' })])
-    expect(filterJobs(data, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, query: '런던 Stripe' })).toHaveLength(1)
-    expect(filterJobs(data, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, query: '서울 Stripe' })).toHaveLength(0)
+    const data = catalog([job({ cityIds: ['london'], companyId: 'fixture-aster-transit' })])
+    expect(filterJobs(data, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, query: '런던 Aster Transit' })).toHaveLength(1)
+    expect(filterJobs(data, SAMPLE_PROFILE, { ...DEFAULT_FILTERS, query: '서울 Aster Transit' })).toHaveLength(0)
   })
 
   it('retains uncertainty and experience gaps in recommendation explanations', () => {
@@ -108,13 +108,14 @@ describe('hard conditions and unknown information', () => {
   })
 })
 
-describe('sample integrity and outbound links', () => {
-  it('labels every sample job and links to a real company careers page', () => {
+describe('historical sample integrity and outbound links', () => {
+  it('retains source labels and original career links in the frozen historical fixture', () => {
+    const demo = createLegacyDemoCatalog()
     expect(new Set(demo.jobs.map(item => item.id)).size).toBe(demo.jobs.length)
     for (const item of demo.jobs) {
       expect(item.source).toBe('sample')
-      expect(item.url).toBe(COMPANIES.find(company => company.id === item.companyId)?.careerUrl)
-      for (const id of item.cityIds) expect(CITIES.some(city => city.id === id)).toBe(true)
+      expect(item.url).toBe(demo.companies.find(company => company.id === item.companyId)?.careerUrl)
+      for (const id of item.cityIds) expect(demo.cities.some(city => city.id === id)).toBe(true)
     }
   })
 

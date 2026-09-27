@@ -11,7 +11,7 @@ import {
   legacyFinanceDeveloper, legacyFinanceJob, legacyFinanceSaved,
 } from '../fixtures/finance-occupation'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
-import { sourceChoice } from './helpers/source-choice'
+import { expectPublicSourceOverview } from './helpers/source-choice'
 
 test.use({ serviceWorkers: 'block' })
 const close = (page: Page) => page.getByRole('button', { name: '닫기', exact: true }).click()
@@ -186,7 +186,7 @@ for (const width of [1440, 320]) {
     expect(traffic.errors).toEqual([])
   })
 
-  test(`v4 saved finance remains readable as 기타 직군 through CSV, JSON, source changes and context restart at ${width}px`, async ({ page, browser, baseURL }, info) => {
+  test(`v4 saved finance remains readable as 기타 직군 through CSV, JSON, public rejoin and context restart at ${width}px`, async ({ page, browser, baseURL }, info) => {
     await page.setViewportSize({ width, height: 960 })
     await page.clock.setFixedTime(new Date('2026-09-27T02:00:10.000Z'))
     await seed(page, true)
@@ -226,17 +226,17 @@ for (const width of [1440, 320]) {
     await expect(page.locator('.posting-notice.changed, .posting-notice.missing')).toHaveCount(0)
     const records = await expectFinanceSaved(page)
     await page.getByRole('button', { name: '공개 채용', exact: true }).click()
-    await sourceChoice(page, 'sample').click()
-    // Sample selection is client-side; the existing sample catalog is reused.
-    await expect(sourceChoice(page, 'sample')).toHaveAttribute('aria-pressed', 'true')
-    await close(page)
-    await expect(page.getByRole('button', { name: '샘플 탐색', exact: true })).toBeVisible()
-    await expect(page.locator('.saved-role')).toHaveText('기타 직군')
-    expect(await expectFinanceSaved(page)).toEqual(records)
-    await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
-    await sourceChoice(page, 'public').click()
+    await expectPublicSourceOverview(page)
     await expect(page.locator('.coverage-stats strong')).toHaveText(['2', '1', '1'])
     await close(page)
+    await expect(page.locator('.saved-role')).toHaveText('기타 직군')
+    expect(await expectFinanceSaved(page)).toEqual(records)
+    await page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('button', { name: '기회 탐색', exact: true }).click()
+    await titles(page, ['Backend Software Engineer, Finance Ledger'])
+    await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '1'])
+    await savedMenu(page).click()
+    await expect(page.locator('.saved-role')).toHaveText('기타 직군')
+    expect(await expectFinanceSaved(page)).toEqual(records)
     await expect(page.locator('.saved-status')).toHaveText('지원 완료')
     const csvDownload = page.waitForEvent('download')
     await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
@@ -280,6 +280,7 @@ for (const width of [1440, 320]) {
       expect(await expectFinanceSaved(target)).toEqual(records)
       await target.reload()
       expect(await expectFinanceSaved(target)).toEqual(records)
+      expect(restartedTraffic.requests).toEqual([])
       expect(restartedTraffic.unexpected).toEqual([])
       expect(restartedTraffic.errors).toEqual([])
     } finally { await restarted.close() }

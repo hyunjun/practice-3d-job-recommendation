@@ -46,7 +46,8 @@ function date(value: string): string {
 }
 function recoveryLabel(source: SavedRecovery) {
   return source.kind === 'legacy' ? '이전 목록의 보관 원본'
-    : source.kind === 'additional-legacy' ? '이전 형식의 브라우저 사본' : '읽을 수 없는 저장 항목'
+    : source.kind === 'additional-legacy' ? '이전 형식의 브라우저 사본'
+    : source.kind === 'retired-samples' ? '이전 가상 공고의 메모·기록' : '읽을 수 없는 저장 항목'
 }
 function makeReview(name: string, parsed: ParsedSavedImport, base: Base): Review {
   const existing = new Set([...base.records.map(record => record.job.id), ...base.unreadableIds])
@@ -168,6 +169,7 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
             {review.parsed.exportedAt && <small>{date(review.parsed.exportedAt)}에 만든 파일</small>}
             <p>공고 {rows.length}개 · 새 공고 {rows.filter(row => row.state === 'new').length}개 · 현재와 다른 공고 {rows.filter(row => row.state === 'different').length}개 · 같은 기록 {rows.filter(row => row.state === 'same').length}개</p>
             {(review.parsed.invalid > 0 || review.parsed.unreadableSources > 0) && <p className="saved-file-warning">읽을 수 없는 항목 {review.parsed.invalid}개 · 읽을 수 없는 원본 묶음 {review.parsed.unreadableSources}개는 가져오지 않아요. 선택한 원본 파일은 바꾸지 않아요.</p>}
+            {review.parsed.excludedSamples > 0 && <p className="saved-file-warning">이전 가상 공고 {review.parsed.excludedSamples}개는 가져오기에서 제외했어요. 메모와 지원 기록은 선택한 원본 파일에 그대로 남아 있으며, 현재 공고 목록에는 추가하지 않아요.</p>}
             {review.parsed.duplicates > 0 && <p className="saved-file-warning">파일 안에 같은 공고가 {review.parsed.duplicates}번 더 있어요. 내용이 다르면 사용할 기록을 선택할 수 있어요.</p>}
             {stale && <p className="saved-file-warning">검토 중 현재 목록이 갱신됐어요. 다시 비교한 뒤 반영해 주세요.</p>}
             {rows.some(row => row.state === 'blocked') && <p className="saved-file-warning">기존 원본을 읽을 수 없는 공고는 선택할 수 없어요. 아래 보관 원본을 먼저 확인해 주세요.</p>}
@@ -207,7 +209,7 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
       {storage.recovery.length > 0 && <section className="saved-recovery-management" aria-labelledby="saved-recovery-title">
         <h3 id="saved-recovery-title">따로 보관한 원본 관리</h3>
         <p>이전 목록 전체에는 이미 삭제한 공고의 메모도 남아 있을 수 있어요. 필요한 보관본은 내려받은 뒤 정리할 수 있어요.</p>
-        {storage.recovery.map((source, index) => <div className="saved-recovery-source" key={`${source.kind}-${index}`}><div><strong>{recoveryLabel(source)}</strong><small>{source.count === null ? '일부 기록을 읽을 수 없거나 별도 검토가 필요해요.' : `목록에 합치지 못한 항목 ${source.count}개`}</small></div><div className="saved-storage-actions"><button className="text-button" onClick={() => { try { downloadSavedRecovery([source]); setError(null) } catch { setError('원본 파일을 만들지 못했어요. 보관본은 그대로 남아 있어요.') } }}><Download size={14} />이 원본 내려받기</button><button className="text-button muted" disabled={!canWrite} onClick={() => { setRemoving(source); setError(null); setMessage(null) }}><Trash2 size={14} />보관본 삭제</button></div></div>)}
+        {storage.recovery.map((source, index) => <div className="saved-recovery-source" key={`${source.kind}-${index}`}><div><strong>{recoveryLabel(source)}</strong><small>{source.kind === 'retired-samples' ? `예전 메모·지원 상태·원본 ${source.count}개를 보관했어요. 실제 공고 목록에는 포함하지 않아요.` : source.count === null ? '일부 기록을 읽을 수 없거나 별도 검토가 필요해요.' : `목록에 합치지 못한 항목 ${source.count}개`}</small></div><div className="saved-storage-actions"><button className="text-button" onClick={() => { try { downloadSavedRecovery([source]); setError(null) } catch { setError('원본 파일을 만들지 못했어요. 보관본은 그대로 남아 있어요.') } }}><Download size={14} />이 원본 내려받기</button><button className="text-button muted" disabled={!canWrite} onClick={() => { setRemoving(source); setError(null); setMessage(null) }}><Trash2 size={14} />보관본 삭제</button></div></div>)}
         {removing && <div className="saved-recovery-confirm" role="group" aria-label="보관본 삭제 확인">
           <strong>{recoveryLabel(removing)}을 삭제할까요?</strong><p>선택한 보관본만 삭제하며 되돌릴 수 없어요. 현재 공고 목록, 다른 보관본과 내려받은 파일은 유지해요.</p>
           {removing.kind === 'additional-legacy' && <p>이전 버전의 ORBIT 탭이 열려 있다면 먼저 닫아 주세요. 이 사본은 다른 탭의 동시 수정을 잠글 수 없고, 이전 탭이 다시 기록할 수도 있어요.</p>}

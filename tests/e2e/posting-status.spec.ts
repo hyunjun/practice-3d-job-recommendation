@@ -1,12 +1,13 @@
 import { readSavedJson, waitForSavedCommit } from './helpers/saved-store'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { resourceCheckedTest as test } from './helpers/public-app'
 import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { readFile } from 'node:fs/promises'
 import { PUBLIC_COMPANIES } from '../../shared/companies'
 import { createJobRevision } from '../../shared/posting-status'
 import type { PostingStatusIndex } from '../../shared/posting-status'
-import { createSampleCatalog } from '../../shared/sample'
+import { LEGACY_POSTING_BOOKMARK } from '../fixtures/legacy-saved'
 import { DEFAULT_FILTERS, SAMPLE_PROFILE } from '../../shared/types'
 import type { Company, Job, SavedJob } from '../../shared/types'
 import { normalizeJob } from '../../server/normalize'
@@ -34,10 +35,8 @@ const jobs = [
   fixture(spotify, 7703, 'missing fixture'), fixture(figma, 7704, 'outage fixture'),
   fixture(stripe, 7705, 'outside map fixture'),
 ]
-const sample = createSampleCatalog()
 const saved: SavedJob[] = [
   ...jobs.map(job => ({ job, company: companies.find(company => company.id === job.companyId)!, savedAt: iso(BASE - 60_000), status: 'applied' as const, note: `Private note ${job.id}` })),
-  { job: sample.jobs[0], company: sample.companies.find(company => company.id === sample.jobs[0].companyId)!, savedAt: iso(BASE - 60_000), status: 'saved', note: 'Sample bookmark' },
 ]
 
 async function makeIndex(): Promise<PostingStatusIndex> {
@@ -63,28 +62,30 @@ async function makeIndex(): Promise<PostingStatusIndex> {
   }
 }
 
-async function restore(page: Page, records = saved) {
+async function restore(page: Page, records = saved, activeCount = records.length) {
   await page.clock.install({ time: new Date(BASE + 10_000) })
   await page.addInitScript(({ records, profile, filters }) => {
     if (!localStorage.getItem('orbit.v1.saved')) localStorage.setItem('orbit.v1.saved', JSON.stringify(records))
     localStorage.setItem('orbit.v1.profile', JSON.stringify({ ...profile, kind: 'personal', name: 'Private profile fixture' }))
     if (!localStorage.getItem('orbit.v1.exploration')) localStorage.setItem('orbit.v1.exploration', JSON.stringify({
-      source: 'sample', mapMode: 'flat', selectedId: 'london', filters: { ...filters, query: 'keep this search', region: 'europe' },
+      source: 'public', mapMode: 'flat', selectedId: 'london', filters: { ...filters, query: 'keep this search', region: 'europe' },
     }))
   }, { records, profile: SAMPLE_PROFILE, filters: DEFAULT_FILTERS })
   await page.goto('/#saved')
-  await expect(page.locator('.saved-card')).toHaveCount(records.length)
+  await expect(page.locator('.saved-card')).toHaveCount(activeCount)
 }
 const card = (page: Page, text: string) => page.locator('.saved-card').filter({ hasText: text })
 
-test('explicit status checks compare locally, preserve private records and export separate application and posting states', async ({ page }) => {
+test('explicit status checks compare public records locally, export separate states and preserve a retired neighbour only in recovery', async ({ page }) => {
   const index = await makeIndex()
   const requests: { url: string; method: string; body: string | null }[] = []
   await page.route('**/api/posting-status*', route => {
     requests.push({ url: route.request().url(), method: route.request().method(), body: route.request().postData() })
     return route.fulfill({ json: index })
   })
-  await restore(page)
+  const original = [...saved, LEGACY_POSTING_BOOKMARK]
+  await restore(page, original, 5)
+  await expect(page.locator('.saved-card').filter({ hasText: 'Historical fictional bookmark' })).toHaveCount(0)
   expect(requests).toHaveLength(0)
   await expect(page.locator('.posting-notice.unchecked')).toHaveCount(5)
   const before = ({ saved: await readSavedJson(page), ...(await page.evaluate(() => ({
@@ -115,7 +116,15 @@ test('explicit status checks compare locally, preserve private records and expor
   const downloading = page.waitForEvent('download')
   await page.getByRole('button', { name: 'CSV 내보내기', exact: true }).click()
   const csv = await readFile((await (await downloading).path())!, 'utf8')
-  for (const value of ['공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '표시 내용 일치', '미확인', '저장 내용과 다른 항목', '지원 완료', '공개 목록에서 미확인', '포지션 · 보상 · 지원 링크', 'Sample bookmark']) expect(csv).toContain(value)
+  for (const value of ['공개 게시 상태', '게시 목록 확인 시각', '내용 비교', '표시 내용 일치', '미확인', '저장 내용과 다른 항목', '지원 완료', '공개 목록에서 미확인', '포지션 · 보상 · 지원 링크']) expect(csv).toContain(value)
+  expect(csv).not.toContain('Sample bookmark')
+  expect(csv).not.toContain('Historical fictional bookmark')
+  await page.getByRole('button', { name: '기록 백업·복원', exact: true }).click()
+  const recoveryDownload = page.waitForEvent('download')
+  await page.getByRole('button', { name: '이 원본 내려받기', exact: true }).click()
+  const recovery = JSON.parse(await readFile((await (await recoveryDownload).path())!, 'utf8'))
+  expect(recovery.sources).toEqual([{ kind: 'legacy', count: 1, original: JSON.stringify(original) }])
+  await page.keyboard.press('Escape')
   await waitForSavedCommit(page)
   await page.reload()
   await expect(page.locator('.posting-notice.unchecked')).toHaveCount(5)

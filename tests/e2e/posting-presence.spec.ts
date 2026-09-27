@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { resourceCheckedTest as test } from './helpers/public-app'
 import type { Page, TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { readFile, writeFile } from 'node:fs/promises'
@@ -32,7 +33,7 @@ async function fixture(page: Page, info: TestInfo, baseURL: string | undefined, 
   const directory = path.join(PRESENCE_PRIVATE_ROOT, 'runs', runId, `${mode}-${info.titlePath.join('-').replaceAll(/[^a-zA-Z0-9-]/g, '-').slice(-180)}`)
   return createPostingPresenceServer(directory, mode, { responses: presenceResponses({ scenario }) })
 }
-async function seed(page: Page, origin: string, saved = presenceSaved(), source: 'sample' | 'public' = 'sample', visibleCount = saved.length) {
+async function seed(page: Page, origin: string, saved = presenceSaved(), source: 'public' = 'public', visibleCount = saved.length) {
   await page.clock.install({ time: new Date(PRESENCE_NOW) })
   await page.addInitScript(({ origin, saved, filters, source }) => {
     if (location.origin !== origin || sessionStorage.getItem('presence-seeded')) return
@@ -464,8 +465,6 @@ for (const width of [1440, 320]) test.describe(`presence-only saved flow at ${wi
       await seed(page, server.origin, records)
       const oldSaved = await readSaved(page)
       await navigation(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
-      await page.getByRole('button', { name: '샘플 탐색', exact: true }).click()
-      await page.getByRole('button', { name: /공개 채용공고/ }).click()
       await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
       if (await page.getByRole('dialog').count()) await page.getByRole('button', { name: '닫기', exact: true }).click()
       await expect(explorationSearch(page)).toHaveValue('Harbour Relay')
@@ -536,7 +535,7 @@ for (const width of [1440, 320]) test.describe(`presence-only saved flow at ${wi
     const server = await fixture(page, info, baseURL)
     try {
       await server.start()
-      await seed(page, server.origin, presencePagedSaved(), 'sample', 12)
+      await seed(page, server.origin, presencePagedSaved(), 'public', 12)
       await expect(page.locator('.saved-results-summary')).toHaveText('13개 기회 중 1–12개 표시')
       await check(page)
       await assertTraffic(server, 3, 0)

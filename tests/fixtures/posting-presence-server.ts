@@ -3,7 +3,7 @@ import { spawn, execFile } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createWriteStream } from 'node:fs'
-import { mkdir, readFile, readdir, rename, symlink, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, realpath, rename, symlink, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { createServer } from 'node:net'
 import path from 'node:path'
@@ -125,7 +125,9 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
       "import { mergeConfig } from 'vite'",
       `export default mergeConfig(original, ${JSON.stringify({
         cacheDir: path.join(cwd, 'node_modules/.vite'),
-        server: { host: '127.0.0.1', hmr: { host: '127.0.0.1', port: hmrPort }, fs: { allow: [cwd, path.join(repository, 'node_modules')] } },
+        server: { host: '127.0.0.1', hmr: { host: '127.0.0.1', port: hmrPort }, fs: { allow: [
+          cwd, path.join(repository, 'node_modules'), await realpath(path.join(repository, 'node_modules')),
+        ] } },
       })})`,
       '',
     ].join('\n'))
