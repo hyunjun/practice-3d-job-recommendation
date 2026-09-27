@@ -51,7 +51,7 @@ describe('SmartRecruiters public facts', () => {
       { city: 'London', region: 'ON', country: 'ca', fullLocation: 'London, Ontario, Canada' },
       { city: 'Vancouver', region: 'WA', country: 'us' },
       { city: 'Melbourne', country: 'xx' },
-      { city: 'Petaling Jaya', country: 'my' },
+      { city: 'Penang', country: 'my' },
       { country: 'au' },
     ]) expect(normalize({ location: { ...location, remote: false, hybrid: false } })?.cityIds).toEqual([])
     expect(normalize({ location: { city: 'Bangalore', country: 'in' } })?.cityIds).toEqual(['bengaluru'])

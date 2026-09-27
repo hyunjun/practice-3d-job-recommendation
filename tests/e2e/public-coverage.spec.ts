@@ -1,3 +1,4 @@
+import { isRegionalSourceRequest, REGIONAL_SOURCE_FULL_URLS } from '../fixtures/regional-sources'
 import { expect, test } from '@playwright/test'
 import type { Locator, Page, TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
@@ -110,7 +111,7 @@ function expectSavedSource(records: SavedJob[]) {
 for (const width of [1440, 320]) test.describe(`unconfigured public coverage at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
-  test('the real124-board default collector groups the original Seoul openings, finds both brand names and retains the pool through public-only saved exploration', async ({ page, request, baseURL }, info) => {
+  test('the real130-board default collector groups the original Seoul openings, finds both brand names and retains the pool through public-only saved exploration', async ({ page, request, baseURL }, info) => {
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const server = await createPublicCoverageServer(info.outputPath('default-server'), mode)
     const failures = browserFailures(page)
@@ -129,7 +130,7 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       await expect(company(page, 'Moloco').locator('header p')).toHaveText('AI · 광고 기술')
 
       const before = await catalog(page, server.origin)
-      expect(before.companies).toHaveLength(124)
+      expect(before.companies).toHaveLength(130)
       expect(before.companies.slice(22, 24).map(company => [company.id, company.name, company.provider, company.board, company.careerUrl])).toEqual([
         ['moloco', 'Moloco', 'greenhouse', 'moloco', 'https://www.moloco.com/company/careers'],
         ['sendbird', 'Delight.ai (Sendbird)', 'greenhouse', 'sendbird', 'https://delight.ai/careers'],
@@ -143,10 +144,10 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       await dataButton.click()
       const data = page.getByRole('dialog')
       await expect(data.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
-        'Greenhouse65개 회사', 'Ashby27개 회사', 'Lever9개 회사', 'SmartRecruiters10개 회사',
-        'Workable3개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
+        'Greenhouse67개 회사', 'Ashby29개 회사', 'Lever10개 회사', 'SmartRecruiters10개 회사',
+        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
       ])
-      await expect(data.locator('.coverage-stats > div').filter({ has: page.getByText('대상 회사', { exact: true }) }).locator('strong')).toHaveText('124')
+      await expect(data.locator('.coverage-stats > div').filter({ has: page.getByText('대상 회사', { exact: true }) }).locator('strong')).toHaveText('130')
       await expect(data.locator('.coverage-stats > div').filter({ has: page.getByText('조회된 개발 공고', { exact: true }) }).locator('strong')).toHaveText('5')
       await expect(data.locator('.posting-purpose-count')).toHaveText('조회된 개발 공고에 인재풀·관심 등록 1개가 포함되어 있어요. 기본 추천에서는 제외하며 모집 유형 필터로 따로 볼 수 있어요.')
       await data.locator('.board-details > summary').click()
@@ -198,7 +199,7 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
 
       await dataButton.click()
       await expectPublicSourceOverview(page)
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '124', '5'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '130', '5'])
       await escapeTo(page, dataButton)
       await navigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
       await expect(page.locator('.saved-card')).toHaveCount(0)
@@ -212,13 +213,15 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
         .toMatchObject({ source: 'public', selectedId: 'seoul', filters: { query: '', postingType: 'all' } })
       expect(await readSaved(page)).toEqual([])
       const upstream = await server.requests()
+      expect(upstream.filter(request => isRegionalSourceRequest(request.url)).map(request => request.url).sort())
+        .toEqual([...REGIONAL_SOURCE_FULL_URLS].sort())
       expect(upstream.filter(value => isSourceExpansionRequest(value.url)).map(value => value.url).sort())
         .toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
-      expect(upstream).toHaveLength(124)
-      const historical = upstream.filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url))
+      expect(upstream).toHaveLength(130)
+      const historical = upstream.filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url) && !isRegionalSourceRequest(request.url))
       expect(historical).toHaveLength(83)
       expect(new Set(historical.map(request => request.url)).size).toBe(83)
-      expect(upstream.filter(request => isIntegrationRequest(request.url)).map(request => request.url).sort())
+      expect(upstream.filter(request => isIntegrationRequest(request.url) && !isRegionalSourceRequest(request.url)).map(request => request.url).sort())
         .toEqual([...INTEGRATION_EMPTY_FULL_URLS].sort())
       expect(upstream.every(request => request.synthetic && !request.networkSent && request.method === 'GET')).toBe(true)
       await server.assertDefaultConfiguration()
@@ -248,12 +251,12 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       await expect(page.locator('.city-detail-count strong')).toHaveText(['3', '4'])
       const before = await catalog(page, server.origin)
       expect(before.jobs[0]).toMatchObject({ id: 'greenhouse-stripe-44001', fetchedAt: oldTime, updatedAt: COVERAGE_UPDATED_AT })
-      expect((await server.requests()).filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url)).map(request => request.url).sort())
+      expect((await server.requests()).filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url) && !isRegionalSourceRequest(request.url)).map(request => request.url).sort())
         .toEqual([...COVERAGE_NEW_URLS, ...COVERAGE_EXPANSION_URLS, ...Object.values(SURVEY_FULL_URLS)].sort())
-      expect((await server.requests()).filter(request => isIntegrationRequest(request.url)).map(request => request.url).sort())
+      expect((await server.requests()).filter(request => isIntegrationRequest(request.url) && !isRegionalSourceRequest(request.url)).map(request => request.url).sort())
         .toEqual([...INTEGRATION_EMPTY_FULL_URLS].sort())
       const expanded = JSON.parse(await readFile(server.defaultCache, 'utf8'))
-      expect(expanded.boards).toHaveLength(124)
+      expect(expanded.boards).toHaveLength(130)
       for (const original of originalCache.boards) {
         expect(expanded.boards.find((board: { companyId: string }) => board.companyId === original.companyId)).toMatchObject(original)
       }
@@ -321,9 +324,9 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
       expect(await readSaved(page)).toEqual(records)
       const after = await catalog(page, server.origin)
       expect(after.jobs).toEqual(before.jobs)
-      expect((await server.requests()).filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url)).map(request => request.url).sort())
+      expect((await server.requests()).filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url) && !isRegionalSourceRequest(request.url)).map(request => request.url).sort())
         .toEqual([...COVERAGE_NEW_URLS, ...COVERAGE_EXPANSION_URLS, ...Object.values(SURVEY_FULL_URLS)].sort())
-      expect((await server.requests()).filter(request => isIntegrationRequest(request.url)).map(request => request.url).sort())
+      expect((await server.requests()).filter(request => isIntegrationRequest(request.url) && !isRegionalSourceRequest(request.url)).map(request => request.url).sort())
         .toEqual([...INTEGRATION_EMPTY_FULL_URLS].sort())
       const restartedCache = JSON.parse(await readFile(server.defaultCache, 'utf8'))
       expect(restartedCache).toEqual(expanded)
@@ -367,10 +370,12 @@ for (const width of [1440, 320]) test.describe(`unconfigured public coverage at 
         expect(restoredFailures).toEqual({ errors: [], resources: [] })
       } finally { await destination.close() }
       const upstream = await server.requests()
+      expect(upstream.filter(request => isRegionalSourceRequest(request.url)).map(request => request.url).sort())
+        .toEqual([...REGIONAL_SOURCE_FULL_URLS].sort())
       expect(upstream.filter(value => isSourceExpansionRequest(value.url)).map(value => value.url).sort())
         .toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
-      expect(upstream).toHaveLength(102)
-      expect(upstream.filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url))).toHaveLength(61)
+      expect(upstream).toHaveLength(108)
+      expect(upstream.filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url) && !isRegionalSourceRequest(request.url))).toHaveLength(61)
       expect(upstream.every(request => request.synthetic && !request.networkSent && request.method === 'GET')).toBe(true)
       await writeFile(info.outputPath('cache-saved-identity.json'), JSON.stringify({ originalCache, before, after, records, upstream }, null, 2))
     } finally {

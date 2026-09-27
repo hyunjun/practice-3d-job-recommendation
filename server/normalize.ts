@@ -1,5 +1,4 @@
-import { CITY_BY_ID } from '../shared/cities'
-import { locateCities } from '../shared/city-location'
+import { locateCities, locateCitiesInCountry } from '../shared/city-location'
 export { locateCities } from '../shared/city-location'
 import { upgradeJobLocation } from '../shared/job-location'
 import { createWorkplaceLocations } from '../shared/job-workplace'
@@ -11,7 +10,7 @@ import { languageRequirements } from '../shared/job-languages'
 import { workTimeRequirements } from '../shared/job-work-time'
 import { plainText } from '../shared/text'
 export { plainText } from '../shared/text'
-import { COMPENSATION_VERSION, EMPLOYMENT_VERSION } from '../shared/types'
+import { CITY_COVERAGE_VERSION, COMPENSATION_VERSION, EMPLOYMENT_VERSION } from '../shared/types'
 import type { Employment, Job, JobManagement, JobProvider, Salary, Visa, WorkMode } from '../shared/types'
 import { employmentFact, managementFact, visaFact, workModeFact } from './job-facts'
 import { eligibilityFacts } from '../shared/job-eligibility'
@@ -53,7 +52,7 @@ export function postingCities(locations: PostingLocation[]): string[] {
     const text = location.address?.addressLocality
       ? [location.address.addressLocality, location.address.addressRegion, location.address.addressCountry].filter(Boolean).join(', ')
       : location.label
-    return locateCities(text).filter(id => !country || CITY_BY_ID.get(id)?.countryCode === country)
+    return locateCitiesInCountry(text, location.address?.addressCountry ?? undefined)
   }))]
 }
 
@@ -121,7 +120,7 @@ export function normalizePosting(input: PostingInput): Job | null {
     id: `${input.provider}-${companyId}-${input.id}`, companyId, title,
     role: roleClassification.roles[0] ?? 'unknown', roleClassification, occupation,
     ...(postingPurpose ? { postingPurpose } : {}),
-    cityIds: input.cityIds, locationLabel: input.locationLabel, workMode: workMode.value,
+    cityIds: input.cityIds, cityCoverageVersion: CITY_COVERAGE_VERSION, locationLabel: input.locationLabel, workMode: workMode.value,
     ...(workplaceLocations ? { workplaceLocations } : {}),
     employment: employment.value, employmentVersion: EMPLOYMENT_VERSION, ...qualificationFacts(text, companyId), salary,
     languageRequirements: languageRequirements(text),

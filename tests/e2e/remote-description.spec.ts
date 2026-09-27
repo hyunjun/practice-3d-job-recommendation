@@ -98,7 +98,7 @@ function expectOriginalSaved(records: SavedJob[]) {
       id: 'greenhouse-remote-description-a-4101', title: 'Backend Engineer Cedar',
       url: 'https://example.com/jobs/remote-description/4101', locationLabel: 'Remote',
       cityIds: [], remoteCountries: ['GB'], remoteWorldwide: false, remoteScopeUnknown: false,
-      remoteScopeVersion: 2, fetchedAt: REMOTE_DESCRIPTION_TIME, updatedAt: REMOTE_DESCRIPTION_UPDATED_AT,
+      remoteScopeVersion: 3, fetchedAt: REMOTE_DESCRIPTION_TIME, updatedAt: REMOTE_DESCRIPTION_UPDATED_AT,
       description: remoteDescriptionText(REMOTE_UK_PARAGRAPH),
       remoteScopeResolution: { version: 1, status: 'description', listedCountries: [], listedWorldwide: false },
     },

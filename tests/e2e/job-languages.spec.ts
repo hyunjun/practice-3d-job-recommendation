@@ -254,7 +254,7 @@ for (const width of [1440, 320]) test.describe(`spoken languages through real fo
       expect(await server.requests()).toHaveLength(0)
       await page.getByRole('button', { name: '데이터와 추천 방식', exact: true }).click()
       await page.getByRole('dialog').getByRole('button', { name: '공개 공고 다시 조회', exact: true }).click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '4', '6'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '4', '6'])
       await expect(page.locator('.data-loading')).toHaveCount(0)
       await page.getByRole('button', { name: '닫기', exact: true }).click()
       const before = await catalog(page, server.origin)

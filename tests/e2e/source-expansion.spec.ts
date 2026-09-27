@@ -1,3 +1,4 @@
+import { REGIONAL_SOURCE_FULL_URLS } from '../fixtures/regional-sources'
 import { expect, test } from '@playwright/test'
 import type { BrowserContext, Locator, Page, TestInfo } from '@playwright/test'
 import { readFile, writeFile } from 'node:fs/promises'
@@ -45,11 +46,11 @@ async function fullCatalog(page: Page, origin: string) {
     expect(response.status()).toBe(200)
     const catalog = await response.json() as Catalog
     expect(catalog.source).toBe('public')
-    expect(catalog.companies).toHaveLength(124)
-    expect(catalog.boards).toHaveLength(124)
+    expect(catalog.companies).toHaveLength(130)
+    expect(catalog.boards).toHaveLength(130)
     expect(catalog.jobs).toHaveLength(36)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
-    expect(catalog.companies.slice(93).map(company => company.id)).toEqual(SOURCE_EXPANSION_IDS)
+    expect(catalog.companies.slice(93, 124).map(company => company.id)).toEqual(SOURCE_EXPANSION_IDS)
     expect(catalog.boards.reduce((sum, board) => sum + board.total, 0)).toBe(164)
     for (const expected of [...SOURCE_EXPANSION_ATS_JOBS, ...CAREERS_WIRE_JOBS]) {
       expect(catalog.jobs.find(job => job.id === expected.id)).toMatchObject({
@@ -111,16 +112,16 @@ for (const width of [1440, 320]) test.describe(`two expansion cohorts at ${width
       }
       await surveyDataButton(page).click()
       const data = page.getByRole('dialog')
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '124', '36'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '130', '36'])
       await expect(data.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
-        'Greenhouse65개 회사', 'Ashby27개 회사', 'Lever9개 회사', 'SmartRecruiters10개 회사',
-        'Workable3개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
+        'Greenhouse67개 회사', 'Ashby29개 회사', 'Lever10개 회사', 'SmartRecruiters10개 회사',
+        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
       ])
       await expect(data.getByText('Booking.com 게시판에는 Booking Holdings의 공고도 포함됩니다.', { exact: true })).toBeVisible()
       await expect(data.getByText('Starbucks는 공식 Technology 분류의 공고를 수집합니다. 매장 등 다른 분류의 전체 채용 수가 아니며, 분류 이동으로 목록에서 빠질 수도 있어 채용 마감을 단정하지 않아요.', { exact: true })).toBeVisible()
       await expect(data.getByText('공식 사이트의 부하를 줄이기 위해 정상 조회 후 24시간 동안 자료를 재사용합니다. 목록 확인과 본문 수집에 각각 적용하며, 새로고침도 같은 대기 시간을 지켜요.', { exact: true })).toBeVisible()
       await surveyBoardHistory(page)
-      await expect(data.locator('.board-row')).toHaveCount(124)
+      await expect(data.locator('.board-row')).toHaveCount(130)
       for (const company of SOURCE_EXPANSION_REGISTRATIONS) {
         const row = data.locator('.board-row').filter({ has: page.getByText(company.name, { exact: true }) })
         await expect(row.getByRole('link', { name: `${company.name} 채용 페이지`, exact: true })).toHaveAttribute('href', company.careerUrl)
@@ -179,7 +180,7 @@ for (const width of [1440, 320]) test.describe(`two expansion cohorts at ${width
       await surveyClose(page, starbucks)
       await surveyDataButton(page).click()
       await expectPublicSourceOverview(page)
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '124', '36'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '130', '36'])
       await surveyClose(page, surveyDataButton(page))
       await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
       await expect(page.locator('.saved-card')).toHaveCount(2)
@@ -233,7 +234,7 @@ for (const width of [1440, 320]) test.describe(`two expansion cohorts at ${width
       await expect(savedStarbucks(target)).toContainText(SOURCE_EXPANSION_NOTE)
       expect(await readFile(server.defaultCache, 'utf8')).toBe(originalCache)
       const requests = await syntheticRequests(server)
-      expect(requests.map(request => request.url).sort()).toEqual([...SOURCE_EXPANSION_ALL_FULL_URLS].sort())
+      expect(requests.map(request => request.url).sort()).toEqual([...SOURCE_EXPANSION_ALL_FULL_URLS, ...REGIONAL_SOURCE_FULL_URLS].sort())
       await writeFile(info.outputPath('source-expansion-result.json'), JSON.stringify({ catalog, saved, requests }, null, 2))
       expectSurveyPrivacy(state, server.origin)
       expectSurveyPrivacy(imported, server.origin)

@@ -1,7 +1,6 @@
 import { ageCatalog, catalogDeadlines } from '../../shared/catalog-freshness'
-import { createSearchIndex, selectSearchJobs } from '../../shared/job-search'
+import { createSearchIndex, inSearchScope, selectSearchJobs } from '../../shared/job-search'
 import type { SearchIndex } from '../../shared/job-search'
-import { isUnmappedJob } from '../../shared/job-location'
 import { createCatalogUpgrader } from '../../shared/job-upgrade'
 import { createSearchRanker, groupCities } from '../../shared/matching'
 import { analyzeSearchRecovery } from '../../shared/search-recovery'
@@ -98,7 +97,9 @@ export class CatalogWorkerModel {
     const matches = rank(input.filters)
     const cities = groupCities(catalog, matches, input.filters)
     const remote = matches.filter(match => match.job.workMode === 'remote')
-    const unmapped = matches.filter(match => isUnmappedJob(match.job))
+    const unmappedIds = new Set(index.entries.filter(entry =>
+      inSearchScope(entry, { kind: 'unmapped' }, input.filters.region)).map(entry => entry.job.id))
+    const unmapped = matches.filter(match => unmappedIds.has(match.job.id))
     const scope = input.scope
     const hasScopeResults = scope.kind === 'cities' ? cities.length > 0
       : scope.kind === 'city' ? cities.some(result => result.city.id === scope.cityId)

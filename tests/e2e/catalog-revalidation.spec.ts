@@ -358,7 +358,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await page.getByRole('button', { name: '공개 공고 다시 조회', exact: true }).click()
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveText('Fictional public retry48')
     await expectPublicOnlyDialog(page)
-    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
+    await expect(page.locator('.coverage-stats strong')).toHaveText(['35', '—', '—'])
     expect(state.traffic.catalog()).toHaveLength(1)
     await page.getByRole('button', { name: '닫기', exact: true }).click()
     await page.getByRole('button', { name: '기회 탐색', exact: true }).click()

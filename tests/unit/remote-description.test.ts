@@ -55,7 +55,7 @@ function normalized(provider: JobProvider = 'greenhouse', body = remoteDescripti
 function expectScope(job: Job, countries: string[], unknown = false) {
   expect(job).toMatchObject({
     workMode: 'remote', cityIds: [], remoteCountries: countries, remoteWorldwide: false,
-    remoteScopeUnknown: unknown, remoteScopeVersion: 2, fetchedAt: REMOTE_DESCRIPTION_TIME,
+    remoteScopeUnknown: unknown, remoteScopeVersion: 3, fetchedAt: REMOTE_DESCRIPTION_TIME,
   })
 }
 
@@ -296,7 +296,7 @@ describe('displayed regions after a concrete body restriction', () => {
 })
 
 describe('old snapshots, caches, saved records and revisions', () => {
-  it.each([undefined, 1] as const)('migrates remote scope version %s once without changing source facts', version => {
+  it.each([undefined, 1, 2] as const)('migrates remote scope version %s once without changing source facts', version => {
     const old = legacyRemoteDescriptionJob('4101', { remoteScopeVersion: version })
     const copy = structuredClone(old)
     expect(JobSchema.safeParse(old).success).toBe(true)

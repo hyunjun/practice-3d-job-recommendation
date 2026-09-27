@@ -23,6 +23,7 @@ import { asCoverageReply } from '../fixtures/public-coverage-transport'
 import { isIntegrationRequest } from '../fixtures/source-integration-contract'
 import { withIntegrationEmptyBoards } from '../fixtures/source-integrations'
 import { isSourceExpansionRequest, SOURCE_EXPANSION_EMPTY_FULL_URLS } from '../fixtures/source-expansion-empty'
+import { isRegionalSourceRequest, REGIONAL_SOURCE_FULL_URLS } from '../fixtures/regional-sources'
 
 // Keep the historical deterministic clock. Actual pacing and shared cooldowns
 // are exercised by source-integrations-providers with the real queue timers.
@@ -68,11 +69,12 @@ async function fixture(options: { old36?: boolean; history?: boolean; failures?:
   const requests: { url: string; method: string; body: unknown }[] = []
   const integrationRequests: { url: string; method: string; body: unknown }[] = []
   const expansionRequests: { url: string; method: string; body: unknown }[] = []
+  const regionalRequests: { url: string; method: string; body: unknown }[] = []
   const unexpected: string[] = []
   vi.stubGlobal('fetch', vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
     const url = input instanceof Request ? input.url : String(input)
     const method = init?.method ?? (input instanceof Request ? input.method : 'GET')
-    ;(isSourceExpansionRequest(url) ? expansionRequests : isIntegrationRequest(url) ? integrationRequests : requests).push({ url, method, body: init?.body ?? null })
+    ;(isRegionalSourceRequest(url) ? regionalRequests : isSourceExpansionRequest(url) ? expansionRequests : isIntegrationRequest(url) ? integrationRequests : requests).push({ url, method, body: init?.body ?? null })
     if (method !== 'GET' || init?.body || !Object.hasOwn(responses, url)) {
       unexpected.push(url)
       throw new Error(`Blocked unexpected fictional request: ${method} ${url}`)
@@ -109,14 +111,17 @@ async function fixture(options: { old36?: boolean; history?: boolean; failures?:
     })
   }
   return {
-    config, old, requests, integrationRequests, expansionRequests, unexpected, service,
+    config, old, requests, integrationRequests, expansionRequests, regionalRequests, unexpected, service,
     respond: (options: Parameters<typeof surveyResponses>[0] = {}) => { responses = withIntegrationEmptyBoards(surveyResponses(options)) },
   }
 }
-function extraRequests(state: Awaited<ReturnType<typeof fixture>>, himalayas: number, workable: number) {
+function extraRequests(state: Awaited<ReturnType<typeof fixture>>, himalayas: number, workable: number, regional = 6) {
   expect(state.integrationRequests.filter(request => request.url.startsWith('https://himalayas.app/'))).toHaveLength(himalayas)
   expect(state.integrationRequests.filter(request => request.url.startsWith('https://apply.workable.com/'))).toHaveLength(workable)
   expect(state.integrationRequests.every(request => request.method === 'GET' && request.body === null)).toBe(true)
+  expect(state.regionalRequests.slice(0, 6).map(request => request.url).sort()).toEqual([...REGIONAL_SOURCE_FULL_URLS].sort())
+  expect(state.regionalRequests).toHaveLength(regional)
+  expect(state.regionalRequests.every(request => request.method === 'GET' && request.body === null)).toBe(true)
 }
 const positiveFields = (job: { id: string; companyId: string; source: string; title: string; role: string; cityIds: readonly string[]; url: string }) => ({
   id: job.id, companyId: job.companyId, source: job.source, title: job.title, role: job.role, cityIds: job.cityIds, url: job.url,
@@ -127,13 +132,13 @@ describe('independent47-company public survey', () => {
     const state = await fixture()
     const service = state.service()
     const catalog = await service.get()
-    expect(catalog.companies).toHaveLength(124)
+    expect(catalog.companies).toHaveLength(130)
     expect(catalog.companies.slice(36, 83).map(({ id, name, careerUrl, provider, board }) =>
       ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
     expect(catalog.jobs).toHaveLength(65)
     expect(catalog.jobs.filter(job => SURVEY_REGISTRATIONS.some(company => company.id === job.companyId)
       && job.id !== 'greenhouse-xai-61901').map(positiveFields)).toEqual(SURVEY_JOBS.map(positiveFields))
-    expect(catalog.boards).toHaveLength(124)
+    expect(catalog.boards).toHaveLength(130)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.jobs.filter(job => job.postingPurpose).map(job => job.id)).toEqual([
       'greenhouse-moloco-44102', 'greenhouse-xai-61901',
@@ -177,7 +182,7 @@ describe('independent47-company public survey', () => {
     expect(state.requests.map(request => request.url).sort()).toEqual([...Object.values(SURVEY_FULL_URLS), ...SURVEY_DETAIL_URLS].sort())
     const bytes = await readFile(state.config.cacheFile, 'utf8')
     const cache = JSON.parse(bytes)
-    expect(cache.boards).toHaveLength(124)
+    expect(cache.boards).toHaveLength(130)
     for (const original of state.old.boards) {
       const kept = cache.boards.find((board: { companyId: string }) => board.companyId === original.companyId)
       expect(kept).toMatchObject(original)
@@ -204,7 +209,7 @@ describe('independent47-company public survey', () => {
     now += 61_000
     const listed = await service.getPostingStatus(true)
     expect(state.requests).toHaveLength(168)
-    extraRequests(state, 7, 6)
+    extraRequests(state, 7, 6, 12)
     expect(state.requests.slice(85)).toHaveLength(83)
     expect(state.requests.slice(85).some(request => SURVEY_DETAIL_URLS.includes(request.url as typeof SURVEY_DETAIL_URLS[number]))).toBe(false)
     expect(listed.boards.find(board => board.companyId === 'servicenow')!.listing!.content!.checkedAt).toBe(SURVEY_NOW)
@@ -217,11 +222,11 @@ describe('independent47-company public survey', () => {
     })
     expect(await readFile(state.config.cacheFile, 'utf8')).toBe(fullBytes)
     expect(state.requests).toHaveLength(251)
-    extraRequests(state, 7, 9)
+    extraRequests(state, 7, 9, 18)
     state.respond({ changedServiceNow: true })
     const changed = await service.getPostingStatus(true, true)
     expect(state.requests).toHaveLength(336)
-    extraRequests(state, 7, 12)
+    extraRequests(state, 7, 12, 24)
     expect(changed.boards.find(board => board.companyId === 'servicenow')!.listing!.jobs.map(job => [job.id, job.title, job.url])).toEqual([
       ['smartrecruiters-servicenow-synthetic-61038', SURVEY_SERVICE_CHANGED_TITLE, 'https://example.com/synthetic/stage61/servicenow-61038'],
     ])
@@ -266,7 +271,7 @@ describe('independent47-company public survey', () => {
     expect(state.unexpected).toEqual([])
   })
 
-  it('excludes a complete old36 cohort and compares only the current124-company days', async () => {
+  it('excludes a complete old36 cohort and compares only the current130-company days', async () => {
     const state = await fixture({ history: true })
     const service = state.service()
     const old = await service.getObservations()
@@ -297,7 +302,7 @@ describe('independent47-company public survey', () => {
     expect(persisted.series.find((series: { scope: { key: string } }) => series.scope.key === SURVEY_OLD_SCOPE_KEY))
       .toEqual(surveyOldHistory().series[0])
     expect(state.requests).toHaveLength(170)
-    extraRequests(state, 14, 6)
+    extraRequests(state, 14, 6, 12)
     expect(state.unexpected).toEqual([])
   })
 })

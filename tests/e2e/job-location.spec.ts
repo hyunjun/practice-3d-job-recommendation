@@ -133,7 +133,7 @@ test('region recovery discloses the broader scope, supports undo and keeps non-r
   const filters = { ...SEARCH_FILTERS, query: 'Gurugram', region: 'europe' as const }
   await restore(page, () => catalog, 'unmapped', filters)
   await expect(page.locator('.company-card')).toHaveCount(0)
-  await expect(page.locator('.unmapped-range-note')).toHaveText('국가가 확인된 공고는 해당 지역에서도 표시해요. 국가가 미확인인 근무지는 ‘전 세계’에서 찾고, 공고에 적힌 지역명으로 검색할 수 있어요.')
+  await expect(page.locator('.unmapped-range-note')).toHaveText('국가가 확인된 공고는 해당 지역에서도 표시해요. 국가가 미확인인 근무지는 ‘전 세계’에서 찾고, 공고에 적힌 지역명으로 검색할 수 있어요. 여러 근무지가 있는 공고는 다른 지역의 지도 도시에도 연결될 수 있어요.')
   const options = page.locator('.recovery-option')
   await expect(options).toHaveCount(2)
   await expect(options.locator('dt')).toHaveText(['검색어', '탐색 지역'])

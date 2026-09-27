@@ -262,9 +262,11 @@ for (const width of [1440, 320]) test.describe(`observation history at ${width}p
       const historyRequests = api.requests.filter(request => new URL(request.url).pathname === '/api/observations').length
       await dimension(page).selectOption('regions')
       const regions = panel(page).getByRole('table', { name: '근무 지역별 일반 공고' })
+      await expect(regions.locator('tbody tr')).toHaveCount(7)
       await row(regions, '미주', ['1', '16.7%'])
       await row(regions, '유럽', ['2', '33.3%'])
       await row(regions, '아시아 · 태평양', ['1', '16.7%'])
+      await row(regions, '중동', ['0', '0.0%'])
       await row(regions, '원격근무', ['1', '16.7%'])
       await row(regions, '그 밖의 확인된 지역', ['1', '16.7%'])
       await row(regions, '지역 일부 또는 전체 미확인', ['1', '16.7%'])

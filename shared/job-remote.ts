@@ -27,6 +27,7 @@ export function remoteScope(location: string, retainedCountries: string[] = []):
   if (/\b(?:americas?|north america|south america)\b/i.test(location) || /\bAMER\b/.test(location)) remoteRegions.push('americas')
   if (/\beurope(?:an(?: union)?)?\b/i.test(location) || /\bEU\b/.test(location)) remoteRegions.push('europe')
   if (/\b(?:asia[\s-]*(?:and |& )?pacific|APAC)\b/i.test(location)) remoteRegions.push('asia-pacific')
+  if (/\bmiddle[\s-]+east\b/i.test(location)) remoteRegions.push('middle-east')
   return {
     remoteCountries: orderedCountries(countries),
     remoteWorldwide, remoteScopeUnknown: !remoteWorldwide && countries.size === 0,

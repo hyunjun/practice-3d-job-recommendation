@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { isUnmappedJob } from '../../shared/job-location'
 import { JobProviderSchema, JobSchema } from '../../shared/schemas'
+import { MAP_REGIONS } from '../../shared/types'
 import type { Catalog } from '../../shared/types'
 
 const identifier = z.string().min(1).max(100)
@@ -13,7 +14,7 @@ const company = z.object({
 })
 const city = z.object({
   id: identifier, name: z.string(), en: z.string(), country: z.string(), countryCode: z.string(),
-  region: z.enum(['americas', 'europe', 'asia-pacific']),
+  region: z.enum(MAP_REGIONS),
   lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180),
   timezone: z.string(), description: z.string(), image: z.string().optional(),
 })

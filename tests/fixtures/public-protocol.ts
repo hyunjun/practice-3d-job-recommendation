@@ -32,7 +32,7 @@ export function publicProtocolJob(id = 'london', overrides: Partial<PublicJob> =
   // identity. Legacy public read-upgrade tests use their own earlier snapshots.
   return structuredClone({
     id: `greenhouse-fixture-aster-transit-${id}`, companyId: 'fixture-aster-transit', title, role,
-    cityIds: ['london'], locationLabel: 'London, United Kingdom',
+    cityIds: ['london'], cityCoverageVersion: 1, locationLabel: 'London, United Kingdom',
     workMode: 'onsite', employment: 'fulltime', employmentVersion: 1,
     minExperience: years, skills, salary: { min: 130000, max: 180000, currency: 'USD' },
     compensationVersion: 2, visa: 'yes', eligibility: { version: 2, rules: [] },
@@ -57,7 +57,7 @@ export function publicProtocolJob(id = 'london', overrides: Partial<PublicJob> =
       version: 6, category: 'engineering', departments: [],
       evidence: [{ source: 'title', text: title }],
     },
-    remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false, remoteScopeVersion: 2,
+    remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false, remoteScopeVersion: 3,
     description: 'Synthetic engineering protocol fixture. This is not a real vacancy.',
     requirements: ['Engineering experience.'],
     url: `https://example.test/jobs/${id}`, source: 'greenhouse',

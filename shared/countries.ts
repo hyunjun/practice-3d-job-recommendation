@@ -13,8 +13,12 @@ export interface Country {
 const koreanNames = new Intl.DisplayNames(['ko'], { type: 'region', fallback: 'none' })
 const englishNames = new Intl.DisplayNames(['en'], { type: 'region', fallback: 'none' })
 
+// A navigation group, independent of the source's UN M49 classification and
+// country-by-country employment eligibility. Keep the scope explicit.
+const MIDDLE_EAST = new Set('AE BH EG IL IQ IR JO KW LB OM PS QA SA SY TR YE'.split(' '))
+
 export const COUNTRY_BY_CODE = new Map<string, Country>(COUNTRY_DATA.map(([code, alpha3, region, referenceName]) => [code, {
-  code, alpha3, region, referenceName,
+  code, alpha3, region: MIDDLE_EAST.has(code) ? 'middle-east' : region, referenceName,
   name: koreanNames.of(code) ?? referenceName,
   englishName: englishNames.of(code) ?? referenceName,
 }]))

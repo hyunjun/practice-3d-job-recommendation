@@ -18,23 +18,24 @@ import { SOURCE_EXPANSION_IDS, SOURCE_EXPANSION_PROVIDER_COUNTS, SOURCE_EXPANSIO
 import { SOURCE_EXPANSION_ATS_JOBS } from '../fixtures/source-expansion-postings'
 import { SOURCE_EXPANSION_ALL_FULL_URLS, SOURCE_EXPANSION_EXCLUDED_IDS, SOURCE_EXPANSION_NOW, sourceExpansionOld93Cache, sourceExpansionResponses } from '../fixtures/source-expansion-wire'
 import { SEARCH_PROFILE } from '../fixtures/search-catalog'
+import { REGIONAL_SOURCE_FULL_URLS } from '../fixtures/regional-sources'
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 describe('both approved expansion cohorts and preserved original93 contracts', () => {
   it('appends exactly31 literal registrations with22 regional and9 cross-industry employers', () => {
-    expect(PUBLIC_COMPANIES).toHaveLength(124)
-    expect(PUBLIC_COMPANIES.slice(93).map(({ id, name, provider, board, careerUrl, industry }) =>
+    expect(PUBLIC_COMPANIES).toHaveLength(130)
+    expect(PUBLIC_COMPANIES.slice(93, 124).map(({ id, name, provider, board, careerUrl, industry }) =>
       ({ id, name, provider, board, careerUrl, industry }))).toEqual(
       SOURCE_EXPANSION_REGISTRATIONS.map(({ cohort: _cohort, region: _region, ...company }) => company),
     )
-    expect(PUBLIC_COMPANIES.slice(93).map(company => company.id)).toEqual(SOURCE_EXPANSION_IDS)
+    expect(PUBLIC_COMPANIES.slice(93, 124).map(company => company.id)).toEqual(SOURCE_EXPANSION_IDS)
     expect(SOURCE_EXPANSION_REGISTRATIONS.filter(company => company.cohort === 'regional')).toHaveLength(22)
     expect(SOURCE_EXPANSION_REGISTRATIONS.filter(company => company.cohort === 'cross-industry')).toHaveLength(9)
     expect(Object.fromEntries(Object.keys(SOURCE_EXPANSION_PROVIDER_COUNTS).map(provider => [
-      provider, PUBLIC_COMPANIES.filter(company => company.provider === provider).length,
+      provider, PUBLIC_COMPANIES.slice(0, 124).filter(company => company.provider === provider).length,
     ]))).toEqual({ greenhouse: 65, ashby: 27, lever: 9, smartrecruiters: 10, workable: 3, himalayas: 7, careers: 3 })
-    expect(PUBLIC_COMPANIES.at(-1)).toMatchObject({ id: 'auto1', name: 'AUTO1 Group', provider: 'smartrecruiters', board: 'Auto1' })
+    expect(PUBLIC_COMPANIES[123]).toMatchObject({ id: 'auto1', name: 'AUTO1 Group', provider: 'smartrecruiters', board: 'Auto1' })
     // Deferred sources must not be represented as covered by an unrelated board.
     for (const id of ['walmart', 'traderepublic', 'toyotaconnected', 'bosch']) expect(PUBLIC_COMPANIES.some(company => company.id === id)).toBe(false)
   })
@@ -58,8 +59,8 @@ describe('both approved expansion cohorts and preserved original93 contracts', (
     })
     const current = service()
     const catalog = await current.get()
-    expect(catalog.companies).toHaveLength(124)
-    expect(catalog.boards).toHaveLength(124)
+    expect(catalog.companies).toHaveLength(130)
+    expect(catalog.boards).toHaveLength(130)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.jobs).toHaveLength(36)
     expect(catalog.boards.reduce((sum, board) => sum + board.total, 0)).toBe(164)
@@ -71,9 +72,9 @@ describe('both approved expansion cohorts and preserved original93 contracts', (
       expect(added.find(job => job.id === literal.id)).toMatchObject(facts)
     }
     for (const id of SOURCE_EXPANSION_EXCLUDED_IDS) expect(catalog.jobs.some(job => job.id === id)).toBe(false)
-    expect(transport.urls().sort()).toEqual([...SOURCE_EXPANSION_ALL_FULL_URLS].sort())
+    expect(transport.urls().sort()).toEqual([...SOURCE_EXPANSION_ALL_FULL_URLS, ...REGIONAL_SOURCE_FULL_URLS].sort())
     expect(transport.urls().some(url => url.includes('/companies/AUTO1/'))).toBe(false)
-    expect(boards).toHaveLength(124)
+    expect(boards).toHaveLength(130)
     for (const previous of raw.boards) {
       const retained = boards.find(board => board.companyId === previous.companyId)!
       expect(retained).toMatchObject({ checkedAt: previous.checkedAt, retryAt: previous.retryAt, failures: previous.failures,
@@ -104,7 +105,7 @@ describe('both approved expansion cohorts and preserved original93 contracts', (
     const savedBytes = JSON.stringify(boards)
     expect((await service().get()).jobs).toEqual(catalog.jobs)
     expect(JSON.stringify(boards)).toBe(savedBytes)
-    expect(transport.urls()).toHaveLength(45)
+    expect(transport.urls()).toHaveLength(51)
     expect(JSON.stringify(raw)).toBe(before)
   })
 

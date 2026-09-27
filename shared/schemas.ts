@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { COMPENSATION_VERSION, ELIGIBILITY_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, LANGUAGE_REQUIREMENTS_VERSION, OCCUPATION_VERSION, POSTING_PURPOSE_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION, SPOKEN_LANGUAGE_CODES, WORK_TIME_REQUIREMENTS_VERSION, WORK_TIME_REQUIREMENT_KINDS } from './types'
+import { CITY_COVERAGE_VERSION, COMPENSATION_VERSION, ELIGIBILITY_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, LANGUAGE_REQUIREMENTS_VERSION, MAP_REGIONS, OCCUPATION_VERSION, POSTING_PURPOSE_VERSION, PUBLIC_PROVIDERS, QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION, SPOKEN_LANGUAGE_CODES, WORK_TIME_REQUIREMENTS_VERSION, WORK_TIME_REQUIREMENT_KINDS } from './types'
 
 export const JobProviderSchema = z.enum(PUBLIC_PROVIDERS)
 const QualificationKindSchema = z.enum(['required', 'qualification', 'preferred', 'context'])
@@ -38,6 +38,7 @@ export const JobSchema = z.object({
     }).optional(),
   }).optional(),
   cityIds: z.array(z.string()).max(50), locationLabel: z.string().max(2000),
+  cityCoverageVersion: z.literal(CITY_COVERAGE_VERSION).optional(),
   workplaceLocations: z.object({
     version: z.literal(1),
     locations: z.array(z.object({
@@ -121,8 +122,8 @@ export const JobSchema = z.object({
     truncated: z.boolean().optional(),
   }).optional(),
   remoteWorldwide: z.boolean(), remoteScopeUnknown: z.boolean(),
-  remoteRegions: z.array(z.enum(['americas', 'europe', 'asia-pacific'])).max(3).optional(),
-  remoteScopeVersion: z.union([z.literal(1), z.literal(REMOTE_SCOPE_VERSION)]).optional(),
+  remoteRegions: z.array(z.enum(MAP_REGIONS)).max(MAP_REGIONS.length).optional(),
+  remoteScopeVersion: z.union([z.literal(1), z.literal(2), z.literal(REMOTE_SCOPE_VERSION)]).optional(),
   remoteScopeResolution: z.object({
     version: z.literal(1), status: z.enum(['description', 'unconfirmed']),
     listedCountries: z.array(z.string()).max(300), listedWorldwide: z.boolean(),

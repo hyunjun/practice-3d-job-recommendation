@@ -51,7 +51,8 @@ export function analyzeSearchRecovery(index: SearchIndex, filters: Filters, scop
   const alternatives = scopes.map(next => ({ scope: next, count: countSearchJobs(current, next, filters.region) }))
     .filter(item => item.count.jobs > 0)
   const words = searchWords(filters.query)
-  const available = index.entries.filter(entry => inSearchScope(entry, scope))
+  const available = index.entries.filter(entry => inSearchScope(entry, scope)
+    || inSearchScope(entry, scope, filters.region))
   const candidates = new Map<string, Partial<Filters>>()
   let profileExcluded = 0
   for (const entry of available) {

@@ -112,11 +112,11 @@ async function lifecycle(companies = [integrationCompany('microsoft'), integrati
 }
 
 describe('daily source registration, cache and visible age', () => {
-  it('keeps the approved ten after the unchanged old36 and approved47 within the124 public-only defaults', async () => {
+  it('keeps the approved ten after the unchanged old36 and approved47 within the130 public-only defaults', async () => {
     const cwd = await directory()
     const configuration = await loadBoardConfiguration({ cwd })
     const identity = ({ id, name, board, provider }: Company) => ({ id, name, board, provider })
-    expect(configuration.companies).toHaveLength(124)
+    expect(configuration.companies).toHaveLength(130)
     expect(configuration.companies.slice(0, 36).map(identity)).toEqual(old83Companies.slice(0, 36).map(identity))
     expect(configuration.companies.slice(36, 83).map(({ id, name, board, provider, careerUrl }) =>
       ({ id, name, board, provider, careerUrl }))).toEqual(SURVEY_REGISTRATIONS)
@@ -125,7 +125,7 @@ describe('daily source registration, cache and visible age', () => {
     for (const [provider, count] of [
       ['greenhouse', 50], ['ashby', 24], ['lever', 4], ['smartrecruiters', 5], ['himalayas', 7], ['workable', 3],
     ] as const) expect(configuration.companies.slice(0, 93).filter(company => company.provider === provider)).toHaveLength(count)
-    expect(configuration.companies.slice(93).map(company => company.id)).toEqual(SOURCE_EXPANSION_IDS)
+    expect(configuration.companies.slice(93, 124).map(company => company.id)).toEqual(SOURCE_EXPANSION_IDS)
     for (const excluded of ['nvidia', 'netflix', 'oracle', 'dell', 'workday', 'hubspot', 'amd', 'atlassian'])
       expect(configuration.companies.some(company => company.id === excluded)).toBe(false)
     for (const [id, url] of Object.entries(WORKABLE_CAREER_URLS))

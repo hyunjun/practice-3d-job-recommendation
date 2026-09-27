@@ -162,7 +162,7 @@ describe('raw four-provider retention and existing scope semantics', () => {
     expect(job).toMatchObject({
       id: 'ashby-country-moss-5512', cityIds: [], workMode: 'onsite', remoteCountries: [],
       workplaceLocations: { version: 1, locations: [
-        { label: 'Tallinn', country: 'EE' }, { label: 'Petaling Jaya', country: 'MYS' },
+        { label: 'Tallinn', country: 'EE' }, { label: 'Penang', country: 'MYS' },
       ] },
     })
     expect(workplaceCountryRevision(job)).toEqual({ countries: ['EE', 'MY'], uncertain: false, conflict: false })
@@ -180,7 +180,7 @@ describe('raw four-provider retention and existing scope semantics', () => {
   it('does not copy Lever primary country into a separately named secondary country', () => {
     const job = normalizeLeverJob(workplaceCountryLeverPostings()[1], 'country-wren', fetchedAt)!
     expect(job.workplaceLocations).toEqual({ version: 1, locations: [
-      { label: 'Wren Annex', country: 'EE' }, { label: 'Petaling Jaya, Malaysia' },
+      { label: 'Wren Annex', country: 'EE' }, { label: 'Penang, Malaysia' },
     ] })
     expect(workplaceCountryRevision(job)).toEqual({ countries: ['EE', 'MY'], uncertain: false, conflict: false })
   })
@@ -197,10 +197,10 @@ describe('raw four-provider retention and existing scope semantics', () => {
 
   it('retains SmartRecruiters original country spelling, without treating an unknown field as label evidence', () => {
     const job = normalizeSmartRecruitersJob(workplaceCountrySmartRecruitersRaw(), 'country-cove', fetchedAt)!
-    expect(job.workplaceLocations).toEqual({ version: 1, locations: [{ label: 'Petaling Jaya', country: 'my' }] })
+    expect(job.workplaceLocations).toEqual({ version: 1, locations: [{ label: 'Penang', country: 'my' }] })
     expect(workplaceCountryRevision(job)).toEqual({ countries: ['MY'], uncertain: false, conflict: false })
     const unknown = normalizeSmartRecruitersJob(workplaceCountrySmartRecruitersPostings()[2], 'country-cove', fetchedAt)!
-    expect(unknown.workplaceLocations).toEqual({ version: 1, locations: [{ label: 'Petaling Jaya, Malaysia', country: '??' }] })
+    expect(unknown.workplaceLocations).toEqual({ version: 1, locations: [{ label: 'Penang, Malaysia', country: '??' }] })
     expect(workplaceCountryRevision(unknown)).toEqual({ countries: [], uncertain: true, conflict: false })
   })
 
@@ -228,11 +228,11 @@ describe('raw four-provider retention and existing scope semantics', () => {
     expect(countSearchJobs(europe, { kind: 'unmapped' }, 'europe')).toEqual({ jobs: 5, companies: 3, cities: 0 })
     const asia = selectSearchJobs(index, { ...WORKPLACE_COUNTRY_FILTERS, region: 'asia-pacific' })
     expect(asia.filter(entry => inSearchScope(entry, { kind: 'unmapped' }, 'asia-pacific')).map(entry => entry.job.id)).toEqual([
-      'greenhouse-country-fern-5506', 'greenhouse-country-fern-5509',
+      'greenhouse-country-fern-5506', 'greenhouse-country-fern-5507', 'greenhouse-country-fern-5509',
       'ashby-country-moss-5511', 'ashby-country-moss-5512', 'lever-country-wren-5522', 'smartrecruiters-country-cove-5531',
     ])
-    expect(countSearchJobs(asia, { kind: 'unmapped' }, 'asia-pacific')).toEqual({ jobs: 6, companies: 4, cities: 0 })
-    expect(asia.map(entry => entry.job.id)).not.toContain('greenhouse-country-fern-5507')
+    expect(countSearchJobs(asia, { kind: 'unmapped' }, 'asia-pacific')).toEqual({ jobs: 7, companies: 4, cities: 0 })
+    expect(asia.map(entry => entry.job.id)).toContain('greenhouse-country-fern-5507')
     const americas = selectSearchJobs(index, { ...WORKPLACE_COUNTRY_FILTERS, region: 'americas' })
     expect(americas.map(entry => entry.job.id)).toEqual([
       'greenhouse-country-fern-5505', 'ashby-country-moss-5513', 'lever-country-wren-5521',
@@ -261,19 +261,22 @@ describe('raw four-provider retention and existing scope semantics', () => {
     })
   })
 
-  it('keeps an already-mapped city country in details without manufacturing raw metadata or expanding mapped region scope', () => {
+  it('keeps the mapped city in Europe and the separately confirmed unsupported workplace discoverable in APAC', () => {
     const job = normalizeAshbyJob(workplaceCountryAshbyRaw({
       location: 'Berlin', address: undefined,
-      secondaryLocations: [{ location: 'Petaling Jaya, Malaysia' }],
+      secondaryLocations: [{ location: 'Penang, Malaysia' }],
     }), 'country-moss', fetchedAt)!
     expect(job.cityIds).toEqual(['berlin'])
     expect(job.workplaceLocations).toEqual({
-      version: 1, locations: [{ label: 'Berlin' }, { label: 'Petaling Jaya, Malaysia' }],
+      version: 1, locations: [{ label: 'Berlin' }, { label: 'Penang, Malaysia' }],
     })
     expect(workplaceCountryInfo(job).countries).toEqual(['DE', 'MY'])
     const index = createSearchIndex({ ...catalog([job]), unmappedCount: 0 }, WORKPLACE_COUNTRY_PROFILE)
     expect(selectSearchJobs(index, { ...WORKPLACE_COUNTRY_FILTERS, region: 'europe' }).map(entry => entry.job.id)).toEqual(['ashby-country-moss-5511'])
-    expect(selectSearchJobs(index, { ...WORKPLACE_COUNTRY_FILTERS, region: 'asia-pacific' })).toEqual([])
+    const apac = selectSearchJobs(index, { ...WORKPLACE_COUNTRY_FILTERS, region: 'asia-pacific' })
+    expect(apac.map(entry => entry.job.id)).toEqual(['ashby-country-moss-5511'])
+    expect(countSearchJobs(apac, { kind: 'cities' }, 'asia-pacific')).toEqual({ jobs: 0, companies: 0, cities: 0 })
+    expect(countSearchJobs(apac, { kind: 'unmapped' }, 'asia-pacific')).toEqual({ jobs: 1, companies: 1, cities: 0 })
     expect(countSearchJobs(index.entries, { kind: 'unmapped' }, 'all')).toEqual({ jobs: 0, companies: 0, cities: 0 })
   })
 })

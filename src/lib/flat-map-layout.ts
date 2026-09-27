@@ -34,8 +34,9 @@ export function flatMapScale(width: number, height: number): number {
 }
 
 export function flatMapZoomLimit(scale: number): number {
-  // Keep nearby registered cities separable even when the whole world fits a phone.
-  return Math.max(7, 16 / scale)
+  // Taipei and Hsinchu need about 38 screen pixels per projection unit to
+  // separate their fixed-size labels. Keep headroom even on a narrow phone.
+  return Math.max(7, 48 / scale)
 }
 
 export function zoomFlatMap(view: FlatMapView, k: number): FlatMapView {

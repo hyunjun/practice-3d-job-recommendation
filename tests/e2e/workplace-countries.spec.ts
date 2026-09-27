@@ -272,9 +272,9 @@ for (const width of [1440, 320]) test.describe(`confirmed workplace countries at
       await audit(page, info, `europe-country-results-${width}.png`)
       if (width === 320) await region(page, '아시아 · 태평양').tap()
       else await region(page, '아시아 · 태평양').click()
-      await expect(page.locator('.list-toolbar > span')).toHaveText('4개 회사 · 6개 공고')
+      await expect(page.locator('.list-toolbar > span')).toHaveText('4개 회사 · 7개 공고')
       await expandedTitles(page, [
-        'Backend Engineer — Atlas Bridge', 'Backend Engineer — Coast Gauge', 'Backend Engineer — Fern Compass',
+        'Backend Engineer — Atlas Bridge', 'Backend Engineer — Civic Engine', 'Backend Engineer — Coast Gauge', 'Backend Engineer — Fern Compass',
         'Backend Engineer — Reed Compass', 'Backend Engineer — Tide Channel', 'Backend Engineer — Twin Router',
       ])
       await expect(page.locator('.map-stats strong')).toHaveText(['4곳', '0곳'])
@@ -347,7 +347,7 @@ for (const width of [1440, 320]) test.describe(`confirmed workplace countries at
       await expect(page.locator('.results-panel')).toBeFocused()
       await expect(region(page, '유럽')).toHaveAttribute('aria-pressed', 'true')
       await expect(page.locator('.mini-job-title')).toHaveText(['Backend Engineer — Lantern Ledger'])
-      await expect(page.locator('.unmapped-range-note')).toHaveText('국가가 확인된 공고는 해당 지역에서도 표시해요. 국가가 미확인인 근무지는 ‘전 세계’에서 찾고, 공고에 적힌 지역명으로 검색할 수 있어요.')
+      await expect(page.locator('.unmapped-range-note')).toHaveText('국가가 확인된 공고는 해당 지역에서도 표시해요. 국가가 미확인인 근무지는 ‘전 세계’에서 찾고, 공고에 적힌 지역명으로 검색할 수 있어요. 여러 근무지가 있는 공고는 다른 지역의 지도 도시에도 연결될 수 있어요.')
       await search(page).fill('Fog')
       await expect(page.locator('.mini-job-title')).toHaveCount(0)
       const options = page.locator('.recovery-option')
@@ -453,7 +453,7 @@ for (const width of [1440, 320]) test.describe(`confirmed workplace countries at
       await search(page).fill('Fern Compass')
       const compass = page.getByRole('button', { name: 'Backend Engineer — Fern Compass', exact: true })
       await compass.click()
-      await countryEvidence(page, '에스토니아 · 말레이시아', ['Tallinn\n국가: EE', 'Petaling Jaya\n국가: MYS'])
+      await countryEvidence(page, '에스토니아 · 말레이시아', ['Tallinn\n국가: EE', 'Penang\n국가: MYS'])
       await audit(page, info, `structured-country-evidence-${width}.png`)
       await page.getByRole('button', { name: '기회 저장', exact: true }).click()
       await closeDialog(page, compass)
@@ -481,7 +481,7 @@ for (const width of [1440, 320]) test.describe(`confirmed workplace countries at
         note: WORKPLACE_COUNTRY_NOTE, status: 'applied', job: { workplaceLocations: { version: 1, locations: [{ label: 'Tallinn, Estonia' }] } },
       })
       expect(records.find(record => record.job.id === 'ashby-country-moss-5512')?.job.workplaceLocations).toEqual({
-        version: 1, locations: [{ label: 'Tallinn', country: 'EE' }, { label: 'Petaling Jaya', country: 'MYS' }],
+        version: 1, locations: [{ label: 'Tallinn', country: 'EE' }, { label: 'Penang', country: 'MYS' }],
       })
       for (const query of ['Ledger 에스토니아', 'Ledger Estonia', 'Ledger EST']) {
         await savedSearch(page).fill(query)
@@ -493,7 +493,7 @@ for (const width of [1440, 320]) test.describe(`confirmed workplace countries at
         '근무 국가': '에스토니아', '근무 국가 근거': 'Tallinn, Estonia', '상태': '지원 완료', '메모': WORKPLACE_COUNTRY_NOTE,
       })
       expect(csv.find(row => row['포지션'] === 'Backend Engineer — Fern Compass')).toMatchObject({
-        '근무 국가': '에스토니아 · 말레이시아', '근무 국가 근거': 'Tallinn\n국가: EE\n\nPetaling Jaya\n국가: MYS',
+        '근무 국가': '에스토니아 · 말레이시아', '근무 국가 근거': 'Tallinn\n국가: EE\n\nPenang\n국가: MYS',
       })
       expect(csv.find(row => row['포지션'] === 'Backend Engineer — Cedar Dial')).toMatchObject({ '근무 국가': '확인 필요', '근무 국가 근거': 'CA' })
       expect(csv.find(row => row['포지션'] === 'Backend Engineer — Cloud Current')).toMatchObject({
@@ -557,7 +557,7 @@ for (const width of [1440, 320]) test.describe(`confirmed workplace countries at
       await page.getByRole('dialog').getByRole('button', { name: '공개 공고 다시 조회', exact: true }).click()
       // Ten Greenhouse, six Ashby, three Lever and three SmartRecruiters jobs;
       // the separate Other locations result count is twenty.
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '4', '22'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '4', '22'])
       await expect(page.locator('.data-loading')).toHaveCount(0)
       await page.getByRole('button', { name: '닫기', exact: true }).click()
       await savedSearch(page).fill('Ledger 에스토니아')
@@ -585,10 +585,10 @@ for (const width of [1440, 320]) test.describe(`confirmed workplace countries at
       const storedJobs = cache.boards.flatMap(board => board.snapshot.jobs)
       expect(storedJobs.map(job => job.id)).toEqual(allIds)
       expect(storedJobs.find(job => job.id === 'ashby-country-moss-5512')?.workplaceLocations).toEqual({
-        version: 1, locations: [{ label: 'Tallinn', country: 'EE' }, { label: 'Petaling Jaya', country: 'MYS' }],
+        version: 1, locations: [{ label: 'Tallinn', country: 'EE' }, { label: 'Penang', country: 'MYS' }],
       })
       expect(storedJobs.find(job => job.id === 'lever-country-wren-5522')?.workplaceLocations).toEqual({
-        version: 1, locations: [{ label: 'Wren Annex', country: 'EE' }, { label: 'Petaling Jaya, Malaysia' }],
+        version: 1, locations: [{ label: 'Wren Annex', country: 'EE' }, { label: 'Penang, Malaysia' }],
       })
       await page.goto('about:blank')
       await server.stop()
@@ -736,13 +736,13 @@ test('a failed real board update retains prior country evidence, valid regional 
     expect(current.jobs.map(job => job.id)).toEqual(allIds)
     expect(current.boards.find(board => board.companyId === 'country-moss')).toMatchObject({ status: 'error', dataStatus: 'stale', included: 6 })
     expect(current.jobs.find(job => job.id === 'ashby-country-moss-5511')).toMatchObject({
-      stale: true, fetchedAt: past, cityIds: [], locationLabel: 'Petaling Jaya',
-      workplaceLocations: { version: 1, locations: [{ label: 'Petaling Jaya', country: 'MY' }] },
+      stale: true, fetchedAt: past, cityIds: [], locationLabel: 'Penang',
+      workplaceLocations: { version: 1, locations: [{ label: 'Penang', country: 'MY' }] },
     })
     await expect(page.locator('.mini-job-title')).toHaveText(['Backend Engineer — Reed Compass'])
     await expect(page.locator('.stale-job-badge')).toHaveText('이전 조회 공고')
     await title.click()
-    await countryEvidence(page, '말레이시아', ['Petaling Jaya\n국가: MY'])
+    await countryEvidence(page, '말레이시아', ['Penang\n국가: MY'])
     await expect(page.locator('.job-freshness-notice')).toContainText('이전 조회 결과를 보고 있어요')
     await closeDialog(page, title)
     expect(await readSaved(page)).toEqual(saved)

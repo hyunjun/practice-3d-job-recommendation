@@ -25,12 +25,14 @@ function legacyRemote(location: string, overrides: Partial<Job> = {}): Job {
 }
 
 describe('country coverage independent of map cities', () => {
-  it('offers named countries and areas with unique identifiers without expanding map coverage', () => {
+  it('offers countries independently of the approved map cities, including three New Zealand cities', () => {
     expect(COUNTRY_OPTIONS).toHaveLength(250)
     expect(new Set(COUNTRY_OPTIONS.map(([code]) => code)).size).toBe(COUNTRY_OPTIONS.length)
     expect(COUNTRY_OPTIONS.every(([code, label]) => /^[A-Z]{2}$/.test(code) && label !== code)).toBe(true)
     for (const city of CITIES) expect(COUNTRY_BY_CODE.get(city.countryCode)?.region).toBe(city.region)
-    expect(CITIES.some(city => city.countryCode === 'PL' || city.countryCode === 'NZ')).toBe(false)
+    expect(CITIES.some(city => city.countryCode === 'PL')).toBe(false)
+    expect(CITIES.filter(city => city.countryCode === 'NZ').map(city => city.id).sort())
+      .toEqual(['auckland', 'christchurch', 'wellington'])
     expect(countryName('PL')).toBe('폴란드')
     expect(countryName('NZ')).toBe('뉴질랜드')
   })

@@ -3,6 +3,7 @@ import { upgradeJobQualifications } from './job-qualifications'
 import { upgradeJobEligibility } from './job-eligibility'
 import { upgradeJobEmployment } from './job-employment'
 import { isUnmappedJob, upgradeJobLocation } from './job-location'
+import { upgradeJobCityCoverage } from './job-city-coverage'
 import { upgradeCatalogOccupations, upgradeJobOccupation } from './job-occupation'
 import { upgradeJobRole } from './job-roles'
 import { upgradeJobPostingPurpose } from './job-posting'
@@ -26,6 +27,7 @@ export function upgradeJob<T extends Job>(job: T, { preserveUnverifiablePay = fa
   // Research-role interpretation can depend on the occupation's original evidence.
   current = upgradeJobOccupation(current)
   current = upgradeJobRole(current)
+  current = upgradeJobCityCoverage(current)
   current = upgradeJobLocation(current)
   return upgradeJobPostingPurpose(upgradeJobEmployment(current))
 }

@@ -161,4 +161,11 @@ export const PUBLIC_COMPANIES: Company[] = [
   { id: "zalando", name: "Zalando", initials: "Z", color: "#84dba6", industry: "커머스 · 패션", careerUrl: "https://jobs.zalando.com/en/jobs", provider: "careers", board: "zalando" },
   { id: "starbucks", name: "Starbucks", initials: "S", color: "#91bafd", industry: "외식 · 커피", careerUrl: "https://careers.starbucks.com/discover-opportunities/technology/", provider: "careers", board: "starbucks-technology" },
   { id: "auto1", name: "AUTO1 Group", initials: "AG", color: "#a79aff", industry: "자동차 · 커머스", careerUrl: "https://www.auto1-group.com/en/jobs/", provider: "smartrecruiters", board: "Auto1" },
+  // Official boards for the expanded Hong Kong, New Zealand and Oregon coverage.
+  { id: 'halter', name: 'Halter', initials: 'H', color: '#84dba6', industry: '농업 · IoT · 소프트웨어', careerUrl: 'https://www.halterhq.com/careers', provider: 'ashby', board: 'halter' },
+  { id: 'partly', name: 'Partly', initials: 'P', color: '#91bafd', industry: '자동차 · AI · 수리 소프트웨어', careerUrl: 'https://www.partly.com/us/careers/open-roles', provider: 'ashby', board: 'partly.com' },
+  { id: 'pushpay', name: 'Pushpay', initials: 'P', color: '#a79aff', industry: '결제 · 커뮤니티 소프트웨어', careerUrl: 'https://pushpay.com/about-us/careers/', provider: 'greenhouse', board: 'pushpay' },
+  { id: 'lalamove', name: 'Lalamove', initials: 'L', color: '#ff9c78', industry: '물류 · 모빌리티', careerUrl: 'https://www.lalamove.com/careers', provider: 'lever', board: 'lalamove' },
+  { id: 'dat', name: 'DAT Freight & Analytics', initials: 'DAT', color: '#f7d878', industry: '물류 · 운송 데이터', careerUrl: 'https://careers.dat.com/jobs/', provider: 'greenhouse', board: 'datsolutions' },
+  { id: 'pikpok', name: 'PikPok', initials: 'PP', color: '#83d1c7', industry: '게임 · 소프트웨어', careerUrl: 'https://pikpok.com/careers/', provider: 'workable', board: 'pikpok' },
 ]

@@ -7,20 +7,20 @@ import { workplaceCountryInfo } from './job-workplace'
 import { JobProviderSchema } from './schemas'
 import { CATALOG_LIFETIME } from './catalog-freshness'
 import {
-  EMPLOYMENT_VERSION, JOB_ROLES, OCCUPATION_VERSION, POSTING_PURPOSE_VERSION,
+  CITY_COVERAGE_VERSION, EMPLOYMENT_VERSION, JOB_ROLES, MAP_REGIONS, OCCUPATION_VERSION, POSTING_PURPOSE_VERSION,
   QUALIFICATIONS_VERSION, REMOTE_SCOPE_VERSION, ROLE_CLASSIFICATION_VERSION,
 } from './types'
 import type { Company, Job } from './types'
 
 // Bump the leading version when aggregation, country interpretation or skill
 // extraction changes without a corresponding source interpretation version.
-export const OBSERVATION_METHOD = `observations-1.occupation-${OCCUPATION_VERSION}.roles-${ROLE_CLASSIFICATION_VERSION}.qualifications-${QUALIFICATIONS_VERSION}.remote-${REMOTE_SCOPE_VERSION}.employment-${EMPLOYMENT_VERSION}.purpose-${POSTING_PURPOSE_VERSION}`
+export const OBSERVATION_METHOD = `observations-2.cities-${CITY_COVERAGE_VERSION}.occupation-${OCCUPATION_VERSION}.roles-${ROLE_CLASSIFICATION_VERSION}.qualifications-${QUALIFICATIONS_VERSION}.remote-${REMOTE_SCOPE_VERSION}.employment-${EMPLOYMENT_VERSION}.purpose-${POSTING_PURPOSE_VERSION}`
 export const OBSERVATION_RETENTION_DAYS = 90 as const
-export const OBSERVATION_REGIONS = ['americas', 'europe', 'asia-pacific', 'remote', 'other', 'unknown'] as const
+export const OBSERVATION_REGIONS = [...MAP_REGIONS, 'remote', 'other', 'unknown'] as const
 export const OBSERVATION_ROLES = [...JOB_ROLES, 'unknown'] as const
 export const OBSERVATION_MODES = ['remote', 'hybrid', 'onsite', 'unknown'] as const
 export const OBSERVATION_REGION_LABELS: Record<typeof OBSERVATION_REGIONS[number], string> = {
-  americas: '미주', europe: '유럽', 'asia-pacific': '아시아 · 태평양',
+  americas: '미주', europe: '유럽', 'asia-pacific': '아시아 · 태평양', 'middle-east': '중동',
   remote: '원격근무', other: '그 밖의 확인된 지역', unknown: '지역 일부 또는 전체 미확인',
 }
 
@@ -47,7 +47,11 @@ const SkillCountSchema = z.object({
 export const ObservationStatsSchema = z.object({
   published: Count, technical: Count, openings: Count, talentPools: Count,
   companies: z.array(CompanyCountSchema).max(1000),
-  regions: z.array(z.object({ key: z.enum(OBSERVATION_REGIONS), count: Count })).length(OBSERVATION_REGIONS.length),
+  // Legacy series retain their six original buckets. An unmeasured Middle East
+  // must not be rewritten as zero or moved out of the old Asia-Pacific total.
+  regions: z.array(z.object({ key: z.enum(OBSERVATION_REGIONS), count: Count }))
+    .min(OBSERVATION_REGIONS.length - 1).max(OBSERVATION_REGIONS.length)
+    .refine(regions => regions.length === OBSERVATION_REGIONS.length || !regions.some(region => region.key === 'middle-east')),
   roles: z.array(z.object({ key: z.enum(OBSERVATION_ROLES), count: Count })).length(OBSERVATION_ROLES.length),
   workModes: z.array(z.object({ key: z.enum(OBSERVATION_MODES), count: Count })).length(OBSERVATION_MODES.length),
   skills: z.array(SkillCountSchema).max(100), skillCount: Count,
@@ -103,6 +107,8 @@ export const ObservationSeriesSchema = z.object({
     && attempt.boards.every(board => series.scope.boards.some(source => source.companyId === board.companyId))))
   && series.days.every(day => !day.complete || day.complete.stats.companies.length === series.scope.boards.length
     && day.complete.stats.companies.every(company => series.scope.boards.some(board => board.companyId === company.companyId))))
+  .refine(series => series.method !== OBSERVATION_METHOD || series.days.every(day => !day.complete
+    || day.complete.stats.regions.length === OBSERVATION_REGIONS.length))
 export type ObservationSeries = z.infer<typeof ObservationSeriesSchema>
 export const ObservationHistorySchema = z.object({
   version: z.literal(1), retentionDays: z.literal(OBSERVATION_RETENTION_DAYS),

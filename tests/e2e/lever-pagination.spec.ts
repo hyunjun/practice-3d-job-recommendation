@@ -204,7 +204,7 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       expect(original.snapshot).toMatchObject({ fetchedAt: PAGINATION_TIME, total: 50, publishedIds: initialIds })
 
       await change(page, server, 'overlap', PAGINATION_CHANGE_TIME)
-      await refresh(page, ['22', '2', '4'])
+      await refresh(page, ['35', '2', '4'])
       await expect(row(page, 'Alder Pagination')).toContainText('이전 2개 유지')
       await expect(row(page, 'Alder Pagination')).toContainText(duplicateMessage)
       await expect(firstTime(page, 'Alder Pagination')).toHaveAttribute('datetime', PAGINATION_TIME)
@@ -267,7 +267,7 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       expect(await server.requests()).toHaveLength(6)
 
       await change(page, server, 'recovered', PAGINATION_RECOVERY_TIME)
-      await refresh(page, ['22', '2', '5'], true)
+      await refresh(page, ['35', '2', '5'], true)
       await expect(firstTime(page, 'Alder Pagination')).toHaveAttribute('datetime', PAGINATION_RECOVERY_TIME)
       await expect(row(page, 'Alder Pagination')).toContainText('3개 반영')
       await closeData(page)
@@ -319,14 +319,14 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       expect(status.boards[0]).toMatchObject({ status: 'error', lastSuccessAt: null })
       expect(status.boards[0]).not.toHaveProperty('listing')
       await dataButton(page).press('Enter')
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '1', '—'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '1', '—'])
       await expect(page.getByRole('dialog').getByRole('alert')).toContainText(unavailable.error)
       await expect(page.getByRole('dialog').getByRole('button', { name: /^공개 공고 다시 조회/ })).toBeDisabled()
       await audit(page, info, width === 320 ? 'lever-unavailable-320.png' : undefined)
       await closeData(page)
 
       await change(page, server, 'recovered', PAGINATION_CHANGE_TIME)
-      await refresh(page, ['22', '1', '3'], true)
+      await refresh(page, ['35', '1', '3'], true)
       await expect(page.locator('.board-details')).not.toHaveAttribute('open')
       await page.locator('.board-details > summary').click()
       await expect(firstTime(page, 'Alder Pagination')).toHaveAttribute('datetime', PAGINATION_CHANGE_TIME)
@@ -361,7 +361,7 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       const records: SavedJob[] = await saveTracked(page)
       const beforeContext = await contextState(page)
       await change(page, server, 'out-of-scope', PAGINATION_CHANGE_TIME)
-      await refresh(page, ['22', '1', '0'])
+      await refresh(page, ['35', '1', '0'])
       await page.locator('.board-details > summary').click()
       await expect(firstTime(page, 'Alder Pagination')).toHaveAttribute('datetime', PAGINATION_CHANGE_TIME)
       await expect(row(page, 'Alder Pagination')).toContainText('0개 반영')
@@ -382,7 +382,7 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       expect(await readSaved(page)).toEqual(records)
 
       await change(page, server, 'empty', PAGINATION_EMPTY_TIME)
-      await refresh(page, ['22', '1', '0'])
+      await refresh(page, ['35', '1', '0'])
       await page.locator('.board-details > summary').click()
       await expect(firstTime(page, 'Alder Pagination')).toHaveAttribute('datetime', PAGINATION_EMPTY_TIME)
       await expect(row(page, 'Alder Pagination')).toContainText('0개 반영')
@@ -395,7 +395,7 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       expect(empty.boards[0]).toMatchObject({ failures: 0, retryAt: null })
       expect(empty.boards[0].snapshot).toEqual({
         fetchedAt: PAGINATION_EMPTY_TIME, jobs: [], total: 0, unmappedCount: 0, publishedIds: [],
-        observationMethod: 'observations-1.occupation-6.roles-1.qualifications-1.remote-2.employment-1.purpose-1',
+        observationMethod: 'observations-2.cities-1.occupation-6.roles-1.qualifications-1.remote-3.employment-1.purpose-1',
       })
       expect(await readSaved(page)).toEqual(records)
       expect(await contextState(page)).toEqual(beforeContext)

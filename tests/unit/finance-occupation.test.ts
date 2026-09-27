@@ -143,7 +143,7 @@ describe('fictional collection and v4 cache migration', () => {
     const store = createObservationStore(options)
     await store.record(entries, 'cache')
     const history = await store.read()
-    expect(history.method).toBe('observations-1.occupation-6.roles-1.qualifications-1.remote-2.employment-1.purpose-1')
+    expect(history.method).toBe('observations-2.cities-1.occupation-6.roles-1.qualifications-1.remote-3.employment-1.purpose-1')
     expect(history.days).toHaveLength(1)
     expect(history.days[0]).toMatchObject({
       day: '2026-09-27', complete: {

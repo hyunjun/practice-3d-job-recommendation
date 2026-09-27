@@ -22,7 +22,7 @@ for (const width of [1440, 320]) test.describe(`public source collection lifecyc
     test.setTimeout(90_000)
     const mode = await readServerMode(page.request, `${baseURL}/api/health`)
     const cacheSeed = sourcePublicLifecycleCache()
-    expect(cacheSeed.boards).toHaveLength(123)
+    expect(cacheSeed.boards).toHaveLength(129)
     const server = await createPublicCoverageServer(info.outputPath('source-public-lifecycle-server'), mode, {
       cacheSeed, clock: SOURCE_EXPANSION_NOW, responses: sourcePublicLifecycleResponses(), defaultEmptyBoards: false,
     })
@@ -67,8 +67,8 @@ for (const width of [1440, 320]) test.describe(`public source collection lifecyc
 
       const catalog = await surveyJson<Catalog>(page, server.origin, '/api/catalog?source=public')
       expect(catalog.source).toBe('public')
-      expect(catalog.companies).toHaveLength(124)
-      expect(catalog.boards).toHaveLength(124)
+      expect(catalog.companies).toHaveLength(130)
+      expect(catalog.boards).toHaveLength(130)
       expect(catalog.jobs).toHaveLength(4)
       expect(catalog.jobs.some(job => job.source === 'sample')).toBe(false)
       expect(catalog.boards.find(board => board.companyId === 'booking')).toMatchObject({
@@ -87,7 +87,7 @@ for (const width of [1440, 320]) test.describe(`public source collection lifecyc
       }
       await surveyDataButton(page).click()
       const overview = await expectPublicSourceOverview(page, 'rejoined public collector')
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '124', '4'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '130', '4'])
       await surveyImage(page, info, 'rejoined-public-source')
       await surveyClose(page, surveyDataButton(page))
 

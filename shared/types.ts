@@ -1,4 +1,5 @@
-export type Region = 'all' | 'americas' | 'europe' | 'asia-pacific'
+export const MAP_REGIONS = ['americas', 'europe', 'asia-pacific', 'middle-east'] as const
+export type Region = 'all' | typeof MAP_REGIONS[number]
 export const JOB_ROLES = ['backend', 'frontend', 'fullstack', 'ml', 'data', 'devops', 'mobile', 'security'] as const
 export type KnownJobRole = typeof JOB_ROLES[number]
 export type Role = 'all' | KnownJobRole
@@ -15,7 +16,8 @@ export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 2 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
 export const OCCUPATION_VERSION = 6 as const
-export const REMOTE_SCOPE_VERSION = 2 as const
+export const REMOTE_SCOPE_VERSION = 3 as const
+export const CITY_COVERAGE_VERSION = 1 as const
 export const EMPLOYMENT_VERSION = 1 as const
 export const POSTING_PURPOSE_VERSION = 1 as const
 export const LANGUAGE_REQUIREMENTS_VERSION = 1 as const
@@ -199,6 +201,7 @@ export interface Job {
   occupation?: JobOccupation
   postingPurpose?: JobPostingPurpose
   cityIds: string[]
+  cityCoverageVersion?: typeof CITY_COVERAGE_VERSION
   locationLabel: string
   workplaceLocations?: {
     version: 1
@@ -225,7 +228,7 @@ export interface Job {
   remoteWorldwide: boolean
   remoteScopeUnknown: boolean
   remoteRegions?: Exclude<Region, 'all'>[]
-  remoteScopeVersion?: 1 | typeof REMOTE_SCOPE_VERSION
+  remoteScopeVersion?: 1 | 2 | typeof REMOTE_SCOPE_VERSION
   remoteScopeResolution?: JobRemoteScopeResolution
   description: string
   requirements: string[]
@@ -345,6 +348,7 @@ export const REGION_LABELS: Record<Region, string> = {
   americas: '미주',
   europe: '유럽',
   'asia-pacific': '아시아 · 태평양',
+  'middle-east': '중동',
 }
 
 export const EMPLOYMENT_LABELS: Record<Employment | 'all', string> = {

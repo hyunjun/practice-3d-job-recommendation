@@ -99,7 +99,7 @@ describe('independent ordinary-opening distribution expectations', () => {
       remoteCountries: ['US', 'CA'], remoteWorldwide: false,
     })
     const stats = buildObservationStats([job], [OBSERVATION_COMPANIES[0]], 1)
-    expect(rows(stats.regions)).toEqual({ americas: 0, europe: 0, 'asia-pacific': 0, remote: 1, other: 0, unknown: 0 })
+    expect(rows(stats.regions)).toEqual({ americas: 0, europe: 0, 'asia-pacific': 0, 'middle-east': 0, remote: 1, other: 0, unknown: 0 })
     expect(stats.openings).toBe(1)
   })
 
@@ -114,7 +114,7 @@ describe('independent ordinary-opening distribution expectations', () => {
     })
     const stats = buildObservationStats([partlyUnknown, conflict], [OBSERVATION_COMPANIES[0]], 2)
     expect(stats.openings).toBe(2)
-    expect(rows(stats.regions)).toEqual({ americas: 0, europe: 1, 'asia-pacific': 0, remote: 0, other: 0, unknown: 2 })
+    expect(rows(stats.regions)).toEqual({ americas: 0, europe: 1, 'asia-pacific': 0, 'middle-east': 0, remote: 0, other: 0, unknown: 2 })
   })
 
   it('counts a required alternative as inclusion in one required item and deduplicates repeated mentions per posting', () => {
@@ -156,7 +156,7 @@ describe('independent ordinary-opening distribution expectations', () => {
     const stats = buildObservationStats([], OBSERVATION_COMPANIES, 0)
     expect(stats).toMatchObject({ published: 0, technical: 0, openings: 0, talentPools: 0, skills: [], skillCount: 0 })
     expect(stats.companies.map(company => company.count)).toEqual([0, 0])
-    expect(rows(stats.regions)).toEqual({ americas: 0, europe: 0, 'asia-pacific': 0, remote: 0, other: 0, unknown: 0 })
+    expect(rows(stats.regions)).toEqual({ americas: 0, europe: 0, 'asia-pacific': 0, 'middle-east': 0, remote: 0, other: 0, unknown: 0 })
     expect(rows(stats.workModes)).toEqual({ onsite: 0, hybrid: 0, remote: 0, unknown: 0 })
     expect(stats.roles.every(role => role.count === 0)).toBe(true)
     expect(ObservationStatsSchema.safeParse(stats).success).toBe(true)

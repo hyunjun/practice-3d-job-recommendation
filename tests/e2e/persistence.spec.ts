@@ -152,7 +152,7 @@ test('restored loading shows no fictional jobs and saved navigation cancels a pe
     await expect(page.locator('.saved-card, .city-row, .company-card')).toHaveCount(0)
     await page.getByRole('button', { name: '공개 채용', exact: true }).click()
     await expectPublicOnlyDialog(page)
-    await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
+    await expect(page.locator('.coverage-stats strong')).toHaveText(['35', '—', '—'])
     await page.getByRole('button', { name: '닫기', exact: true }).click()
     expect(traffic.requests).toHaveLength(attempts)
     for (const request of traffic.requests) expect(request).toMatchObject({

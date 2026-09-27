@@ -211,7 +211,7 @@ export const OBSERVATION_EXPECTED = {
   openings: 6,
   talentPools: 1,
   companies: { 'observation-orchard': 3, 'observation-relay': 3 },
-  regions: { americas: 1, europe: 2, 'asia-pacific': 1, remote: 1, other: 1, unknown: 1 },
+  regions: { americas: 1, europe: 2, 'asia-pacific': 1, 'middle-east': 0, remote: 1, other: 1, unknown: 1 },
   roles: { backend: 3, frontend: 2, fullstack: 0, ml: 1, data: 1, devops: 0, mobile: 0, security: 0, unknown: 1 },
   workModes: { onsite: 2, hybrid: 2, remote: 1, unknown: 1 },
   skills: {

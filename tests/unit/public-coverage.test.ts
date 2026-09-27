@@ -36,6 +36,7 @@ import { withIntegrationEmptyBoards } from '../fixtures/source-integrations'
 import { asCoverageReply } from '../fixtures/public-coverage-transport'
 import { SOURCE_EXPANSION_IDS } from '../fixtures/source-expansion-contract'
 import { isSourceExpansionRequest, SOURCE_EXPANSION_EMPTY_FULL_URLS } from '../fixtures/source-expansion-empty'
+import { isRegionalSourceRequest, REGIONAL_SOURCE_FULL_URLS, REGIONAL_SOURCE_IDS } from '../fixtures/regional-sources'
 
 // Real request parsing and cache behavior; pacing/cooldown has its own provider
 // suite. Avoid adding six wall-clock seconds to each historical fixture case.
@@ -64,7 +65,7 @@ const expectedDefaultIds = [
   'openai', 'notion', 'reddit', 'discord', 'coinbase', 'dropbox', 'duolingo', 'roblox',
   'spacex', 'pinterest', 'databricks', 'robinhood',
 ]
-const currentDefaultIds = [...expectedDefaultIds, ...SURVEY_REGISTRATIONS.map(company => company.id), ...INTEGRATION_DEFAULT_IDS, ...SOURCE_EXPANSION_IDS]
+const currentDefaultIds = [...expectedDefaultIds, ...SURVEY_REGISTRATIONS.map(company => company.id), ...INTEGRATION_DEFAULT_IDS, ...SOURCE_EXPANSION_IDS, ...REGIONAL_SOURCE_IDS]
 const sha = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 
 async function directory() {
@@ -77,11 +78,12 @@ function transport() {
   const requests: { url: string; method: string }[] = []
   const integrationRequests: { url: string; method: string }[] = []
   const expansionRequests: { url: string; method: string }[] = []
+  const regionalRequests: { url: string; method: string }[] = []
   const unexpected: string[] = []
   vi.stubGlobal('fetch', vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
     const url = input instanceof Request ? input.url : String(input)
     const method = init?.method ?? (input instanceof Request ? input.method : 'GET')
-    ;(isSourceExpansionRequest(url) ? expansionRequests : isIntegrationRequest(url) ? integrationRequests : requests).push({ url, method })
+    ;(isRegionalSourceRequest(url) ? regionalRequests : isSourceExpansionRequest(url) ? expansionRequests : isIntegrationRequest(url) ? integrationRequests : requests).push({ url, method })
     if (method !== 'GET' || !Object.hasOwn(responses, url)) {
       unexpected.push(url)
       throw new Error(`Blocked unexpected synthetic upstream request: ${method} ${url}`)
@@ -89,7 +91,7 @@ function transport() {
     const reply = asCoverageReply(responses[url])
     return new Response(reply.format === 'text' ? reply.body as string : JSON.stringify(reply.body), { status: reply.status ?? 200, headers: reply.headers })
   }))
-  return { requests, integrationRequests, expansionRequests, responses, unexpected }
+  return { requests, integrationRequests, expansionRequests, regionalRequests, responses, unexpected }
 }
 function service(config: BoardConfiguration, now: () => number = () => NOW) {
   return createCatalogService({
@@ -122,7 +124,7 @@ afterEach(async () => {
 describe('default public coverage and retired historical samples', () => {
   it('preserves the frozen93 registrations before the31 additions', () => {
     expect(PUBLIC_COMPANIES.slice(0, 83)).toHaveLength(83)
-    expect(PUBLIC_COMPANIES).toHaveLength(124)
+    expect(PUBLIC_COMPANIES).toHaveLength(130)
     expect(PUBLIC_COMPANIES.slice(0, 22)).toEqual(ORIGINAL_PUBLIC_REGISTRATIONS)
     expect(PUBLIC_COMPANIES.slice(22, 24)).toEqual(ADDED_PUBLIC_REGISTRATIONS)
     expect(PUBLIC_COMPANIES.slice(24, 36).map(({ id, name, careerUrl, provider, board }) =>
@@ -135,7 +137,7 @@ describe('default public coverage and retired historical samples', () => {
     expect(PUBLIC_COMPANIES.slice(36, 83).map(({ id, name, careerUrl, provider, board }) =>
       ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
     expect(PUBLIC_COMPANIES.map(company => company.id)).toEqual(currentDefaultIds)
-    expect(new Set(PUBLIC_COMPANIES.map(company => company.id)).size).toBe(124)
+    expect(new Set(PUBLIC_COMPANIES.map(company => company.id)).size).toBe(130)
     expect(Object.fromEntries(['greenhouse', 'ashby', 'lever', 'smartrecruiters'].map(provider =>
       [provider, PUBLIC_COMPANIES.slice(0, 93).filter(company => company.provider === provider).length])))
       .toEqual({ greenhouse: 50, ashby: 24, lever: 4, smartrecruiters: 5 })
@@ -166,7 +168,7 @@ describe('default public coverage and retired historical samples', () => {
     expect(JSON.stringify(records)).toBe(before)
   })
 
-  it('loads the124 defaults without an environment/local configuration or filesystem side effects', async () => {
+  it('loads the130 defaults without an environment/local configuration or filesystem side effects', async () => {
     const cwd = await directory()
     const config = await loadBoardConfiguration({ cwd })
     expect(config.mode).toBe('default')
@@ -176,13 +178,13 @@ describe('default public coverage and retired historical samples', () => {
     expect(await readdir(cwd)).toEqual([])
   })
 
-  it('collects all124 default boards, retaining the original83 requests and pool/publication IDs', async () => {
+  it('collects all130 default boards, retaining the original83 requests and pool/publication IDs', async () => {
     const network = transport()
     const config = await loadBoardConfiguration({ cwd: await directory() })
     const catalogService = service(config)
     const catalog = await catalogService.get()
     expect(catalog.companies.map(company => company.id)).toEqual(currentDefaultIds)
-    expect(catalog.boards).toHaveLength(124)
+    expect(catalog.boards).toHaveLength(130)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.jobs.map(job => job.id)).toEqual(expectedJobIds)
     expect(catalog.jobs.map(job => job.cityIds)).toEqual([['seoul'], ['seoul'], ['seoul'], ['seoul'], ['seoul']])
@@ -211,9 +213,11 @@ describe('default public coverage and retired historical samples', () => {
     expect(network.integrationRequests.every(request => request.method === 'GET')).toBe(true)
     expect(network.expansionRequests.map(request => request.url).sort()).toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
     expect(network.expansionRequests.every(request => request.method === 'GET')).toBe(true)
+    expect(network.regionalRequests.map(request => request.url).sort()).toEqual([...REGIONAL_SOURCE_FULL_URLS].sort())
+    expect(network.regionalRequests.every(request => request.method === 'GET')).toBe(true)
     expect(network.unexpected).toEqual([])
     const stored = JSON.parse(await readFile(config.cacheFile, 'utf8'))
-    expect(stored.boards).toHaveLength(124)
+    expect(stored.boards).toHaveLength(130)
     expect(stored.boards.find((board: { companyId: string }) => board.companyId === 'sendbird').snapshot.jobs[0].url)
       .toBe('https://sendbird.com/careers?gh_jid=44201')
   })
@@ -251,6 +255,7 @@ describe('default public coverage and retired historical samples', () => {
     expect(network.requests).toHaveLength(61)
     expect(network.integrationRequests.map(request => request.url).sort()).toEqual([...INTEGRATION_EMPTY_FULL_URLS].sort())
     expect(network.expansionRequests.map(request => request.url).sort()).toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
+    expect(network.regionalRequests.map(request => request.url).sort()).toEqual([...REGIONAL_SOURCE_FULL_URLS].sort())
     expect(await readdir(path.join(cwd, '.local'))).toEqual(['public-board-cache-v5.json'])
   })
 })

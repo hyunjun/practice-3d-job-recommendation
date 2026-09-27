@@ -157,7 +157,7 @@ async function blockedRefreshInput(page: Page, state: State, phase: string, cata
 
 async function publicUnknown(page: Page) {
   await expectPublicOnlyDialog(page)
-  await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
+  await expect(page.locator('.coverage-stats strong')).toHaveText(['35', '—', '—'])
   await expect(page.locator('.coverage-stats')).toContainText('조회된 개발 공고')
   await expect(page.locator('.company-card, .flat-marker, .city-row, .comparison-city')).toHaveCount(0)
   expect((await contextState(page)).exploration.source).toBe('public')

@@ -46,7 +46,7 @@ npm run dev
 
 | 설정 | 동작 |
 | --- | --- |
-| 설정 파일 없음 | 기본 124개 회사 사용 |
+| 설정 파일 없음 | 기본 130개 회사 사용 |
 | `mode: "extend"` 또는 mode 생략 | 기본 목록에 추가. 같은 ID의 회사 객체는 해당 회사의 등록 정보 변경 |
 | `mode: "replace"` | `companies`에 적은 회사만 사용 |
 | 회사 ID 문자열 | 기본 목록의 등록 정보 재사용. `npm run boards:check -- --help`에서 ID 목록 확인 |
@@ -96,7 +96,7 @@ ORBIT_BOARDS_FILE="/absolute/path/my-boards.json" npm start
 - **빈 결과에서 이어 찾기:** 같은 조건의 다른 도시·원격 기회·기타 근무지로 이동하거나, 바꿀 조건과 예상 회사·공고 수를 먼저 확인합니다. 선택한 변경만 적용하고 실행 취소할 수 있습니다.
 - **회사와 공고:** 관련 공고를 회사별로 묶고, 경험이 맞는 이유와 부족하거나 미확인인 조건을 표시합니다. 회사 카드를 펼치면 추천 순서대로 10개씩 탐색하고 각 페이지에서 상세 열람·저장을 할 수 있습니다.
 - **원격 기회:** 원격 공고를 별도로 보여주고 공고에 명시된 근무 지역과 거주 국가를 비교합니다.
-- **기타 근무지:** 제공 도시에 연결되지 않은 공고도 원문 근무지로 검색하고 열람·저장합니다. 근무 국가가 확인되면 해당 지역에서도 찾을 수 있고, 국가가 미확인인 공고는 전 세계 범위에서 제공합니다. 국가명만 있거나 위치가 불명확한 공고를 임의의 도시나 원격근무로 분류하지 않습니다.
+- **기타 근무지:** 선택한 지역의 지도 도시에 연결되지 않은 공고도 원문 근무지로 검색하고 열람·저장합니다. 근무 국가가 확인되면 해당 지역에서도 찾을 수 있고, 여러 지역의 근무지가 있는 공고는 다른 지역의 도시 목록에도 나타날 수 있습니다. 국가가 미확인인 공고는 전 세계 범위에서 제공하며, 국가명만 있거나 위치가 불명확한 공고를 임의의 도시나 원격근무로 분류하지 않습니다.
 - **취업 자격 조건:** 비자 지원의 적용 범위, 취업 허가·시민권·거주 요건·보안 인가·수출 통제 조건을 원문과 함께 확인합니다. 필수로 명시된 조건과 우대 사항을 구분합니다.
 - **공고의 언어 조건:** 영어·한국어 등의 명시적인 언어 능력 조건을 검색하고, 필수·자격 항목·우대와 요구 수준의 원문을 확인합니다. 여러 직급의 조건은 해당 직급 이름과 함께 표시합니다.
 - **시간대·협업 시간:** 명시된 근무·거주 시간대, 협업 시간대, 코어·일반 근무시간과 시간 중첩 안내를 원문과 함께 확인합니다. 저장 기록과 내보내기에도 적용 범위와 원래 시각 표현을 보존합니다.
@@ -143,15 +143,15 @@ ORBIT_BOARDS_FILE="/absolute/path/my-boards.json" npm start
 
 이전에 저장한 가상 공고는 실제 공고 목록·추천·CSV·일반 JSON 백업에서 제외합니다. 기존 메모·지원 상태·원본은 **기록 백업·복원 → 따로 보관한 원본 관리**에서 내려받을 수 있습니다. 가상 공고를 포함한 외부 백업 파일은 제외 수량을 표시하며 실제 공고만 선택할 수 있습니다. [기록 이전과 보관 범위](docs/saved-storage.md)를 참고하세요.
 
-공개 모드의 기본 설정은 다음 **124개 회사**를 조회합니다. **117개사는 공식 출처**, **7개사는 Himalayas의 공개 원격 공고**입니다. 로컬 설정으로 이 목록을 선택·확장할 수 있습니다.
+공개 모드의 기본 설정은 다음 **130개 회사**를 조회합니다. **123개사는 공식 출처**, **7개사는 Himalayas의 공개 원격 공고**입니다. 로컬 설정으로 이 목록을 선택·확장할 수 있습니다.
 
 | 출처 | 회사 수 | 대상 회사 |
 | --- | ---: | --- |
-| Greenhouse | 65 | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom, Asana, Moloco, Delight.ai (Sendbird), Reddit, Discord, Coinbase, Dropbox, Duolingo, Roblox, SpaceX, Pinterest, Databricks, Robinhood, Adyen, Affirm, Automattic, Brave, Brex, Canonical, Cockroach Labs, Coupang, DigitalOcean, Elastic, Epic Games, Fivetran, Grafana Labs, Lyft, Miro, Mozilla, N26, Okta, Proton, Riot Games, Scale AI, Together AI, Twilio, Twitch, Waymo, Wikimedia Foundation, xAI (SpaceXAI), HelloFresh, Doctolib, SumUp, KRAFTON, Culture Amp, VTEX, Careem, Tamara, Moniepoint, Lucid Motors, Agoda, The New York Times, Flexport, Razorpay, Financial Times |
-| Ashby | 27 | Linear, DeepL, n8n, Supabase, Mistral AI, Jane, OpenAI, Notion, ClickHouse, Cohere, Confluent, Cursor, Docker, ElevenLabs, Kong, Perplexity, Plaid, PostHog, Ramp, Replit, Runway, Sentry, Snowflake, Temporal, Airwallex, Nubank, Mollie |
-| Lever | 9 | Spotify, Contentsquare, Palantir, Zoox, BlaBlaCar, Immutable, dLocal, Woven by Toyota, Qonto |
+| Greenhouse | 67 | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom, Asana, Moloco, Delight.ai (Sendbird), Reddit, Discord, Coinbase, Dropbox, Duolingo, Roblox, SpaceX, Pinterest, Databricks, Robinhood, Adyen, Affirm, Automattic, Brave, Brex, Canonical, Cockroach Labs, Coupang, DigitalOcean, Elastic, Epic Games, Fivetran, Grafana Labs, Lyft, Miro, Mozilla, N26, Okta, Proton, Riot Games, Scale AI, Together AI, Twilio, Twitch, Waymo, Wikimedia Foundation, xAI (SpaceXAI), HelloFresh, Doctolib, SumUp, KRAFTON, Culture Amp, VTEX, Careem, Tamara, Moniepoint, Lucid Motors, Agoda, The New York Times, Flexport, Razorpay, Financial Times, Pushpay, DAT Freight & Analytics |
+| Ashby | 29 | Linear, DeepL, n8n, Supabase, Mistral AI, Jane, OpenAI, Notion, ClickHouse, Cohere, Confluent, Cursor, Docker, ElevenLabs, Kong, Perplexity, Plaid, PostHog, Ramp, Replit, Runway, Sentry, Snowflake, Temporal, Airwallex, Nubank, Mollie, Halter, Partly |
+| Lever | 10 | Spotify, Contentsquare, Palantir, Zoox, BlaBlaCar, Immutable, dLocal, Woven by Toyota, Qonto, Lalamove |
 | SmartRecruiters | 10 | Canva, Grab, Wise, Delivery Hero, ServiceNow, Freshworks, McDonald’s, IKEA (Inter IKEA Group), Scalable Capital, AUTO1 Group |
-| Workable | 3 | Hugging Face, SmartNews, Mercari |
+| Workable | 4 | Hugging Face, SmartNews, Mercari, PikPok |
 | [Himalayas](https://himalayas.app) · 공개 잡 사이트 | 7 | Microsoft, Adobe, Salesforce, Cisco, Qualcomm, Broadcom, Red Hat |
 | 회사 공식 사이트 직접 수집 | 3 | Booking.com / Booking Holdings, Zalando, Starbucks Technology |
 
@@ -199,7 +199,9 @@ Sendbird API의 이전 채용 목록 주소는 게시 ID가 정확히 일치하�
 - 기타 근무지도 확인된 근무 국가가 해당하는 지역에서 표시합니다. 국가가 미확인이거나 제공 지역에 속하지 않으면 **전 세계**에서 찾을 수 있습니다. 원문 지역명으로 검색할 수 있고 직무·보상·비자 등의 조건은 계속 적용합니다. 지역 필터를 해제해야 결과가 생기는 경우 변경 전·후 수치를 안내하고 사용자가 선택할 때만 적용합니다.
 - 데이터 화면에서 최근 조회·이전 조회·미확인 게시판, 회사별 마지막 정상 확인과 실패 시각, 재시도 가능 시각을 확인할 수 있습니다. 서버 조회와 열린 화면 모두 회사별 원래 시각을 기준으로 24시간을 넘긴 결과를 추천에서 제외합니다.
 
-조회 가능한 게시판과 공고 수는 계속 바뀝니다. 화면의 **데이터와 추천 방식**에서 출처, 제공 도시, 조회 시각, 게시판별 상태를 확인할 수 있습니다. 이 앱의 22개 도시는 지도 표시 범위이며, 각 도시의 전체 채용 시장을 수집했다는 뜻이 아닙니다.
+조회 가능한 게시판과 공고 수는 계속 바뀝니다. 화면의 **데이터와 추천 방식**에서 출처, 제공 도시, 조회 시각, 게시판별 상태를 확인할 수 있습니다. 이 앱의 35개 도시는 지도 표시 범위이며, 각 도시의 전체 채용 시장을 수집했다는 뜻이 아닙니다.
+
+대만의 타이베이·신주, 홍콩, 방콕, 쿠알라룸푸르, 마닐라, 뉴질랜드의 오클랜드·웰링턴·크라이스트처치, 두바이, 애틀랜타, 로스앤젤레스와 오리건의 포틀랜드를 포함합니다. 두바이는 **중동** 탭에서 탐색합니다. 기존 공고도 원문 근무지로 새 도시에 연결하며, 국가만 적힌 공고와 원격 공고를 임의의 도시로 배치하지 않습니다. [도시·광역권 범위와 추가 출처](docs/regional-coverage.md)를 참고하세요.
 
 화면을 계속 열어 두어도 일반 공개 게시판은 정상 확인 후 **30분**, Himalayas와 공식 사이트 직접 수집은 **24시간**이 지나면 이전 조회로 바뀝니다. 모든 출처에서 **24시간**을 넘기면 회사 수·지도·목록·도시 비교에서 제외하며, 모든 기록의 확인 기간이 지나면 검색 결과 없음 대신 재조회를 안내합니다. 탭에 돌아오거나 뒤로 가기로 화면이 복원될 때도 기기 시각으로 다시 확인합니다. 시간 경과를 게시판 장애나 모집 종료로 표시하지 않습니다. 검색 조건과 저장한 공고·메모·지원 상태는 유지하고, 저장 목록과 열려 있는 상세에서는 오래된 조회 기록임을 표시합니다.
 
@@ -211,7 +213,7 @@ Sendbird API의 이전 채용 목록 주소는 게시 ID가 정확히 일치하�
 
 ### 기타 근무지의 국가와 지역
 
-지도에 연결되지 않은 비원격 공고도 근무 국가가 확인되면 **미주**, **유럽**, **아시아·태평양**의 해당 지역에서 찾을 수 있습니다. 여러 근무 국가가 명시되면 각각의 해당 지역에 포함하며 전체 회사·공고 수는 중복 집계하지 않습니다. 국가가 미확인이거나 제공하는 지역 탭에 속하지 않는 공고는 **전 세계**에서 찾을 수 있습니다.
+지도에 연결되지 않은 비원격 공고도 근무 국가가 확인되면 **미주**, **유럽**, **아시아·태평양**, **중동**의 해당 지역에서 찾을 수 있습니다. 여러 근무 국가가 명시되면 각각의 해당 지역에 포함하며 전체 회사·공고 수는 중복 집계하지 않습니다. 다른 지역의 지도 도시에 연결된 공고도 선택한 지역에 별도의 미매핑 근무지가 있으면 기타 근무지에서 계속 찾을 수 있습니다. 국가가 미확인이거나 제공하는 지역 탭에 속하지 않는 공고는 **전 세계**에서 찾을 수 있습니다.
 
 상세의 **확인된 근무 국가 → 근무 국가의 근거**에서 공고의 위치 문구와 국가 필드를 확인합니다. 나라의 한국어·영어 이름과 코드는 탐색·저장 검색에 포함합니다. 국가가 기재됐다는 사실은 원격근무나 지원 가능한 거주 국가를 뜻하지 않으며, 원격근무의 거주 조건은 별도로 확인합니다.
 

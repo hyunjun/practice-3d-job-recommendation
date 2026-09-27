@@ -2,6 +2,8 @@ import type { Filters, Profile } from '../../shared/types'
 
 // Invented employers, roles and source paragraphs. The real provider collector
 // receives these raw fields; no country metadata is supplied by a test oracle.
+// Penang keeps this cohort's unsupported-city boundary after Petaling Jaya
+// becomes part of the approved Kuala Lumpur coverage in stage70.
 export const WORKPLACE_COUNTRY_REGISTRATIONS = [
   {
     id: 'country-fern', name: 'Fern Beacon Labs', provider: 'greenhouse', board: 'FernCountries55',
@@ -63,8 +65,8 @@ export function workplaceCountryAshbyRaw(overrides: Record<string, unknown> = {}
   return {
     id: '5511', title: 'Backend Engineer — Reed Compass',
     jobUrl: 'https://example.com/jobs/country-moss-5511', isListed: true,
-    location: 'Petaling Jaya',
-    address: { postalAddress: { addressLocality: 'Petaling Jaya', addressCountry: 'MY' } },
+    location: 'Penang',
+    address: { postalAddress: { addressLocality: 'Penang', addressCountry: 'MY' } },
     workplaceType: 'OnSite', isRemote: false, employmentType: 'FullTime', department: 'Engineering',
     descriptionPlain: WORKPLACE_COUNTRY_BODY,
     ...overrides,
@@ -86,7 +88,7 @@ export function workplaceCountrySmartRecruitersRaw(overrides: Record<string, unk
     id: '5531', name: 'Backend Engineer — Tide Channel',
     company: { identifier: 'CoveCountries55' }, visibility: 'PUBLIC' as const, active: true,
     releasedDate: '2026-09-24T08:30:00.000Z', postingUrl: 'https://example.com/jobs/country-cove-5531',
-    location: { city: 'Petaling Jaya', country: 'my', fullLocation: 'Petaling Jaya', remote: false, hybrid: false },
+    location: { city: 'Penang', country: 'my', fullLocation: 'Penang', remote: false, hybrid: false },
     typeOfEmployment: { label: 'Full-time' }, function: { label: 'Engineering' },
     jobAd: { sections: { jobDescription: { title: 'Responsibilities', text: '<p>Build observability services with TypeScript.</p>' } } },
     ...overrides,
@@ -115,11 +117,11 @@ export function workplaceCountryGreenhousePostings() {
     }),
     workplaceCountryGreenhouseRaw({
       id: 5506, internal_job_id: 95506, title: 'Backend Engineer — Atlas Bridge',
-      absolute_url: 'https://example.com/jobs/country-fern-5506', location: { name: 'Tallinn, Estonia; Petaling Jaya, Malaysia' },
+      absolute_url: 'https://example.com/jobs/country-fern-5506', location: { name: 'Tallinn, Estonia; Penang, Malaysia' },
     }),
     workplaceCountryGreenhouseRaw({
       id: 5507, internal_job_id: 95507, title: 'Backend Engineer — Civic Engine',
-      absolute_url: 'https://example.com/jobs/country-fern-5507', location: { name: 'Berlin, Germany; Petaling Jaya, Malaysia' },
+      absolute_url: 'https://example.com/jobs/country-fern-5507', location: { name: 'Berlin, Germany; Penang, Malaysia' },
     }),
     workplaceCountryGreenhouseRaw({
       id: 5508, internal_job_id: 95508, title: 'Backend Engineer — Cloud Current',
@@ -145,7 +147,7 @@ export function workplaceCountryAshbyPostings() {
     workplaceCountryAshbyRaw({
       id: '5512', title: 'Backend Engineer — Fern Compass', jobUrl: 'https://example.com/jobs/country-moss-5512',
       location: 'Tallinn', address: { addressLocality: 'Tallinn', addressCountry: 'EE' },
-      secondaryLocations: [{ location: 'Petaling Jaya', address: { postalAddress: { addressLocality: 'Petaling Jaya', addressCountry: 'MYS' } } }],
+      secondaryLocations: [{ location: 'Penang', address: { postalAddress: { addressLocality: 'Penang', addressCountry: 'MYS' } } }],
     }),
     workplaceCountryAshbyRaw({
       id: '5513', title: 'Backend Engineer — Maple Compass', jobUrl: 'https://example.com/jobs/country-moss-5513',
@@ -173,7 +175,7 @@ export function workplaceCountryLeverPostings() {
     workplaceCountryLeverRaw({
       id: '5522', text: 'Backend Engineer — Twin Router', hostedUrl: 'https://example.com/jobs/country-wren-5522',
       country: 'EE',
-      categories: { location: 'Wren Annex', allLocations: ['Wren Annex', 'Petaling Jaya, Malaysia'], commitment: 'Full-time', department: 'Engineering' },
+      categories: { location: 'Wren Annex', allLocations: ['Wren Annex', 'Penang, Malaysia'], commitment: 'Full-time', department: 'Engineering' },
     }),
     workplaceCountryLeverRaw({
       id: '5523', text: 'Backend Engineer — Hollow Router', hostedUrl: 'https://example.com/jobs/country-wren-5523',
@@ -192,7 +194,7 @@ export function workplaceCountrySmartRecruitersPostings() {
     }),
     workplaceCountrySmartRecruitersRaw({
       id: '5533', name: 'Backend Engineer — Quiet Channel', postingUrl: 'https://example.com/jobs/country-cove-5533',
-      location: { city: 'Petaling Jaya', country: '??', fullLocation: 'Petaling Jaya, Malaysia', remote: false, hybrid: false },
+      location: { city: 'Penang', country: '??', fullLocation: 'Penang, Malaysia', remote: false, hybrid: false },
     }),
   ]
 }

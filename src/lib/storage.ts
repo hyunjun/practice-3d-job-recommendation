@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { CITY_BY_ID } from '../../shared/cities'
-import { DEFAULT_FILTERS, ELIGIBILITY_LABELS, ELIGIBILITY_LEVEL_LABELS, EMPLOYMENT_LABELS, JOB_ROLES, JOB_SOURCE_LABELS, QUALIFICATION_LABELS, ROLE_FILTER_LABELS, SAMPLE_PROFILE, VISA_LABELS } from '../../shared/types'
+import { DEFAULT_FILTERS, ELIGIBILITY_LABELS, ELIGIBILITY_LEVEL_LABELS, EMPLOYMENT_LABELS, JOB_ROLES, JOB_SOURCE_LABELS, MAP_REGIONS, QUALIFICATION_LABELS, ROLE_FILTER_LABELS, SAMPLE_PROFILE, VISA_LABELS } from '../../shared/types'
 import { formatCompensation, formatJobSalary } from '../../shared/matching'
 import { formatExperienceYears } from '../../shared/job-qualifications'
 import { jobRoleEvidence, jobRoleLabel } from '../../shared/job-roles'
@@ -81,7 +81,7 @@ export function loadExploration(profile: Profile): ExplorationState {
     source: z.enum(['sample', 'public', 'greenhouse']).transform(() => 'public' as const).catch('public'),
     filters: z.object({
       query: z.string().max(500).catch(filters.query),
-      region: z.enum(['all', 'americas', 'europe', 'asia-pacific']).catch(filters.region),
+      region: z.enum(['all', ...MAP_REGIONS]).catch(filters.region),
       role: z.enum(['all', ...JOB_ROLES, 'unknown']).catch(filters.role),
       workMode: z.enum(['all', 'remote', 'hybrid', 'onsite', 'unknown']).catch(filters.workMode),
       visa: z.enum(['all', 'yes', 'supported', 'possible']).catch(filters.visa),

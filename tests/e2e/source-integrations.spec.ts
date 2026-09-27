@@ -16,7 +16,7 @@ import {
 import { readSaved } from './helpers/saved-store'
 import { expectPublicSourceOverview } from './helpers/source-choice'
 import {
-  assertSynthetic, catalog124, csvRows, downloadText, integrationServer,
+  assertSynthetic, catalog130, csvRows, downloadText, integrationServer,
   saveWithNote, sourceCredit, statusAction,
 } from './helpers/source-integrations'
 
@@ -53,7 +53,7 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       await server.start()
       await server.verifyProductionBytes()
       const state = await seedSurvey(page, server.origin, { selectedId: null, clock: INTEGRATION_NOW })
-      const catalog = await catalog124(page, server.origin, 75)
+      const catalog = await catalog130(page, server.origin, 75)
       const oldJobs = catalog.jobs.filter(job => SURVEY_REGISTRATIONS.some(company => company.id === job.companyId)
         && job.id !== 'greenhouse-xai-61901')
       const facts = (job: { id: string; title: string; url: string }) => ({ id: job.id, title: job.title, url: job.url })
@@ -67,20 +67,20 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       ])
       await surveyDataButton(page).click()
       const data = page.getByRole('dialog')
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '124', '75'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '130', '75'])
       await expect(data.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
-        'Greenhouse65개 회사', 'Ashby27개 회사', 'Lever9개 회사', 'SmartRecruiters10개 회사',
-        'Workable3개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
+        'Greenhouse67개 회사', 'Ashby29개 회사', 'Lever10개 회사', 'SmartRecruiters10개 회사',
+        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
       ])
       await expect(data.getByText('Himalayas는 하루 단위로 갱신됩니다. 정상 조회 후 24시간 동안 자료를 재사용하며 새로고침도 같은 대기 시간을 따릅니다. 거주 국가·시간대 조건을 회사의 오피스 위치로 표시하지 않습니다.', { exact: true })).toBeVisible()
       await surveyBoardHistory(page)
-      await expect(data.locator('.board-row')).toHaveCount(124)
+      await expect(data.locator('.board-row')).toHaveCount(130)
       for (const [name, id] of [['Hugging Face', 'hugging-face'], ['SmartNews', 'smartnews'], ['Mercari', 'mercari']] as const) {
         const row = data.locator('.board-row').filter({ has: page.getByText(name, { exact: true }) })
         await expect(row.getByRole('link', { name: `${name} 채용 페이지`, exact: true })).toHaveAttribute('href', WORKABLE_CAREER_URLS[id])
       }
       await expectPublicSourceOverview(page)
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '124', '75'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '130', '75'])
       await surveyClose(page, surveyDataButton(page))
       await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
       await expect(page.locator('.saved-card')).toHaveCount(0)
@@ -218,12 +218,12 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       await server.start()
       await server.verifyProductionBytes()
       const state = await seedSurvey(page, server.origin, { saved: integrationOldSaved(), selectedId: null, clock: INTEGRATION_NOW })
-      await catalog124(page, server.origin, 12)
+      await catalog130(page, server.origin, 12)
       const firstRequests = await assertSynthetic(server, 11)
       expect(firstRequests.map(request => request.url).sort()).toEqual([...INTEGRATION_FULL_URLS].sort())
       const before = await readFile(server.defaultCache, 'utf8')
       const cache = JSON.parse(before)
-      expect(cache.boards).toHaveLength(124)
+      expect(cache.boards).toHaveLength(130)
       for (const previous of old.boards) expect(cache.boards.find((board: { companyId: string }) => board.companyId === previous.companyId))
         .toMatchObject({ checkedAt: '2026-10-01T23:39:55.000Z', snapshot: {
           fetchedAt: '2026-10-01T23:39:55.000Z', total: previous.snapshot.total,
@@ -255,7 +255,7 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       await expect(microsoftSaved(page).locator('.posting-current-title')).toHaveCount(0)
       expect(await readFile(server.defaultCache, 'utf8')).toBe(before)
       expect(await readSaved(page)).toEqual(saved)
-      await assertSynthetic(server, 105)
+      await assertSynthetic(server, 105, 12)
 
       await server.respond(integrationResponses({ microsoft: 'changed-body' }))
       const content = await statusAction(page, true)
@@ -279,7 +279,7 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       expect(await readSaved(page)).toEqual(saved)
       expect((await readSaved(page)).find(record => record.job.id === oldSaved.job.id)).toEqual(oldSaved)
       expect(await readFile(server.defaultCache, 'utf8')).toBe(currentBytes)
-      await assertSynthetic(server, 201)
+      await assertSynthetic(server, 201, 18)
       expectSurveyPrivacy(state, server.origin)
       await writeFile(info.outputPath('list-body-evidence.json'), JSON.stringify({ listed, content, originalBodyAt, saved }, null, 2))
     } finally { await page.close(); await server.stop() }
@@ -294,7 +294,7 @@ test('daily source remains browse-fresh while a new UTC day cannot claim a compa
     await server.start()
     await server.verifyProductionBytes()
     const state = await seedSurvey(page, server.origin, { selectedId: null, clock: INTEGRATION_NOW })
-    await catalog124(page, server.origin, 75)
+    await catalog130(page, server.origin, 75)
     const initial = await surveyJson<ObservationHistory>(page, server.origin, '/api/observations')
     expect(initial.days[0].complete).toMatchObject({
       comparable: true, stats: { published: 80, technical: 75, openings: 73, talentPools: 2 },
@@ -302,7 +302,7 @@ test('daily source remains browse-fresh while a new UTC day cannot claim a compa
     await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
     await server.advance(31 * 60_000)
     await page.clock.fastForward(31 * 60_000)
-    const current = await catalog124(page, server.origin, 75)
+    const current = await catalog130(page, server.origin, 75)
     expect(current.boards.filter(board => board.provider === 'himalayas').map(board => board.dataStatus)).toEqual([
       'fresh', 'fresh', 'fresh', 'fresh', 'fresh', 'fresh', 'fresh',
     ])
@@ -314,7 +314,7 @@ test('daily source remains browse-fresh while a new UTC day cannot claim a compa
       'booking', 'zalando', 'starbucks',
     ])
     expect(history.days[0].complete).toEqual(initial.days[0].complete)
-    const requests = await assertSynthetic(server, 184)
+    const requests = await assertSynthetic(server, 184, 12)
     expect(requests.filter(request => request.url.startsWith('https://himalayas.app/'))).toHaveLength(8)
     await surveyNavigation(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
     await surveyDataButton(page).click()
@@ -366,7 +366,7 @@ test('real HTTP304 remains stable before each provider expiry and after an owned
     expect(wire.map(event => event.status)).toEqual([200, 304, 200, 304, 304])
     expect(wire[4]).toMatchObject({ ifNoneMatch: expect.any(String), cacheControl: 'private, no-cache, must-revalidate' })
     expect(await readFile(server.defaultCache, 'utf8')).toBe(bytes)
-    const requests = await assertSynthetic(server, 184)
+    const requests = await assertSynthetic(server, 184, 12)
     expect(requests.filter(request => request.url.startsWith('https://himalayas.app/'))).toHaveLength(8)
     expectSurveyPrivacy(state, server.origin)
     await writeFile(info.outputPath('source-http-cache.json'), JSON.stringify({ first, beforeDay, wire, requests }, null, 2))

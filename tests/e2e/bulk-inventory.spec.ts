@@ -222,7 +222,7 @@ for (const subject of subjects) for (const width of [1440, 320]) test.describe(`
       expect(original.snapshot).toMatchObject({ fetchedAt: BULK_TIME, total: 3, publishedIds: subject.publishedIds })
 
       await change(page, server, subject.provider, 'duplicate', BULK_CHANGE_TIME)
-      await refresh(page, ['22', '2', '4'])
+      await refresh(page, ['35', '2', '4'])
       await expect(row(page, subject.companyName)).toContainText('이전 2개 유지')
       await expect(row(page, subject.companyName)).toContainText(duplicateMessage)
       await expect(firstTime(page, subject.companyName)).toHaveAttribute('datetime', BULK_TIME)
@@ -283,7 +283,7 @@ for (const subject of subjects) for (const width of [1440, 320]) test.describe(`
       await change(page, server, subject.provider, 'recovered', BULK_RECOVERY_TIME)
       // Saved-only restart has not loaded a browser catalog. The explicit
       // initial public action still performs the same full recollection.
-      await refresh(page, ['22', '2', '5'], true)
+      await refresh(page, ['35', '2', '5'], true)
       await openHistory(page)
       await expect(firstTime(page, subject.companyName)).toHaveAttribute('datetime', BULK_RECOVERY_TIME)
       await expect(row(page, subject.companyName)).toContainText('3개 반영')
@@ -301,7 +301,7 @@ for (const subject of subjects) for (const width of [1440, 320]) test.describe(`
       })
 
       await change(page, server, subject.provider, 'empty', BULK_EMPTY_TIME)
-      await refresh(page, ['22', '2', '2'])
+      await refresh(page, ['35', '2', '2'])
       await openHistory(page)
       await expect(firstTime(page, subject.companyName)).toHaveAttribute('datetime', BULK_EMPTY_TIME)
       await expect(row(page, subject.companyName)).toContainText('0개 반영')
@@ -314,7 +314,7 @@ for (const subject of subjects) for (const width of [1440, 320]) test.describe(`
       expect(empty.boards[0]).toMatchObject({ failures: 0, retryAt: null })
       expect(empty.boards[0].snapshot).toEqual({
         fetchedAt: BULK_EMPTY_TIME, jobs: [], total: 0, unmappedCount: 0, publishedIds: [],
-        observationMethod: 'observations-1.occupation-6.roles-1.qualifications-1.remote-2.employment-1.purpose-1',
+        observationMethod: 'observations-2.cities-1.occupation-6.roles-1.qualifications-1.remote-3.employment-1.purpose-1',
       })
       expect(await readSaved(page)).toEqual(records)
       expect(await contextState(page)).toEqual(beforeContext)
@@ -355,14 +355,14 @@ for (const subject of subjects) for (const width of [1440, 320]) test.describe(`
       expect(status.boards[0]).toMatchObject({ status: 'error', lastSuccessAt: null })
       expect(status.boards[0]).not.toHaveProperty('listing')
       await dataButton(page).press('Enter')
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '1', '—'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '1', '—'])
       await expect(page.getByRole('dialog').getByRole('alert')).toContainText(unavailable.error)
       await expect(page.getByRole('dialog').getByRole('button', { name: /^공개 공고 다시 조회/ })).toBeDisabled()
       await audit(page, info, width === 320 ? `bulk-${subject.provider}-unavailable-320.png` : undefined)
       await closeData(page)
 
       await change(page, server, subject.provider, 'recovered', BULK_CHANGE_TIME)
-      await refresh(page, ['22', '1', '3'], true)
+      await refresh(page, ['35', '1', '3'], true)
       await openHistory(page)
       await expect(firstTime(page, subject.companyName)).toHaveAttribute('datetime', BULK_CHANGE_TIME)
       await closeData(page)

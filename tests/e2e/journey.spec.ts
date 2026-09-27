@@ -260,7 +260,7 @@ test('a failed first public feed keeps unknown coverage and no fictional results
   await page.getByRole('button', { name: '공개 공고 연결 필요', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('게시판 연결을 확인해 주세요.')
   await expectPublicOnlyDialog(page)
-  await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
+  await expect(page.locator('.coverage-stats strong')).toHaveText(['35', '—', '—'])
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await expect(page.getByRole('button', { name: '공개 공고 연결 필요', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: '공개 공고에 연결하지 못했어요', exact: true })).toBeVisible()

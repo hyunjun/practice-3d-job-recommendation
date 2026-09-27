@@ -36,7 +36,8 @@ const FlatMap = lazy(() => import('./components/FlatMap').then(module => ({ defa
 type View = 'explore' | 'saved' | 'compare'
 type Notice = { message: string; action?: { label: string; run: () => void }; tone?: 'error' }
 const REGION_VIEWS: Record<Region, [number, number, number]> = {
-  all: [29, -39, 3.4], americas: [36, -98, 2.65], europe: [48, 7, 2.15], 'asia-pacific': [20, 119, 2.9],
+  all: [29, -39, 3.4], americas: [36, -98, 2.65], europe: [48, 7, 2.15],
+  'asia-pacific': [-10, 132, 3.8], 'middle-east': [27, 46, 2.6],
 }
 
 function currentView(): View {

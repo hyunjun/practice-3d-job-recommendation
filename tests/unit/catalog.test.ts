@@ -339,6 +339,7 @@ describe('cache validation and migration', () => {
       delete legacyJob.workTimeRequirements
       delete legacyJob.roleClassification
       delete legacyJob.occupation
+      delete legacyJob.cityCoverageVersion
       await writeFile(previousFile, JSON.stringify({ version: 4, boards: [previous] }))
       const cache = createFileBoardCache(currentFile, [previousFile, path.join(directory, 'v3.json')], companies)
       const loaded = await cache.load()
@@ -353,7 +354,7 @@ describe('cache validation and migration', () => {
       expect((await cache.load())[0].snapshot).toEqual({
         ...previous.snapshot,
         jobs: previous.snapshot!.jobs.map(job => ({
-          ...job, visa: 'unknown', eligibility: { version: ELIGIBILITY_VERSION, rules: [] }, evidence: {},
+          ...job, cityCoverageVersion: 1, visa: 'unknown', eligibility: { version: ELIGIBILITY_VERSION, rules: [] }, evidence: {},
           languageRequirements: { version: 1, rules: [] },
           workTimeRequirements: { version: 1, rules: [] },
           roleClassification: { version: 1, roles: ['backend'], evidence: [{ role: 'backend', source: 'title', text: job.title }] },

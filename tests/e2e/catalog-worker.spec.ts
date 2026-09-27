@@ -386,7 +386,7 @@ test('a cold saved-only visit supports note search and profile edits without sta
   await expect(page.locator('.saved-note-preview')).toHaveText([CATALOG_WORKER_NOTE])
   await expect(page.locator('.saved-title')).toHaveText(['Backend Engineer — Atlas Alpha'])
   await page.locator('.data-status-button').click()
-  await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '—', '—'])
+  await expect(page.locator('.coverage-stats strong')).toHaveText(['35', '—', '—'])
   await close(page)
   await page.clock.fastForward(120000)
   expect(new URL(page.url()).hash).toBe('#saved')
