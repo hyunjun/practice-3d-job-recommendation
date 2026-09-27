@@ -393,7 +393,10 @@ for (const width of [1440, 320]) test.describe(`Lever inventory consistency at $
       await expect(page.locator('.posting-notice.unknown')).toHaveCount(0)
       const empty = await cache(server)
       expect(empty.boards[0]).toMatchObject({ failures: 0, retryAt: null })
-      expect(empty.boards[0].snapshot).toEqual({ fetchedAt: PAGINATION_EMPTY_TIME, jobs: [], total: 0, unmappedCount: 0, publishedIds: [] })
+      expect(empty.boards[0].snapshot).toEqual({
+        fetchedAt: PAGINATION_EMPTY_TIME, jobs: [], total: 0, unmappedCount: 0, publishedIds: [],
+        observationMethod: 'observations-1.occupation-6.roles-1.qualifications-1.remote-2.employment-1.purpose-1',
+      })
       expect(await readSaved(page)).toEqual(records)
       expect(await contextState(page)).toEqual(beforeContext)
       await page.locator('.saved-card .posting-notice').scrollIntoViewIfNeeded()

@@ -31,13 +31,31 @@ export function upgradeJob<T extends Job>(job: T, { preserveUnverifiablePay = fa
 }
 
 /** Account for moved/conflicting locations without discarding legacy count-only omissions. */
-export function upgradeJobCollection<T extends Pick<Catalog, 'jobs' | 'unmappedCount'>>(collection: T): T {
-  const jobs = collection.jobs.map(job => upgradeJob(job))
+function upgradeCollection<T extends Pick<Catalog, 'jobs' | 'unmappedCount'>>(collection: T, read: (job: Job) => Job): T {
+  const jobs = collection.jobs.map(read)
   const delta = jobs.filter(isUnmappedJob).length - collection.jobs.filter(isUnmappedJob).length
   return { ...collection, jobs, unmappedCount: collection.unmappedCount === null ? null : collection.unmappedCount + delta }
+}
+
+export function upgradeJobCollection<T extends Pick<Catalog, 'jobs' | 'unmappedCount'>>(collection: T): T {
+  return upgradeCollection(collection, job => upgradeJob(job))
 }
 
 /** Public exploration excludes other occupations; saved records are never filtered here. */
 export function upgradeCatalog(catalog: Catalog): Catalog {
   return catalog.source === 'sample' ? catalog : upgradeCatalogOccupations(upgradeJobCollection(catalog))
+}
+
+/** Reuse migrations only for immutable records within one live catalog session. */
+export function createCatalogUpgrader(): (catalog: Catalog) => Catalog {
+  const converted = new WeakMap<Job, Job>()
+  const read = (job: Job) => {
+    let current = converted.get(job)
+    if (!current) {
+      current = upgradeJob(job)
+      converted.set(job, current)
+    }
+    return current
+  }
+  return catalog => catalog.source === 'sample' ? catalog : upgradeCatalogOccupations(upgradeCollection(catalog, read))
 }

@@ -2,12 +2,10 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { ArrowRight, ArrowUpRight, Bookmark, BriefcaseBusiness, Check, ChevronDown, CircleHelp, Compass, Database, GitCompareArrows, Globe2, Maximize, Minus, Moon, MousePointer2, Plus, RotateCcw, Search, SlidersHorizontal, Sparkles, Sun, X } from 'lucide-react'
 import { CITY_BY_ID } from '../shared/cities'
 import { catalogNeedsAttention } from '../shared/catalog-health'
-import { ageCatalog, catalogDeadlines, snapshotDeadlines } from '../shared/catalog-freshness'
-import { countFilters, createSearchRanker, groupCities, matchJob } from '../shared/matching'
-import { createSearchIndex } from '../shared/job-search'
-import { isUnmappedJob } from '../shared/job-location'
+import { snapshotDeadlines } from '../shared/catalog-freshness'
+import { countFilters, matchJob } from '../shared/matching'
 import type { SearchScope } from '../shared/job-search'
-import { analyzeSearchRecovery, undoRecoveryChanges } from '../shared/search-recovery'
+import { undoRecoveryChanges } from '../shared/search-recovery'
 import type { RecoverySuggestion } from '../shared/search-recovery'
 import { DEFAULT_FILTERS, MODE_LABELS, POSTING_TYPE_LABELS, REGION_LABELS, ROLE_FILTER_LABELS, SAMPLE_PROFILE, VISA_FILTER_LABELS } from '../shared/types'
 import type { Filters, MatchedJob, Profile, Region } from '../shared/types'
@@ -28,10 +26,9 @@ import type { GlobeHandle } from './components/Globe'
 import { useCatalog } from './hooks/useCatalog'
 import { usePostingStatus } from './hooks/usePostingStatus'
 import { useSavedJobs } from './hooks/useSavedJobs'
-import { FreshnessTimeContext, useDeadlineClock } from './hooks/useDeadlineClock'
+import { FreshnessTimeContext } from './hooks/useDeadlineClock'
 import { deleteProfile, loadCompare, loadExploration, loadProfile, persist, persistExploration, STORAGE_KEYS } from './lib/storage'
 import type { ExplorationState } from './lib/storage'
-import { createGlobeCities } from './lib/globe-cities'
 
 const Globe = lazy(() => import('./components/Globe').then(module => ({ default: module.Globe })))
 const FlatMap = lazy(() => import('./components/FlatMap').then(module => ({ default: module.FlatMap })))
@@ -86,40 +83,25 @@ export default function App() {
   const closeNotice = useCallback(() => setNotice(null), [])
   const notify = useCallback((message: string, action?: Notice['action'], tone?: Notice['tone']) => setNotice({ message, action, tone }), [])
   const notifyCatalog = useCallback((message: string, tone?: Notice['tone']) => notify(message, undefined, tone), [notify])
-  const { catalog: receivedCatalog, loading, progress, error: dataError, reload, retryAt } = useCatalog(notifyCatalog, view !== 'saved')
-  const catalogTimes = useMemo(() => catalogDeadlines(receivedCatalog), [receivedCatalog])
-  const deadlines = useMemo(() => [
-    ...catalogTimes,
+  const searchScope = useMemo<SearchScope>(() => panelTab !== 'cities' ? { kind: panelTab }
+    : selectedId && CITY_BY_ID.has(selectedId) ? { kind: 'city', cityId: selectedId } : { kind: 'cities' }, [panelTab, selectedId])
+  const extraDeadlines = useMemo(() => [
     ...saved.flatMap(item => item.job.source === 'sample' ? [] : snapshotDeadlines(item.job.fetchedAt, item.job.source)),
     ...(openJob && openJob.job.source !== 'sample' ? snapshotDeadlines(openJob.job.fetchedAt, openJob.job.source) : []),
-  ], [catalogTimes, saved, openJob])
-  const freshnessNow = useDeadlineClock(deadlines)
-  // Resume events within the same age window should not rebuild the search index.
-  const catalogTime = catalogTimes.reduce((latest, time) => time <= freshnessNow ? Math.max(latest, time) : latest, 0)
-  const { catalog, expired: catalogExpired } = useMemo(() => ageCatalog(receivedCatalog, catalogTime), [receivedCatalog, catalogTime])
+  ], [saved, openJob])
+  const {
+    catalog, expired: catalogExpired, loading, progress, error: dataError, reload, retryAt,
+    matches, cities, globeCities, remote, unmapped, companyCount, recovery: preparedRecovery,
+    preview, searching, freshnessNow,
+  } = useCatalog(notifyCatalog, view !== 'saved', { profile, filters, scope: searchScope, recover: view === 'explore', extraDeadlines })
   const catalogReady = Boolean(catalog.fetchedAt)
   const retryCatalog = () => void reload({ refresh: true, announce: catalogReady })
   const showData = () => setModal('data')
   const showSavedData = () => { closeJob(); setModal('saved-data') }
 
-  const searchIndex = useMemo(() => createSearchIndex(catalog, profile), [catalog, profile])
-  const rankSearch = useMemo(() => createSearchRanker(searchIndex, profile), [searchIndex, profile])
-  const matches = useMemo(() => rankSearch(filters), [rankSearch, filters])
-  const cities = useMemo(() => groupCities(catalog, matches, filters), [catalog, matches, filters])
-  const globeCities = useMemo(() => createGlobeCities(cities), [cities])
-  const remote = useMemo(() => matches.filter(match => match.job.workMode === 'remote'), [matches])
-  const unmapped = useMemo(() => matches.filter(match => isUnmappedJob(match.job)), [matches])
-  const companyCount = useMemo(() => new Set(matches.map(match => match.company.id)).size, [matches])
   const savedIds = useMemo(() => new Set(saved.map(item => item.job.id)), [saved])
   const savedOpenJob = saved.find(item => item.job.id === openJob?.job.id)
-  const searchScope = useMemo<SearchScope>(() => panelTab !== 'cities' ? { kind: panelTab }
-    : selectedId && CITY_BY_ID.has(selectedId) ? { kind: 'city', cityId: selectedId } : { kind: 'cities' }, [panelTab, selectedId])
-  // Other cities or tabs can still have matches when the displayed scope is empty.
-  const hasScopeResults = searchScope.kind === 'cities' ? cities.length > 0
-    : searchScope.kind === 'city' ? cities.some(result => result.city.id === searchScope.cityId)
-    : searchScope.kind === 'remote' ? remote.length > 0 : unmapped.length > 0
-  const recovery = useMemo(() => view === 'explore' && catalogReady && !loading && !hasScopeResults && !catalog.boards.some(board => board.status === 'pending')
-    ? analyzeSearchRecovery(searchIndex, filters, searchScope) : null, [view, catalogReady, loading, hasScopeResults, catalog.boards, searchIndex, filters, searchScope])
+  const recovery = loading || searching ? null : preparedRecovery
 
   useEffect(() => {
     const onHash = () => setView(currentView())
@@ -306,7 +288,7 @@ export default function App() {
         </div>
         <span className="toolbar-match-note"><Sparkles size={13} />내 경험과 연결되는 기회</span>
       </div>
-      {catalogReady && (filters.query || countFilters(filters) > 0) && <div className="active-filter-summary"><span>{matches.length}개 공고가 현재 조건에 맞아요{filters.postingType !== 'opening' && ` · ${POSTING_TYPE_LABELS[filters.postingType]}`}{catalog.source === 'public' && filters.role !== 'all' && (filters.role === 'unknown' ? ' · 세부 직무 미확인 공고' : ' · 직무 미확인 공고 제외')}{filters.salaryMin > 0 && ` · 희망 연봉 $${filters.salaryMin / 1000}k+`}{filters.employment !== 'all' && ' · 고용 형태 필터 적용'}{!filters.remoteEligibleOnly && ' · 원격근무 지역 제한 해제'}</span><button onClick={resetFilters}><RotateCcw size={11} />초기화</button></div>}
+      {catalogReady && (filters.query || countFilters(filters) > 0) && <div className="active-filter-summary" aria-busy={searching && !dataError}><span>{searching ? dataError ? '검색 결과를 다시 확인해 주세요.' : '조건에 맞는 공고를 찾고 있어요.' : `${matches.length}개 공고가 현재 조건에 맞아요`}{filters.postingType !== 'opening' && ` · ${POSTING_TYPE_LABELS[filters.postingType]}`}{catalog.source === 'public' && filters.role !== 'all' && (filters.role === 'unknown' ? ' · 세부 직무 미확인 공고' : ' · 직무 미확인 공고 제외')}{filters.salaryMin > 0 && ` · 희망 연봉 $${filters.salaryMin / 1000}k+`}{filters.employment !== 'all' && ' · 고용 형태 필터 적용'}{!filters.remoteEligibleOnly && ' · 원격근무 지역 제한 해제'}</span><button onClick={resetFilters}><RotateCcw size={11} />초기화</button></div>}
       <main id="main-content" className="explore-layout" tabIndex={-1}>
         <div className="map-stage" ref={mapStageRef}>
           <div className="space-grain" />
@@ -323,13 +305,13 @@ export default function App() {
           <div className="map-bottom-bar" data-map-overlay><div className="map-view-switch segmented"><button className={mapMode === 'globe' ? 'selected' : ''} aria-pressed={mapMode === 'globe'} onClick={() => setMapMode('globe')}><Globe2 size={13} />3D 지구</button><button className={mapMode === 'flat' ? 'selected' : ''} aria-pressed={mapMode === 'flat'} onClick={() => setMapMode('flat')}>2D 지도</button></div><span className="map-interaction-hint"><MousePointer2 size={12} />{mapMode === 'globe' ? '드래그로 회전 · 스크롤로 확대' : '드래그로 이동 · + / −로 확대'}</span><button className="map-legend" onClick={() => setModal('data')}><span />숫자 = 추천 회사 수<CircleHelp size={12} /></button></div>
           <div className="map-footline" data-map-overlay><span><span className="tiny-live-dot" />{catalog.cities.length}개 도시를 연결하는 커리어 지도</span><button onClick={() => { setPanelTab('remote'); setSelectedId(null) }}>원격으로 세계와 연결되기<ArrowRight size={12} /></button><button className="mobile-results-link" onClick={() => panelRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })}>도시 목록 보기<ChevronDown size={12} /></button></div>
         </div>
-        <div ref={panelRef} className="panel-container"><CityPanel catalog={catalog} results={cities} remote={remote} unmapped={unmapped} remoteEligibleOnly={filters.remoteEligibleOnly} selectedId={selectedId} tab={panelTab} sort={citySort} profile={profile} compareIds={compareIds} savedIds={savedIds} saveReady={savedStorage.ready} onSort={setCitySort} onTab={setPanelTab} onSelect={selectCity} onHover={setHoveredId} onCompare={toggleCompare} onOpenJob={showJob} onSave={toggleSave} onProfile={() => setModal('profile')} onData={showData} onFilters={() => setModal('filters')} status={catalogStatus} emptyState={<SearchRecovery analysis={recovery} filters={filters} scope={searchScope} onApply={applyRecovery} onNavigate={navigateRecovery} onFilters={() => setModal('filters')} onProfile={() => setModal('profile')} onData={showData} />} /></div>
+        <div ref={panelRef} className="panel-container" aria-busy={searching && !dataError}><CityPanel catalog={catalog} results={cities} remote={remote} unmapped={unmapped} remoteEligibleOnly={filters.remoteEligibleOnly} selectedId={selectedId} tab={panelTab} sort={citySort} profile={profile} compareIds={compareIds} savedIds={savedIds} saveReady={savedStorage.ready} onSort={setCitySort} onTab={setPanelTab} onSelect={selectCity} onHover={setHoveredId} onCompare={toggleCompare} onOpenJob={showJob} onSave={toggleSave} onProfile={() => setModal('profile')} onData={showData} onFilters={() => setModal('filters')} status={catalogStatus} emptyState={<SearchRecovery analysis={recovery} filters={filters} scope={searchScope} onApply={applyRecovery} onNavigate={navigateRecovery} onFilters={() => setModal('filters')} onProfile={() => setModal('profile')} onData={showData} />} /></div>
       </main>
     </> : view === 'saved' ? <SavedView saved={saved} storage={savedStorage} showStorageStatus={!openJob && modal !== 'saved-data'} onManage={showSavedData} profile={profile} postingStatus={postingStatus} onOpen={showJob} onRemove={toggleSave} onExplore={() => navigate('explore')} /> : !catalogReady ? <main id="main-content" className="collection-page" tabIndex={-1}>{catalogStatus}</main> : <CompareView catalog={catalog} results={cities} postingType={filters.postingType} compareIds={compareIds} status={catalogStatus} onToggle={toggleCompare} onAuto={() => setCompareIds(cities.slice(0, 3).map(result => result.city.id))} onSelect={id => { navigate('explore'); selectCity(id) }} onExplore={() => navigate('explore')} />}
     <footer className="app-footer"><span><OrbitLogo small />A WORLD OF POSSIBILITIES.</span><span>PUBLIC JOB BOARDS<span className="footer-dot">·</span>LOCAL FIRST<button onClick={() => setModal('data')}><Database size={11} />데이터와 추천 방식</button></span></footer>
     {modal === 'profile' && <ProfileDialog profile={profile} filters={filters} remember={rememberProfile} onApply={applyProfile} onDelete={() => { deleteProfile(); setProfile(SAMPLE_PROFILE); setRememberProfile(true); setFilters({ ...DEFAULT_FILTERS }); setPanelTab('cities'); setSelectedId(null); setModal(null); notify('저장된 프로필을 삭제하고 샘플로 돌아왔어요.') }} onClose={() => setModal(null)} />}
     {modal === 'saved-data' && <SavedDataDialog storage={savedStorage} onClose={() => setModal(null)} />}
-    {modal === 'filters' && <FiltersDialog filters={filters} searchIndex={searchIndex} onApply={updateFilters} onClose={() => setModal(null)} />}
+    {modal === 'filters' && <FiltersDialog filters={filters} preview={preview} onApply={updateFilters} onClose={() => setModal(null)} />}
     {modal === 'data' && <DataDialog catalog={catalog} expired={catalogExpired} loading={loading} progress={progress} error={dataError} retryAt={retryAt} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
     {openJob && <JobDialog storage={savedStorage} onManageSaved={showSavedData} match={{ ...openJob, ...matchJob(openJob.job, profile) }} saved={savedOpenJob} postingObservation={savedOpenJob ? postingStatus.observations.get(savedOpenJob.job.id) : undefined} onToggleSave={() => toggleSave(openJob)} onUpdateSaved={update => { changeSaved({ kind: 'update', id: openJob.job.id, patch: update }) }} onClose={closeJob} fallbackFocus={jobFocusFallback.current} />}
     {notice && <Toast message={notice.message} action={notice.action} tone={notice.tone} onDismiss={closeNotice} />}

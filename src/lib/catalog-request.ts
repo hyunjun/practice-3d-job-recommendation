@@ -93,10 +93,39 @@ function retryDelay(response: Response): number {
   return Math.max(1000, Number.isFinite(requested) ? requested : 0)
 }
 
-/** Follow one requested, shared collection. No profile or job IDs leave the browser. */
-export async function requestPublicCatalog({
-  refresh, signal, onUpdate,
-}: { refresh: boolean; signal: AbortSignal; onUpdate: (catalog: Catalog, progress: CatalogProgress | null) => void }): Promise<void> {
+export interface CatalogRead<T> {
+  value: T
+  progress: CatalogProgress | null
+}
+
+/** One decoder owns the validated snapshot for one collection, including its deltas. */
+export function createCatalogReader(): (response: Response, initial: boolean) => Promise<CatalogRead<Catalog>> {
+  let state: CatalogCollectionSnapshot | undefined
+  return async (response, initial) => {
+    const result = await readResponse(response)
+    if (initial) {
+      if (response.status !== 202) {
+        state = undefined
+        return { value: readCatalog(result), progress: null }
+      }
+      state = readSnapshot(result)
+    } else {
+      if (!state) throw malformed()
+      state = readUpdate(result, state)
+    }
+    return { value: state.catalog, progress: state.progress }
+  }
+}
+
+/** Transport stays on the page; decoding and computation can run in a dedicated worker. */
+export async function requestCatalogStream<T>({
+  refresh, signal, read, onUpdate,
+}: {
+  refresh: boolean
+  signal: AbortSignal
+  read: (response: Response, initial: boolean) => Promise<CatalogRead<T>>
+  onUpdate: (value: T, progress: CatalogProgress | null) => void | Promise<void>
+}): Promise<void> {
   let response: Response
   try {
     response = await fetch(`/api/catalog?source=public${refresh ? '&refresh=1' : ''}`, {
@@ -106,20 +135,20 @@ export async function requestPublicCatalog({
     if (signal.aborted) throw error
     throw new CatalogRequestError('공개 공고에 연결하지 못했어요. 연결 상태를 확인한 뒤 다시 조회해 주세요.')
   }
-  const result = await readResponse(response)
+  let state = await read(response, true)
   signal.throwIfAborted()
   if (response.status !== 202) {
-    onUpdate(readCatalog(result), null)
+    await onUpdate(state.value, null)
     return
   }
-  let state = readSnapshot(result)
-  onUpdate(state.catalog, state.progress)
+  if (!state.progress) throw malformed()
+  await onUpdate(state.value, state.progress)
   let delay = retryDelay(response)
   // Bound a stalled connection. Provider work may be shared with other tabs;
   // leaving this view cancels only this browser's requests, not their collection.
   const monitoring = AbortSignal.any([signal, AbortSignal.timeout(10 * 60_000)])
   try {
-    while (!state.progress.done) {
+    while (state.progress && !state.progress.done) {
       await waitForProgress(delay, monitoring)
       // Build a fixed same-origin URL; never follow an arbitrary monitor URL
       // supplied in a payload or send filters, saved IDs, resumes or notes.
@@ -129,13 +158,20 @@ export async function requestPublicCatalog({
       monitoring.throwIfAborted()
       delay = retryDelay(next)
       if (next.status === 204) continue
-      const updated = readUpdate(await readResponse(next), state)
+      const updated = await read(next, false)
       monitoring.throwIfAborted()
       state = updated
-      onUpdate(state.catalog, state.progress)
+      await onUpdate(state.value, state.progress)
     }
   } catch (error) {
     if (signal.aborted || error instanceof CatalogRequestError) throw error
     throw new CatalogRequestError('수집 진행 연결이 끊겼어요. 도착한 공고는 유지됩니다. 다시 조회해 이어서 확인해 주세요.')
   }
+}
+
+/** The same protocol is also usable without a browser worker, e.g. in HTTP contract tests. */
+export function requestPublicCatalog({
+  refresh, signal, onUpdate,
+}: { refresh: boolean; signal: AbortSignal; onUpdate: (catalog: Catalog, progress: CatalogProgress | null) => void }): Promise<void> {
+  return requestCatalogStream({ refresh, signal, read: createCatalogReader(), onUpdate })
 }

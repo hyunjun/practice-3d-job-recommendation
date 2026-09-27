@@ -86,9 +86,19 @@ async function restore(page: Page, options: {
     saved: options.saved ?? [],
   })
   await page.goto(options.view && options.view !== 'explore' ? `/#${options.view}` : '/')
-  const initial = await expectInitialCatalogRequest(page, traffic)
-  return async () => {
-    expect(traffic.requests).toHaveLength(initial.attempts)
+  let initial = options.view === 'saved' ? null : await expectInitialCatalogRequest(page, traffic)
+  if (options.view === 'saved') expect(traffic.requests).toEqual([])
+  return async ({ savedOnly = false }: { savedOnly?: boolean } = {}) => {
+    if (savedOnly) {
+      expect(traffic.requests).toEqual([])
+    } else {
+      if (!initial) {
+        // The mounted saved page starts its first collection only on entering explore.
+        initial = await expectInitialCatalogRequest(page, traffic)
+        expect(initial).toMatchObject({ attempts: 1, cancelled: 0 })
+      }
+      expect(traffic.requests).toHaveLength(initial.attempts)
+    }
     for (const request of traffic.requests) {
       expect(request.url).toBe(new URL('/api/catalog?source=public', page.url()).href)
       expect(request.method).toBe('GET')
@@ -281,6 +291,7 @@ for (const width of [1440, 320]) test.describe(`personal profile edit context at
     }
     const verify = await restore(page, { filters, tab: 'unmapped', view: 'saved', saved: savedRecords })
     await expect(page.locator('.saved-card')).toHaveCount(2)
+    await verify({ savedOnly: true })
     await page.getByLabel('저장한 기회 검색', { exact: true }).fill('PRIVATE_EDIT_40_NOTE')
     await page.locator('.collection-tabs').getByRole('button', { name: /^지원 완료/ }).click()
     await expect(page.locator('.saved-title')).toHaveText(['Atlas London Backend Engineer'])
@@ -293,6 +304,7 @@ for (const width of [1440, 320]) test.describe(`personal profile edit context at
     await page.getByLabel('선호 근무 형태', { exact: true }).selectOption('remote')
     await page.getByLabel('비자 지원', { exact: true }).selectOption('yes')
     await setSalary(page, 180000)
+    await verify({ savedOnly: true })
     await applyEdit(page)
     await expect(nav(page).getByRole('button', { name: /^저장한 기회/ })).toHaveAttribute('aria-current', 'page')
     expect(new URL(page.url()).hash).toBe('#saved')
@@ -301,14 +313,18 @@ for (const width of [1440, 320]) test.describe(`personal profile edit context at
     await expect(page.locator('.saved-title')).toHaveText(['Atlas London Backend Engineer'])
     await expect(page.locator('.saved-note-preview')).toHaveText(['PRIVATE_EDIT_40_NOTE'])
     await expect(page.locator('.saved-status')).toHaveText(['지원 완료'])
+    await verify({ savedOnly: true })
     await page.getByRole('button', { name: 'Atlas London Backend Engineer', exact: true }).click()
     await expect(page.getByRole('dialog')).toContainText('입력 경력 9년 · 공고에서 확인한 연수 하한 7년')
     await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveValue('PRIVATE_EDIT_40_NOTE')
     await expect(page.getByRole('button', { name: '지원 완료로 표시됨', exact: true })).toBeVisible()
+    await verify({ savedOnly: true })
     await close(page)
     expect(await readSavedJson(page)).toBe(savedBefore)
+    await verify({ savedOnly: true })
 
     await nav(page).getByRole('button', { name: '기회 탐색', exact: true }).click()
+    await verify()
     await expect(resultsTab(page, '원격 기회')).toHaveAttribute('aria-pressed', 'true')
     await expect(page.getByLabel('직무 필터', { exact: true })).toHaveValue('unknown')
     await expect(page.getByLabel('도시, 회사 또는 포지션 검색')).toHaveValue('Atlas')

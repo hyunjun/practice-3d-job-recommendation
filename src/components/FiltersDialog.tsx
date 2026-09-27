@@ -1,14 +1,44 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowRight, RotateCcw, SlidersHorizontal } from 'lucide-react'
-import { selectSearchJobs } from '../../shared/job-search'
 import { DEFAULT_FILTERS, EMPLOYMENT_LABELS, MODE_LABELS, POSTING_TYPE_LABELS, ROLE_FILTER_LABELS, VISA_FILTER_LABELS } from '../../shared/types'
-import type { SearchIndex } from '../../shared/job-search'
 import type { Filters } from '../../shared/types'
 import { Dialog, Toggle } from './ui'
 
-export function FiltersDialog({ filters, searchIndex, onApply, onClose }: { filters: Filters; searchIndex: SearchIndex; onApply: (filters: Filters) => void; onClose: () => void }) {
+export function FiltersDialog({ filters, preview, onApply, onClose }: { filters: Filters; preview: (filters: Filters) => Promise<number>; onApply: (filters: Filters) => void; onClose: () => void }) {
   const [draft, setDraft] = useState(filters)
-  const matchCount = useMemo(() => selectSearchJobs(searchIndex, draft).length, [searchIndex, draft])
+  const [result, setResult] = useState<{ draft: Filters; preview: typeof preview; count?: number; error?: string }>()
+  const latest = useRef({ draft, preview })
+  latest.current = { draft, preview }
+  const wanted = useRef(0)
+  const working = useRef(false)
+  const mounted = useRef(true)
+  const refresh = useCallback(() => {
+    wanted.current++
+    setResult(undefined)
+    if (working.current) return
+    working.current = true
+    void (async () => {
+      while (mounted.current) {
+        const ticket = wanted.current
+        const request = latest.current
+        try {
+          const count = await request.preview(request.draft)
+          if (!mounted.current) return
+          if (ticket !== wanted.current || request.draft !== latest.current.draft || request.preview !== latest.current.preview) continue
+          setResult({ ...request, count })
+        } catch (cause) {
+          if (!mounted.current) return
+          if (ticket !== wanted.current) continue
+          setResult({ ...request, error: cause instanceof Error ? cause.message : '공고 수를 확인하지 못했어요.' })
+        }
+        return
+      }
+    })().finally(() => { working.current = false })
+  }, [])
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false } }, [])
+  useEffect(() => { refresh() }, [draft, preview, refresh])
+  const current = result?.draft === draft && result.preview === preview ? result : undefined
+  const counting = !current
   const update = <K extends keyof Filters>(key: K, value: Filters[K]) => setDraft(previous => ({ ...previous, [key]: value }))
   return <Dialog title="내게 중요한 조건으로." eyebrow="REFINE YOUR ORBIT" onClose={onClose} className="filters-dialog">
     <div className="dialog-body">
@@ -30,6 +60,7 @@ export function FiltersDialog({ filters, searchIndex, onApply, onClose }: { filt
       <Toggle checked={draft.includeUnknownSalary} onChange={value => update('includeUnknownSalary', value)} label="연봉 미공개·별도 보상 공고도 포함" description="지역별 구간이나 다른 지급 기간 때문에 연봉을 함께 비교할 수 없는 공고도 찾아요." />
       <Toggle checked={draft.remoteEligibleOnly} onChange={value => update('remoteEligibleOnly', value)} label="거주 국가가 포함된 원격근무만" description="명시된 근무 지역과 거주 국가를 비교해요. 취업 허가나 주별 제한까지 확인한 결과는 아닙니다." />
     </div>
-    <footer className="dialog-footer"><button className="text-button muted" onClick={() => setDraft({ ...DEFAULT_FILTERS, query: filters.query, region: filters.region })}><RotateCcw size={15} />조건 초기화</button><button className="button primary" onClick={() => onApply(draft)}><SlidersHorizontal size={16} />{matchCount}개 공고 보기<ArrowRight size={16} /></button></footer>
+    {current?.error && <p className="inline-note" role="alert">{current.error}<button className="text-button" onClick={refresh}>다시 계산</button></p>}
+    <footer className="dialog-footer"><button className="text-button muted" onClick={() => setDraft({ ...DEFAULT_FILTERS, query: filters.query, region: filters.region })}><RotateCcw size={15} />조건 초기화</button><button className="button primary" disabled={counting || Boolean(current?.error)} aria-busy={counting} onClick={() => onApply(draft)}><SlidersHorizontal size={16} />{counting ? '공고 수 계산 중' : current?.error ? '공고 수 확인 필요' : `${current?.count}개 공고 보기`}<ArrowRight size={16} /></button></footer>
   </Dialog>
 }

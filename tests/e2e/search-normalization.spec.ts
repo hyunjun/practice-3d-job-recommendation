@@ -67,6 +67,9 @@ async function setup(page: Page, options: {
 }
 
 async function expectTitles(page: Page, titles: string[], companyNames?: string[]) {
+  const panel = page.locator('.panel-container')
+  await expect(panel).toBeVisible()
+  await expect(panel).toHaveAttribute('aria-busy', 'false')
   if (companyNames) await expect(page.locator('.company-card h3')).toHaveText(companyNames)
   const collapsed = page.locator('.company-card .more-jobs[aria-expanded="false"]')
   while (await collapsed.count()) await collapsed.first().click()
