@@ -52,10 +52,13 @@ globalThis.fetch = async (input, init) => {
     const response = asCoverageReply(responses[url])
     if (response.delayMs) await delay(response.delayMs, undefined, { signal: signal ?? undefined })
     if (response.failure) throw new Error(response.failure)
-    const json = JSON.stringify(response.body)
+    if (response.format === 'text' && typeof response.body !== 'string') throw new Error('Text fixture requires a string body')
+    const contents = response.format === 'text' ? response.body as string : JSON.stringify(response.body)
     const status = response.status ?? 200
-    const result = new Response(json, { status, headers: { 'Content-Type': 'application/json', ...response.headers } })
-    record({ event: 'response', sequence: id, status, bytes: Buffer.byteLength(json), at: new Date(Date.now()).toISOString() })
+    const result = new Response(contents, { status, headers: {
+      'Content-Type': response.format === 'text' ? 'text/html; charset=utf-8' : 'application/json', ...response.headers,
+    } })
+    record({ event: 'response', sequence: id, status, bytes: Buffer.byteLength(contents), at: new Date(Date.now()).toISOString() })
     return result
   } catch (error) {
     record({ event: 'failure', sequence: id, error: String(error), at: new Date(Date.now()).toISOString() })

@@ -3,12 +3,13 @@ import { spawn, execFile } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createWriteStream } from 'node:fs'
-import { copyFile, cp, mkdir, readFile, readdir, symlink, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, symlink, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { createServer } from 'node:net'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
+import { copyFixture } from './copy-fixture'
 import { LANGUAGE_REGISTRATIONS, languageUpstreamResponses } from './job-languages'
 
 const repository = fileURLToPath(new URL('../../', import.meta.url))
@@ -70,8 +71,8 @@ export async function createJobLanguagesServer(directory: string, mode: Mode, op
   } else {
     // Identical application files, copied only to give Vite its own root/cache.
     await Promise.all([
-      ...['index.html', 'package.json', 'tsconfig.json'].map(file => copyFile(path.join(repository, file), path.join(cwd, file))),
-      ...['src', 'shared'].map(file => cp(path.join(repository, file), path.join(cwd, file), { recursive: true })),
+      ...['index.html', 'package.json', 'tsconfig.json'].map(file => copyFixture(path.join(repository, file), path.join(cwd, file))),
+      ...['src', 'shared'].map(file => copyFixture(path.join(repository, file), path.join(cwd, file))),
       symlink(path.join(repository, 'public'), path.join(cwd, 'public'), 'dir'),
     ])
     await mkdir(path.join(cwd, 'node_modules'))

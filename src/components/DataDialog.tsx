@@ -19,6 +19,8 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
   const coverage = unmappedCoverage(catalog)
   const talentPools = catalog.jobs.filter(isTalentPoolJob).length
   const hasHimalayas = !isSample && catalog.companies.some(company => company.provider === 'himalayas')
+  const hasCareers = !isSample && catalog.companies.some(company => company.provider === 'careers')
+  const hasStarbucks = catalog.companies.some(company => company.provider === 'careers' && company.board === 'starbucks-technology')
   const retryIn = useRetryCountdown(retryAt)
   const providers = PUBLIC_PROVIDERS.map(provider => ({
     provider, count: catalog.companies.filter(company => (company.provider ?? 'greenhouse') === provider).length,
@@ -52,6 +54,14 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
         <p>Himalayas에서 제공하는 해당 회사의 원격 공고를 보충합니다. 회사 공식 채용 사이트의 전체 목록과 수집 범위가 다르며, 게시 여부도 Himalayas 목록을 기준으로 확인해요. 각 공고에서 출처와 원문 링크를 확인할 수 있습니다.</p>
         <p>Himalayas는 하루 단위로 갱신됩니다. 정상 조회 후 24시간 동안 자료를 재사용하며 새로고침도 같은 대기 시간을 따릅니다. 거주 국가·시간대 조건을 회사의 오피스 위치로 표시하지 않습니다.</p>
         <p>날짜별 공고 수 비교는 모든 회사의 수집 시각이 30분 안에 모인 기록에만 적용합니다. 출처마다 갱신 주기가 달라 완전한 비교 기록이 쌓이지 않을 수 있어요.</p>
+      </section>}
+      {hasCareers && <section className="data-explanation">
+        <h3><Globe2 size={16} />회사 공식 채용 사이트</h3>
+        <p>회사 공식 사이트에 공개된 채용 목록을 수집합니다. 페이지 전체와 공고의 회사·ID를 확인하며, 일부 페이지나 본문을 읽지 못하면 정상 조회로 기록하지 않아요.</p>
+        {catalog.companies.some(company => company.provider === 'careers' && company.board === 'booking') && <p>Booking.com 게시판에는 Booking Holdings의 공고도 포함됩니다.</p>}
+        {hasStarbucks && <p>Starbucks는 공식 Technology 분류의 공고를 수집합니다. 매장 등 다른 분류의 전체 채용 수가 아니며, 분류 이동으로 목록에서 빠질 수도 있어 채용 마감을 단정하지 않아요.</p>}
+        <p>공식 사이트의 부하를 줄이기 위해 정상 조회 후 24시간 동안 자료를 재사용합니다. 목록 확인과 본문 수집에 각각 적용하며, 새로고침도 같은 대기 시간을 지켜요.</p>
+        <p>출처별 수집 시각이 달라 모든 회사의 시각이 30분 안에 모이는 날짜별 비교 기록이 쌓이지 않을 수 있어요.</p>
       </section>}
       <section className="data-explanation">
         <h3><CircleHelp size={16} />일반 채용과 인재풀의 차이</h3>
@@ -90,9 +100,10 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
 
 function BoardHistory({ catalog, loading, retryIn, onRefresh }: { catalog: Catalog; loading: boolean; retryIn: number; onRefresh: () => void }) {
   const hasHimalayas = catalog.companies.some(company => company.provider === 'himalayas')
+  const hasCareers = catalog.companies.some(company => company.provider === 'careers')
   return <section className="board-section">
     <div className="board-heading"><h3>게시판 조회 상태</h3><button className="text-button" disabled={loading || retryIn > 0} onClick={onRefresh}><RefreshCw size={13} />새로고침{!loading && retryIn > 0 && <span aria-hidden="true"> · {formatRetryWait(retryIn)} 후</span>}</button></div>
-    <p className="field-description">최근 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />공식 게시판은 정상 확인 후 30분이 지나면 이전 조회로 표시해요.{hasHimalayas && ' Himalayas는 하루 단위 갱신에 맞춰 24시간 동안 재사용해요.'} 모든 출처에서 24시간을 넘긴 공고는 추천에서 제외해요. 공개 탐색·도시 비교 화면으로 돌아오거나 그 화면에서 네트워크가 다시 연결되면 오래되거나 확인하지 못한 게시판을 다시 조회해요. 게시판별 대기 시간을 지키며 검색 조건과 저장 기록은 유지합니다.</p>
+    <p className="field-description">최근 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />일반 공개 게시판은 정상 확인 후 30분이 지나면 이전 조회로 표시해요.{hasHimalayas && ' Himalayas는 하루 단위 갱신에 맞춰 24시간 동안 재사용해요.'}{hasCareers && ' 회사 공식 사이트 직접 수집도 부하를 줄이기 위해 24시간 동안 재사용해요.'} 모든 출처에서 24시간을 넘긴 공고는 추천에서 제외해요. 공개 탐색·도시 비교 화면으로 돌아오거나 그 화면에서 네트워크가 다시 연결되면 오래되거나 확인하지 못한 게시판을 다시 조회해요. 게시판별 대기 시간을 지키며 검색 조건과 저장 기록은 유지합니다.</p>
     <details className="board-details" open={loading || catalogNeedsAttention(catalog)}>
       <summary>회사별 조회 기록<ChevronDown size={14} /></summary>
       <div className="board-list">{catalog.boards.map(board => {

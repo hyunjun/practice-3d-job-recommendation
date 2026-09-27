@@ -1,6 +1,7 @@
 import { expansionLegacy36Cache } from './public-company-expansion'
 import { SURVEY_REGISTRATIONS, surveyOldSaved, surveyResponses } from './public-company-survey'
 import { coverageReply } from './public-coverage-transport'
+import { withSourceExpansionEmptyBoards } from './source-expansion-empty'
 import {
   HIMALAYAS_BODY, HIMALAYAS_CHANGED_BODY, HIMALAYAS_CHANGED_TITLE,
   INTEGRATION_OLD_AT,
@@ -179,12 +180,12 @@ export function newSourceResponses(options: {
 }
 
 export function integrationResponses(options: Parameters<typeof newSourceResponses>[0] = {}): Record<string, unknown> {
-  return { ...surveyResponses(), ...newSourceResponses(options) }
+  return withSourceExpansionEmptyBoards({ ...surveyResponses(), ...newSourceResponses(options) })
 }
 
 /** Extend a historical response map without changing any old36/47 posting. */
 export function withIntegrationEmptyBoards(responses: Record<string, unknown>): Record<string, unknown> {
-  return {
+  return withSourceExpansionEmptyBoards({
     'https://himalayas.app/jobs/api/search?company=microsoft&sort=recent&page=1': { offset: 0, limit: 20, totalCount: 0, jobs: [] },
     'https://himalayas.app/jobs/api/search?company=adobe&sort=recent&page=1': { offset: 0, limit: 20, totalCount: 0, jobs: [] },
     'https://himalayas.app/jobs/api/search?company=salesforce&sort=recent&page=1': { offset: 0, limit: 20, totalCount: 0, jobs: [] },
@@ -199,7 +200,7 @@ export function withIntegrationEmptyBoards(responses: Record<string, unknown>): 
     'https://apply.workable.com/api/v1/widget/accounts/mercari?details=true': { name: 'Mercari', jobs: [] },
     'https://apply.workable.com/api/v1/widget/accounts/mercari': { name: 'Mercari', jobs: [] },
     ...responses,
-  }
+  })
 }
 
 export function integrationOld83Cache() {

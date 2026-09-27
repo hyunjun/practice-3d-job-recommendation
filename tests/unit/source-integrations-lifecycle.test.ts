@@ -19,9 +19,10 @@ import {
   INTEGRATION_NOW, INTEGRATION_REGISTRATIONS, MICROSOFT_PUBLISHED_IDS, WORKABLE_CAREER_URLS, integrationCompany,
 } from '../fixtures/source-integration-contract'
 import { integrationOld83Cache } from '../fixtures/source-integrations'
+import { SOURCE_EXPANSION_IDS } from '../fixtures/source-expansion-contract'
 
 // Literal externally visible deadlines, never product constants.
-const method = 'observations-1.occupation-5.roles-1.qualifications-1.remote-2.employment-1.purpose-1'
+const method = 'observations-1.occupation-6.roles-1.qualifications-1.remote-2.employment-1.purpose-1'
 const directories: string[] = []
 let now: number
 beforeEach(() => {
@@ -116,15 +117,16 @@ describe('daily source registration, cache and visible age', () => {
     const cwd = await directory()
     const configuration = await loadBoardConfiguration({ cwd })
     const identity = ({ id, name, board, provider }: Company) => ({ id, name, board, provider })
-    expect(configuration.companies).toHaveLength(93)
+    expect(configuration.companies).toHaveLength(124)
     expect(configuration.companies.slice(0, 36).map(identity)).toEqual(old83Companies.slice(0, 36).map(identity))
     expect(configuration.companies.slice(36, 83).map(({ id, name, board, provider, careerUrl }) =>
       ({ id, name, board, provider, careerUrl }))).toEqual(SURVEY_REGISTRATIONS)
-    expect(configuration.companies.slice(83).map(identity).sort((a, b) => a.id.localeCompare(b.id)))
+    expect(configuration.companies.slice(83, 93).map(identity).sort((a, b) => a.id.localeCompare(b.id)))
       .toEqual([...INTEGRATION_REGISTRATIONS].sort((a, b) => a.id.localeCompare(b.id)))
     for (const [provider, count] of [
       ['greenhouse', 50], ['ashby', 24], ['lever', 4], ['smartrecruiters', 5], ['himalayas', 7], ['workable', 3],
-    ] as const) expect(configuration.companies.filter(company => company.provider === provider)).toHaveLength(count)
+    ] as const) expect(configuration.companies.slice(0, 93).filter(company => company.provider === provider)).toHaveLength(count)
+    expect(configuration.companies.slice(93).map(company => company.id)).toEqual(SOURCE_EXPANSION_IDS)
     for (const excluded of ['nvidia', 'netflix', 'oracle', 'dell', 'workday', 'hubspot', 'amd', 'atlassian'])
       expect(configuration.companies.some(company => company.id === excluded)).toBe(false)
     for (const [id, url] of Object.entries(WORKABLE_CAREER_URLS))
@@ -364,7 +366,7 @@ describe('provider-aware posting bounds and unchanged observation comparison', (
     expect(jobFreshness(lifecycleJob('microsoft'), now)).toBe('fresh')
   })
 
-  it('retains an old83 observation as another cohort even when both cohorts have the same finance-v5 method', async () => {
+  it('retains an old83 observation as another cohort even when both cohorts have the same current-v6 method', async () => {
     const cwd = await directory()
     const file = path.join(cwd, 'observations.json')
     const seed = integrationOld83Cache()

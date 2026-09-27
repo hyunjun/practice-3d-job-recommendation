@@ -6,7 +6,7 @@ import type { Catalog, FactEvidence, Job, JobManagement, JobOccupation } from '.
 const TECHNICAL_TITLE = /\b(?:engineers?|engineering|developers?|data scientists?|software architects?)\b/i
 const RESEARCH_TITLE = /\b(?:scientists?|researchers?)\b/i
 const TECHNICAL_RESEARCH = /\b(?:computer science|computational|machine learning|deep learning|reinforcement learning|artificial intelligence|ai|ml|cyber[\s-]?security|security|cryptography)\b/i
-const MANAGEMENT_TITLE = /\b(?:managers?|directors?|head of|vice president|vp|supervisors?)\b/i
+const MANAGEMENT_TITLE = /\b(?:managers?|mgrs?|directors?|dirs?|head of|vice president|vp|supervisors?)\b/i
 const SUPPORT_TITLE = /\b(?:solutions? (?:engineers?|architects?)|sales engineers?|(?:technical |customer |product )?support (?:software )?engineers?|customer (?:success )?engineers?|field engineers?)\b/i
 const SERVICES_TITLE = /\btechnical services? engineers?\b/i
 const SUPPORT_DEPARTMENT = /\b(?:technical support|customer support|support engineering)\b/i
@@ -14,11 +14,18 @@ const PHYSICAL_TITLE = /\b(?:mechanical|electrical|civil|structural|chemical|man
 const COMMERCIAL_TITLE = /\b(?:recruiter|recruiting|account executive|sales representative|pre[- ]sales|post[- ]sales)\b/i
 const WRITING_TITLE = /\b(?:copy[\s-]?writers?|writers?|(?:technical|content)\s+editors?)\b/i
 const FINANCE_TITLE = /\b(?:finance|financial|accounting|fp&a)(?:\s+(?:planning|analysis|strategy|operations?)|\s*(?:&|and)\s*(?:planning|analysis|strategy|operations?))*\s+(?:leads?|analysts?|associates?|partners?|controllers?|accountants?)\b|\baccountants?\b/i
-const NON_DEVELOPMENT_TITLE = /\b(?:designers?|(?:business|administrative) partners?|assistants?|representatives?|coordinators?)\b/i
+const NON_DEVELOPMENT_TITLE = /\b(?:designers?|(?:business|market) developers?|(?:business|administrative) partners?|assistants?|representatives?|coordinators?)\b/i
 const PHYSICAL_SPECIALTY = /\b(?:aerodynamics?|aerothermal|aerospace|aerostructures?|propulsion|actuators?|fluids?|thermal|avionics|rfic|antennas?|analog|mixed[\s-]?signal|radio[\s-]?frequency)\b|\b(?:flight|launch|vehicle|materials?|metallurg(?:y|ical)|weld(?:ing)?|structures?|power electronics|pcb|pcba)(?:\s+[a-z-]+){0,2}\s+engineers?\b/i
 const COMPUTING_ROLE_TITLE = /\b(?:software|firmware|embedded|back[\s-]?end|front[\s-]?end|full[\s-]?stack|data|machine learning|ai|ml|computer|cyber[\s-]?security|security|devops|site reliability)(?:\s+[a-z][a-z-]*){0,3}\s+(?:engineers?|developers?|scientists?|researchers?)\b|\bsoftware architects?\b/i
 const OTHER_RESEARCH = /\b(?:ux|user experience|(?:user|market|people) research(?:ers?)?|recruit(?:ing|ment)?|medicinal chemistry|wet[- ]lab)\b|\blife sciences\b.*\bchemistry\b/i
 const SOFTWARE_TITLE = /\b(?:(?:software|firmware|embedded|back[\s-]?end|front[\s-]?end|full[\s-]?stack|data|machine learning|security|devops|site reliability)\s+(?:engineers?|developers?)|software architects?)\b/i
+// Titles in retailers and manufacturers often put the physical specialty after
+// "Engineer". These are job-level clues, never an inference from the employer.
+const INDUSTRIAL_ROLE = /\b(?:supplier (?:industrialization|industrialisation|indusrialization)|industrialization|homologation|process(?: development)?|field quality|incoming quality|cost|CAD|BIM|BOM|NVH|mass|maintenance|stamping|fastener|plastics|brakes|steering|suspension|seatbelts?|dimensional|acoustic|camera|NPI project)\b/i
+const PHYSICAL_CONTEXT = /\b(?:interiors?|interior trim|chassis|seatbelts?|safety restraints?|vehicle (?:crash|electronics)|body structures?|closures|lighting systems?|charging systems?|power electronics|powertrain|drive units?|batter(?:y|ies)|wire harness(?:es)?|inverter|textiles?|home furnishing|polymers?|composites?|antenna RF|NVH)\b/i
+const COMPUTING_CONTEXT = /\b(?:software|firmware|embedded|machine learning|computer vision|cloud|cybersecurity|DevOps|SRE|EDA|RTL|MES|manufacturing execution systems?|web|network|front[\s-]?end|back[\s-]?end|full[\s-]?stack)\b/i
+const COMPUTING_DEPARTMENT = /\b(?:software|firmware|digital technology|cloud infrastructure|front[\s-]?end|back[\s-]?end)\b/i
+const AMBIGUOUS_DESIGN = /\bdesign(?: release)? engineers?\b/i
 const MAX_TEXT = 100000
 const MAX_EVIDENCE = 8
 
@@ -47,10 +54,12 @@ function scopeParagraphs(input: string): ScopeParagraph[] {
     if (!text) continue
     const normalized = text.replace(/[’‘]/g, "'").replace(/[:：]$/, '')
     const next = qualificationSection(text)
-    if (next || /^(?:your (?:mission|impact|role)|the opportunity|role overview|what you'll be doing|what you'll do at .+)$/i.test(normalized)) {
+    const dutiesHeading = /^(?:you(?:'ll| will)|your (?:general |specific )?responsibilities(?: (?:will|might) include)?|what you'll actually do)$/i.test(normalized)
+    const qualificationsHeading = /^(?:you have|what you bring)$/i.test(normalized)
+    if (next || dutiesHeading || qualificationsHeading || /^(?:your (?:mission|impact|role)|the opportunity|role overview|what you'll be doing|what you'll do at .+)$/i.test(normalized)) {
       heading = text
       section = next === 'preferred' ? 'preferred' : next === 'excluded' || /^(?:about (?:the |our )?team|our (?:tech|stack|technology)|tech(?:nology)? stack)$/i.test(normalized)
-        ? 'excluded' : next === 'required' || next === 'qualification' ? 'qualification' : 'duties'
+        ? 'excluded' : next === 'required' || next === 'qualification' || qualificationsHeading ? 'qualification' : 'duties'
       continue
     }
     // Inline prose can establish a role even when the publisher did not add a heading.
@@ -126,6 +135,28 @@ export function occupationFacts(input: { title: string; description: string; dep
       ...(supportWork ? [paragraphEvidence(supportWork)] : []),
     ])
   }
+  const physicalDepartment = departments.find(department => PHYSICAL_CONTEXT.test(department)
+    || /\b(?:mechanical|manufacturing|mfg|industrialization|vehicle engineering|supplier quality|corporate quality|electronics)\b/i.test(department))
+  const physicalTitle = INDUSTRIAL_ROLE.test(roleTitle) || PHYSICAL_CONTEXT.test(title) || PHYSICAL_SPECIALTY.test(title)
+  const explicitComputing = COMPUTING_ROLE_TITLE.test(title) || COMPUTING_CONTEXT.test(title)
+  if (TECHNICAL_TITLE.test(title) && (physicalTitle || physicalDepartment) && !explicitComputing) {
+    return assessment('other', [titleEvidence, ...(physicalDepartment ? [{ source: 'board' as const, text: physicalDepartment }] : [])])
+  }
+  // "Design Engineer" also describes textiles, furniture and industrial design.
+  // A software duty/qualification can establish the computing interpretation.
+  if (AMBIGUOUS_DESIGN.test(roleTitle) && !explicitComputing) {
+    const physical = paragraphs.find(paragraph => paragraph.kind === 'duties' && PHYSICAL_CONTEXT.test(paragraph.text))
+    if (physical) return assessment('other', [titleEvidence, paragraphEvidence(physical)])
+    const department = departments.find(value => COMPUTING_DEPARTMENT.test(value))
+    const computing = paragraphs.filter(paragraph => TECHNICAL_WORK.test(paragraph.text)
+      || paragraph.kind === 'qualification' && ENGINEERING_QUALIFICATION.test(paragraph.text)
+      || /\b(?:front[\s-]?end|back[\s-]?end|full[\s-]?stack|web apps?|web applications?)\b/i.test(paragraph.text)
+        && /\b(?:develop\w*|implement\w*|engineer\w*|build\w*|experience|proficien\w*)\b/i.test(paragraph.text))
+    if (!computing.length && !department) return assessment('unconfirmed', [titleEvidence])
+    return assessment('engineering', [
+      titleEvidence, ...(department ? [{ source: 'board' as const, text: department }] : []), ...computing.map(paragraphEvidence),
+    ])
+  }
   if (TECHNICAL_TITLE.test(title)) return assessment('engineering', [titleEvidence])
   if (OTHER_RESEARCH.test(title)) return assessment('other', [titleEvidence])
   const technical = paragraphs.filter(paragraph => TECHNICAL_WORK.test(paragraph.text)
@@ -144,7 +175,7 @@ export function isTechnicalOccupation(occupation: JobOccupation): boolean {
 export function needsOccupationDescription(title: string): boolean {
   const preliminary = occupationFacts({ title, description: '' })
   return isTechnicalOccupation(preliminary)
-    || preliminary.category === 'unconfirmed' && RESEARCH_TITLE.test(title.normalize('NFKC'))
+    || preliminary.category === 'unconfirmed' && (RESEARCH_TITLE.test(title.normalize('NFKC')) || AMBIGUOUS_DESIGN.test(title.normalize('NFKC')))
 }
 
 export function upgradeJobOccupation<T extends Job>(job: T): T {

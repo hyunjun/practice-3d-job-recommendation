@@ -8,13 +8,13 @@ export const CATALOG_LIFETIME = {
 
 export const PUBLIC_CATALOG_RECHECK_COOLDOWN = 60_000
 
-/** Himalayas documents daily feed updates; successful reads wait a full day. */
+/** Daily feeds and site-specific crawling reuse successful reads for a full day. */
 export function sourceFreshFor(source?: Job['source']): number {
-  return source === 'himalayas' ? 24 * 60 * 60 * 1000 : CATALOG_LIFETIME.freshFor
+  return source === 'himalayas' || source === 'careers' ? 24 * 60 * 60 * 1000 : CATALOG_LIFETIME.freshFor
 }
 
 export function sourceRefreshInterval(source?: Job['source']): number {
-  return source === 'himalayas' ? sourceFreshFor(source) : PUBLIC_CATALOG_RECHECK_COOLDOWN
+  return source === 'himalayas' || source === 'careers' ? sourceFreshFor(source) : PUBLIC_CATALOG_RECHECK_COOLDOWN
 }
 
 export type SnapshotFreshness = 'fresh' | 'stale' | 'expired' | 'unknown'

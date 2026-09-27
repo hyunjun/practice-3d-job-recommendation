@@ -6,6 +6,7 @@ import type { PostingStatusIndex } from '../../../shared/posting-status'
 import { createPublicCoverageServer } from '../../fixtures/public-coverage-server'
 import { INTEGRATION_JOBS, INTEGRATION_NOW } from '../../fixtures/source-integration-contract'
 import { integrationResponses } from '../../fixtures/source-integrations'
+import { isSourceExpansionRequest, SOURCE_EXPANSION_EMPTY_FULL_URLS } from '../../fixtures/source-expansion-empty'
 import { readServerMode } from './api-requests'
 import { surveyJson } from './public-company-survey'
 import { waitForSavedCommit } from './saved-store'
@@ -22,10 +23,10 @@ export async function integrationServer(page: Page, info: TestInfo, baseURL: str
   })
 }
 
-export async function catalog93(page: Page, origin: string, count: number) {
+export async function catalog124(page: Page, origin: string, count: number) {
   const catalog = await surveyJson<Catalog>(page, origin, '/api/catalog?source=public')
-  expect(catalog.companies).toHaveLength(93)
-  expect(catalog.boards).toHaveLength(93)
+  expect(catalog.companies).toHaveLength(124)
+  expect(catalog.boards).toHaveLength(124)
   expect(catalog.jobs).toHaveLength(count)
   for (const expected of INTEGRATION_JOBS) expect(catalog.jobs.find(job => job.id === expected.id)).toMatchObject(expected)
   return catalog
@@ -38,12 +39,12 @@ export async function sourceCredit(scope: Locator, canonical: string) {
   await expect(credit.getByRole('link', { name: 'Himalayas 원문', exact: true })).toHaveAttribute('href', canonical)
 }
 
-export async function statusAction(page: Page, content: boolean) {
+export async function statusAction(page: Page, content: boolean, listingLabel: '게시 상태 확인' | '새로 확인' = '게시 상태 확인') {
   const pending = page.waitForResponse(response => {
     const url = new URL(response.url())
     return url.pathname === '/api/posting-status' && url.search === (content ? '?refresh=1&content=1' : '?refresh=1')
   })
-  await page.getByRole('button', { name: content ? '공고 내용 확인' : '게시 상태 확인', exact: true }).click()
+  await page.getByRole('button', { name: content ? '공고 내용 확인' : listingLabel, exact: true }).click()
   const response = await pending
   expect(response.status()).toBe(200)
   return await response.json() as PostingStatusIndex
@@ -83,9 +84,12 @@ export function csvRows(text: string) {
 }
 
 export async function assertSynthetic(server: Awaited<ReturnType<typeof createPublicCoverageServer>>, count: number) {
-  const requests = await server.requests()
+  const all = await server.requests()
+  const requests = all.filter(request => !isSourceExpansionRequest(request.url))
+  expect(all.filter(request => isSourceExpansionRequest(request.url)).slice(0, 31).map(request => request.url).sort())
+    .toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
   expect(requests).toHaveLength(count)
-  expect(requests.every(request => request.synthetic && !request.networkSent && request.method === 'GET' && request.body === null)).toBe(true)
+  expect(all.every(request => request.synthetic && !request.networkSent && request.method === 'GET' && request.body === null)).toBe(true)
   await server.assertDefaultConfiguration()
   return requests
 }

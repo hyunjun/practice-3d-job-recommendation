@@ -138,7 +138,7 @@ for (const width of [1440, 320]) {
       job: {
         id: 'greenhouse-fable-orbit-106', title: 'Frontend Engineer, Developer Community',
         description: TECHNICAL_SCOPE_CASES[2].description,
-        fetchedAt: '2026-09-26T07:00:00.000Z', occupation: { version: 5, category: 'engineering' },
+        fetchedAt: '2026-09-26T07:00:00.000Z', occupation: { version: 6, category: 'engineering' },
         url: 'https://example.org/fable-orbit/106',
       },
     })
@@ -266,7 +266,7 @@ for (const width of [1440, 320]) {
         title: 'Administrative Business Partner - Engineering, Product and Design',
         description: OUTSIDE_SCOPE_CASES[1].description, requirements: [],
         url: 'https://example.org/fable-orbit/administrator', fetchedAt: '2026-09-26T07:00:00.000Z',
-        occupation: { version: 5, category: 'other', departments: ['Core Engineering'] },
+        occupation: { version: 6, category: 'other', departments: ['Core Engineering'] },
       },
     })
     await expect(page.locator('.saved-role')).toHaveText('기타 직군')

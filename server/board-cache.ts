@@ -78,11 +78,13 @@ export interface BoardCache {
   save: (boards: CachedBoard[]) => Promise<void>
 }
 
-const MAX_FILE_BYTES = 64 * 1024 * 1024
+export const MAX_BOARD_CACHE_BYTES = 128 * 1024 * 1024
 
 async function readJson(file: string): Promise<unknown> {
-  if ((await stat(file)).size > MAX_FILE_BYTES) throw new Error('Board cache exceeds the size limit')
-  return JSON.parse(await readFile(file, 'utf8'))
+  if ((await stat(file)).size > MAX_BOARD_CACHE_BYTES) throw new Error('Board cache exceeds the size limit')
+  const text = await readFile(file, 'utf8')
+  if (Buffer.byteLength(text) > MAX_BOARD_CACHE_BYTES) throw new Error('Board cache exceeds the size limit')
+  return JSON.parse(text)
 }
 
 export function parseCachedBoards(input: unknown): CachedBoard[] {
@@ -150,10 +152,12 @@ export function createFileBoardCache(file: string, legacyFiles: string | string[
       }
     },
     async save(boards) {
+      const contents = JSON.stringify({ version: 5, boards })
+      if (Buffer.byteLength(contents) > MAX_BOARD_CACHE_BYTES) throw new Error('Board cache exceeds the size limit')
       await mkdir(path.dirname(file), { recursive: true })
       const temporary = `${file}.${process.pid}.${randomUUID()}.tmp`
       try {
-        await writeFile(temporary, JSON.stringify({ version: 5, boards }), 'utf8')
+        await writeFile(temporary, contents, 'utf8')
         await rename(temporary, file)
       } finally {
         await rm(temporary, { force: true })

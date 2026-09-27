@@ -69,14 +69,14 @@ describe('finance is the primary role and engineering can be its budget customer
     }).category).toBe('other')
   })
 
-  it('emits v5 and accepts historical v4 as well as v5, while rejecting adjacent unsupported versions', () => {
-    expect(OCCUPATION_VERSION).toBe(5)
-    expect(occupationFacts({ title: 'Finance Lead, Engineering', description: '' }).version).toBe(5)
+  it('emits v6 and accepts historical v4/v5, while rejecting adjacent unsupported versions', () => {
+    expect(OCCUPATION_VERSION).toBe(6)
+    expect(occupationFacts({ title: 'Finance Lead, Engineering', description: '' }).version).toBe(6)
     const legacy = legacyFinanceJob()
-    for (const version of [1, 2, 3, 4, 5]) {
+    for (const version of [1, 2, 3, 4, 5, 6]) {
       expect(JobSchema.safeParse({ ...legacy, occupation: { ...legacy.occupation, version } }).success, `v${version}`).toBe(true)
     }
-    for (const version of [0, 6]) {
+    for (const version of [0, 7]) {
       expect(JobSchema.safeParse({ ...legacy, occupation: { ...legacy.occupation, version } }).success, `v${version}`).toBe(false)
     }
   })
@@ -105,7 +105,7 @@ describe('fictional collection and v4 cache migration', () => {
     ])
     expect(result.jobs[0]).toMatchObject({
       source: 'ashby', fetchedAt: '2026-09-27T02:00:00.000Z', url: 'https://example.org/fable-ledger/201',
-      occupation: { version: 5, category: 'engineering', departments: ['All Departments', 'Finance'] },
+      occupation: { version: 6, category: 'engineering', departments: ['All Departments', 'Finance'] },
     })
   })
 
@@ -132,7 +132,7 @@ describe('fictional collection and v4 cache migration', () => {
     }] })[0].snapshot?.unmappedCount).toBeNull()
   })
 
-  it('does not promote a cached v4 observation into a comparable v5 day on first read or restart', async () => {
+  it('does not promote a cached v4 observation into a comparable v6 day on first read or restart', async () => {
     let file: unknown = { version: 1, series: [] }
     const cache = {
       load: async () => structuredClone(file),
@@ -143,7 +143,7 @@ describe('fictional collection and v4 cache migration', () => {
     const store = createObservationStore(options)
     await store.record(entries, 'cache')
     const history = await store.read()
-    expect(history.method).toBe('observations-1.occupation-5.roles-1.qualifications-1.remote-2.employment-1.purpose-1')
+    expect(history.method).toBe('observations-1.occupation-6.roles-1.qualifications-1.remote-2.employment-1.purpose-1')
     expect(history.days).toHaveLength(1)
     expect(history.days[0]).toMatchObject({
       day: '2026-09-27', complete: {
@@ -182,7 +182,7 @@ describe('v4 saved finance snapshots remain personal records', () => {
     const original = legacyFinanceSaved()
     const untouched = structuredClone(original)
     const migrated = upgradeJobOccupation(original.job)
-    expect(migrated.occupation).toMatchObject({ version: 5, category: 'other' })
+    expect(migrated.occupation).toMatchObject({ version: 6, category: 'other' })
     expect({ ...migrated, occupation: original.job.occupation }).toEqual(original.job)
     const decoded = decodeSavedJobs(JSON.stringify([original]))
     expect(decoded.omitted).toBe(0)
@@ -197,7 +197,7 @@ describe('v4 saved finance snapshots remain personal records', () => {
         title: 'Strategic Finance Lead, Platform & Engineering', description: FINANCE_DESCRIPTION,
         url: 'https://example.org/fable-ledger/101', requirements: [],
         updatedAt: '2026-09-25T06:07:08.000Z', fetchedAt: '2026-09-27T02:00:00.000Z',
-        occupation: { version: 5, category: 'other', departments: ['All Departments', 'Finance'] },
+        occupation: { version: 6, category: 'other', departments: ['All Departments', 'Finance'] },
       },
     })
     expect(jobRoles(saved.job)).toEqual([])

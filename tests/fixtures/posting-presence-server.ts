@@ -3,12 +3,13 @@ import { spawn, execFile } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createWriteStream } from 'node:fs'
-import { cp, mkdir, readFile, readdir, rename, symlink, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, rename, symlink, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { createServer } from 'node:net'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
+import { copyFixture } from './copy-fixture'
 import { PRESENCE_NOW, PRESENCE_REGISTRATION, presenceResponses } from './posting-presence'
 import type { PresenceResponses } from './posting-presence'
 
@@ -106,13 +107,13 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
   await mkdir(path.join(cwd, '.local'), { recursive: true })
   if (mode === 'production') {
     await Promise.all([
-      cp(path.join(buildRoot, 'dist'), path.join(cwd, 'dist'), { recursive: true }),
-      cp(path.join(buildRoot, 'dist-server'), path.join(cwd, 'dist-server'), { recursive: true }),
+      copyFixture(path.join(buildRoot, 'dist'), path.join(cwd, 'dist')),
+      copyFixture(path.join(buildRoot, 'dist-server'), path.join(cwd, 'dist-server')),
       symlink(path.join(repository, 'node_modules'), path.join(cwd, 'node_modules'), 'dir'),
     ])
   } else {
     await Promise.all([
-      ...['index.html', 'package.json', 'tsconfig.json', 'src', 'shared', 'server'].map(name => cp(path.join(sourceRoot, name), path.join(cwd, name), { recursive: true })),
+      ...['index.html', 'package.json', 'tsconfig.json', 'src', 'shared', 'server'].map(name => copyFixture(path.join(sourceRoot, name), path.join(cwd, name))),
       symlink(path.join(repository, 'public'), path.join(cwd, 'public'), 'dir'),
     ])
     await mkdir(path.join(cwd, 'node_modules'))

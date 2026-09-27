@@ -5,7 +5,7 @@ export type Role = 'all' | KnownJobRole
 export type JobRole = KnownJobRole | 'unknown'
 export type WorkMode = 'remote' | 'hybrid' | 'onsite' | 'unknown'
 export type Visa = 'yes' | 'conditional' | 'no' | 'unknown'
-export const PUBLIC_PROVIDERS = ['greenhouse', 'ashby', 'lever', 'smartrecruiters', 'workable', 'himalayas'] as const
+export const PUBLIC_PROVIDERS = ['greenhouse', 'ashby', 'lever', 'smartrecruiters', 'workable', 'himalayas', 'careers'] as const
 export type JobProvider = typeof PUBLIC_PROVIDERS[number]
 export type JobSource = 'sample' | JobProvider
 export type Source = 'sample' | 'public'
@@ -14,7 +14,7 @@ export const COMPENSATION_VERSION = 2 as const
 export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 2 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
-export const OCCUPATION_VERSION = 5 as const
+export const OCCUPATION_VERSION = 6 as const
 export const REMOTE_SCOPE_VERSION = 2 as const
 export const EMPLOYMENT_VERSION = 1 as const
 export const POSTING_PURPOSE_VERSION = 1 as const
@@ -27,7 +27,7 @@ export type SpokenLanguageCode = typeof SPOKEN_LANGUAGE_CODES[number]
 
 export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
   sample: '샘플', greenhouse: 'Greenhouse', ashby: 'Ashby', lever: 'Lever', smartrecruiters: 'SmartRecruiters',
-  workable: 'Workable', himalayas: 'Himalayas',
+  workable: 'Workable', himalayas: 'Himalayas', careers: '공식 채용 사이트',
 }
 
 export interface FactEvidence {
@@ -155,8 +155,8 @@ export interface JobManagement {
 }
 
 export interface JobOccupation {
-  /** Versions 1–4 remain readable in saved records and cached snapshots. */
-  version: 1 | 2 | 3 | 4 | typeof OCCUPATION_VERSION
+  /** Older interpretations remain readable in saved records and cached snapshots. */
+  version: 1 | 2 | 3 | 4 | 5 | typeof OCCUPATION_VERSION
   category: 'engineering' | 'research' | 'support' | 'management' | 'other' | 'unconfirmed'
   evidence: FactEvidence[]
   departments: string[]

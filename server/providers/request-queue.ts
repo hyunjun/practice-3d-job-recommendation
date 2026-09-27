@@ -1,16 +1,17 @@
 import { BoardFetchError } from '../catalog-service'
-import { BOARD_TIMEOUT, BoardResponseError, fetchBoardJson } from './http'
+import { BOARD_TIMEOUT, BoardResponseError, fetchBoardJson, fetchBoardText } from './http'
 
 interface Request {
   url: string
   signal: AbortSignal
+  response: 'json' | 'text'
   resolve: (value: unknown) => void
   reject: (reason: unknown) => void
   cancel: () => void
 }
 
 /** One queue per provider, shared by every company and by list/detail requests. */
-export function createBoardRequestQueue({ concurrency, interval }: { concurrency: number; interval: number }) {
+export function createBoardRequestQueue({ concurrency, interval, response = 'json' }: { concurrency: number; interval: number; response?: 'json' | 'text' }) {
   const waiting: Request[] = []
   let active = 0
   let nextStart = 0
@@ -47,7 +48,7 @@ export function createBoardRequestQueue({ concurrency, interval }: { concurrency
       active++
       nextStart = Date.now() + interval
       const signal = AbortSignal.any([request.signal, AbortSignal.timeout(BOARD_TIMEOUT)])
-      void fetchBoardJson(request.url, signal).then(request.resolve, cause => {
+      void (request.response === 'text' ? fetchBoardText : fetchBoardJson)(request.url, signal).then(request.resolve, cause => {
         if (cause instanceof BoardResponseError && (cause.status === 429 || cause.retryAfter)) {
           const retryAfter = Math.max(cause.retryAfter ?? Date.now() + 60_000, cooldown?.retryAfter ?? 0)
           cooldown = new BoardFetchError(cause.message, retryAfter)
@@ -58,10 +59,10 @@ export function createBoardRequestQueue({ concurrency, interval }: { concurrency
     }
   }
 
-  return (url: string, signal: AbortSignal): Promise<unknown> => new Promise((resolve, reject) => {
+  return (url: string, signal: AbortSignal, readAs: 'json' | 'text' = response): Promise<unknown> => new Promise((resolve, reject) => {
     if (signal.aborted) { reject(signal.reason); return }
     const request: Request = {
-      url, signal, resolve, reject,
+      url, signal, response: readAs, resolve, reject,
       cancel: () => {
         const index = waiting.indexOf(request)
         if (index !== -1) waiting.splice(index, 1)

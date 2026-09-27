@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { lstat, readFile, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { z } from 'zod'
+import { isCareerBoard, CAREER_BOARDS } from '../shared/career-sources'
 import { PUBLIC_COMPANIES } from '../shared/companies'
 import { PUBLIC_PROVIDERS } from '../shared/types'
 import type { Company } from '../shared/types'
@@ -38,6 +39,9 @@ const Registration = z.object({
     } catch { return false }
   }, '계정 정보가 포함되지 않은 HTTPS 채용 페이지 주소를 입력해 주세요.'),
 }).strict().superRefine((company, context) => {
+  if (company.provider === 'careers' && !isCareerBoard(company.board)) {
+    context.addIssue({ code: 'custom', path: ['board'], message: `공식 사이트 수집은 ${CAREER_BOARDS.join(', ')} 중 하나를 지정해 주세요.` })
+  }
   if (company.boardRegion && company.provider !== 'lever') {
     context.addIssue({ code: 'custom', path: ['boardRegion'], message: 'boardRegion은 Lever 게시판에만 지정할 수 있어요.' })
   }

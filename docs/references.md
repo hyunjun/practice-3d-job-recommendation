@@ -732,6 +732,20 @@ Stability AI의 공개 응답은 6개 공고의 지원 URL을 HTTP로 반환해 
 
 Himalayas는 전체 회사 커리어 목록을 대신하지 않는 원격 공고 표본입니다. 전체 페이지와 회사별 공고 경로를 확인한 Microsoft·Adobe·Salesforce·Cisco·Qualcomm·Broadcom·Red Hat만 추가했습니다. NVIDIA·Netflix 등의 짧은 페이지와 AMD·Atlassian의 총수·배열 불일치는 정상 빈 목록으로 처리하지 않았습니다.
 
+## 지역 대표 기업과 다른 산업의 소프트웨어 직무
+
+2026-09-26 UTC에 지역별 기업과 다른 산업의 SW 채용 기업을 나누어 55개 회사를 조사했습니다. 공식 홈페이지·게시판 회사 표시·게시 ID·목록과 본문을 대조했습니다. **31개사 추가 결과와 24개사 보류 이유**는 [지역·산업별 조사 소스](regional-industry-sources.md)에 공식 링크와 함께 기록했습니다.
+
+| 조사 소스 | 확인한 구조 | 적용 |
+|---|---|---|
+| [Zalando Jobs](https://jobs.zalando.com/en/jobs) | 공개 HTML의 페이지별 목록·총수와 개별 공고 데이터 | 전체 페이지와 본문 식별자를 대조. HTML 안의 JSON·텍스트만 읽고 스크립트를 실행하지 않음 |
+| [Booking.com Jobs](https://jobs.booking.com/booking/jobs) | 공개 Jibe API의 목록·본문·추가 근무지, Booking Holdings 공고 포함 | 회사 표시에 그룹 범위 반영, 5초 요청 간격과 전체 페이지 검증 |
+| [Starbucks Technology](https://careers.starbucks.com/discover-opportunities/technology/) · [공개 공고 페이지](https://apply.starbucks.com/careers) · [JobPosting 구조](https://schema.org/JobPosting) | Technology 필터가 적용된 공개 목록과 개별 페이지의 구조화된 전체 본문 | 상세 API의 반복 429를 보존하고 공개 페이지를 본문 수집 경로로 사용. 10초 간격, 하루 재사용, 분류 이동과 마감 구분 |
+| [Walmart Technology](https://careers.walmart.com/us/en/home/careers-areas/technology) · [수집 경로 정책](https://careers.walmart.com/robots.txt) | 검색 API·결과 경로 수집 제한, 대체 잡 사이트 응답의 총수·배열 불일치 | 현재 반영 보류. 채용 0건으로 표현하거나 불완전한 자료를 합치지 않음 |
+| [IKEA](https://careers.smartrecruiters.com/InterIKEAGroup) · [Lucid Motors](https://job-boards.greenhouse.io/lucidmotors) · [Doctolib](https://careers.doctolib.com/) | 같은 게시판 안에 SW 개발과 사업 개발·물리적 엔지니어링이 함께 존재 | 회사 업종으로 배제하지 않고 직무 제목·실제 부서·업무 근거로 직군 판정 보완 |
+
+각 기업의 법인·국가·별도 게시판을 모두 합친 채용 규모는 아닙니다. 새 수집도 기존 출처와 동일하게 원문·확인 시각을 유지하며, 테스트에는 실제 공고를 복사하지 않은 합성 자료를 사용합니다.
+
 실제 응답의 날짜는 Unix 초, 국가 제한은 문자열 배열, 시간대는 숫자 배열이었습니다. OpenAPI가 설명하는 밀리초·국가 객체·시간대 문자열 형식도 구분해 검증합니다. 페이지마다 다른 `updatedAt`이나 게시 날짜 `pubDate`를 본문 수정 시각으로 사용하지 않고, 실제 요청 시각을 별도로 보존합니다.
 
 지원 가능 국가·시간대를 오피스 도시로 사용하지 않으며, 외부 사이트의 seniority·category 태그로 회사의 관리직·부서를 추정하지 않습니다. 메타데이터 급여에 기본급 근거가 없으면 비교 연봉에서 제외하고, 출처의 `guid` 원문 링크를 유지합니다. 새 수집기로 받은 15개 원 응답과 실제 캐시 반영 근거는 `.local/research/63/`에 보존합니다.

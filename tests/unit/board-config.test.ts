@@ -18,11 +18,13 @@ import { fetchLeverBoard } from '../../server/providers/lever'
 import { fetchSmartRecruitersBoard } from '../../server/providers/smartrecruiters'
 import { fetchWorkableBoard } from '../../server/providers/workable'
 import { fetchHimalayasBoard } from '../../server/providers/himalayas'
+import { fetchCareersBoard } from '../../server/providers/careers'
 import type { Company, Job, JobProvider } from '../../shared/types'
 import { BOARD_CONFIG_REGISTRATIONS, boardFixtureResponse, boardRegistration } from '../fixtures/board-config'
 import { EXPANDED_PUBLIC_REGISTRATIONS } from '../fixtures/public-coverage'
 import { SURVEY_REGISTRATIONS } from '../fixtures/public-company-survey'
 import { INTEGRATION_DEFAULT_IDS } from '../fixtures/source-integration-contract'
+import { SOURCE_EXPANSION_IDS } from '../fixtures/source-expansion-contract'
 
 const repository = fileURLToPath(new URL('../../', import.meta.url))
 const historical36Ids = [
@@ -32,7 +34,7 @@ const historical36Ids = [
   'openai', 'notion', 'reddit', 'discord', 'coinbase', 'dropbox', 'duolingo', 'roblox',
   'spacex', 'pinterest', 'databricks', 'robinhood',
 ]
-const defaultIds = [...historical36Ids, ...SURVEY_REGISTRATIONS.map(company => company.id), ...INTEGRATION_DEFAULT_IDS]
+const defaultIds = [...historical36Ids, ...SURVEY_REGISTRATIONS.map(company => company.id), ...INTEGRATION_DEFAULT_IDS, ...SOURCE_EXPANSION_IDS]
 const BASE = Date.parse('2026-09-20T06:00:00.000Z')
 const initialTime = '2026-09-20T06:00:00.000Z'
 const directories: string[] = []
@@ -42,7 +44,7 @@ const ids = (companies: Company[]) => companies.map(company => company.id)
 const providers: Record<JobProvider, (company: Company, fetchedAt: string) => Promise<BoardResult>> = {
   greenhouse: fetchGreenhouseBoard, ashby: fetchAshbyBoard, lever: fetchLeverBoard,
   smartrecruiters: fetchSmartRecruitersBoard,
-  workable: fetchWorkableBoard, himalayas: fetchHimalayasBoard,
+  workable: fetchWorkableBoard, himalayas: fetchHimalayasBoard, careers: fetchCareersBoard,
 }
 
 async function directory() {
@@ -119,7 +121,7 @@ describe('board configuration resolution', () => {
     expect(ids(resolved.companies)).toEqual(defaultIds)
     expect(ids(resolved.companies.slice(0, 36))).toEqual(historical36Ids)
     expect(resolved.companies.slice(0, 83)).toHaveLength(83)
-    expect(resolved.companies).toHaveLength(93)
+    expect(resolved.companies).toHaveLength(124)
     expect(resolved.cacheFile).toBe(path.join(cwd, '.local/public-board-cache-v5.json'))
     expect(resolved.legacyCacheFiles).toEqual([
       path.join(cwd, '.local/greenhouse-cache-v4.json'), path.join(cwd, '.local/greenhouse-cache-v3.json'),
@@ -579,7 +581,7 @@ describe('offline board-check CLI', () => {
     expect(result.code).toBe(0)
     expect(result.signal).toBeNull()
     expect(result.stdout).toContain('기본 공개 게시판 목록을 사용합니다.')
-    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 93개')
+    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 124개')
     expect(result.stdout).toContain('stripe · Stripe · Greenhouse · stripe')
     expect(result.stdout).toContain('wise · Wise · SmartRecruiters · Wise')
     expect(result.stdout).toContain('openai · OpenAI · Ashby · openai')

@@ -9,6 +9,7 @@ import { fetchLeverBoard, fetchLeverPresence } from './providers/lever'
 import { fetchSmartRecruitersBoard, fetchSmartRecruitersPresence } from './providers/smartrecruiters'
 import { fetchWorkableBoard, fetchWorkablePresence } from './providers/workable'
 import { fetchHimalayasBoard, fetchHimalayasPresence } from './providers/himalayas'
+import { fetchCareersBoard, fetchCareersPresence } from './providers/careers'
 import { createFilePresenceCache, presenceCacheFile } from './posting-presence'
 import type { PresenceResult } from './posting-presence'
 import { createFileObservationCache, createObservationStore, observationCacheFile } from './catalog-observations'
@@ -18,12 +19,12 @@ export { fetchGreenhouseBoard } from './providers/greenhouse'
 const providers: Record<JobProvider, (company: Company, fetchedAt: string) => Promise<BoardResult>> = {
   greenhouse: fetchGreenhouseBoard, ashby: fetchAshbyBoard, lever: fetchLeverBoard,
   smartrecruiters: fetchSmartRecruitersBoard,
-  workable: fetchWorkableBoard, himalayas: fetchHimalayasBoard,
+  workable: fetchWorkableBoard, himalayas: fetchHimalayasBoard, careers: fetchCareersBoard,
 }
 const presenceProviders: Record<JobProvider, (company: Company, fetchedAt: string) => Promise<PresenceResult>> = {
   greenhouse: fetchGreenhousePresence, ashby: fetchAshbyPresence, lever: fetchLeverPresence,
   smartrecruiters: fetchSmartRecruitersPresence,
-  workable: fetchWorkablePresence, himalayas: fetchHimalayasPresence,
+  workable: fetchWorkablePresence, himalayas: fetchHimalayasPresence, careers: fetchCareersPresence,
 }
 
 let service: ReturnType<typeof createCatalogService> | undefined

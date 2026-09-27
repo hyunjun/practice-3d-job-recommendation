@@ -16,7 +16,7 @@ import {
 import { readSaved } from './helpers/saved-store'
 import { sourceChoice } from './helpers/source-choice'
 import {
-  assertSynthetic, catalog93, csvRows, downloadText, integrationServer,
+  assertSynthetic, catalog124, csvRows, downloadText, integrationServer,
   saveWithNote, sourceCredit, statusAction,
 } from './helpers/source-integrations'
 
@@ -53,7 +53,7 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       await server.start()
       await server.verifyProductionBytes()
       const state = await seedSurvey(page, server.origin, { selectedId: null, clock: INTEGRATION_NOW })
-      const catalog = await catalog93(page, server.origin, 75)
+      const catalog = await catalog124(page, server.origin, 75)
       const oldJobs = catalog.jobs.filter(job => SURVEY_REGISTRATIONS.some(company => company.id === job.companyId)
         && job.id !== 'greenhouse-xai-61901')
       const facts = (job: { id: string; title: string; url: string }) => ({ id: job.id, title: job.title, url: job.url })
@@ -61,17 +61,20 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       expect(catalog.boards.reduce((count, board) => count + board.total, 0)).toBe(80)
       await expect(page.locator('.catalog-source-credit').getByRole('link', { name: 'Himalayas', exact: true }))
         .toHaveAttribute('href', 'https://himalayas.app')
-      await expect(page.locator('.catalog-source-credit')).toHaveText('원격 공고 출처: Himalayas · 회사 공식 게시판과 수집 범위가 다릅니다.')
+      await expect(page.locator('.catalog-source-credit p')).toHaveText([
+        '원격 공고 출처: Himalayas · 회사 공식 게시판과 수집 범위가 다릅니다.',
+        'Starbucks는 공식 채용 사이트의 Technology 분류를 수집합니다.',
+      ])
       await surveyDataButton(page).click()
       const data = page.getByRole('dialog')
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '93', '75'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '124', '75'])
       await expect(data.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
-        'Greenhouse50개 회사', 'Ashby24개 회사', 'Lever4개 회사', 'SmartRecruiters5개 회사',
-        'Workable3개 회사', 'Himalayas7개 회사',
+        'Greenhouse65개 회사', 'Ashby27개 회사', 'Lever9개 회사', 'SmartRecruiters10개 회사',
+        'Workable3개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
       ])
       await expect(data.getByText('Himalayas는 하루 단위로 갱신됩니다. 정상 조회 후 24시간 동안 자료를 재사용하며 새로고침도 같은 대기 시간을 따릅니다. 거주 국가·시간대 조건을 회사의 오피스 위치로 표시하지 않습니다.', { exact: true })).toBeVisible()
       await surveyBoardHistory(page)
-      await expect(data.locator('.board-row')).toHaveCount(93)
+      await expect(data.locator('.board-row')).toHaveCount(124)
       for (const [name, id] of [['Hugging Face', 'hugging-face'], ['SmartNews', 'smartnews'], ['Mercari', 'mercari']] as const) {
         const row = data.locator('.board-row').filter({ has: page.getByText(name, { exact: true }) })
         await expect(row.getByRole('link', { name: `${name} 채용 페이지`, exact: true })).toHaveAttribute('href', WORKABLE_CAREER_URLS[id])
@@ -79,7 +82,7 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       await sourceChoice(page, 'sample').click()
       await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
       await sourceChoice(page, 'public').click()
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '93', '75'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['22', '124', '75'])
       await surveyClose(page, surveyDataButton(page))
 
       await openRemote(page, 'Microsoft')
@@ -214,12 +217,12 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       await server.start()
       await server.verifyProductionBytes()
       const state = await seedSurvey(page, server.origin, { saved: integrationOldSaved(), selectedId: null, clock: INTEGRATION_NOW })
-      await catalog93(page, server.origin, 12)
+      await catalog124(page, server.origin, 12)
       const firstRequests = await assertSynthetic(server, 11)
       expect(firstRequests.map(request => request.url).sort()).toEqual([...INTEGRATION_FULL_URLS].sort())
       const before = await readFile(server.defaultCache, 'utf8')
       const cache = JSON.parse(before)
-      expect(cache.boards).toHaveLength(93)
+      expect(cache.boards).toHaveLength(124)
       for (const previous of old.boards) expect(cache.boards.find((board: { companyId: string }) => board.companyId === previous.companyId))
         .toMatchObject({ checkedAt: '2026-10-01T23:39:55.000Z', snapshot: {
           fetchedAt: '2026-10-01T23:39:55.000Z', total: previous.snapshot.total,
@@ -290,7 +293,7 @@ test('daily source remains browse-fresh while a new UTC day cannot claim a compa
     await server.start()
     await server.verifyProductionBytes()
     const state = await seedSurvey(page, server.origin, { selectedId: null, clock: INTEGRATION_NOW })
-    await catalog93(page, server.origin, 75)
+    await catalog124(page, server.origin, 75)
     const initial = await surveyJson<ObservationHistory>(page, server.origin, '/api/observations')
     expect(initial.days[0].complete).toMatchObject({
       comparable: true, stats: { published: 80, technical: 75, openings: 73, talentPools: 2 },
@@ -298,7 +301,7 @@ test('daily source remains browse-fresh while a new UTC day cannot claim a compa
     await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
     await server.advance(31 * 60_000)
     await page.clock.fastForward(31 * 60_000)
-    const current = await catalog93(page, server.origin, 75)
+    const current = await catalog124(page, server.origin, 75)
     expect(current.boards.filter(board => board.provider === 'himalayas').map(board => board.dataStatus)).toEqual([
       'fresh', 'fresh', 'fresh', 'fresh', 'fresh', 'fresh', 'fresh',
     ])
@@ -307,6 +310,7 @@ test('daily source remains browse-fresh while a new UTC day cannot claim a compa
     expect(history.days[1].complete).toBeUndefined()
     expect(history.days[1].latest.boards.filter(board => board.status === 'stale').map(board => board.companyId)).toEqual([
       'microsoft', 'adobe', 'salesforce', 'cisco', 'qualcomm', 'broadcom', 'redhat',
+      'booking', 'zalando', 'starbucks',
     ])
     expect(history.days[0].complete).toEqual(initial.days[0].complete)
     const requests = await assertSynthetic(server, 184)

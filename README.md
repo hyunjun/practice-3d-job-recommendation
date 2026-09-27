@@ -23,7 +23,7 @@ npm run dev
 PORT=5174 npm run dev
 ```
 
-처음에는 **샘플 데이터와 샘플 프로필**로 시작합니다. 상단의 **샘플 탐색 → 공개 채용공고**를 선택하면 Greenhouse·Ashby·Lever·SmartRecruiters·Workable 공식 게시판과 Himalayas의 공개 원격 공고를 함께 조회합니다. 인터넷이 필요하며 전체 수집에는 1분 이상 걸릴 수 있지만, **먼저 확인된 회사의 공고부터 탐색**할 수 있습니다. 나머지를 수집하는 동안 검색·저장·메모 작성을 계속할 수 있습니다.
+처음에는 **샘플 데이터와 샘플 프로필**로 시작합니다. 상단의 **샘플 탐색 → 공개 채용공고**를 선택하면 Greenhouse·Ashby·Lever·SmartRecruiters·Workable 공식 게시판, 회사 공식 사이트와 Himalayas의 공개 원격 공고를 함께 조회합니다. 인터넷이 필요하며 전체 수집에는 1분 이상 걸릴 수 있지만, **먼저 확인된 회사의 공고부터 탐색**할 수 있습니다. 나머지를 수집하는 동안 검색·저장·메모 작성을 계속할 수 있습니다.
 
 지도 텍스처, 국가 경계, 도시 사진, 글꼴, PDF 분석 자산을 로컬에서 제공합니다. 패키지 설치가 끝나면 샘플 탐색과 이력서 분석은 인터넷 연결 없이 사용할 수 있습니다.
 
@@ -50,7 +50,7 @@ npm run dev
 
 | 설정 | 동작 |
 | --- | --- |
-| 설정 파일 없음 | 기본 93개 회사 사용 |
+| 설정 파일 없음 | 기본 124개 회사 사용 |
 | `mode: "extend"` 또는 mode 생략 | 기본 목록에 추가. 같은 ID의 회사 객체는 해당 회사의 등록 정보 변경 |
 | `mode: "replace"` | `companies`에 적은 회사만 사용 |
 | 회사 ID 문자열 | 기본 목록의 등록 정보 재사용. `npm run boards:check -- --help`에서 ID 목록 확인 |
@@ -69,9 +69,11 @@ npm run dev
 }
 ```
 
-`provider`는 `greenhouse`, `ashby`, `lever`, `smartrecruiters`, `workable`, `himalayas` 중 하나입니다. 회사의 공식 채용 페이지에서 공개 게시판을 확인하고, `board`에는 URL의 게시판 이름 부분을 넣으세요. 기존 네 제공자의 대소문자·공백·Unicode는 보존합니다. 예를 들어 Ashby의 `https://jobs.ashbyhq.com/Linear`는 `board: "Linear"`입니다. Lever EU 게시판에는 `boardRegion: "eu"`를 추가합니다. 표시용 이니셜과 색상은 자동으로 정하며 `industry`는 생략할 수 있습니다.
+`provider`는 `greenhouse`, `ashby`, `lever`, `smartrecruiters`, `workable`, `himalayas`, `careers` 중 하나입니다. 회사의 공식 채용 페이지에서 공개 게시판을 확인하고, `board`에는 URL의 게시판 이름 부분을 넣으세요. 기존 네 제공자의 대소문자·공백·Unicode는 보존합니다. 예를 들어 Ashby의 `https://jobs.ashbyhq.com/Linear`는 `board: "Linear"`입니다. Lever EU 게시판에는 `boardRegion: "eu"`를 추가합니다. 표시용 이니셜과 색상은 자동으로 정하며 `industry`는 생략할 수 있습니다.
 
 Workable은 공식 페이지에서 연결한 계정 이름(`huggingface` 등)을 사용하며, 등록한 회사 이름과 API의 회사 이름을 대조합니다. 대소문자·일부 구두점·일반적인 법인 접미사를 제외한 이름이 일치해야 합니다. Himalayas는 해당 사이트의 회사 슬러그(`red-hat` 등)를 사용합니다. 두 제공자의 계정 이름에는 소문자 영문·숫자와 단어 사이 하이픈만 허용합니다. Himalayas 등록은 해당 회사의 공식 전체 목록을 연결한 것이 아니므로 출처 표시와 원문 링크를 유지해야 합니다.
+
+`careers`는 조사한 공식 사이트 전용이며 `board`에 `booking`, `zalando`, `starbucks-technology`만 허용합니다. 세 사이트의 정상 목록·본문을 각각 24시간 재사용합니다. Starbucks는 Technology 분류를 수집하고, Booking.com 게시판에는 Booking Holdings도 포함됩니다.
 
 회사 `id`는 회사 수의 중복 제거와 저장 기록의 연결 기준입니다. 같은 회사의 게시판을 변경할 때는 ID를 유지하고, 같은 실제 회사에 여러 ID를 만들지 마세요. 한 ID에는 하나의 게시판을 등록합니다. 목록 안의 중복 ID나 같은 출처·게시판·Lever 지역을 가리키는 중복 등록은 오류로 알려줍니다.
 
@@ -129,7 +131,7 @@ ORBIT_BOARDS_FILE="/absolute/path/my-boards.json" npm start
 
 이런 공고에는 세부 개발 직무와 희망 개발 직무 일치를 적용하지 않습니다. 저장 검색·상세·CSV는 현재 직군을 사용하고, 공고에 명시된 기술·경력·근무 조건은 계속 비교합니다. 원래 부서 정보와 JSON 백업의 이전 분류 기록도 유지합니다.
 
-게시 상태는 실시간 채용 가능 여부가 아닙니다. 마지막 정상 목록 조회로부터 공식 게시판은 30분, Himalayas는 24시간이 지나거나 해당 게시판 조회가 실패하면 **확인 필요**로 바뀝니다. Himalayas 공고의 게시 여부는 해당 잡 사이트 목록 기준이며 회사의 현재 모집 여부와 다를 수 있습니다. 공개 목록에서 찾지 못해도 채용 종료로 단정하지 않으며 원문 확인을 안내합니다. 전체 공개 ID가 없는 이전 캐시나 출처 게시판을 확인할 수 없는 오래된 저장 기록으로는 목록에서 사라졌다고 판단하지 않습니다. 화면을 새로 열면 게시 상태를 다시 확인해야 합니다.
+게시 상태는 실시간 채용 가능 여부가 아닙니다. 마지막 정상 목록 조회로부터 일반 공식 게시판은 30분, Himalayas와 공식 사이트 직접 수집은 24시간이 지나거나 해당 게시판 조회가 실패하면 **확인 필요**로 바뀝니다. Himalayas 공고의 게시 여부는 해당 잡 사이트 목록 기준이며 회사의 현재 모집 여부와 다를 수 있습니다. Starbucks는 공식 Technology 분류의 목록 기준이므로 분류 이동으로 빠질 수도 있습니다. 공개 목록에서 찾지 못해도 채용 종료로 단정하지 않으며 원문 확인을 안내합니다. 전체 공개 ID가 없는 이전 캐시나 출처 게시판을 확인할 수 없는 오래된 저장 기록으로는 목록에서 사라졌다고 판단하지 않습니다. 화면을 새로 열면 게시 상태를 다시 확인해야 합니다.
 
 목록과 본문의 확인 시각·유효 기간은 별도입니다. 최근 목록에서 게시를 확인해도 본문이 오래됐거나 조회에 실패했으면 **내용 미확인**으로 표시합니다. 마지막 본문에서 비공개로 확인된 ID가 목록에 다시 보일 때도 활성화로 단정하지 않습니다. 같은 종류의 동시 수집과 두 경로의 실패 후 대기를 공유하고, 목록만 확인하면 본문 캐시와 저장한 기록을 덮어쓰지 않습니다. [게시 확인 API·캐시·운영 범위](docs/posting-presence.md)에 제공자별 호출과 호환 계약을 정리했습니다.
 
@@ -147,16 +149,17 @@ ORBIT_BOARDS_FILE="/absolute/path/my-boards.json" npm start
 
 데이터 화면의 **선택됨** 표시는 현재 사용하는 모드를 알려줍니다. 조회 중이거나 재조회 대기 중에도 선택한 카드의 제목과 표시를 읽을 수 있으며, 대기 중인 공개 조회는 반복 실행하지 않습니다.
 
-공개 모드의 기본 설정은 다음 **93개 회사**를 조회합니다. **86개사는 공식 공개 게시판**, **7개사는 Himalayas의 공개 원격 공고**입니다. 로컬 설정으로 이 목록을 선택·확장할 수 있습니다.
+공개 모드의 기본 설정은 다음 **124개 회사**를 조회합니다. **117개사는 공식 출처**, **7개사는 Himalayas의 공개 원격 공고**입니다. 로컬 설정으로 이 목록을 선택·확장할 수 있습니다.
 
 | 출처 | 회사 수 | 대상 회사 |
 | --- | ---: | --- |
-| Greenhouse | 50 | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom, Asana, Moloco, Delight.ai (Sendbird), Reddit, Discord, Coinbase, Dropbox, Duolingo, Roblox, SpaceX, Pinterest, Databricks, Robinhood, Adyen, Affirm, Automattic, Brave, Brex, Canonical, Cockroach Labs, Coupang, DigitalOcean, Elastic, Epic Games, Fivetran, Grafana Labs, Lyft, Miro, Mozilla, N26, Okta, Proton, Riot Games, Scale AI, Together AI, Twilio, Twitch, Waymo, Wikimedia Foundation, xAI (SpaceXAI) |
-| Ashby | 24 | Linear, DeepL, n8n, Supabase, Mistral AI, Jane, OpenAI, Notion, ClickHouse, Cohere, Confluent, Cursor, Docker, ElevenLabs, Kong, Perplexity, Plaid, PostHog, Ramp, Replit, Runway, Sentry, Snowflake, Temporal |
-| Lever | 4 | Spotify, Contentsquare, Palantir, Zoox |
-| SmartRecruiters | 5 | Canva, Grab, Wise, Delivery Hero, ServiceNow |
+| Greenhouse | 65 | Stripe, Figma, Vercel, Cloudflare, Datadog, MongoDB, Airbnb, GitLab, Anthropic, Intercom, Asana, Moloco, Delight.ai (Sendbird), Reddit, Discord, Coinbase, Dropbox, Duolingo, Roblox, SpaceX, Pinterest, Databricks, Robinhood, Adyen, Affirm, Automattic, Brave, Brex, Canonical, Cockroach Labs, Coupang, DigitalOcean, Elastic, Epic Games, Fivetran, Grafana Labs, Lyft, Miro, Mozilla, N26, Okta, Proton, Riot Games, Scale AI, Together AI, Twilio, Twitch, Waymo, Wikimedia Foundation, xAI (SpaceXAI), HelloFresh, Doctolib, SumUp, KRAFTON, Culture Amp, VTEX, Careem, Tamara, Moniepoint, Lucid Motors, Agoda, The New York Times, Flexport, Razorpay, Financial Times |
+| Ashby | 27 | Linear, DeepL, n8n, Supabase, Mistral AI, Jane, OpenAI, Notion, ClickHouse, Cohere, Confluent, Cursor, Docker, ElevenLabs, Kong, Perplexity, Plaid, PostHog, Ramp, Replit, Runway, Sentry, Snowflake, Temporal, Airwallex, Nubank, Mollie |
+| Lever | 9 | Spotify, Contentsquare, Palantir, Zoox, BlaBlaCar, Immutable, dLocal, Woven by Toyota, Qonto |
+| SmartRecruiters | 10 | Canva, Grab, Wise, Delivery Hero, ServiceNow, Freshworks, McDonald’s, IKEA (Inter IKEA Group), Scalable Capital, AUTO1 Group |
 | Workable | 3 | Hugging Face, SmartNews, Mercari |
 | [Himalayas](https://himalayas.app) · 공개 잡 사이트 | 7 | Microsoft, Adobe, Salesforce, Cisco, Qualcomm, Broadcom, Red Hat |
+| 회사 공식 사이트 직접 수집 | 3 | Booking.com / Booking Holdings, Zalando, Starbucks Technology |
 
 OpenAI·Notion·Reddit·Discord·Coinbase·Dropbox·Duolingo·Roblox·SpaceX·Pinterest·Databricks·Robinhood의 공개 게시판도 기본 목록에 포함합니다. **샘플 탐색 → 공개 채용공고**에서 현재 게시물을 수집하며, 다음 실행에서도 로컬 캐시를 재사용하고 회사별 갱신 정책에 따라 새로 조회합니다. 실제 공고 원문과 캐시는 `.local/`에만 저장하고 저장소에는 수집할 회사와 공개 게시판 정보만 포함합니다.
 
@@ -185,7 +188,7 @@ Sendbird API의 이전 채용 목록 주소는 게시 ID가 정확히 일치하�
 - Himalayas는 회사별 검색의 모든 페이지를 검증합니다. 총수·offset·페이지 크기·회사 슬러그·공고 경로·중복 ID가 일치해야 하며 짧은 중간 페이지를 정상 목록으로 반영하지 않습니다. 전체 검증 후 출처의 만료 시각이 지난 항목을 제외하고, GUID에서 안정적인 ID를 만들며 Himalayas 원문 URL을 유지합니다. 게시 날짜를 본문 수정 시각으로 사용하지 않습니다.
 - Himalayas의 지원 가능 국가·시간대를 오피스 도시로 사용하지 않습니다. 국가 없이 시간대만 제한된 공고를 전 세계 원격으로 표시하지 않으며, 직무 본문에 명시된 출근·하이브리드 조건은 보존하되 확인하지 못한 오피스 위치를 만들지 않습니다. 제3자의 seniority·category 태그를 회사의 관리자·부서 정보로 간주하지 않습니다.
 - Himalayas는 본문의 급여 근거를 우선하고, API의 금액만 있으면 기본급·총보상 구분 미확인으로 보관합니다. 월급·시급을 연봉으로 환산하지 않습니다.
-- 공식 게시판의 정상 결과는 30분 캐시하고 수동 조회에 최소 1분 간격을 둡니다. Himalayas는 출처의 하루 단위 갱신에 맞춰 정상 결과와 수동 재조회에 **24시간** 간격을 적용합니다. 목록과 본문은 각각의 시각을 유지하고, 전체 본문을 수집하면 같은 시각의 목록도 재사용합니다.
+- 일반 공식 게시판의 정상 결과는 30분 캐시하고 수동 조회에 최소 1분 간격을 둡니다. Himalayas는 출처의 하루 단위 갱신에 맞춰, 공식 사이트 직접 수집은 원 사이트의 부하를 줄이기 위해 정상 결과와 수동 재조회에 **24시간** 간격을 적용합니다. 목록과 본문은 각각의 시각을 유지하고, 전체 본문을 수집하면 같은 시각의 목록도 재사용합니다.
 - Workable 요청은 제공자 공통 큐에서 동시 2개·시작 간격 500ms, Himalayas는 동시 2개·시작 간격 1초로 제한합니다. 두 경로가 같은 큐와 429·Retry-After 대기를 공유합니다. Himalayas의 회사별 조회는 최대 100페이지·2,000개·120초이며 모든 개별 요청의 제한은 25초입니다.
 - 사용 가능한 캐시는 먼저 보여주고 새 결과는 회사별 전체 목록의 검증이 끝난 뒤 반영합니다. 진행 표시의 숫자는 이번에 조회할 회사 중 응답 처리가 끝난 회사 수이며, 남은 시간이나 성공률이 아닙니다. 조회 중·실패·이전 조회 공고를 구분합니다.
 - 일부 게시판의 조회가 실패하면 마지막 정상 확인으로부터 24시간 이내인 해당 회사의 공고를 유지합니다. 목록·상세·저장·도시 비교에서 이전 조회 결과임을 구분하고 원래 확인 시각을 보존합니다. 정상 응답이 빈 목록이면 기존 공고를 제거합니다.
@@ -199,12 +202,12 @@ Sendbird API의 이전 채용 목록 주소는 게시 ID가 정확히 일치하�
 - 고용 형태를 읽을 때 `Smart Contract`, `Contract Testing` 같은 기술·업무 명칭과 실제 계약직 조건을 구분합니다. 제목에 명시된 `12-month contract`·인턴십 등은 유지하며, 풀타임 근무와 계약·인턴 구분이 함께 있으면 계약·인턴 유형으로 표시하고 원문 근거를 제공합니다. 풀타임 직무의 설명에 인턴 멘토링이 등장해도 인턴 공고로 바꾸지 않습니다. 명시된 조건이 없거나 서로 충돌하면 **고용 형태 미확인**으로 남깁니다.
 - 이전 캐시·저장 기록·JSON 백업의 고용 형태도 보관된 제목·본문 근거로 다시 확인합니다. ID·메모·지원 상태·조회 및 저장 시각을 보존하며, 원래 근거가 없는 이전 값이나 게시판의 명시적 필드를 임의로 바꾸지 않습니다. API에 없는 고용 정보를 채용 페이지에서 추측해 채우지 않습니다.
 - 제공 도시에 연결되지 않은 개발 공고도 수집해 **기타 근무지**에서 보여줍니다. 원문 위치를 유지하고, 임의의 도시나 원격 공고로 바꾸지 않습니다. 회사 전체 집계·검색·저장·게시 상태 비교에도 포함합니다.
-- 기타 근무지는 **전 세계**에서만 표시합니다. 원문 지역명으로 검색할 수 있고 직무·보상·비자 등의 조건은 계속 적용합니다. 지역 필터를 해제해야 결과가 생기는 경우 변경 전·후 수치를 안내하고 사용자가 선택할 때만 적용합니다.
+- 기타 근무지도 확인된 근무 국가가 해당하는 지역에서 표시합니다. 국가가 미확인이거나 제공 지역에 속하지 않으면 **전 세계**에서 찾을 수 있습니다. 원문 지역명으로 검색할 수 있고 직무·보상·비자 등의 조건은 계속 적용합니다. 지역 필터를 해제해야 결과가 생기는 경우 변경 전·후 수치를 안내하고 사용자가 선택할 때만 적용합니다.
 - 데이터 화면에서 최근 조회·이전 조회·미확인 게시판, 회사별 마지막 정상 확인과 실패 시각, 재시도 가능 시각을 확인할 수 있습니다. 서버 조회와 열린 화면 모두 회사별 원래 시각을 기준으로 24시간을 넘긴 결과를 추천에서 제외합니다.
 
 조회 가능한 게시판과 공고 수는 계속 바뀝니다. 화면의 **데이터와 추천 방식**에서 출처, 제공 도시, 조회 시각, 게시판별 상태를 확인할 수 있습니다. 이 앱의 22개 도시는 지도 표시 범위이며, 각 도시의 전체 채용 시장을 수집했다는 뜻이 아닙니다.
 
-화면을 계속 열어 두어도 공식 게시판은 정상 확인 후 **30분**, Himalayas는 **24시간**이 지나면 이전 조회로 바뀝니다. 모든 출처에서 **24시간**을 넘기면 회사 수·지도·목록·도시 비교에서 제외하며, 모든 기록의 확인 기간이 지나면 검색 결과 없음 대신 재조회를 안내합니다. 탭에 돌아오거나 뒤로 가기로 화면이 복원될 때도 기기 시각으로 다시 확인합니다. 시간 경과를 게시판 장애나 모집 종료로 표시하지 않습니다. 검색 조건과 저장한 공고·메모·지원 상태는 유지하고, 저장 목록과 열려 있는 상세에서는 오래된 조회 기록임을 표시합니다.
+화면을 계속 열어 두어도 일반 공개 게시판은 정상 확인 후 **30분**, Himalayas와 공식 사이트 직접 수집은 **24시간**이 지나면 이전 조회로 바뀝니다. 모든 출처에서 **24시간**을 넘기면 회사 수·지도·목록·도시 비교에서 제외하며, 모든 기록의 확인 기간이 지나면 검색 결과 없음 대신 재조회를 안내합니다. 탭에 돌아오거나 뒤로 가기로 화면이 복원될 때도 기기 시각으로 다시 확인합니다. 시간 경과를 게시판 장애나 모집 종료로 표시하지 않습니다. 검색 조건과 저장한 공고·메모·지원 상태는 유지하고, 저장 목록과 열려 있는 상세에서는 오래된 조회 기록임을 표시합니다.
 
 **공개 모드**에서 탐색·도시 비교 화면으로 돌아오거나 네트워크가 다시 연결되면, 오래됐거나 확인하지 못한 자료를 다시 조회합니다. 회사별 정상 확인 시각과 재시도 대기를 확인하고, 자동 조회는 이전 요청 시작 후 최소 1분 간격을 둡니다. 진행 중인 조회가 있으면 이어서 기다리며 수동 새로고침은 기존 방식으로 사용할 수 있습니다. 시간 경과만으로 새 조회를 시작하거나 숨겨진 화면·샘플 모드·저장 화면에서 자동 조회하지 않습니다. 공개 모드를 기억한 채 저장 화면을 바로 열어도 전체 공고 수집을 시작하지 않으며, 저장 공고의 확인은 사용자가 직접 실행합니다.
 
@@ -292,7 +295,7 @@ Greenhouse가 공개 응답에서 관심 등록으로 명시한 항목(`internal
 
 다른 시간대에 동료가 있다는 소개·과거 협업 경험·소프트웨어의 시간 처리·지원 및 면접 일정은 현재 직무의 근무시간 조건과 구분합니다. 거주 국가만으로 지원자의 시간대나 조건 충족 여부를 추정하지 않고, 기존 근무 국가·근무 형태·기술 적합도 점수를 바꾸지 않습니다.
 
-여섯 제공자의 새 수집은 전체 원문에서 근거를 보관하고, 이전 API·캐시·저장 기록·JSON 복원은 보관된 본문으로 같은 정보를 보완합니다. 본문보다 뒤에 따로 보관한 최신 근거도 유지합니다. 일부만 해석한 경우에는 전체 원문 확인을 안내합니다. CSV의 기존 43개 열 뒤에 **시간대·협업 시간**, **시간대·협업 시간 근거**를 추가합니다. 실제 시간 조건 변경은 게시 내용의 근무 조건 차이로 표시하지만, 저장한 원문·메모·지원 상태·시각은 바꾸지 않습니다.
+모든 제공자의 새 수집은 전체 원문에서 근거를 보관하고, 이전 API·캐시·저장 기록·JSON 복원은 보관된 본문으로 같은 정보를 보완합니다. 본문보다 뒤에 따로 보관한 최신 근거도 유지합니다. 일부만 해석한 경우에는 전체 원문 확인을 안내합니다. CSV의 기존 43개 열 뒤에 **시간대·협업 시간**, **시간대·협업 시간 근거**를 추가합니다. 실제 시간 조건 변경은 게시 내용의 근무 조건 차이로 표시하지만, 저장한 원문·메모·지원 상태·시각은 바꾸지 않습니다.
 
 ### 저장 기록과 복구
 
@@ -486,11 +489,11 @@ public/                      로컬 지도·사진·폰트 관련 자산
 
 직군·직무 분류는 게시된 표기를 이용한 탐색 보조입니다. 제목의 제품 분야와 실제 담당 업무가 일치하지 않을 수 있고, 부서가 해당 직무보다 넓은 범위일 수 있습니다. 일반 연구 직함에서 영어 업무·자격 근거를 확인하지 못하면 탐색에서 빠질 수 있으며, 연구직으로 포함되어도 학위·연구 경력 충족을 보장하지 않습니다. 모든 직업·직급·언어를 검증하거나 O*NET 직업 코드를 자동 부여하는 분류 체계는 아닙니다.
 
-API는 `/api/catalog?source=sample` 또는 `source=public`을 사용합니다. 이전 `source=greenhouse` 요청도 받지만 반환하는 카탈로그 모드는 `public`이며, 각 공고의 `source`에는 실제 제공자를 기록합니다. 개인별 수집 목록은 로컬 게시판 설정으로 관리합니다. 저장소의 기본 목록 자체를 변경할 때는 `shared/companies.ts`의 `PUBLIC_COMPANIES`를 수정합니다. 두 방식 모두 같은 여섯 수집기를 사용합니다.
+API는 `/api/catalog?source=sample` 또는 `source=public`을 사용합니다. 이전 `source=greenhouse` 요청도 받지만 반환하는 카탈로그 모드는 `public`이며, 각 공고의 `source`에는 실제 제공자를 기록합니다. 개인별 수집 목록은 로컬 게시판 설정으로 관리합니다. 저장소의 기본 목록 자체를 변경할 때는 `shared/companies.ts`의 `PUBLIC_COMPANIES`를 수정합니다. 두 방식 모두 같은 공개 수집기를 사용합니다.
 
 `/api/posting-status`는 등록된 게시판의 전체 공개 ID, 탐색 대상 공고의 표시 항목별 SHA-256 값, 회사별 확인·실패·재시도 시각을 반환합니다. `?refresh=1`은 기존 회사별 재조회 정책을 따르며 카탈로그와 진행 중인 수집을 공유합니다. 저장한 공고 ID나 URL을 입력받는 API가 아니며 임의 사이트를 조회하지 않습니다. 전체 ID는 직군 선별 전에 확보하고, 비공개·비활성이 명시된 항목을 제외한 완전한 공개 목록을 회사별 캐시에 반영합니다. 지도에 연결되지 않은 개발·연구 공고의 내용도 비교 대상에 포함합니다.
 
-두 공개 API의 정상 응답은 `Cache-Control: private, no-cache, must-revalidate`와 ETag를 사용합니다. 샘플·오류 응답은 `no-store`입니다. 이는 출처별 수집 캐시(공식 게시판 30분, Himalayas 24시간)와 별도이며, 조건부 요청도 수집 서비스를 먼저 호출합니다. 압축 형식별 응답을 구분하도록 `Vary: Accept-Encoding`을 `200`·`304`·`HEAD`에 유지합니다. 응답에는 공개 게시판 데이터만 담고 프로필·검색 조건·저장한 공고 ID를 서버로 전송하지 않습니다.
+두 공개 API의 정상 응답은 `Cache-Control: private, no-cache, must-revalidate`와 ETag를 사용합니다. 샘플·오류 응답은 `no-store`입니다. 이는 출처별 수집 캐시(일반 공개 게시판 30분, Himalayas·공식 사이트 직접 수집 24시간)와 별도이며, 조건부 요청도 수집 서비스를 먼저 호출합니다. 압축 형식별 응답을 구분하도록 `Vary: Accept-Encoding`을 `200`·`304`·`HEAD`에 유지합니다. 응답에는 공개 게시판 데이터만 담고 프로필·검색 조건·저장한 공고 ID를 서버로 전송하지 않습니다.
 
 서버는 한 프로세스의 로컬 실행을 기준으로 합니다. `src`의 지도 표현, `shared`의 추천·집계, 서버의 게시판 조회와 캐시 정책이 분리되어 있습니다.
 
@@ -499,3 +502,9 @@ API는 `/api/catalog?source=sample` 또는 `source=public`을 사용합니다. �
 수집 API 조사와 실제 데이터 검증 결과는 [개선 기록](docs/improvements.md)에 정리합니다.
 
 동봉된 외부 자산의 라이선스 고지는 해당 자산에 적용됩니다. ORBIT 자체 코드의 오픈소스 라이선스는 아직 지정하지 않았습니다.
+
+## 지역과 산업을 넓힌 실제 공고
+
+지역 대표 기업 22곳과 외식·유통·자동차·여행·언론·물류의 SW 채용 기업 9곳을 추가했습니다. 잘란도, Booking.com, Starbucks Technology, IKEA, Woven by Toyota, Nubank, Moniepoint 등의 공식 출처를 연결합니다. [55개 회사의 조사 소스·반영 수량·보류 이유](docs/regional-industry-sources.md)를 함께 기록했습니다.
+
+실제 수집 자료는 `.local/`에만 저장하며 공개 저장소에는 포함하지 않습니다. 초기 채용 자료를 받으려면 인터넷 연결이 필요합니다. 수집은 회사별 요청 간격·페이지 검증·재사용 시간을 따르며 검색할 때마다 공고별 원문을 호출하지 않습니다.

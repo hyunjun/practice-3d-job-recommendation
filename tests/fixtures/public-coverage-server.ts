@@ -3,12 +3,13 @@ import { execFile, spawn } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createWriteStream } from 'node:fs'
-import { access, copyFile, cp, mkdir, readFile, readdir, rename, stat, symlink, writeFile } from 'node:fs/promises'
+import { access, mkdir, readFile, readdir, rename, stat, symlink, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { createServer } from 'node:net'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
+import { copyFixture } from './copy-fixture'
 import { withSurveyEmptyBoards } from './public-company-survey'
 import { withIntegrationEmptyBoards } from './source-integrations'
 import type { CoverageEvent, CoverageRequest, CoverageWireResponse } from './public-coverage-transport'
@@ -74,8 +75,10 @@ async function hashes(root: string, names: string[]) {
 /** An unconfigured real default app: no environment or local board override. */
 export async function createPublicCoverageServer(directory: string, mode: PublicCoverageMode, options: {
   cacheSeed?: unknown
+  cacheSeedFile?: string
   observationsSeed?: unknown
   responses?: Record<string, unknown>
+  defaultEmptyBoards?: boolean
   sourceRoot?: string
   buildRoot?: string
   port?: number
@@ -83,22 +86,22 @@ export async function createPublicCoverageServer(directory: string, mode: Public
 } = {}) {
   directory = path.resolve(directory)
   const cwd = path.join(directory, 'runtime')
-  const sourceRoot = options.sourceRoot ?? repository
-  const buildRoot = options.buildRoot ?? repository
+  const sourceRoot = options.sourceRoot ?? process.env.ORBIT_FIXTURE_SOURCE_ROOT ?? repository
+  const buildRoot = options.buildRoot ?? process.env.ORBIT_FIXTURE_BUILD_ROOT ?? repository
   const port = await availablePort(options.port)
   let hmrPort = mode === 'development' ? await availablePort() : undefined
   while (hmrPort === port) hmrPort = await availablePort()
   await mkdir(path.join(cwd, '.local'), { recursive: true })
   if (mode === 'production') {
     await Promise.all([
-      ...['dist', 'dist-server'].map(name => cp(path.join(buildRoot, name), path.join(cwd, name), { recursive: true })),
+      ...['dist', 'dist-server'].map(name => copyFixture(path.join(buildRoot, name), path.join(cwd, name))),
       symlink(path.join(repository, 'node_modules'), path.join(cwd, 'node_modules'), 'dir'),
     ])
   } else {
     await Promise.all([
-      ...['index.html', 'package.json', 'tsconfig.json'].map(file => copyFile(path.join(sourceRoot, file), path.join(cwd, file))),
-      ...['src', 'shared', 'server'].map(file => cp(path.join(sourceRoot, file), path.join(cwd, file), { recursive: true })),
-      copyFile(path.join(sourceRoot, 'vite.config.ts'), path.join(cwd, 'vite.original.config.ts')),
+      ...['index.html', 'package.json', 'tsconfig.json'].map(file => copyFixture(path.join(sourceRoot, file), path.join(cwd, file))),
+      ...['src', 'shared', 'server'].map(file => copyFixture(path.join(sourceRoot, file), path.join(cwd, file))),
+      copyFixture(path.join(sourceRoot, 'vite.config.ts'), path.join(cwd, 'vite.original.config.ts')),
       symlink(path.join(repository, 'public'), path.join(cwd, 'public'), 'dir'),
     ])
     await mkdir(path.join(cwd, 'node_modules'))
@@ -132,7 +135,17 @@ export async function createPublicCoverageServer(directory: string, mode: Public
   const configFile = path.join(cwd, '.local/job-boards.json')
   const defaultCache = path.join(cwd, '.local/public-board-cache-v5.json')
   const observationsFile = path.join(cwd, '.local/observations-v1/public-board-cache-v5.json')
+  if (options.cacheSeed !== undefined && options.cacheSeedFile !== undefined) throw new Error('Choose one isolated cache seed')
   if (options.cacheSeed !== undefined) await writeFile(defaultCache, JSON.stringify(options.cacheSeed))
+  if (options.cacheSeedFile !== undefined) {
+    await copyFixture(options.cacheSeedFile, defaultCache)
+    const [before, copied] = await Promise.all([readFile(options.cacheSeedFile), readFile(defaultCache)])
+    expect(copied.equals(before)).toBe(true)
+    await writeFile(path.join(directory, 'cache-seed.json'), JSON.stringify({
+      file: options.cacheSeedFile, bytes: before.length, sha256: createHash('sha256').update(before).digest('hex'),
+      copiedSha256: createHash('sha256').update(copied).digest('hex'),
+    }, null, 2))
+  }
   if (options.observationsSeed !== undefined) {
     await mkdir(path.dirname(observationsFile), { recursive: true })
     await writeFile(observationsFile, JSON.stringify(options.observationsSeed))
@@ -143,10 +156,10 @@ export async function createPublicCoverageServer(directory: string, mode: Public
   if (!Number.isFinite(initialClock)) throw new Error('Invalid public coverage clock')
   await writeFile(clockFile, String(options.clock === undefined ? 0 : initialClock - Date.now()))
   async function respond(responses: Record<string, unknown>) {
-    await writeFile(`${responsesFile}.next`, JSON.stringify(withIntegrationEmptyBoards(responses)))
+    await writeFile(`${responsesFile}.next`, JSON.stringify(options.defaultEmptyBoards === false ? responses : withIntegrationEmptyBoards(responses)))
     await rename(`${responsesFile}.next`, responsesFile)
   }
-  await respond(options.responses ?? withSurveyEmptyBoards())
+  await respond(options.responses ?? (options.defaultEmptyBoards === false ? {} : withSurveyEmptyBoards()))
   const origin = `http://127.0.0.1:${port}`
   const runs: Run[] = []
   let child: ChildProcess | undefined

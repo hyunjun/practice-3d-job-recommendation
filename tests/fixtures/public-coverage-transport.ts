@@ -1,4 +1,5 @@
 export interface CoverageResponseOptions {
+  format?: 'json' | 'text'
   status?: number
   headers?: Record<string, string>
   delayMs?: number

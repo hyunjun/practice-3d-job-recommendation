@@ -13,6 +13,7 @@ import {
 } from '../fixtures/public-company-survey'
 import { createPublicCoverageServer } from '../fixtures/public-coverage-server'
 import { isIntegrationRequest } from '../fixtures/source-integration-contract'
+import { isSourceExpansionRequest, SOURCE_EXPANSION_EMPTY_FULL_URLS } from '../fixtures/source-expansion-empty'
 import { expectInitialCatalogRequest, readServerMode } from './helpers/api-requests'
 import { readSaved } from './helpers/saved-store'
 import { sourceChoice } from './helpers/source-choice'
@@ -43,8 +44,10 @@ async function requestsAre(server: Server, count: number, additional: [number, n
   const all = await server.requests()
   // Keep the original83-provider wire assertions intact and account for each
   // new provider separately, including its distinct successful-read deadline.
-  const requests = all.filter(request => !isIntegrationRequest(request.url))
+  const requests = all.filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url))
   expect(requests).toHaveLength(count)
+  expect(all.filter(request => isSourceExpansionRequest(request.url)).slice(0, 31).map(request => request.url).sort())
+    .toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
   expect(all.filter(request => request.url.startsWith('https://himalayas.app/'))).toHaveLength(additional[0])
   expect(all.filter(request => request.url.startsWith('https://apply.workable.com/'))).toHaveLength(additional[1])
   expect(all.every(request => request.synthetic && !request.networkSent && request.method === 'GET' && request.body === null)).toBe(true)
@@ -54,8 +57,8 @@ async function requestsAre(server: Server, count: number, additional: [number, n
 
 function expectRegistrations(catalog: Catalog, jobs: number) {
   expect(catalog.source).toBe('public')
-  expect(catalog.companies).toHaveLength(93)
-  expect(catalog.boards).toHaveLength(93)
+  expect(catalog.companies).toHaveLength(124)
+  expect(catalog.boards).toHaveLength(124)
   expect(catalog.jobs).toHaveLength(jobs)
   expect(catalog.companies.slice(36, 83).map(({ id, name, careerUrl, provider, board }) =>
     ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
@@ -64,7 +67,7 @@ function expectRegistrations(catalog: Catalog, jobs: number) {
 async function observations(page: Page) {
   const panel = page.getByRole('dialog').locator('.observation-panel')
   await panel.locator('> summary').click()
-  await expect(panel.locator('.observation-scope')).toHaveText('대상 93개 회사 · 최근 90일 이내 · UTC 날짜별 마지막 정상 집계')
+  await expect(panel.locator('.observation-scope')).toHaveText('대상 124개 회사 · 최근 90일 이내 · UTC 날짜별 마지막 정상 집계')
   return panel
 }
 
@@ -101,7 +104,7 @@ function expectSaved(records: SavedJob[]) {
   })
 }
 
-for (const width of [1440, 320]) test.describe(`independent historical47 survey in93 defaults at ${width}px`, () => {
+for (const width of [1440, 320]) test.describe(`independent historical47 survey in124 defaults at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
   test('all47 new sources have literal positive jobs and search, role, region and sample selection retain their context', async ({ page, baseURL }, info) => {
@@ -129,14 +132,14 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
 
       await surveyDataButton(page).click()
       const dialog = page.getByRole('dialog')
-      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '93', '65'])
+      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '124', '65'])
       await expect(dialog.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
-        'Greenhouse50개 회사', 'Ashby24개 회사', 'Lever4개 회사', 'SmartRecruiters5개 회사',
-        'Workable3개 회사', 'Himalayas7개 회사',
+        'Greenhouse65개 회사', 'Ashby27개 회사', 'Lever9개 회사', 'SmartRecruiters10개 회사',
+        'Workable3개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
       ])
       await expect(dialog.locator('.posting-purpose-count')).toHaveText('조회된 개발 공고에 인재풀·관심 등록 2개가 포함되어 있어요. 기본 추천에서는 제외하며 모집 유형 필터로 따로 볼 수 있어요.')
       await surveyBoardHistory(page)
-      await expect(dialog.locator('.board-row')).toHaveCount(93)
+      await expect(dialog.locator('.board-row')).toHaveCount(124)
       for (const company of SURVEY_REGISTRATIONS) {
         const row = dialog.locator('.board-row').filter({ has: page.getByText(company.name, { exact: true }) })
         await expect(row).toHaveCount(1)
@@ -183,7 +186,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       await sourceChoice(page, 'sample').click()
       await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '32', '179'])
       await sourceChoice(page, 'public').click()
-      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '93', '65'])
+      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['22', '124', '65'])
       await surveyClose(page, surveyDataButton(page))
       await expect(page.locator('.company-card h3')).toHaveText('Miro')
       await expect(page.locator('.mini-job-title')).toHaveText('Frontend Engineer — Synthetic Willow Canvas61')
@@ -218,7 +221,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       expect(upstream.map(request => request.url).sort()).toEqual([...Object.values(SURVEY_FULL_URLS), ...SURVEY_DETAIL_URLS].sort())
       const initialBytes = await readFile(server.defaultCache, 'utf8')
       const expanded = JSON.parse(initialBytes)
-      expect(expanded.boards).toHaveLength(93)
+      expect(expanded.boards).toHaveLength(124)
       for (const original of old.boards)
         expect(expanded.boards.find((board: { companyId: string }) => board.companyId === original.companyId)).toMatchObject(original)
 
@@ -341,7 +344,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
         ['servicenow', 'unavailable', null], ['xai', 'unavailable', null],
       ])
       await surveyDataButton(page).click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '93', '60'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['22', '124', '60'])
       await surveyBoardHistory(page)
       for (const name of ['ClickHouse', 'Palantir', 'ServiceNow', 'xAI (SpaceXAI)']) {
         const row = page.getByRole('dialog').locator('.board-row').filter({ has: page.getByText(name, { exact: true }) })
@@ -409,7 +412,9 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
         method: 'observations-1.occupation-4.roles-1.qualifications-1.remote-2.employment-1.purpose-1',
         firstDay: '2026-09-25', lastDay: '2026-09-25', companyCount: 36,
       }])
-      await requestsAre(server, 0, [0, 0])
+      // Reading stored observations alone must not collect any provider.
+      expect(await server.requests()).toEqual([])
+      await server.assertDefaultConfiguration()
       const state = await seedSurvey(page, server.origin, { query: 'Coupang' })
       await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '1'])
       await surveyDataButton(page).click()
@@ -421,7 +426,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       const excluded = panel.getByText('회사·게시판 구성 또는 분류 기준이 다른 이전 기록 1개 묶음은 현재 비교에서 제외했어요.', { exact: true })
       await expect(excluded).toBeVisible()
       await expect(panel.getByRole('combobox', { name: '관측 날짜 (UTC)', exact: true }).locator('option')).toHaveText(['2026-09-26'])
-      await expect(panel.locator('.observation-table tbody tr')).toHaveCount(93)
+      await expect(panel.locator('.observation-table tbody tr')).toHaveCount(124)
       await requestsAre(server, 85)
       await excluded.scrollIntoViewIfNeeded()
       await expect(excluded).toBeInViewport()
@@ -460,7 +465,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
   })
 })
 
-test('the unconfigured93-source server retains real browser304 and file-cache behavior across its owned process restart', async ({ page, baseURL }, info) => {
+test('the unconfigured124-source server retains real browser304 and file-cache behavior across its owned process restart', async ({ page, baseURL }, info) => {
   test.setTimeout(90_000)
   const server = await fixture(page, info, baseURL)
   try {

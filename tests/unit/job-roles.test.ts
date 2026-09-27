@@ -14,6 +14,7 @@ import { LeverJobSchema, normalizeLeverJob } from '../../server/providers/lever'
 import { loadExploration, loadProfile, STORAGE_KEYS } from '../../src/lib/storage'
 import { decodeSavedJobs } from '../../shared/saved-jobs'
 import { SEARCH_COMPANIES, SEARCH_TIME, searchCatalog } from '../fixtures/search-catalog'
+import { SOFTWARE_DESIGN_BODY, TEXTILE_DESIGN_BODY } from '../fixtures/industry-occupation'
 
 const company = SEARCH_COMPANIES[0]
 function posting(title: string, departments: string[] = [], id = 1) {
@@ -67,7 +68,16 @@ describe('role classification from published labels', () => {
     })
     expect(jobRoles(posting('Frontend Engineer', ['Security', 'AI Research & Engineering']))).toEqual(['frontend'])
     expect(jobRoles(posting('Software Engineer', ['Platform']))).toEqual(['devops'])
-    expect(jobRoles(posting('Design Engineer', ['Design']))).toEqual([])
+    expect(posting('Design Engineer', ['Design'])).toBeNull()
+    const design = (description: string) => normalizeJob({
+      id: 642100, title: 'Design Engineer', departments: [{ name: 'Design' }],
+      absolute_url: 'https://example.com/jobs/synthetic-design642100', location: { name: 'London, UK' },
+      content: description.split('\n').map(paragraph => `<p>${paragraph}</p>`).join(''),
+    }, company.id, SEARCH_TIME)
+    expect(design(TEXTILE_DESIGN_BODY)).toBeNull()
+    const computingDesign = design(SOFTWARE_DESIGN_BODY)
+    expect(computingDesign).toMatchObject({ occupation: { version: 6, category: 'engineering' } })
+    expect(jobRoles(computingDesign!)).toEqual([])
     expect(jobRoles(posting('Marketing Engineer', ['Marketing']))).toEqual([])
   })
 

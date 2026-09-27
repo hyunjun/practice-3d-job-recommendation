@@ -22,6 +22,7 @@ import {
 import { asCoverageReply } from '../fixtures/public-coverage-transport'
 import { isIntegrationRequest } from '../fixtures/source-integration-contract'
 import { withIntegrationEmptyBoards } from '../fixtures/source-integrations'
+import { isSourceExpansionRequest, SOURCE_EXPANSION_EMPTY_FULL_URLS } from '../fixtures/source-expansion-empty'
 
 // Keep the historical deterministic clock. Actual pacing and shared cooldowns
 // are exercised by source-integrations-providers with the real queue timers.
@@ -49,8 +50,8 @@ afterEach(async () => {
 })
 
 async function fixture(options: { old36?: boolean; history?: boolean; failures?: boolean } = {}) {
-  const [{ fetchWorkableBoard, fetchWorkablePresence }, { fetchHimalayasBoard, fetchHimalayasPresence }] = await Promise.all([
-    import('../../server/providers/workable'), import('../../server/providers/himalayas'),
+  const [{ fetchWorkableBoard, fetchWorkablePresence }, { fetchHimalayasBoard, fetchHimalayasPresence }, { createCareersFetcher }] = await Promise.all([
+    import('../../server/providers/workable'), import('../../server/providers/himalayas'), import('../../server/providers/careers'),
   ])
   const cwd = await mkdtemp(path.join(tmpdir(), 'orbit-survey61-'))
   directories.push(cwd)
@@ -66,30 +67,32 @@ async function fixture(options: { old36?: boolean; history?: boolean; failures?:
   let responses = withIntegrationEmptyBoards(surveyResponses({ failures: options.failures }))
   const requests: { url: string; method: string; body: unknown }[] = []
   const integrationRequests: { url: string; method: string; body: unknown }[] = []
+  const expansionRequests: { url: string; method: string; body: unknown }[] = []
   const unexpected: string[] = []
   vi.stubGlobal('fetch', vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
     const url = input instanceof Request ? input.url : String(input)
     const method = init?.method ?? (input instanceof Request ? input.method : 'GET')
-    ;(isIntegrationRequest(url) ? integrationRequests : requests).push({ url, method, body: init?.body ?? null })
+    ;(isSourceExpansionRequest(url) ? expansionRequests : isIntegrationRequest(url) ? integrationRequests : requests).push({ url, method, body: init?.body ?? null })
     if (method !== 'GET' || init?.body || !Object.hasOwn(responses, url)) {
       unexpected.push(url)
       throw new Error(`Blocked unexpected fictional request: ${method} ${url}`)
     }
     const reply = asCoverageReply(responses[url])
     if (reply.failure) throw new Error(reply.failure)
-    return Response.json(reply.body, { status: reply.status ?? 200, headers: reply.headers })
+    return new Response(reply.format === 'text' ? reply.body as string : JSON.stringify(reply.body), { status: reply.status ?? 200, headers: reply.headers })
   }))
   function service() {
     // Queue timing has its own suite. These tests exercise real parsing, cache
     // identity and observations with no wall-clock delay under a controlled date.
     const smart = createSmartRecruitersFetcher({ concurrency: 4, interval: 0, timeout: 30_000 })
+    const careers = createCareersFetcher({ concurrency: 2, interval: 0, bookingInterval: 0, timeout: 30_000 })
     const full = {
       greenhouse: fetchGreenhouseBoard, ashby: fetchAshbyBoard, lever: fetchLeverBoard,
-      smartrecruiters: smart, workable: fetchWorkableBoard, himalayas: fetchHimalayasBoard,
+      smartrecruiters: smart, workable: fetchWorkableBoard, himalayas: fetchHimalayasBoard, careers: careers.fetchBoard,
     }
     const presence: Record<JobProvider, (company: Company, at: string) => Promise<PresenceResult>> = {
       greenhouse: fetchGreenhousePresence, ashby: fetchAshbyPresence, lever: fetchLeverPresence,
-      smartrecruiters: smart.fetchPresence, workable: fetchWorkablePresence, himalayas: fetchHimalayasPresence,
+      smartrecruiters: smart.fetchPresence, workable: fetchWorkablePresence, himalayas: fetchHimalayasPresence, careers: careers.fetchPresence,
     }
     return createCatalogService({
       companies: config.companies,
@@ -106,7 +109,7 @@ async function fixture(options: { old36?: boolean; history?: boolean; failures?:
     })
   }
   return {
-    config, old, requests, integrationRequests, unexpected, service,
+    config, old, requests, integrationRequests, expansionRequests, unexpected, service,
     respond: (options: Parameters<typeof surveyResponses>[0] = {}) => { responses = withIntegrationEmptyBoards(surveyResponses(options)) },
   }
 }
@@ -124,13 +127,13 @@ describe('independent47-company public survey', () => {
     const state = await fixture()
     const service = state.service()
     const catalog = await service.get()
-    expect(catalog.companies).toHaveLength(93)
+    expect(catalog.companies).toHaveLength(124)
     expect(catalog.companies.slice(36, 83).map(({ id, name, careerUrl, provider, board }) =>
       ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
     expect(catalog.jobs).toHaveLength(65)
     expect(catalog.jobs.filter(job => SURVEY_REGISTRATIONS.some(company => company.id === job.companyId)
       && job.id !== 'greenhouse-xai-61901').map(positiveFields)).toEqual(SURVEY_JOBS.map(positiveFields))
-    expect(catalog.boards).toHaveLength(93)
+    expect(catalog.boards).toHaveLength(124)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.jobs.filter(job => job.postingPurpose).map(job => job.id)).toEqual([
       'greenhouse-moloco-44102', 'greenhouse-xai-61901',
@@ -149,6 +152,7 @@ describe('independent47-company public survey', () => {
     ])
     expect(state.requests).toHaveLength(85)
     extraRequests(state, 7, 3)
+    expect(state.expansionRequests.map(request => request.url).sort()).toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
     expect(state.requests.map(request => request.url).sort()).toEqual([
       ...Object.keys(expansionResponses()), ...Object.values(SURVEY_FULL_URLS), ...SURVEY_DETAIL_URLS,
     ].sort())
@@ -173,7 +177,7 @@ describe('independent47-company public survey', () => {
     expect(state.requests.map(request => request.url).sort()).toEqual([...Object.values(SURVEY_FULL_URLS), ...SURVEY_DETAIL_URLS].sort())
     const bytes = await readFile(state.config.cacheFile, 'utf8')
     const cache = JSON.parse(bytes)
-    expect(cache.boards).toHaveLength(93)
+    expect(cache.boards).toHaveLength(124)
     for (const original of state.old.boards) {
       const kept = cache.boards.find((board: { companyId: string }) => board.companyId === original.companyId)
       expect(kept).toMatchObject(original)
@@ -184,6 +188,7 @@ describe('independent47-company public survey', () => {
     expect((await restarted.get()).jobs).toEqual(before.jobs)
     expect(await readFile(state.config.cacheFile, 'utf8')).toBe(bytes)
     expect(state.requests).toHaveLength(49)
+    expect(state.expansionRequests.map(request => request.url).sort()).toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
     extraRequests(state, 7, 3)
     expect(state.unexpected).toEqual([])
     expect((await restarted.getObservations()).days[0].complete).toMatchObject({
@@ -261,7 +266,7 @@ describe('independent47-company public survey', () => {
     expect(state.unexpected).toEqual([])
   })
 
-  it('excludes a complete old36 cohort and compares only the current93-company days', async () => {
+  it('excludes a complete old36 cohort and compares only the current124-company days', async () => {
     const state = await fixture({ history: true })
     const service = state.service()
     const old = await service.getObservations()
