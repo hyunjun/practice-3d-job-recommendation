@@ -7,6 +7,7 @@ import type { SearchScope } from '../../shared/job-search'
 import type { CatalogProgress } from '../../shared/catalog-progress'
 import { CatalogRequestError, requestCatalogStream } from '../lib/catalog-request'
 import { CatalogWorkerClient } from '../lib/catalog-worker-client'
+import { CatalogPresentationQueue } from '../lib/catalog-presentation'
 import type { CatalogProjection } from '../lib/catalog-worker-types'
 import { useDeadlineClock } from './useDeadlineClock'
 
@@ -38,11 +39,14 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
   const [error, setError] = useState('')
   const [errorRetryAt, setErrorRetryAt] = useState<string>()
   const [deadlines, setDeadlines] = useState<number[]>([])
+  const [presentation] = useState(() => new CatalogPresentationQueue())
   const times = useMemo(() => [...deadlines, ...input.extraDeadlines], [deadlines, input.extraDeadlines])
   const freshnessNow = useDeadlineClock(times)
   const boundary = deadlines.reduce((latest, time) => time <= freshnessNow ? Math.max(latest, time) : latest, 0)
-  const key = useMemo(() => JSON.stringify([input.profile, input.filters, input.scope, input.recover, boundary, loading]),
-    [input.profile, input.filters, input.scope, input.recover, boundary, loading])
+  const intentKey = useMemo(() => JSON.stringify([input.profile, input.filters, input.scope, input.recover, boundary]),
+    [input.profile, input.filters, input.scope, input.recover, boundary])
+  const previousIntentRef = useRef(intentKey)
+  const key = useMemo(() => JSON.stringify([intentKey, loading]), [intentKey, loading])
   const inputRef = useRef({ ...input, key })
   inputRef.current = { ...input, key }
   const mounted = useRef(true)
@@ -65,13 +69,14 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
     if (!mounted.current) return
     requestRef.current?.abort()
     requestRef.current = null
+    presentation.cancel()
     collectingRef.current = false
     failedRequestRef.current = true
     setLoading(false)
     setError(cause.message)
     setErrorRetryAt(undefined)
     notify(cause.message, 'error')
-  }, [notify])
+  }, [notify, presentation])
 
   const ensureClient = useCallback(() => {
     if (!clientRef.current || clientRef.current.failed) {
@@ -106,6 +111,9 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
         } catch (cause) {
           if (!mounted.current) return
           if (client !== clientRef.current || wanted !== wantedRef.current) continue
+          // A newer decode may overtake a deferred presentation. Its receipt will
+          // enqueue the replacement; the skipped intermediate snapshot is not an error.
+          if (cause instanceof CatalogRequestError && cause.code === 'CATALOG_SUPERSEDED') return
           throw cause
         }
         if (!mounted.current) return
@@ -134,6 +142,7 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
 
   const reload = useCallback(async ({ refresh = false, announce = true }: { refresh?: boolean; announce?: boolean } = {}) => {
     requestRef.current?.abort()
+    presentation.cancel()
     const controller = new AbortController()
     requestRef.current = controller
     const stream = ++streamRef.current
@@ -145,6 +154,8 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
     setErrorRetryAt(undefined)
     setProgress(null)
     setLoading(true)
+    let lastPresentation: Promise<void> = Promise.resolve()
+    let presentationError: unknown
     try {
       let client: CatalogWorkerClient | undefined
       await requestCatalogStream({
@@ -155,14 +166,24 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
           client ??= ensureClient()
           return client.read(response, initial, stream, controller.signal)
         },
-        async onUpdate(receipt, latest) {
+        onUpdate(receipt, latest) {
           if (controller.signal.aborted || client !== clientRef.current) return
-          revisionRef.current = receipt.revision
-          progressByRevision.current.set(receipt.revision, { stream, progress: latest })
-          collectingRef.current = Boolean(latest && !latest.done)
-          await project()
+          lastPresentation = presentation.enqueue(async () => {
+            if (controller.signal.aborted || client !== clientRef.current || stream !== streamRef.current) return
+            revisionRef.current = receipt.revision
+            progressByRevision.current.set(receipt.revision, { stream, progress: latest })
+            collectingRef.current = Boolean(latest && !latest.done)
+            await project()
+          }, !publishedRef.current.catalog.fetchedAt)
+          void lastPresentation.catch(cause => {
+            if (controller.signal.aborted || requestRef.current !== controller) return
+            presentationError = cause
+            controller.abort(cause)
+          })
         },
       })
+      // Network completion is not presentation completion; publish the final validated snapshot first.
+      await lastPresentation
       if (!controller.signal.aborted && announce) {
         const catalog = publishedRef.current.catalog
         const health = collectionHealth(catalog)
@@ -172,7 +193,11 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
           : `${catalog.jobs.length.toLocaleString()}개 개발·연구 공고를 가져왔어요.`, attention ? 'error' : undefined)
       }
     } catch (cause) {
-      if (!controller.signal.aborted && mounted.current) {
+      if ((!controller.signal.aborted || presentationError) && mounted.current && requestRef.current === controller) {
+        // A connection failure cannot discard a valid arrival waiting for the current gesture.
+        try { await lastPresentation } catch (failure) { presentationError ??= failure }
+        if (controller.signal.aborted && !presentationError) return
+        cause = presentationError ?? cause
         failedRequestRef.current = true
         if (cause instanceof CatalogRequestError) {
           retryAtRef.current = cause.retryAt
@@ -196,7 +221,7 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
         setLoading(false)
       }
     }
-  }, [ensureClient, notify, project])
+  }, [ensureClient, notify, presentation, project])
 
   useEffect(() => {
     mounted.current = true
@@ -206,20 +231,26 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
       wantedRef.current++
       requestRef.current?.abort()
       requestRef.current = null
+      presentation.cancel()
       clientRef.current?.dispose()
       clientRef.current = null
       revisionRef.current = 0
     }
-  }, [reload])
+  }, [presentation, reload])
 
   useEffect(() => {
-    void project().catch(cause => {
+    const changed = previousIntentRef.current !== intentKey
+    previousIntentRef.current = intentKey
+    // Starting an automatic refresh is not an input intent and must not release a
+    // gesture's pending update. Explicit conditions and freshness expiry can.
+    const pending = changed ? presentation.flush().then(project) : project()
+    void pending.catch(cause => {
       if (!mounted.current || clientRef.current?.failed) return
       const message = cause instanceof Error ? cause.message : '검색 결과를 준비하지 못했어요. 다시 조회해 주세요.'
       setError(message)
       failedRequestRef.current = true
     })
-  }, [key, project])
+  }, [intentKey, key, presentation, project])
 
   const revalidate = useCallback(() => {
     if (!automaticRef.current || document.visibilityState !== 'visible' || requestRef.current) return
@@ -240,6 +271,7 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
     } else if (requestRef.current) {
       requestRef.current.abort()
       requestRef.current = null
+      presentation.cancel()
       lastAttemptRef.current = null
       failedRequestRef.current = true
       collectingRef.current = false
@@ -248,7 +280,7 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
       wantedRef.current++
       setLoading(false)
     }
-  }, [automatic, revalidate, reload])
+  }, [automatic, presentation, revalidate, reload])
 
   useEffect(() => {
     window.addEventListener('focus', revalidate)
@@ -271,8 +303,10 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
     return client.preview(revision, input.profile, draft, Date.now())
   }, [published.value.catalog, error, input.profile, boundary])
 
+  const setMapInteracting = useCallback((active: boolean) => presentation.setInteracting(active), [presentation])
+
   return {
-    ...published.value, loading, progress, error, reload, preview, freshnessNow,
+    ...published.value, loading, progress, error, reload, preview, freshnessNow, setMapInteracting,
     searching: Boolean(published.value.catalog.fetchedAt) && published.key !== key,
     ready: Boolean(published.value.catalog.fetchedAt),
     retryAt: errorRetryAt ?? (error && progress && !progress.done ? undefined : published.value.catalog.refreshAfter),

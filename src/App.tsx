@@ -92,7 +92,7 @@ export default function App() {
   const {
     catalog, expired: catalogExpired, loading, progress, error: dataError, reload, retryAt,
     matches, cities, globeCities, remote, unmapped, companyCount, recovery: preparedRecovery,
-    preview, searching, freshnessNow,
+    preview, searching, freshnessNow, setMapInteracting,
   } = useCatalog(notifyCatalog, view !== 'saved', { profile, filters, scope: searchScope, recover: view === 'explore', extraDeadlines })
   const catalogReady = Boolean(catalog.fetchedAt)
   const retryCatalog = () => void reload({ refresh: true, announce: catalogReady })
@@ -297,7 +297,7 @@ export default function App() {
           <div className="region-tabs" data-map-overlay aria-label="탐색 지역">{Object.entries(REGION_LABELS).map(([value, label]) => <button className={filters.region === value ? 'active' : ''} key={value} aria-pressed={filters.region === value} onClick={() => { setSelectedId(null); setFilters(current => ({ ...current, region: value as Region })) }}>{value === 'all' && <Globe2 size={12} />}{label}</button>)}</div>
           <div className="map-viewport">
             <Suspense fallback={<div className="map-loading"><span className="loading-planet" /><Spinner label="기회의 지도를 펼치는 중" /></div>}>
-              {mapMode === 'globe' ? <Globe ref={mapRef} results={globeCities} selectedId={panelTab === 'cities' ? selectedId : null} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onFailure={onGlobeFailure} onReady={onMapReady} light={light} /> : <FlatMap ref={mapRef} results={cities} selectedId={panelTab === 'cities' ? selectedId : null} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onReady={onMapReady} />}
+              {mapMode === 'globe' ? <Globe ref={mapRef} results={globeCities} selectedId={panelTab === 'cities' ? selectedId : null} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onFailure={onGlobeFailure} onReady={onMapReady} onInteractionChange={setMapInteracting} light={light} /> : <FlatMap ref={mapRef} results={cities} selectedId={panelTab === 'cities' ? selectedId : null} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onReady={onMapReady} onInteractionChange={setMapInteracting} />}
             </Suspense>
           </div>
           {profile.kind === 'sample' && <div className="sample-profile-card" data-map-overlay><div className="sample-avatar">AK<span /></div><div><span>지금은 샘플 프로필로 탐색 중</span><strong>Software Engineer <span>· 5년</span></strong><p>TypeScript · React · Python +3</p></div><button aria-label="내 프로필 입력" onClick={() => setModal('profile')}><ArrowUpRight size={17} /></button></div>}

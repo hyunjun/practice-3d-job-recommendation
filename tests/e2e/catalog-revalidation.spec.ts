@@ -18,6 +18,8 @@ const monitor = '/api/catalog/progress?id=00000000-0000-4000-8000-000000000048&a
 const note = 'PRIVATE_REVALIDATION_48_NOTE 다음 주 지원 준비 🌱'
 const query = (page: Page) => page.getByRole('textbox', { name: '도시, 회사 또는 포지션 검색', exact: true })
 type Reply = (route: Route) => Promise<void> | void
+type DecodedReceipt = { at: number; revision: number }
+declare global { interface Window { __revalidationDecoded48?: DecodedReceipt[] } }
 
 async function setup(page: Page, catalog = revalidationCatalog(), view: 'explore' | 'saved' = 'explore') {
   let reply: Reply = route => route.fulfill({ json: catalog })
@@ -46,6 +48,56 @@ async function setup(page: Page, catalog = revalidationCatalog(), view: 'explore
   await page.route('**/api/catalog/progress?*', route => progressReply(route))
   await page.clock.install({ time: new Date(start - 1000) })
   await page.clock.pauseAt(new Date(start))
+  await page.addInitScript(() => {
+    const NativeWorker = window.Worker
+    const decoded: DecodedReceipt[] = []
+    let activeWorker = 0
+    window.__revalidationDecoded48 = decoded
+    // Observe genuine replies without replacing messages, results or callbacks.
+    window.Worker = class extends NativeWorker {
+      constructor(url: URL | string, options?: WorkerOptions) {
+        super(url, options)
+        if (options?.name !== 'orbit-catalog') return
+        const generation = ++activeWorker
+        this.addEventListener('message', (event: MessageEvent<{
+          result?: { kind: string; value?: { revision: number } }
+        }>) => {
+          if (generation === activeWorker && event.data.result?.kind === 'decoded')
+            decoded.push({ at: performance.now(), revision: event.data.result.value!.revision })
+        })
+      }
+    }
+  })
+  let decodedCount = 0, firstPublication = true
+  const publications: {
+    revision: number; decodedAt: number; advanced: number
+    before: { ticks: number; wallTime: number }; after: { ticks: number; wallTime: number }
+  }[] = []
+  async function nextDecoded() {
+    // Waiting for network/worker work never advances time. Only successful
+    // fixture deliveries call this; intentionally held/error requests do not.
+    await expect.poll(() => page.evaluate(() => window.__revalidationDecoded48!.length)).toBeGreaterThan(decodedCount)
+    // A separate round trip follows the real message handler's microtasks.
+    const observed = await page.evaluate(() => ({
+      count: window.__revalidationDecoded48!.length,
+      receipt: window.__revalidationDecoded48!.at(-1)!,
+    }))
+    decodedCount = observed.count
+    return observed.receipt
+  }
+  async function publishDecoded() {
+    const receipt = await nextDecoded()
+    const before = await page.evaluate(() => ({ ticks: performance.now(), wallTime: Date.now() }))
+    const publicationDelay = firstPublication ? 0 : 120
+    const remaining = Math.max(0, receipt.at + publicationDelay - before.ticks)
+    expect(remaining).toBeLessThanOrEqual(publicationDelay)
+    // Run only the documented idle-publication deadline, never pump toward a
+    // desired result. All original visible-state and request assertions follow.
+    await page.clock.runFor(remaining)
+    const after = await page.evaluate(() => ({ ticks: performance.now(), wallTime: Date.now() }))
+    publications.push({ revision: receipt.revision, decodedAt: receipt.at, advanced: remaining, before, after })
+    firstPublication = false
+  }
   await page.addInitScript(({ profile, exploration }) => {
     localStorage.setItem('orbit.v1.profile', JSON.stringify(profile))
     localStorage.setItem('orbit.v1.exploration', JSON.stringify(exploration))
@@ -57,6 +109,7 @@ async function setup(page: Page, catalog = revalidationCatalog(), view: 'explore
     const initial = await expectInitialCatalogRequest(page, traffic)
     initialAttempts = initial.attempts
     initialCancelled = initial.cancelled
+    await publishDecoded()
     await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
   } else {
     await waitForSavedCommit(page)
@@ -64,7 +117,7 @@ async function setup(page: Page, catalog = revalidationCatalog(), view: 'explore
     expect(traffic.requests).toEqual([])
   }
   return {
-    traffic, failures, initialAttempts, initialCancelled,
+    traffic, failures, initialAttempts, initialCancelled, publishDecoded, publications,
     respond(handler: Reply) { reply = handler },
     progress(handler: Reply) { progressReply = handler },
   }
@@ -93,6 +146,9 @@ async function hint(page: Page, event: 'burst' | 'online' | 'focus' | 'visibilit
 
 async function wallTime(page: Page, offset: number) {
   await page.clock.setSystemTime(new Date(start + offset))
+  // Negative cooldown/Retry-After checks keep their explicit wall-clock point,
+  // regardless of publication time consumed by an earlier positive response.
+  expect(await page.evaluate(() => Date.now())).toBe(start + offset)
 }
 
 async function contextState(page: Page) {
@@ -129,6 +185,7 @@ async function evidence(page: Page, info: TestInfo, state: Awaited<ReturnType<ty
     syntheticClockAndLifecycleEvents: true, requestBoundary: 'real application fetch and progressive response validation',
     initialAttempts: state.initialAttempts, initialCancelled: state.initialCancelled,
     requests: state.traffic.requests, failures: state.failures, context: await contextState(page), saved: await readSavedJson(page),
+    publicationClock: state.publications,
   }, null, 2))
 }
 
@@ -164,6 +221,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await visibility(page, 'visible')
     await hint(page)
     await expect.poll(() => state.traffic.catalog().length).toBe(state.initialAttempts + 1)
+    await state.publishDecoded()
     // The native modal keeps background content inert; inspect that progress
     // without claiming the background control is currently keyboard-accessible.
     const backgroundProgress = page.locator('.catalog-collecting progress[aria-label="공개 게시판 조회 진행"]')
@@ -171,6 +229,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await expect(page.locator('.job-detail-heading h3')).toHaveText('Backend Engineer Old48')
     await expect(page.getByLabel('이 기회에 대한 나의 메모', { exact: true })).toHaveValue(note)
     await page.clock.fastForward(1000)
+    await state.publishDecoded()
     await expect(backgroundProgress).toHaveCount(0)
     await expect(page.getByRole('button', { name: '지원 완료로 표시됨', exact: true })).toBeVisible()
     expect(await readSavedJson(page)).toBe(saved)
@@ -205,6 +264,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     const gated = revalidationCatalog([revalidationJob('Stale48', { fetchedAt: oldTime })], oldTime)
     gated.refreshAfter = iso(240000)
     await held[0].fulfill({ json: gated })
+    await state.publishDecoded()
     await expect(page.getByRole('button', { name: '공개 채용', exact: true })).toBeVisible()
     for (const offset of [180000, 239000]) {
       await wallTime(page, offset)
@@ -214,6 +274,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     state.respond(route => route.fulfill({ json: revalidationCatalog([revalidationJob('AfterWait48', { fetchedAt: iso(240000) })], iso(240000)) }))
     await wallTime(page, 240000)
     await hint(page)
+    await state.publishDecoded()
     await expect(page.locator('.mini-job-title')).toHaveText(['Backend Engineer AfterWait48'])
     expect(state.traffic.catalog()).toHaveLength(state.initialAttempts + 2)
     await wallTime(page, 300000)
@@ -236,6 +297,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     state.progress(route => { heldMonitors.push(route) })
     await page.getByRole('button', { name: '공개 채용', exact: true }).click()
     await page.getByRole('button', { name: '새로고침', exact: true }).click()
+    await state.publishDecoded()
     await expect(page.getByRole('dialog').getByRole('progressbar')).toHaveAttribute('value', '1')
     await page.clock.fastForward(1000)
     await expect.poll(() => heldMonitors.length).toBe(1)
@@ -248,6 +310,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     await expect(page.getByRole('dialog').getByRole('progressbar')).toHaveCount(0)
     await hint(page, 'online')
     await expect.poll(() => state.traffic.catalog().length).toBe(state.initialAttempts + 2)
+    await state.publishDecoded()
     await expect(page.getByRole('dialog').getByRole('progressbar')).toHaveAttribute('value', '1')
     await page.clock.fastForward(1000)
     await expect.poll(() => heldMonitors.length).toBe(2)
@@ -273,6 +336,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     // The canceled monitor's second company must not leak into this request.
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '1'])
     await latest[0].fulfill({ json: revalidationCatalog([revalidationJob('FinalChoice48', { fetchedAt: iso(300000) })], iso(300000)) })
+    await state.publishDecoded()
     await expect(page.locator('.data-loading')).toHaveCount(0)
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '1'])
     await page.getByRole('button', { name: '닫기', exact: true }).click()
@@ -309,6 +373,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     state.respond(route => route.fulfill({ json: revalidationCatalog([revalidationJob('RecoveredPublic48', { fetchedAt: iso(120000) })], iso(120000)) }))
     await wallTime(page, 120000)
     await hint(page, 'online')
+    await state.publishDecoded()
     await expect(page.locator('.coverage-stats strong')).toHaveText(['22', '2', '1'])
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveCount(0)
     await expect(page.locator('.toast')).toHaveCount(0)
@@ -327,6 +392,7 @@ for (const width of [1440, 320]) test.describe(`foreground public revalidation a
     state.respond(route => route.fulfill({ json: revalidationCatalog([revalidationJob('FreshRecovery48', { fetchedAt: iso(183000) })], iso(183000)) }))
     await wallTime(page, 183000)
     await hint(page, 'online')
+    await state.publishDecoded()
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveCount(0)
     await expect(page.locator('.toast')).toHaveCount(0)
     await page.getByRole('button', { name: '닫기', exact: true }).click()

@@ -21,6 +21,7 @@ interface Props {
   onHover: (id: string | null) => void
   onFailure: () => void
   onReady: () => void
+  onInteractionChange: (active: boolean) => void
   light: boolean
 }
 
@@ -53,12 +54,12 @@ function makeLine(points: THREE.Vector3[], color: number, opacity: number): THRE
   return new THREE.Line(geometry, new THREE.LineBasicMaterial({ color, transparent: true, opacity, depthWrite: false }))
 }
 
-export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, selectedId, hoveredId, onSelect, onHover, onFailure, onReady, light }, ref) {
+export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, selectedId, hoveredId, onSelect, onHover, onFailure, onReady, onInteractionChange, light }, ref) {
   const containerRef = useRef<HTMLDivElement>(null)
   const apiRef = useRef<GlobeHandle | null>(null)
   const countCompanies = useMemo(() => createClusterCompanyCounter(results), [results])
-  const stateRef = useRef({ results, countCompanies, selectedId, hoveredId, onSelect, onHover, onReady, light })
-  stateRef.current = { results, countCompanies, selectedId, hoveredId, onSelect, onHover, onReady, light }
+  const stateRef = useRef({ results, countCompanies, selectedId, hoveredId, onSelect, onHover, onReady, onInteractionChange, light })
+  stateRef.current = { results, countCompanies, selectedId, hoveredId, onSelect, onHover, onReady, onInteractionChange, light }
   const markerElements = useRef(new Map<string, HTMLButtonElement>())
   const distanceRef = useRef(3.4)
   const [markers, setMarkers] = useState<Marker[]>([])
@@ -130,12 +131,22 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
     resize()
 
     let tween: { fromLat: number; fromLng: number; fromDistance: number; lat: number; lng: number; distance: number; start: number; duration: number } | null = null
+    let dragging = false
+    let interacting = false
+    const updateInteraction = () => {
+      const next = dragging || Boolean(tween && tween.duration > 0)
+      if (interacting !== next) {
+        interacting = next
+        stateRef.current.onInteractionChange(next)
+      }
+    }
     const flyTo = (lat: number, lng: number, distance = 1.9) => {
       const from = vectorGeo(camera.position)
       let delta = lng - from.lng
       if (delta > 180) delta -= 360
       if (delta < -180) delta += 360
       tween = { fromLat: from.lat, fromLng: from.lng, fromDistance: camera.position.length(), lat, lng: from.lng + delta, distance: THREE.MathUtils.clamp(distance, controls.minDistance, controls.maxDistance), start: performance.now(), duration: reducedMotion ? 0 : 1150 }
+      updateInteraction()
     }
     apiRef.current = {
       flyTo,
@@ -146,8 +157,19 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
       reset: () => flyTo(29, -39, Math.min(baseDistance, 5.6)),
     }
     stateRef.current.onReady()
-    controls.addEventListener('start', () => { tween = null })
+    controls.addEventListener('start', () => { tween = null; dragging = true; updateInteraction() })
+    controls.addEventListener('end', () => { dragging = false; updateInteraction() })
     controls.addEventListener('change', () => { dirty = true })
+    const endInteraction = () => {
+      dragging = false
+      if (interacting) {
+        interacting = false
+        stateRef.current.onInteractionChange(false)
+      }
+    }
+    const onVisibility = () => { if (document.hidden) endInteraction() }
+    window.addEventListener('blur', endInteraction)
+    document.addEventListener('visibilitychange', onVisibility)
 
     const textureLoader = new THREE.TextureLoader()
     const textures: THREE.Texture[] = []
@@ -357,7 +379,7 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
           THREE.MathUtils.lerp(tween.fromDistance, tween.distance, t),
         ))
         camera.lookAt(0, 0, 0)
-        if (progress === 1) tween = null
+        if (progress === 1) { tween = null; updateInteraction() }
       }
       controls.update()
       if (!dirty) return
@@ -396,6 +418,9 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
       boundaryController.abort()
       resizeObserver.disconnect()
       container.removeEventListener('keydown', keyboard)
+      window.removeEventListener('blur', endInteraction)
+      document.removeEventListener('visibilitychange', onVisibility)
+      stateRef.current.onInteractionChange(false)
       controls.dispose()
       apiRef.current = null
       scene.traverse(object => {

@@ -14,9 +14,10 @@ interface Props {
   onSelect: (id: string) => void
   onHover: (id: string | null) => void
   onReady: () => void
+  onInteractionChange: (active: boolean) => void
 }
 
-export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results, selectedId, hoveredId, onSelect, onHover, onReady }, ref) {
+export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results, selectedId, hoveredId, onSelect, onHover, onReady, onInteractionChange }, ref) {
   const [land, setLand] = useState<FeatureCollection<Geometry> | null>(null)
   const [view, setView] = useState({ x: 0, y: 0, k: 1 })
   const [viewport, setViewport] = useState({ width: FLAT_MAP_WIDTH, height: FLAT_MAP_HEIGHT })
@@ -60,8 +61,21 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
 
   useLayoutEffect(() => {
     drag.current = null
+    onInteractionChange(false)
     setView(previous => previous.k > maxZoom ? zoomFlatMap(previous, maxZoom) : previous)
-  }, [maxZoom])
+  }, [maxZoom, onInteractionChange])
+
+  useEffect(() => {
+    const end = () => { drag.current = null; onInteractionChange(false) }
+    const onVisibility = () => { if (document.hidden) end() }
+    window.addEventListener('blur', end)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.removeEventListener('blur', end)
+      document.removeEventListener('visibilitychange', onVisibility)
+      end()
+    }
+  }, [onInteractionChange])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -153,7 +167,9 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
     })
   }, [focusTarget, markers, onHover, viewport, viewportScale])
 
-  const endDrag = (pointerId: number) => { if (drag.current?.id === pointerId) drag.current = null }
+  const endDrag = (pointerId: number) => {
+    if (drag.current?.id === pointerId) { drag.current = null; onInteractionChange(false) }
+  }
 
   return <div className="flat-map">
     <svg
@@ -174,6 +190,7 @@ export const FlatMap = forwardRef<GlobeHandle, Props>(function FlatMap({ results
       onPointerDown={event => {
         if (!event.isPrimary || event.button !== 0 || drag.current || (event.target as Element).closest('[data-map-marker]')) return
         drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY, startX: view.x, startY: view.y }
+        onInteractionChange(true)
         event.currentTarget.setPointerCapture(event.pointerId)
       }}
       onPointerMove={event => {
