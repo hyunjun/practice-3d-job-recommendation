@@ -1,10 +1,11 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { mesh } from 'topojson-client'
 import type { GeometryCollection, Topology } from 'topojson-specification'
-import type { CityResult } from '../../shared/types'
+import { createClusterCompanyCounter } from '../lib/globe-cities'
+import type { GlobeCity } from '../lib/globe-cities'
 
 export interface GlobeHandle {
   flyTo: (lat: number, lng: number, distance?: number) => void
@@ -13,7 +14,7 @@ export interface GlobeHandle {
 }
 
 interface Props {
-  results: CityResult[]
+  results: GlobeCity[]
   selectedId: string | null
   hoveredId: string | null
   onSelect: (id: string) => void
@@ -55,8 +56,9 @@ function makeLine(points: THREE.Vector3[], color: number, opacity: number): THRE
 export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, selectedId, hoveredId, onSelect, onHover, onFailure, onReady, light }, ref) {
   const containerRef = useRef<HTMLDivElement>(null)
   const apiRef = useRef<GlobeHandle | null>(null)
-  const stateRef = useRef({ results, selectedId, hoveredId, onSelect, onHover, onReady, light })
-  stateRef.current = { results, selectedId, hoveredId, onSelect, onHover, onReady, light }
+  const countCompanies = useMemo(() => createClusterCompanyCounter(results), [results])
+  const stateRef = useRef({ results, countCompanies, selectedId, hoveredId, onSelect, onHover, onReady, light })
+  stateRef.current = { results, countCompanies, selectedId, hoveredId, onSelect, onHover, onReady, light }
   const markerElements = useRef(new Map<string, HTMLButtonElement>())
   const distanceRef = useRef(3.4)
   const [markers, setMarkers] = useState<Marker[]>([])
@@ -299,12 +301,11 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
         const center = group.reduce((sum, point) => sum.add(point.point), new THREE.Vector3()).normalize().multiplyScalar(1.014)
         const position = center.clone().project(camera)
         const cityIds = group.map(item => item.result.city.id).sort()
-        const companies = new Set(group.flatMap(item => item.result.matches.map(match => match.company.id)))
         const representative = group[0].result.city
         return {
           id: cityIds.join('_'), cityIds,
           label: group.length > 1 ? `${representative.name} 외 ${group.length - 1}` : representative.name,
-          count: companies.size,
+          count: current.countCompanies(cityIds),
           x: Math.max(75, Math.min(width - 80, (position.x + 1) / 2 * width)),
           y: (-position.y + 1) / 2 * height - 14,
           anchorX: (position.x + 1) / 2 * width,

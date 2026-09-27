@@ -31,6 +31,7 @@ import { useSavedJobs } from './hooks/useSavedJobs'
 import { FreshnessTimeContext, useDeadlineClock } from './hooks/useDeadlineClock'
 import { deleteProfile, loadCompare, loadExploration, loadProfile, persist, persistExploration, STORAGE_KEYS } from './lib/storage'
 import type { ExplorationState } from './lib/storage'
+import { createGlobeCities } from './lib/globe-cities'
 
 const Globe = lazy(() => import('./components/Globe').then(module => ({ default: module.Globe })))
 const FlatMap = lazy(() => import('./components/FlatMap').then(module => ({ default: module.FlatMap })))
@@ -105,6 +106,7 @@ export default function App() {
   const rankSearch = useMemo(() => createSearchRanker(searchIndex, profile), [searchIndex, profile])
   const matches = useMemo(() => rankSearch(filters), [rankSearch, filters])
   const cities = useMemo(() => groupCities(catalog, matches, filters), [catalog, matches, filters])
+  const globeCities = useMemo(() => createGlobeCities(cities), [cities])
   const remote = useMemo(() => matches.filter(match => match.job.workMode === 'remote'), [matches])
   const unmapped = useMemo(() => matches.filter(match => isUnmappedJob(match.job)), [matches])
   const companyCount = useMemo(() => new Set(matches.map(match => match.company.id)).size, [matches])
@@ -313,7 +315,7 @@ export default function App() {
           <div className="region-tabs" data-map-overlay aria-label="탐색 지역">{Object.entries(REGION_LABELS).map(([value, label]) => <button className={filters.region === value ? 'active' : ''} key={value} aria-pressed={filters.region === value} onClick={() => { setSelectedId(null); setFilters(current => ({ ...current, region: value as Region })) }}>{value === 'all' && <Globe2 size={12} />}{label}</button>)}</div>
           <div className="map-viewport">
             <Suspense fallback={<div className="map-loading"><span className="loading-planet" /><Spinner label="기회의 지도를 펼치는 중" /></div>}>
-              {mapMode === 'globe' ? <Globe ref={mapRef} results={cities} selectedId={panelTab === 'cities' ? selectedId : null} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onFailure={onGlobeFailure} onReady={onMapReady} light={light} /> : <FlatMap ref={mapRef} results={cities} selectedId={panelTab === 'cities' ? selectedId : null} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onReady={onMapReady} />}
+              {mapMode === 'globe' ? <Globe ref={mapRef} results={globeCities} selectedId={panelTab === 'cities' ? selectedId : null} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onFailure={onGlobeFailure} onReady={onMapReady} light={light} /> : <FlatMap ref={mapRef} results={cities} selectedId={panelTab === 'cities' ? selectedId : null} hoveredId={hoveredId} onSelect={selectCity} onHover={setHoveredId} onReady={onMapReady} />}
             </Suspense>
           </div>
           {profile.kind === 'sample' && <div className="sample-profile-card" data-map-overlay><div className="sample-avatar">AK<span /></div><div><span>지금은 샘플 프로필로 탐색 중</span><strong>Software Engineer <span>· 5년</span></strong><p>TypeScript · React · Python +3</p></div><button aria-label="내 프로필 입력" onClick={() => setModal('profile')}><ArrowUpRight size={17} /></button></div>}
