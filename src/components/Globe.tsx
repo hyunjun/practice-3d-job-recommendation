@@ -63,7 +63,7 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
   const markerElements = useRef(new Map<string, HTMLButtonElement>())
   const distanceRef = useRef(3.4)
   const [markers, setMarkers] = useState<Marker[]>([])
-  const [loaded, setLoaded] = useState(false)
+  const [rendered, setRendered] = useState(false)
 
   useImperativeHandle(ref, () => ({
     flyTo: (...args) => apiRef.current?.flyTo(...args),
@@ -75,6 +75,8 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
     const container = containerRef.current
     if (!container) return
     let disposed = false
+    let firstFrame = true
+    setRendered(false)
     let renderer: THREE.WebGLRenderer
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' })
@@ -167,7 +169,10 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
         stateRef.current.onInteractionChange(false)
       }
     }
-    const onVisibility = () => { if (document.hidden) endInteraction() }
+    const onVisibility = () => {
+      if (document.hidden) endInteraction()
+      else dirty = true
+    }
     window.addEventListener('blur', endInteraction)
     document.addEventListener('visibilitychange', onVisibility)
 
@@ -231,11 +236,8 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
         dirty = true
         if (uniforms.nightMap.value && uniforms.dayMap.value) {
           uniforms.hasTexture.value = 1
-          setLoaded(true)
         }
-      }, undefined, () => {
-        if (!disposed) setLoaded(true)
-      })
+      }, undefined, () => { /* The base globe remains visible without textures. */ })
     }
     setTexture('/earth/night.jpg', 'nightMap')
     setTexture('/earth/day.jpg', 'dayMap')
@@ -365,7 +367,7 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
     const tick = (now: number) => {
       if (disposed) return
       frame = requestAnimationFrame(tick)
-      if (document.hidden) return
+      if (document.hidden || initial || !width || !height) return
       const currentState = stateRef.current
       if (currentState.results !== previousState.results || currentState.selectedId !== previousState.selectedId || currentState.hoveredId !== previousState.hoveredId || currentState.light !== previousState.light) dirty = true
       previousState = currentState
@@ -392,6 +394,10 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
         selection.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), point.clone().normalize())
       }
       renderer.render(scene, camera)
+      if (firstFrame) {
+        firstFrame = false
+        setRendered(true)
+      }
       project()
       dirty = false
     }
@@ -440,7 +446,7 @@ export const Globe = forwardRef<GlobeHandle, Props>(function Globe({ results, se
   }, [onFailure])
 
   return (
-    <div ref={containerRef} className={`earth-canvas ${loaded ? 'is-ready' : ''}`} tabIndex={0} role="region" aria-label="3D 기회 지도. 방향키로 회전하고 더하기, 빼기 키로 확대하거나 축소할 수 있습니다.">
+    <div ref={containerRef} className={`earth-canvas ${rendered ? 'is-ready' : ''}`} tabIndex={0} role="region" aria-label="3D 기회 지도. 방향키로 회전하고 더하기, 빼기 키로 확대하거나 축소할 수 있습니다.">
       <div className="globe-markers" role="group" aria-label="지도에 표시된 도시">
         {markers.map(marker => {
           const active = marker.cityIds.includes(selectedId ?? '') || marker.cityIds.includes(hoveredId ?? '')

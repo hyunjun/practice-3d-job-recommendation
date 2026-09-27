@@ -6,10 +6,22 @@ import type { Catalog } from '../../../shared/types'
 /** Asset failures are separate from each scenario's intentional API failures.
  * This fixture observes traffic without routing it, preserving real HTTP/304
  * coverage. Depend on page so the audit completes before its teardown. */
-export const resourceCheckedTest = base.extend<{ nonApiResources: void }>({
-  nonApiResources: [async ({ context, page }, use, testInfo) => {
+interface ExpectedImageFailure {
+  path: string
+  status?: number
+  error?: string
+  count: number
+}
+
+export const resourceCheckedTest = base.extend<{
+  nonApiResources: void
+  expectedImageFailures: ExpectedImageFailure[]
+}>({
+  expectedImageFailures: [[], { option: true }],
+  nonApiResources: [async ({ context, page, expectedImageFailures }, use, testInfo) => {
     type Resource = { url: string; type: string; method: string; document: string; status?: number; error?: string }
     const failures: Resource[] = [], expectedCancellations: (Resource & { reason: string })[] = []
+    const expectedFailures: { expectation: ExpectedImageFailure; observed: Resource[] }[] = []
     const responses: Record<string, Record<string, number>> = {}
     const pages = new Map<Page, { id: number; navigation: number; listener: (frame: Frame) => void }>()
     const resources = new Map<Request, Resource>()
@@ -102,15 +114,31 @@ export const resourceCheckedTest = base.extend<{ nonApiResources: void }>({
         })
         failures.splice(index, 1)
       }
+      // Deliberate image outages are opt-in, exact path/status/error matches.
+      // Require their explicit counts too; a missing outage is a test failure.
+      for (const expectation of expectedImageFailures) {
+        const observed: Resource[] = []
+        for (let index = failures.length - 1; index >= 0; index--) {
+          const entry = failures[index]
+          if (entry.type !== 'image' || entry.method !== 'GET'
+            || new URL(entry.url).pathname !== expectation.path
+            || entry.status !== expectation.status || entry.error !== expectation.error) continue
+          observed.push(entry)
+          failures.splice(index, 1)
+        }
+        expectedFailures.push({ expectation, observed })
+      }
       await testInfo.attach('non-api-resource-audit', {
         body: Buffer.from(JSON.stringify({
           version: 1, apiPolicy: 'API failures/cancellations are checked separately by each scenario',
-          responses, expectedCancellations, failures,
+          responses, expectedCancellations, expectedFailures, failures,
         }, null, 2)),
         contentType: 'application/json',
       })
     }
     expect(failures, 'Unexpected non-API resource failure; see non-api-resource-audit attachment').toEqual([])
+    for (const { expectation, observed } of expectedFailures)
+      expect(observed, `Expected image outage ${expectation.path}`).toHaveLength(expectation.count)
   }, { auto: true }],
 })
 

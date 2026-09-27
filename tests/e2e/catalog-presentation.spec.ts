@@ -300,8 +300,11 @@ test('leaving exploration cancels deferred publication, and rejoining uses a new
   await expect(page.getByRole('textbox', { name: '저장한 기회 검색', exact: true })).toBeVisible()
   app.respondInitial(route => route.fulfill({ json: presentationCatalog(3) }))
   await activateWithKeyboard(page.getByRole('button', { name: '기회 탐색', exact: true }))
-  await expect(page.locator('.earth-canvas')).toHaveClass(/is-ready/)
+  await expect(page.locator('.earth-canvas > canvas')).toHaveCount(1)
+  // open() paused RAF along with the scheduler clock. Let the new renderer
+  // paint during the existing interval before requiring first-frame readiness.
   await app.advance(1500)
+  await expect(page.locator('.earth-canvas')).toHaveClass(/is-ready/)
   await expect(counts(page)).toHaveText(['4', '5'])
   await expect(heading(page)).toContainText('런던')
   await expect(page.locator('.city-coordinate')).toHaveText('51.51°N')

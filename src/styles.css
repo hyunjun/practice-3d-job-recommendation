@@ -120,8 +120,7 @@ select option { background: #1e271c; color: var(--text); }
 .region-tabs button.active { background: #36452b; color: #d5e9bd; }
 .earth-canvas { position: absolute; inset: 0; z-index: 0; }
 .earth-canvas:focus-visible { outline-offset: -4px; }
-.earth-canvas canvas { position: absolute; inset: 0; cursor: grab; touch-action: none; opacity: 0; transition: opacity 1s; }
-.earth-canvas.is-ready canvas { opacity: 1; }
+.earth-canvas canvas { position: absolute; inset: 0; cursor: grab; touch-action: none; }
 .earth-canvas canvas:active { cursor: grabbing; }
 .globe-markers { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .globe-pin { position: absolute; left: 0; top: 0; pointer-events: auto; display: flex; align-items: center; gap: 7px; padding: 4px 4px 4px 11px; height: 30px; border-radius: 5px; background: #15231dde; border: 1px solid #7c9b698c; color: #e5efdc; box-shadow: 0 4px 20px #0005; white-space: nowrap; cursor: pointer; backdrop-filter: blur(10px); will-change: transform; transform-origin: bottom center; }
