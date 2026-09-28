@@ -1,0 +1,779 @@
+{
+  "at": "2026-09-27T14:37:54.332770+00:00",
+  "build": "build-02",
+  "distIndexSha256": "ce0775307cf6acb4302d1e1f82dedc3d979be64fa305727e777fb2aac1751930",
+  "buildExpectedDistSha256": "ce0775307cf6acb4302d1e1f82dedc3d979be64fa305727e777fb2aac1751930",
+  "buildInputDrift": [],
+  "coverage": [
+    {
+      "mode": "development",
+      "file": "tests/e2e/bulk-inventory.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 8,
+      "expectedCount": 8,
+      "statuses": {
+        "expected": 8
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/catalog-observations.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 9,
+      "expectedCount": 9,
+      "statuses": {
+        "expected": 9
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/catalog-revalidation.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 8,
+      "expectedCount": 8,
+      "statuses": {
+        "expected": 8
+      },
+      "checkedInputCount": 126,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/catalog-source-selection.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 10,
+      "expectedCount": 10,
+      "statuses": {
+        "expected": 10
+      },
+      "checkedInputCount": 127,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/catalog-validation.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/catalog-worker.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 16,
+      "expectedCount": 16,
+      "statuses": {
+        "expected": 16
+      },
+      "checkedInputCount": 127,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/flat-map.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 4,
+      "expectedCount": 4,
+      "statuses": {
+        "expected": 4
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/globe-first-frame.spec.ts",
+      "run": "dev-regional-02",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/job-languages.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/job-location.spec.ts",
+      "run": "dev-contract-final-02",
+      "tests": 4,
+      "expectedCount": 4,
+      "statuses": {
+        "expected": 4
+      },
+      "checkedInputCount": 122,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/job-upgrade.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 2,
+      "expectedCount": 2,
+      "statuses": {
+        "expected": 2
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/job-work-time.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/journey.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 14,
+      "expectedCount": 14,
+      "statuses": {
+        "expected": 14
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/lever-pagination.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/map-focus-recovery.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 8,
+      "expectedCount": 8,
+      "statuses": {
+        "expected": 8
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/map-focus.spec.ts",
+      "run": "dev-map-regional-03",
+      "tests": 9,
+      "expectedCount": 9,
+      "statuses": {
+        "expected": 9
+      },
+      "checkedInputCount": 125,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/map-layout.spec.ts",
+      "run": "dev-map-regional-03",
+      "tests": 10,
+      "expectedCount": 10,
+      "statuses": {
+        "expected": 10
+      },
+      "checkedInputCount": 122,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/persistence.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 5,
+      "expectedCount": 5,
+      "statuses": {
+        "expected": 5
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/providers.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 7,
+      "expectedCount": 7,
+      "statuses": {
+        "expected": 7
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/public-company-expansion.spec.ts",
+      "run": "dev-contract-final-02",
+      "tests": 4,
+      "expectedCount": 4,
+      "statuses": {
+        "expected": 4
+      },
+      "checkedInputCount": 135,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/public-company-survey.spec.ts",
+      "run": "dev-contract-final-02",
+      "tests": 9,
+      "expectedCount": 9,
+      "statuses": {
+        "expected": 9
+      },
+      "checkedInputCount": 136,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/public-coverage.spec.ts",
+      "run": "dev-contract-final-02",
+      "tests": 4,
+      "expectedCount": 4,
+      "statuses": {
+        "expected": 4
+      },
+      "checkedInputCount": 135,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/regional-coverage.spec.ts",
+      "run": "dev-regional-final-04",
+      "tests": 12,
+      "expectedCount": 12,
+      "statuses": {
+        "expected": 12
+      },
+      "checkedInputCount": 143,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/remote-countries.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 2,
+      "expectedCount": 2,
+      "statuses": {
+        "expected": 2
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/remote-description.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 8,
+      "expectedCount": 8,
+      "statuses": {
+        "expected": 8
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/saved-backup.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 10,
+      "expectedCount": 10,
+      "statuses": {
+        "expected": 10
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/search-recovery.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 7,
+      "expectedCount": 7,
+      "statuses": {
+        "expected": 7
+      },
+      "checkedInputCount": 121,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/source-expansion.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 5,
+      "expectedCount": 5,
+      "statuses": {
+        "expected": 5
+      },
+      "checkedInputCount": 143,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/source-integrations.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 137,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/source-public-lifecycle.spec.ts",
+      "run": "dev-related-final-01",
+      "tests": 2,
+      "expectedCount": 2,
+      "statuses": {
+        "expected": 2
+      },
+      "checkedInputCount": 141,
+      "inputDrift": []
+    },
+    {
+      "mode": "development",
+      "file": "tests/e2e/workplace-countries.spec.ts",
+      "run": "dev-contract-final-02",
+      "tests": 16,
+      "expectedCount": 16,
+      "statuses": {
+        "expected": 16
+      },
+      "checkedInputCount": 127,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/bulk-inventory.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 8,
+      "expectedCount": 8,
+      "statuses": {
+        "expected": 8
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/catalog-observations.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 9,
+      "expectedCount": 9,
+      "statuses": {
+        "expected": 9
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/catalog-revalidation.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 8,
+      "expectedCount": 8,
+      "statuses": {
+        "expected": 8
+      },
+      "checkedInputCount": 126,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/catalog-source-selection.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 10,
+      "expectedCount": 10,
+      "statuses": {
+        "expected": 10
+      },
+      "checkedInputCount": 127,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/catalog-validation.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/catalog-worker.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 16,
+      "expectedCount": 16,
+      "statuses": {
+        "expected": 16
+      },
+      "checkedInputCount": 127,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/flat-map.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 4,
+      "expectedCount": 4,
+      "statuses": {
+        "expected": 4
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/globe-first-frame.spec.ts",
+      "run": "prod-map-regional-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/job-languages.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/job-location.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 4,
+      "expectedCount": 4,
+      "statuses": {
+        "expected": 4
+      },
+      "checkedInputCount": 122,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/job-upgrade.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 2,
+      "expectedCount": 2,
+      "statuses": {
+        "expected": 2
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/job-work-time.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/journey.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 14,
+      "expectedCount": 14,
+      "statuses": {
+        "expected": 14
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/lever-pagination.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/map-focus-recovery.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 8,
+      "expectedCount": 8,
+      "statuses": {
+        "expected": 8
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/map-focus.spec.ts",
+      "run": "prod-map-regional-final-01",
+      "tests": 9,
+      "expectedCount": 9,
+      "statuses": {
+        "expected": 9
+      },
+      "checkedInputCount": 125,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/map-layout.spec.ts",
+      "run": "prod-map-regional-final-01",
+      "tests": 10,
+      "expectedCount": 10,
+      "statuses": {
+        "expected": 10
+      },
+      "checkedInputCount": 122,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/persistence.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 5,
+      "expectedCount": 5,
+      "statuses": {
+        "expected": 5
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/providers.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 7,
+      "expectedCount": 7,
+      "statuses": {
+        "expected": 7
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/public-company-expansion.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 4,
+      "expectedCount": 4,
+      "statuses": {
+        "expected": 4
+      },
+      "checkedInputCount": 135,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/public-company-survey.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 9,
+      "expectedCount": 9,
+      "statuses": {
+        "expected": 9
+      },
+      "checkedInputCount": 136,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/public-coverage.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 4,
+      "expectedCount": 4,
+      "statuses": {
+        "expected": 4
+      },
+      "checkedInputCount": 135,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/regional-coverage.spec.ts",
+      "run": "prod-map-regional-final-01",
+      "tests": 12,
+      "expectedCount": 12,
+      "statuses": {
+        "expected": 12
+      },
+      "checkedInputCount": 143,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/remote-countries.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 2,
+      "expectedCount": 2,
+      "statuses": {
+        "expected": 2
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/remote-description.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 8,
+      "expectedCount": 8,
+      "statuses": {
+        "expected": 8
+      },
+      "checkedInputCount": 124,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/saved-backup.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 10,
+      "expectedCount": 10,
+      "statuses": {
+        "expected": 10
+      },
+      "checkedInputCount": 123,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/search-recovery.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 7,
+      "expectedCount": 7,
+      "statuses": {
+        "expected": 7
+      },
+      "checkedInputCount": 121,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/source-expansion.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 5,
+      "expectedCount": 5,
+      "statuses": {
+        "expected": 5
+      },
+      "checkedInputCount": 143,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/source-integrations.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 6,
+      "expectedCount": 6,
+      "statuses": {
+        "expected": 6
+      },
+      "checkedInputCount": 137,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/source-public-lifecycle.spec.ts",
+      "run": "prod-related-final-01",
+      "tests": 2,
+      "expectedCount": 2,
+      "statuses": {
+        "expected": 2
+      },
+      "checkedInputCount": 141,
+      "inputDrift": []
+    },
+    {
+      "mode": "production",
+      "file": "tests/e2e/workplace-countries.spec.ts",
+      "run": "prod-workplace-final-02",
+      "tests": 16,
+      "expectedCount": 16,
+      "statuses": {
+        "expected": 16
+      },
+      "checkedInputCount": 127,
+      "inputDrift": []
+    }
+  ],
+  "coverageProblems": [],
+  "totals": {
+    "development": 229,
+    "production": 229
+  },
+  "unitSummary": {
+    "numTotalTests": 2196,
+    "numPassedTests": 2196,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0
+  },
+  "unitExitCode": 0,
+  "unitInputDrift": [],
+  "sourceSha256": "e7048739d17bb05a7fc1c25edf974c7cff728ed3564d7ba53cb22956e9f72133",
+  "verifiedCommit": "a6a8900bc4b6b2f4a008ece45ed16b367ce66ad9",
+  "preservedAt": "2026-09-28",
+  "notes": [
+    "Historical verification, not a new test run during cleanup.",
+    "Coverage is the union of final passing files and targeted rechecks: 31 files and 229 tests per mode. It is not a single uninterrupted all-pass full run.",
+    "The initial related DEV run passed 179 of 192 tests; 13 test-contract failures were corrected, and the affected 37 tests passed on recheck.",
+    "The related PROD run passed 191 of 192 tests; one ENOSPC environment failure was followed by a passing 16-test workplace-countries recheck with unchanged product and expectations.",
+    "Final build and test-input drift checks had zero changes. Complete final executions had no skipped or flaky tests.",
+    "Public E2E inputs were synthetic. Product/docs/integration belonged to the main agent; test-only agents supplied independent verification.",
+    "Raw traces, screenshots, caches and process receipts were removed during authorized local cleanup after this summary and docs/improvements.md were preserved."
+  ]
+}

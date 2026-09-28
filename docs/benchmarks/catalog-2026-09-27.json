@@ -1,0 +1,1389 @@
+{
+  "generatedAt": "2026-09-27T10:17:21.114Z",
+  "metricVersion": 2,
+  "interactionVersion": 1,
+  "acceptedNativeRuns": 30,
+  "actualNativeRuns": 20,
+  "syntheticNativeRuns": 10,
+  "qualificationRuns": 4,
+  "qualificationExcludedFromAggregate": true,
+  "comparisons": [
+    {
+      "scenario": "actual-cold",
+      "before": "before66-actual-cold-v2-01",
+      "after": "after68-actual-cold-v2-01",
+      "medianChanges": {
+        "longTaskTotalMs": {
+          "before": 4940,
+          "after": 114,
+          "difference": -4826,
+          "percentChange": -97.6923076923077
+        },
+        "longTaskMaxMs": {
+          "before": 2969,
+          "after": 114,
+          "difference": -2855,
+          "percentChange": -96.16032334119232
+        },
+        "frameP95Ms": {
+          "before": 16.700000000000728,
+          "after": 16.799999999999272,
+          "difference": 0.09999999999854481,
+          "percentChange": 0.5988023952008481
+        },
+        "frameMaxMs": {
+          "before": 2983.300000000001,
+          "after": 100,
+          "difference": -2883.300000000001,
+          "percentChange": -96.64800724030435
+        },
+        "selectionMs": {
+          "before": 39.10000002384186,
+          "after": 55.5,
+          "difference": 16.399999976158142,
+          "percentChange": 41.94373392879278
+        },
+        "responseEndToCatalogDomObservedMs": {
+          "before": 4953,
+          "after": 5473.4000000059605,
+          "difference": 520.4000000059605,
+          "percentChange": 10.506763577750068
+        },
+        "responseEndToCatalogPaintOpportunityMs": {
+          "before": 4979.4000000059605,
+          "after": 5501,
+          "difference": 521.5999999940395,
+          "percentChange": 10.47515764938376
+        }
+      }
+    },
+    {
+      "scenario": "actual-refresh",
+      "before": "before66-actual-refresh-v2-01",
+      "after": "after68-actual-refresh-v2-01",
+      "medianChanges": {
+        "longTaskTotalMs": {
+          "before": 4988,
+          "after": 114,
+          "difference": -4874,
+          "percentChange": -97.71451483560544
+        },
+        "longTaskMaxMs": {
+          "before": 3010,
+          "after": 114,
+          "difference": -2896,
+          "percentChange": -96.21262458471762
+        },
+        "frameP95Ms": {
+          "before": 16.799999999999272,
+          "after": 16.700000000000728,
+          "difference": -0.09999999999854481,
+          "percentChange": -0.5952380952294556
+        },
+        "frameMaxMs": {
+          "before": 2999.7999999999993,
+          "after": 100,
+          "difference": -2899.7999999999993,
+          "percentChange": -96.66644442962864
+        },
+        "selectionMs": {
+          "before": 132.5,
+          "after": 25,
+          "difference": -107.5,
+          "percentChange": -81.13207547169812
+        },
+        "responseEndToCatalogDomObservedMs": {
+          "before": 5022.4000000059605,
+          "after": 5776.5999999940395,
+          "difference": 754.1999999880791,
+          "percentChange": 15.016725071423709
+        },
+        "responseEndToCatalogPaintOpportunityMs": {
+          "before": 5028.200000017881,
+          "after": 5782,
+          "difference": 753.7999999821186,
+          "percentChange": 14.991448231562753
+        }
+      }
+    },
+    {
+      "scenario": "synthetic-native-v1",
+      "before": "before66-synthetic-v1-metric-v2-01",
+      "after": "after68-synthetic-v1-metric-v2-01",
+      "medianChanges": {
+        "longTaskTotalMs": {
+          "before": 291,
+          "after": 0,
+          "difference": -291,
+          "percentChange": -100
+        },
+        "longTaskMaxMs": {
+          "before": 146,
+          "after": 0,
+          "difference": -146,
+          "percentChange": -100
+        },
+        "frameP95Ms": {
+          "before": 16.799999999999272,
+          "after": 16.799999999999272,
+          "difference": 0,
+          "percentChange": 0
+        },
+        "frameMaxMs": {
+          "before": 150,
+          "after": 33.30000000000018,
+          "difference": -116.69999999999982,
+          "percentChange": -77.79999999999988
+        },
+        "selectionMs": {
+          "before": 29.099999994039536,
+          "after": 29.100000023841858,
+          "difference": 2.9802322387695312e-08,
+          "percentChange": 1.0241347769834874e-07
+        }
+      }
+    }
+  ],
+  "harnessManifestSha256": "a8fb2a514fff84ddaea277db436538ecf78a334b861a8908133a2178675e3df2",
+  "preservedAt": "2026-09-28",
+  "sourceSha256": "0aac2689e8078adf77372efbb34a0dafa1a9ba01e6e23cf41fb809fdbaf8ef7a",
+  "baselineCommit": "34df6eeed2a556f6148b592b4241e96b52e3f24e",
+  "candidateCommit": "9a755830fdca29600a5cc3b32e5813af6b3bd86c",
+  "actualPayloadSha256": "2aa19a0497872cf50154edf0c785de466a270a802ef50d3199d27e051bc389d0",
+  "groups": [
+    {
+      "scenario": "actual-cold",
+      "stage": "66",
+      "label": "before66-actual-cold-v2-01",
+      "completeRuns": 5,
+      "metricVersion": 2,
+      "interactionVersion": 1,
+      "browser": "153.0.8010.54",
+      "sourceManifestSha256": "6c4075b8d8213bfa17f6d0dc28d077a45b759d9e4b98b9354049b395db2feb70",
+      "graphics": {
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+        "width": 1080,
+        "height": 782
+      },
+      "durationMs": {
+        "median": 10658.300000011921,
+        "min": 10605.40000000596,
+        "max": 10705.09999999404,
+        "values": [
+          10605.40000000596,
+          10647,
+          10658.300000011921,
+          10705.09999999404,
+          10675.09999999404
+        ]
+      },
+      "frameP95Ms": {
+        "median": 16.700000000000728,
+        "min": 16.700000000000728,
+        "max": 16.799999999999272,
+        "values": [
+          16.700000000000728,
+          16.799999999999272,
+          16.700000000000728,
+          16.700000000000728,
+          16.799999999999272
+        ]
+      },
+      "frameMaxMs": {
+        "median": 2983.300000000001,
+        "min": 2949.7999999999993,
+        "max": 3033.199999999999,
+        "values": [
+          2949.7999999999993,
+          2983.300000000001,
+          3033.199999999999,
+          2999.8999999999996,
+          2966.6000000000004
+        ]
+      },
+      "frameOver50Count": {
+        "median": 3,
+        "min": 3,
+        "max": 3,
+        "values": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      "longTaskTotalMs": {
+        "median": 4940,
+        "min": 4902,
+        "max": 4989,
+        "values": [
+          4902,
+          4940,
+          4989,
+          4947,
+          4930
+        ]
+      },
+      "longTaskMaxMs": {
+        "median": 2969,
+        "min": 2941,
+        "max": 3004,
+        "values": [
+          2941,
+          2967,
+          3004,
+          2993,
+          2969
+        ]
+      },
+      "longTaskCount": {
+        "median": 3,
+        "min": 3,
+        "max": 3,
+        "values": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      "selectionMs": {
+        "median": 39.10000002384186,
+        "min": 37.599999994039536,
+        "max": 45.400000005960464,
+        "values": [
+          38.5,
+          37.599999994039536,
+          39.10000002384186,
+          44.29999998211861,
+          45.400000005960464
+        ]
+      },
+      "responseEndToCatalogDomObservedMs": {
+        "median": 4953,
+        "min": 4915.5,
+        "max": 5022.5999999940395,
+        "values": [
+          4915.5,
+          4953,
+          5022.5999999940395,
+          4962.5,
+          4945.5999999940395
+        ]
+      },
+      "responseEndToCatalogPaintOpportunityMs": {
+        "median": 4979.4000000059605,
+        "min": 4941.9000000059605,
+        "max": 5027.5,
+        "values": [
+          4941.9000000059605,
+          4979.4000000059605,
+          5027.5,
+          4987.0999999940395,
+          4971.0999999940395
+        ]
+      },
+      "catalogDomExecutionMinusSuppliedFrameMs": {
+        "median": 2966.399999982119,
+        "min": 2929.999999994039,
+        "max": 3033.8999999999996,
+        "values": [
+          2929.999999994039,
+          2966.399999982119,
+          3033.8999999999996,
+          2989.8000000178818,
+          2955.5999999880787
+        ]
+      },
+      "scriptSeconds": {
+        "median": 3.349964,
+        "min": 3.3139000000000003,
+        "max": 3.363854,
+        "values": [
+          3.3139000000000003,
+          3.349964,
+          3.363854,
+          3.354835,
+          3.3210200000000003
+        ]
+      },
+      "taskSeconds": {
+        "median": 6.015292,
+        "min": 5.962179,
+        "max": 6.06755,
+        "values": [
+          6.015292,
+          6.065433,
+          6.06755,
+          6.009866,
+          5.962179
+        ]
+      },
+      "drivers": {
+        "keyboardDispatchCompletionMs": {
+          "median": 145.7428749999999,
+          "min": 124.86100000000442,
+          "max": 1970.0100420000017,
+          "values": [
+            145.7428749999999,
+            157.42974999999933,
+            1970.0100420000017,
+            124.86100000000442,
+            135.18341700000747
+          ]
+        },
+        "queuedInputAfterEofControlMs": {
+          "median": 27.569958000000042,
+          "min": 26.968667000001005,
+          "max": 27.736250000001746,
+          "values": [
+            27.569958000000042,
+            27.341499999998632,
+            27.654999999998836,
+            26.968667000001005,
+            27.736250000001746
+          ]
+        },
+        "perRunMaximumDragDispatchLagMs": {
+          "median": 3005.561874333318,
+          "min": 16.89166600000317,
+          "max": 3032.037625333345,
+          "values": [
+            2986.4398340000007,
+            3025.93412466667,
+            16.89166600000317,
+            3032.037625333345,
+            3005.561874333318
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "actual-cold",
+      "stage": "68",
+      "label": "after68-actual-cold-v2-01",
+      "completeRuns": 5,
+      "metricVersion": 2,
+      "interactionVersion": 1,
+      "browser": "153.0.8010.54",
+      "sourceManifestSha256": "c9decc59725ffcef04cc9dd1dede35d3b86ce6a4b15120de0f07497457f0aab3",
+      "graphics": {
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+        "width": 1080,
+        "height": 782
+      },
+      "durationMs": {
+        "median": 9558.09999999404,
+        "min": 9547,
+        "max": 9620.09999999404,
+        "values": [
+          9558.09999999404,
+          9549.299999982119,
+          9547,
+          9620.09999999404,
+          9593.09999999404
+        ]
+      },
+      "frameP95Ms": {
+        "median": 16.799999999999272,
+        "min": 16.799999999999272,
+        "max": 16.799999999999272,
+        "values": [
+          16.799999999999272,
+          16.799999999999272,
+          16.799999999999272,
+          16.799999999999272,
+          16.799999999999272
+        ]
+      },
+      "frameMaxMs": {
+        "median": 100,
+        "min": 99.89999999999964,
+        "max": 133.3000000000011,
+        "values": [
+          99.89999999999964,
+          100,
+          100,
+          99.89999999999964,
+          133.3000000000011
+        ]
+      },
+      "frameOver50Count": {
+        "median": 1,
+        "min": 1,
+        "max": 1,
+        "values": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "longTaskTotalMs": {
+        "median": 114,
+        "min": 113,
+        "max": 150,
+        "values": [
+          114,
+          113,
+          113,
+          116,
+          150
+        ]
+      },
+      "longTaskMaxMs": {
+        "median": 114,
+        "min": 113,
+        "max": 150,
+        "values": [
+          114,
+          113,
+          113,
+          116,
+          150
+        ]
+      },
+      "longTaskCount": {
+        "median": 1,
+        "min": 1,
+        "max": 1,
+        "values": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "selectionMs": {
+        "median": 55.5,
+        "min": 32.19999998807907,
+        "max": 57.099999994039536,
+        "values": [
+          57.099999994039536,
+          55.5,
+          38.29999998211861,
+          55.60000002384186,
+          32.19999998807907
+        ]
+      },
+      "responseEndToCatalogDomObservedMs": {
+        "median": 5473.4000000059605,
+        "min": 5327,
+        "max": 5848.799999982119,
+        "values": [
+          5473.4000000059605,
+          5327,
+          5522.199999988079,
+          5423,
+          5848.799999982119
+        ]
+      },
+      "responseEndToCatalogPaintOpportunityMs": {
+        "median": 5501,
+        "min": 5352.0999999940395,
+        "max": 5880.299999982119,
+        "values": [
+          5501,
+          5352.0999999940395,
+          5551.699999988079,
+          5448.0999999940395,
+          5880.299999982119
+        ]
+      },
+      "catalogDomExecutionMinusSuppliedFrameMs": {
+        "median": 17.400000005960464,
+        "min": 8.499999994039172,
+        "max": 20,
+        "values": [
+          18.399999999999636,
+          20,
+          17.400000005960464,
+          14.799999994040263,
+          8.499999994039172
+        ]
+      },
+      "scriptSeconds": {
+        "median": 0.46885,
+        "min": 0.45967900000000006,
+        "max": 0.477072,
+        "values": [
+          0.45967900000000006,
+          0.46885,
+          0.463493,
+          0.47572700000000007,
+          0.477072
+        ]
+      },
+      "taskSeconds": {
+        "median": 0.9985120000000001,
+        "min": 0.9869650000000001,
+        "max": 1.0071109999999999,
+        "values": [
+          0.989508,
+          0.9869650000000001,
+          0.9985120000000001,
+          1.006275,
+          1.0071109999999999
+        ]
+      },
+      "drivers": {
+        "keyboardDispatchCompletionMs": {
+          "median": 1.9854169999998703,
+          "min": 1.7489999999961583,
+          "max": 3.6153340000018943,
+          "values": [
+            1.8250410000000556,
+            1.9854169999998703,
+            3.6153340000018943,
+            2.4052080000037677,
+            1.7489999999961583
+          ]
+        },
+        "queuedInputAfterEofControlMs": {
+          "median": 26.945874999999432,
+          "min": 26.146208000001934,
+          "max": 37.848125000004075,
+          "values": [
+            26.945874999999432,
+            26.146208000001934,
+            28.797207999996317,
+            26.401708999997936,
+            37.848125000004075
+          ]
+        },
+        "perRunMaximumDragDispatchLagMs": {
+          "median": 19.44254133333743,
+          "min": 2.6678753333326313,
+          "max": 89.39800000000105,
+          "values": [
+            6.175208333333103,
+            2.6678753333326313,
+            19.44254133333743,
+            89.39800000000105,
+            85.09416633332148
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "actual-refresh",
+      "stage": "68",
+      "label": "after68-actual-refresh-v2-01",
+      "completeRuns": 5,
+      "metricVersion": 2,
+      "interactionVersion": 1,
+      "browser": "153.0.8010.54",
+      "sourceManifestSha256": "c9decc59725ffcef04cc9dd1dede35d3b86ce6a4b15120de0f07497457f0aab3",
+      "graphics": {
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+        "width": 1080,
+        "height": 782
+      },
+      "durationMs": {
+        "median": 9511.800000011921,
+        "min": 9482.700000017881,
+        "max": 10520.699999988079,
+        "values": [
+          9482.700000017881,
+          10520.699999988079,
+          9482.90000000596,
+          9511.800000011921,
+          9555
+        ]
+      },
+      "frameP95Ms": {
+        "median": 16.700000000000728,
+        "min": 16.700000000000728,
+        "max": 16.799999999999272,
+        "values": [
+          16.700000000000728,
+          16.799999999999272,
+          16.700000000000728,
+          16.700000000000728,
+          16.700000000000728
+        ]
+      },
+      "frameMaxMs": {
+        "median": 100,
+        "min": 83.39999999999964,
+        "max": 116.70000000000073,
+        "values": [
+          83.39999999999964,
+          116.70000000000073,
+          100,
+          100,
+          99.89999999999964
+        ]
+      },
+      "frameOver50Count": {
+        "median": 1,
+        "min": 1,
+        "max": 1,
+        "values": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "longTaskTotalMs": {
+        "median": 114,
+        "min": 107,
+        "max": 136,
+        "values": [
+          107,
+          136,
+          114,
+          112,
+          120
+        ]
+      },
+      "longTaskMaxMs": {
+        "median": 114,
+        "min": 107,
+        "max": 136,
+        "values": [
+          107,
+          136,
+          114,
+          112,
+          120
+        ]
+      },
+      "longTaskCount": {
+        "median": 1,
+        "min": 1,
+        "max": 1,
+        "values": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "selectionMs": {
+        "median": 25,
+        "min": 21.100000023841858,
+        "max": 27.69999998807907,
+        "values": [
+          21.400000005960464,
+          25.599999994039536,
+          21.100000023841858,
+          25,
+          27.69999998807907
+        ]
+      },
+      "responseEndToCatalogDomObservedMs": {
+        "median": 5776.5999999940395,
+        "min": 5698.300000011921,
+        "max": 6512.300000011921,
+        "values": [
+          5776.5999999940395,
+          6512.300000011921,
+          5698.300000011921,
+          5786.5,
+          5729.9000000059605
+        ]
+      },
+      "responseEndToCatalogPaintOpportunityMs": {
+        "median": 5782,
+        "min": 5703.100000023842,
+        "max": 6517.300000011921,
+        "values": [
+          5782,
+          6517.300000011921,
+          5703.100000023842,
+          5792.0999999940395,
+          5735.199999988079
+        ]
+      },
+      "catalogDomExecutionMinusSuppliedFrameMs": {
+        "median": 25.8999999880798,
+        "min": 16.3000000059601,
+        "max": 27.30000001192093,
+        "values": [
+          25.8999999880798,
+          26.8000000059601,
+          16.3000000059601,
+          18.700000000000728,
+          27.30000001192093
+        ]
+      },
+      "scriptSeconds": {
+        "median": 0.40877100000000005,
+        "min": 0.39497799999999994,
+        "max": 0.43545000000000006,
+        "values": [
+          0.411221,
+          0.43545000000000006,
+          0.40399599999999997,
+          0.39497799999999994,
+          0.40877100000000005
+        ]
+      },
+      "taskSeconds": {
+        "median": 0.8721529999999998,
+        "min": 0.843614,
+        "max": 0.93773,
+        "values": [
+          0.896322,
+          0.93773,
+          0.8720929999999999,
+          0.843614,
+          0.8721529999999998
+        ]
+      },
+      "drivers": {
+        "keyboardDispatchCompletionMs": {
+          "median": 18.18829100000221,
+          "min": 16.382457999992766,
+          "max": 19.36041699999987,
+          "values": [
+            19.36041699999987,
+            18.18829100000221,
+            18.304250000001048,
+            16.382457999992766,
+            17.873584000000847
+          ]
+        },
+        "queuedInputAfterEofControlMs": {
+          "median": 27.596209000010276,
+          "min": 26.184041000000434,
+          "max": 28.52995800000008,
+          "values": [
+            28.52995800000008,
+            27.082416999997804,
+            27.614792000000307,
+            27.596209000010276,
+            26.184041000000434
+          ]
+        },
+        "perRunMaximumDragDispatchLagMs": {
+          "median": 44.17083366666702,
+          "min": 34.91337500000009,
+          "max": 72.1976666666742,
+          "values": [
+            44.17083366666702,
+            34.91337500000009,
+            43.231500333335134,
+            72.1976666666742,
+            68.22341633333417
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "actual-refresh",
+      "stage": "66",
+      "label": "before66-actual-refresh-v2-01",
+      "completeRuns": 5,
+      "metricVersion": 2,
+      "interactionVersion": 1,
+      "browser": "153.0.8010.54",
+      "sourceManifestSha256": "6c4075b8d8213bfa17f6d0dc28d077a45b759d9e4b98b9354049b395db2feb70",
+      "graphics": {
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+        "width": 1080,
+        "height": 782
+      },
+      "durationMs": {
+        "median": 10565,
+        "min": 10536.90000000596,
+        "max": 10645.09999999404,
+        "values": [
+          10645.09999999404,
+          10536.90000000596,
+          10583.899999976158,
+          10565,
+          10555.5
+        ]
+      },
+      "frameP95Ms": {
+        "median": 16.799999999999272,
+        "min": 16.700000000000728,
+        "max": 16.800000000000182,
+        "values": [
+          16.800000000000182,
+          16.799999999999272,
+          16.700000000000728,
+          16.799999999999272,
+          16.799999999999272
+        ]
+      },
+      "frameMaxMs": {
+        "median": 2999.7999999999993,
+        "min": 2966.500000000001,
+        "max": 3016.5,
+        "values": [
+          2999.9000000000005,
+          3016.5,
+          2966.500000000001,
+          2983.1000000000004,
+          2999.7999999999993
+        ]
+      },
+      "frameOver50Count": {
+        "median": 3,
+        "min": 3,
+        "max": 3,
+        "values": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      "longTaskTotalMs": {
+        "median": 4988,
+        "min": 4945,
+        "max": 5035,
+        "values": [
+          5035,
+          4988,
+          5026,
+          4945,
+          4979
+        ]
+      },
+      "longTaskMaxMs": {
+        "median": 3010,
+        "min": 2982,
+        "max": 3024,
+        "values": [
+          3010,
+          3024,
+          2982,
+          2990,
+          3015
+        ]
+      },
+      "longTaskCount": {
+        "median": 3,
+        "min": 3,
+        "max": 3,
+        "values": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      "selectionMs": {
+        "median": 132.5,
+        "min": 129.90000000596046,
+        "max": 163.80000001192093,
+        "values": [
+          131.5,
+          132.5,
+          163.80000001192093,
+          129.90000000596046,
+          137.09999999403954
+        ]
+      },
+      "responseEndToCatalogDomObservedMs": {
+        "median": 5022.4000000059605,
+        "min": 4982,
+        "max": 5072.200000017881,
+        "values": [
+          5071.0999999940395,
+          5022.4000000059605,
+          5072.200000017881,
+          4982,
+          5015
+        ]
+      },
+      "responseEndToCatalogPaintOpportunityMs": {
+        "median": 5028.200000017881,
+        "min": 4988.300000011921,
+        "max": 5079.600000023842,
+        "values": [
+          5078.299999982119,
+          5028.200000017881,
+          5079.600000023842,
+          4988.300000011921,
+          5020.600000023842
+        ]
+      },
+      "catalogDomExecutionMinusSuppliedFrameMs": {
+        "median": 3004.2999999940394,
+        "min": 2970.2000000059606,
+        "max": 3021.69999999404,
+        "values": [
+          3004.2999999940394,
+          3021.69999999404,
+          2970.2000000059606,
+          2980.7999999880794,
+          3012.799999976158
+        ]
+      },
+      "scriptSeconds": {
+        "median": 3.3633290000000002,
+        "min": 3.3337239999999997,
+        "max": 3.37854,
+        "values": [
+          3.369154,
+          3.37854,
+          3.3337239999999997,
+          3.354971,
+          3.3633290000000002
+        ]
+      },
+      "taskSeconds": {
+        "median": 5.908259,
+        "min": 5.885182,
+        "max": 5.973737,
+        "values": [
+          5.973737,
+          5.908259,
+          5.932641,
+          5.903495,
+          5.885182
+        ]
+      },
+      "drivers": {
+        "keyboardDispatchCompletionMs": {
+          "median": 134.04591699999946,
+          "min": 130.6030830000018,
+          "max": 168.05745800000295,
+          "values": [
+            132.81862499999988,
+            134.04591699999946,
+            168.05745800000295,
+            130.6030830000018,
+            138.82150000000547
+          ]
+        },
+        "queuedInputAfterEofControlMs": {
+          "median": 27.633166999999958,
+          "min": 26.930042000007234,
+          "max": 28.226416999998037,
+          "values": [
+            27.045917000000372,
+            27.633166999999958,
+            27.73029200000019,
+            28.226416999998037,
+            26.930042000007234
+          ]
+        },
+        "perRunMaximumDragDispatchLagMs": {
+          "median": 3020.658208666666,
+          "min": 2984.3974163333332,
+          "max": 3022.864666333331,
+          "values": [
+            3020.658208666666,
+            3022.864666333331,
+            2984.3974163333332,
+            2991.4200833333307,
+            3021.4505423333176
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "synthetic-native-v1",
+      "stage": "66",
+      "label": "before66-synthetic-v1-metric-v2-01",
+      "completeRuns": 5,
+      "metricVersion": 2,
+      "interactionVersion": 1,
+      "browser": "153.0.8010.54",
+      "sourceManifestSha256": "6c4075b8d8213bfa17f6d0dc28d077a45b759d9e4b98b9354049b395db2feb70",
+      "graphics": {
+        "renderer": "WebKit WebGL",
+        "vendor": "WebKit",
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+        "unmasked": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+        "width": 1080,
+        "height": 782
+      },
+      "durationMs": {
+        "median": 14818.699999988079,
+        "min": 14735.5,
+        "max": 14832.300000011921,
+        "values": [
+          14736.100000023842,
+          14818.699999988079,
+          14825.299999982119,
+          14832.300000011921,
+          14735.5
+        ]
+      },
+      "frameP95Ms": {
+        "median": 16.799999999999272,
+        "min": 16.700000000000728,
+        "max": 16.799999999999272,
+        "values": [
+          16.700000000000728,
+          16.799999999999272,
+          16.799999999999272,
+          16.799999999999272,
+          16.700000000000728
+        ]
+      },
+      "frameMaxMs": {
+        "median": 150,
+        "min": 133.29999999999927,
+        "max": 150,
+        "values": [
+          150,
+          150,
+          133.29999999999927,
+          150,
+          150
+        ]
+      },
+      "frameOver50Count": {
+        "median": 2,
+        "min": 2,
+        "max": 3,
+        "values": [
+          2,
+          2,
+          3,
+          3,
+          2
+        ]
+      },
+      "longTaskTotalMs": {
+        "median": 291,
+        "min": 290,
+        "max": 343,
+        "values": [
+          290,
+          291,
+          290,
+          343,
+          343
+        ]
+      },
+      "longTaskMaxMs": {
+        "median": 146,
+        "min": 145,
+        "max": 146,
+        "values": [
+          146,
+          146,
+          145,
+          146,
+          146
+        ]
+      },
+      "longTaskCount": {
+        "median": 2,
+        "min": 2,
+        "max": 3,
+        "values": [
+          2,
+          2,
+          2,
+          3,
+          3
+        ]
+      },
+      "selectionMs": {
+        "median": 29.099999994039536,
+        "min": 28.30000001192093,
+        "max": 29.19999998807907,
+        "values": [
+          29.100000023841858,
+          28.599999994039536,
+          29.099999994039536,
+          28.30000001192093,
+          29.19999998807907
+        ]
+      },
+      "selectionPerCityMs": {
+        "런던": {
+          "median": 29.799999982118607,
+          "min": 28.599999994039536,
+          "max": 45.19999998807907,
+          "values": [
+            29.799999982118607,
+            28.599999994039536,
+            45.19999998807907,
+            29.599999994039536,
+            29.799999982118607
+          ]
+        },
+        "암스테르담": {
+          "median": 28.099999994039536,
+          "min": 27.5,
+          "max": 28.400000005960464,
+          "values": [
+            28.099999994039536,
+            28.400000005960464,
+            28,
+            27.5,
+            28.200000017881393
+          ]
+        },
+        "뉴욕": {
+          "median": 29.100000023841858,
+          "min": 28.30000001192093,
+          "max": 29.599999994039536,
+          "values": [
+            29.100000023841858,
+            29.599999994039536,
+            29.099999994039536,
+            28.30000001192093,
+            29.19999998807907
+          ]
+        }
+      },
+      "scriptSeconds": {
+        "median": 1.285511,
+        "min": 1.254624,
+        "max": 1.3162310000000002,
+        "values": [
+          1.254624,
+          1.284669,
+          1.288365,
+          1.3162310000000002,
+          1.285511
+        ]
+      },
+      "taskSeconds": {
+        "median": 3.069813,
+        "min": 3.0211539999999997,
+        "max": 3.1413749999999996,
+        "values": [
+          3.0211539999999997,
+          3.069813,
+          3.0927179999999996,
+          3.1413749999999996,
+          3.066863
+        ]
+      },
+      "drivers": {
+        "perRunMaximumDragDispatchLagMs": {
+          "median": 234.50208399999974,
+          "min": 234.02129133332346,
+          "max": 250.29974933333142,
+          "values": [
+            234.50208399999974,
+            250.29974933333142,
+            234.21845833333646,
+            235.14670800000022,
+            234.02129133332346
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "synthetic-native-v1",
+      "stage": "68",
+      "label": "after68-synthetic-v1-metric-v2-01",
+      "completeRuns": 5,
+      "metricVersion": 2,
+      "interactionVersion": 1,
+      "browser": "153.0.8010.54",
+      "sourceManifestSha256": "c9decc59725ffcef04cc9dd1dede35d3b86ce6a4b15120de0f07497457f0aab3",
+      "graphics": {
+        "renderer": "WebKit WebGL",
+        "vendor": "WebKit",
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+        "unmasked": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+        "width": 1080,
+        "height": 782
+      },
+      "durationMs": {
+        "median": 15224.5,
+        "min": 14978.300000011921,
+        "max": 15355.399999976158,
+        "values": [
+          14978.300000011921,
+          15223.199999988079,
+          15279.699999988079,
+          15355.399999976158,
+          15224.5
+        ]
+      },
+      "frameP95Ms": {
+        "median": 16.799999999999272,
+        "min": 16.700000000000728,
+        "max": 16.799999999999272,
+        "values": [
+          16.700000000000728,
+          16.799999999999272,
+          16.799999999999272,
+          16.799999999999272,
+          16.799999999999272
+        ]
+      },
+      "frameMaxMs": {
+        "median": 33.30000000000018,
+        "min": 33.29999999999973,
+        "max": 33.40000000000009,
+        "values": [
+          33.30000000000018,
+          33.40000000000009,
+          33.30000000000018,
+          33.40000000000009,
+          33.29999999999973
+        ]
+      },
+      "frameOver50Count": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "longTaskTotalMs": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "longTaskMaxMs": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "longTaskCount": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "selectionMs": {
+        "median": 29.100000023841858,
+        "min": 28.599999994039536,
+        "max": 29.299999982118607,
+        "values": [
+          28.599999994039536,
+          29.100000023841858,
+          29.299999982118607,
+          28.900000005960464,
+          29.200000017881393
+        ]
+      },
+      "selectionPerCityMs": {
+        "런던": {
+          "median": 38.60000002384186,
+          "min": 28.599999994039536,
+          "max": 39,
+          "values": [
+            28.599999994039536,
+            39,
+            38.60000002384186,
+            37.30000001192093,
+            38.60000002384186
+          ]
+        },
+        "암스테르담": {
+          "median": 28.5,
+          "min": 27.799999982118607,
+          "max": 28.600000023841858,
+          "values": [
+            28.599999994039536,
+            28.5,
+            28,
+            27.799999982118607,
+            28.600000023841858
+          ]
+        },
+        "뉴욕": {
+          "median": 29.100000023841858,
+          "min": 28.900000005960464,
+          "max": 29.299999982118607,
+          "values": [
+            28.900000005960464,
+            29.100000023841858,
+            29.299999982118607,
+            28.900000005960464,
+            29.200000017881393
+          ]
+        }
+      },
+      "scriptSeconds": {
+        "median": 1.0710030000000001,
+        "min": 1.04987,
+        "max": 1.1306859999999999,
+        "values": [
+          1.1306859999999999,
+          1.093739,
+          1.04987,
+          1.058369,
+          1.0710030000000001
+        ]
+      },
+      "taskSeconds": {
+        "median": 2.932861,
+        "min": 2.8737589999999997,
+        "max": 3.004129,
+        "values": [
+          2.932861,
+          3.004129,
+          2.9262129999999997,
+          2.8737589999999997,
+          2.9404980000000003
+        ]
+      },
+      "drivers": {
+        "perRunMaximumDragDispatchLagMs": {
+          "median": 51.56166733332793,
+          "min": 50.92337533333921,
+          "max": 120.77737500000148,
+          "values": [
+            120.77737500000148,
+            51.6100416666668,
+            50.92337533333921,
+            51.192625333336764,
+            51.56166733332793
+          ]
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Stage66 to combined Stage68 includes both Stage67 worker processing and Stage68 presentation scheduling; this comparison does not isolate either stage.",
+    "Five fresh browser contexts per cohort in one headless installed-Chrome process per cohort. Build order is counterbalanced by scenario (cold66->68, refresh68->66), not randomized per trial; descriptive medians/ranges, not inferential significance.",
+    "The actual cold scenario is the first catalog payload after the app and WebGL globe have already warmed. Startup, provider collection, DNS and Internet latency are excluded.",
+    "Actual refresh replaces a two-job synthetic bootstrap with the first full actual snapshot; it does not represent refreshing an already loaded 60MB actual catalog.",
+    "Actual payload: unchanged authorized 59,894,550 decoded bytes / 5,272,430 Brotli bytes, 24 paced body chunks at50ms with a held final16 encoded bytes. Loopback and controlled gates, no upstream calls.",
+    "Only Date is fixed. RAF, performance.now(), timers and trusted input events are native, with CPU rate1 and no profiler. Long tasks cover the page main thread, not worker CPU or total system work.",
+    "Frame intervals use the native RAF supplied timestamps. Actual DOM observation and the following RAF callback execution use performance.now(); that next callback is a paint-opportunity proxy, not a compositor presentation timestamp.",
+    "Cold city selection occurs after initial city controls exist. Refresh Enter is queued25ms after EOF control; trusted event-to-visible latency and host command completion are recorded separately. Neither is a hardware input latency measurement.",
+    "The synthetic workload has realistic job cardinality but thin descriptions and uses routed public responses. It is a separate native-v1 interaction workload, with metric-v2 endpoints; do not pool it with the actual-payload scenario.",
+    "For synthetic selection, the main comparison is the median of the five per-run medians of three city selections. Per-city medians/ranges are also retained. Frame p95 can hide rare multi-second stalls; per-run maxima and main-thread long-task totals are reported.",
+    "The invalid supplied-RAF DOM/selection endpoints in metric v1 are excluded. Raw QA runs were removed during the 2026-09-28 cleanup after preserving this final metric-v2 aggregate, its per-run numeric values, and the methodology in docs/improvements.md. Original v1 conclusions must not be substituted for this aggregate."
+  ],
+  "retentionNote": "This preserves original metric-v2 numbers; it is not a new benchmark run. Local process receipts, command paths, screenshots, raw traces and posting bodies are excluded. Group values are the original five per-run metrics; null means the metric does not apply."
+}
