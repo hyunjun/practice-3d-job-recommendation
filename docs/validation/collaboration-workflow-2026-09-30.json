@@ -1,0 +1,85 @@
+{
+  "recordVersion": 1,
+  "recordedOn": "2026-09-30",
+  "phase": "workflow-setup",
+  "baseCommit": "604e8e90ad8c421c1c23d4e4d0091ba0b60e7862",
+  "purpose": [
+    "Preserve the user's temporary-file cleanup requirement as an ongoing work condition.",
+    "Require independent roles and explicit unanimous agreement at design, implementation-review and verification-complete gates."
+  ],
+  "goalHandling": {
+    "existingGoalRemainsActive": true,
+    "objectiveTextEdited": false,
+    "reason": "The available goal tool exposes status changes but no objective-text edit. Additional user conditions are persisted in repository instructions and the continuous-improvement document."
+  },
+  "approvedFiles": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "0fae39e9229c09bc0420616a9e7f2d09cc6cc22151d35f8ebb818a9962956a4f"
+    },
+    {
+      "path": "docs/continuous-improvement.md",
+      "sha256": "870136af96aff0f6044a6f20264e9302a26dc34398620034ec75879d94bc3758"
+    }
+  ],
+  "participants": [
+    {
+      "participant": "main",
+      "role": "product implementation, integration, documentation and gate records",
+      "decision": "WORKFLOW_APPROVED",
+      "scope": "Both approvedFiles at their recorded hashes.",
+      "basis": "Read both files, verified SHA-256, local document links, cleanup preservation rules, explicit gate ownership and distinction between requested and observed model settings."
+    },
+    {
+      "participant": "astra",
+      "role": "independent design and code review",
+      "modelConfigured": "global.openai.gpt-6-astra",
+      "reasoningRequested": "max",
+      "invocation": "native subagent",
+      "decision": "WORKFLOW_APPROVED",
+      "scope": "Both approvedFiles at their recorded hashes.",
+      "basis": "Final reply explicitly approves both files, reports independent SHA-256 verification matching main's hashes, and states no outstanding workflow objections.",
+      "receiptCorrection": "An earlier final reply had an incomplete hash and omitted the second file; it was not counted as a complete approval. A complete corrected reply was obtained.",
+      "verificationLimit": "Model and reasoning selection are recorded from the native invocation; effective reasoning effort is not separately introspected."
+    },
+    {
+      "participant": "fable",
+      "role": "independent test design, test-only changes and E2E verification",
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "invocation": "Claude Code 2.1.277, safe mode, read-only review tools",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": ["claude-fable-5-1"],
+      "resultModelUsage": ["claude-fable-5-1"],
+      "decision": "WORKFLOW_APPROVED",
+      "scope": "Both approvedFiles at their recorded hashes and the contents read in the review.",
+      "basis": "Final reply explicitly approves both documents after clarifying gate ownership, hash binding, accepted limitations and requested-only effort reporting.",
+      "verificationLimit": "The read-only toolset cannot compute SHA-256; approval is bound to read content and main's independently checked hash receipt. Effective server effort is not exposed by the runtime metadata."
+    }
+  ],
+  "unanimousWorkflowApproval": true,
+  "unresolvedWorkflowObjections": [],
+  "stage71": {
+    "workflowApprovalIsNotDesignApproval": true,
+    "design": "pending separate unanimous approval",
+    "implementation": "not started",
+    "verification": "not run"
+  },
+  "validation": {
+    "productOrTestChanges": false,
+    "localMarkdownLinks": "passed",
+    "replacementCharacterScan": "passed",
+    "sha256Verification": "passed",
+    "gitDiffCheck": "passed",
+    "e2e": "not required for documentation-only workflow setup"
+  },
+  "preservationAndCleanup": {
+    "protected": [
+      ".local/preserved-2026-09-28/",
+      ".local/observations-v1/"
+    ],
+    "activeWork": "Stage71 review, original responses and extracted audit inputs are still needed for the ongoing design and later verification; cleanup is not yet reported complete.",
+    "completionRule": "Preserve useful conclusions and final consensus in Git, then remove the completed stage's reproducible temporary files and owned processes. Keep irreplaceable historical inputs locally."
+  },
+  "provenance": "Main-authored structured record of completed tool results and participant decisions; this is not a verbatim transcript of all model discussions."
+}
