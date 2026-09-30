@@ -2,7 +2,7 @@
   "version": 1,
   "stage": 72,
   "recordedAt": "2026-09-30T09:09:22.883647+00:00",
-  "status": "verification-approved-awaiting-Git-preservation-and-cleanup",
+  "status": "complete",
   "baselineCommit": "c7830112dc2da58d002da7698cd82147a5272876",
   "previousGoalTurn": "progress: stage71 implemented, independently verified, committed, pushed and cleaned",
   "models": {
@@ -50,13 +50,18 @@
         "effortRequested": "max",
         "quote": "**DESIGN_APPROVED** for `docs/design/provider-response-bounds.md` design 1 at SHA-256 `0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4`. I computed this myself with the permitted helper, which also reported state digest `cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8` over 387 files and helper SHA-256 `a133d74d8d071ecd85aa803d1da03653eb03cd7caf98bb06c2c524c3c4914c5d`. Both match the prompt and main c7830112. This approves the whole contract as read and authorizes implementation and test authorship. It is not an implementation review, no test has run, and it claims nothing about product correctness.",
         "identityComputedIndependently": true,
-        "reviewSource": ".local/research/72-response-bounds/collaboration/design-review-01.review.md"
+        "reviewSource": ".local/research/72-response-bounds/collaboration/design-review-01.review.md",
+        "reviewSourceAvailability": {
+          "workingCopyRemoved": true,
+          "localOnlyGitCommit": "8e25ee1291306cebc2eacd2c345e49c67d2b7da8",
+          "gitPath": ".local/research/72-response-bounds/collaboration/design-review-01.review.md"
+        }
       }
     },
     "completedAt": "2026-09-30T07:29:35.338006+00:00",
     "executionScopeAddition": {
       "file": "tests/e2e/source-expansion.spec.ts",
-      "reason": "Fable identified browser coverage for non-empty Zalando/Starbucks HTML details; main accepts; exact expanded command set will receive all3 implementation-review approval."
+      "reason": "Fable identified browser coverage for non-empty Zalando/Starbucks HTML details; all3 approved the expanded12-spec execution plan in implementation review, and both modes passed."
     }
   },
   "research": {
@@ -253,10 +258,14 @@
     }
   },
   "cleanup": {
-    "status": "pending-Git-preservation-and-cleanup",
+    "status": "complete",
+    "completedAt": "2026-09-30T09:16:56.821442+00:00",
+    "report": "docs/validation/provider-response-bounds-cleanup-2026-09-30.json",
+    "reportSha256": "d34443e344099ece556327979a5519b0d2ba182c04730cd213b3c54338b7051b",
     "preview8787": "off",
     "protectedOriginalFileCount": 10,
-    "preparedOriginalArchive": {
+    "protectedOriginalsUnchanged": true,
+    "originalArchive": {
       "directory": ".local/preserved-2026-09-30-stage-72",
       "verifiedAt": "2026-09-30T08:37:15.530872+00:00",
       "archiveSha256": "9c4e4dd9bd18ec446df00c7d3735e892528bb72e498e6ccf4eb15888fbe93dc1",
@@ -266,34 +275,51 @@
       "uniqueBlobCount": 4,
       "originalBytes": 929169,
       "allCrcSizeShaAndOriginalBytesMatched": true,
-      "workingCopiesRemoved": false
-    }
+      "workingCopiesRemoved": true,
+      "workingCopiesRemovedAt": "2026-09-30T09:16:56.745051+00:00"
+    },
+    "localOnlySourceArchive": {
+      "verifiedAt": "2026-09-30T09:12:22.582976+00:00",
+      "localOnlyRef": "refs/heads/archive/cleanup-2026-09-30/stage-72-verification-tools",
+      "commit": "8e25ee1291306cebc2eacd2c345e49c67d2b7da8",
+      "baseProductCommit": "be279d50f25585e29e205c464be4470e4feddf8c",
+      "fileCount": 91,
+      "allGitBlobsMatchOriginalBytes": true,
+      "manifestSha256": "21bc63c082e7fe08ecb39bf95e3e7ab1a89723ac88101ffd4859ce1f0b9f944f",
+      "pushed": false
+    },
+    "removedRootCount": 8,
+    "remainingLocalFileCount": 14,
+    "localAllocatedKiBBefore": 2968724,
+    "localAllocatedKiBAfter": 242636,
+    "approvedSourceFilesUnchanged": 395,
+    "rawArtifacts": "Reproducible test reports, logs, screenshots, traces, build/runtime/browser copies and working tools were removed after Git preservation. Public evidence retains summary and hashes; the local-only archive retains authored tools, review records and selected result receipts."
   },
   "preExecutionFindings": [
     {
       "kind": "test-design",
       "finding": "Finite cap+1 bodies may finish before the client observes the excess byte; underlying cancel hooks need not run after a stream closes.",
-      "disposition": "Accepted; exact-cap and cap+1 retained, open-source and cap+8MiB cancellation probes added; closed-source case checks size and unlocked reader. Main reviewed and accepts; final Astra review of the frozen source remains pending.",
+      "disposition": "Accepted; exact-cap and cap+1 retained, open-source and cap+8MiB cancellation probes added; closed-source case checks size and unlocked reader. All3 approved the final frozen source and successful execution evidence.",
       "finalDisposition": "Accepted and resolved in all3 final review; no unresolved blocker."
     },
     {
       "kind": "verification-controls",
       "finding": "Static review identified exit-status, captured-plan identity, concurrency, artifact ownership, process cleanup/cancellation, registration and compiled-build provenance gaps.",
-      "disposition": "Main corrected; Astra confirmed the three remaining concrete blockers resolved by static inspection. Full implementation approval and runtime verification are still pending.",
+      "disposition": "Main corrected; Astra confirmed the concrete blockers resolved by static inspection. All3 approved the frozen controls and final successful execution evidence.",
       "finalDisposition": "Accepted and resolved in all3 final review; no unresolved blocker."
     },
     {
       "kind": "test-design",
       "id": "native-header-handoff",
       "finding": "Server write completion plus a short delay does not establish that native fetch has returned a Response before reset or abort.",
-      "disposition": "Fable accepted and added an acknowledgement of the native Response before controlled reset/abort, a pre-header failure boundary case, and response-arrival checks for native deadlines. Main reviewed and accepts; final Astra approval pending.",
+      "disposition": "Fable accepted and added an acknowledgement of the native Response before controlled reset/abort, a pre-header failure boundary case, and response-arrival checks for native deadlines. All3 approved the final frozen source and successful execution evidence.",
       "finalDisposition": "Accepted and resolved in all3 final review; no unresolved blocker."
     },
     {
       "kind": "test-design",
       "id": "smartrecruiters-presence",
       "finding": "The oversized-detail service case omits presence. A later direct fetchPresence proves a new listing succeeds, not preservation of prior v2 presence state.",
-      "disposition": "Fable accepted and extended the existing real-provider scenario with presence/cache, literal retained publication/body timestamps, sibling refresh, saved-posting state and restart/no-extra-request assertions. Main reviewed and accepts; final Astra approval pending.",
+      "disposition": "Fable accepted and extended the existing real-provider scenario with presence/cache, literal retained publication/body timestamps, sibling refresh, saved-posting state and restart/no-extra-request assertions. All3 approved the final frozen source and successful execution evidence.",
       "finalDisposition": "Accepted and resolved in all3 final review; no unresolved blocker."
     }
   ],
@@ -402,7 +428,8 @@
         "quote": "My execution prose said all82 unit files. That was wrong. I recounted the raw Vitest testResults array:81 unit files with2688tests passed.82 is the E2E case count per mode. No unresolved blocker to preserving this completed stage in Git and then removing task temporaries and owned processes, with original archives and observations retained. Cleanup has not happened yet."
       }
     },
-    "gateSha256": "d152778fc2982098089f17250a330107f38ed01103b820ac7bbc0e2c1d7c2680"
+    "gateSha256": "d152778fc2982098089f17250a330107f38ed01103b820ac7bbc0e2c1d7c2680",
+    "evidenceTimingNote": "The approved final evidence file and quoted reviews are immutable records of the pre-cleanup state. Subsequent Git preservation and deletion are recorded in cleanup.report; historical pending-cleanup statements do not describe current artifact availability."
   },
   "postExecutionReviewCorrections": [
     {
@@ -413,5 +440,8 @@
       "finding": "Fable execution prose said82 unit files.",
       "resolution": "Fable explicitly recounted and corrected to81unitfiles/2688tests;82 is each E2E case count. Final raw-evidence record already used81."
     }
-  ]
+  ],
+  "updatedAt": "2026-09-30T09:19:38.491198+00:00",
+  "productCommit": "be279d50f25585e29e205c464be4470e4feddf8c",
+  "productCommitPushedTo": "origin/main"
 }

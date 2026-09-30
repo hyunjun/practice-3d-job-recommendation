@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "stage": 72,
+  "startedAt": "2026-09-30T09:16:53.905584+00:00",
+  "completedAt": "2026-09-30T09:16:56.821442+00:00",
+  "status": "complete",
+  "productCommit": "be279d50f25585e29e205c464be4470e4feddf8c",
+  "localOnlySourceArchive": {
+    "verifiedAt": "2026-09-30T09:12:22.582976+00:00",
+    "localOnlyRef": "refs/heads/archive/cleanup-2026-09-30/stage-72-verification-tools",
+    "commit": "8e25ee1291306cebc2eacd2c345e49c67d2b7da8",
+    "baseProductCommit": "be279d50f25585e29e205c464be4470e4feddf8c",
+    "fileCount": 91,
+    "allGitBlobsMatchOriginalBytes": true,
+    "manifestSha256": "21bc63c082e7fe08ecb39bf95e3e7ab1a89723ac88101ffd4859ce1f0b9f944f",
+    "pushed": false
+  },
+  "removed": [
+    {
+      "path": ".local/e2e-default",
+      "allocatedKiBBefore": 18476
+    },
+    {
+      "path": ".local/playwright",
+      "allocatedKiBBefore": 578596
+    },
+    {
+      "path": ".local/research",
+      "allocatedKiBBefore": 2129016
+    },
+    {
+      "path": "dist",
+      "allocatedKiBBefore": 15516
+    },
+    {
+      "path": "dist-server",
+      "allocatedKiBBefore": 372
+    },
+    {
+      "path": "public/pdf",
+      "allocatedKiBBefore": 4380
+    },
+    {
+      "path": "node_modules/.vite",
+      "allocatedKiBBefore": 8
+    },
+    {
+      "path": "node_modules/.vite-temp",
+      "allocatedKiBBefore": 0
+    }
+  ],
+  "localAllocatedKiBBefore": 2968724,
+  "localAllocatedKiBAfter": 242636,
+  "remainingLocalFiles": [
+    ".local/observations-v1/public-board-cache-v5.json",
+    ".local/preserved-2026-09-28/historical-inputs.zip",
+    ".local/preserved-2026-09-28/manifest.json",
+    ".local/preserved-2026-09-28/measurement-context.json",
+    ".local/preserved-2026-09-28/supplements.json",
+    ".local/preserved-2026-09-28/verification.json",
+    ".local/preserved-2026-09-30/README.md",
+    ".local/preserved-2026-09-30/manifest.json",
+    ".local/preserved-2026-09-30/stage-71-inputs.zip",
+    ".local/preserved-2026-09-30/verification.json",
+    ".local/preserved-2026-09-30-stage-72/README.md",
+    ".local/preserved-2026-09-30-stage-72/manifest.json",
+    ".local/preserved-2026-09-30-stage-72/stage-72-reference-inputs.zip",
+    ".local/preserved-2026-09-30-stage-72/verification.json"
+  ],
+  "baselineOriginalsUnchanged": {
+    "count": 10,
+    "files": [
+      {
+        "path": ".local/preserved-2026-09-28/historical-inputs.zip",
+        "bytes": 247075859,
+        "sha256": "b7114d8f6bce0ea43236ba54601eeccbfab7593493f936ad1842291a475dd85a"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/manifest.json",
+        "bytes": 1063467,
+        "sha256": "431aea357cf79fb7a64bf7725182ebce7f34f3e0811f164992b6a443fa767514"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/measurement-context.json",
+        "bytes": 1812,
+        "sha256": "2ea40e36f2db7463359563c550b3c05bff79107a099a1ea82de8a8da14a9ffd8"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/supplements.json",
+        "bytes": 265,
+        "sha256": "6a5b0903a2724203fbed0fb8051903cd21639d562a2cc642809dbf94c22d829d"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/verification.json",
+        "bytes": 440,
+        "sha256": "e7220fa27d755609e1c4a32fc69e0577fd1f7ad49217031fc295b93971ee9397"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/README.md",
+        "bytes": 914,
+        "sha256": "c6ac62ebef0890438e9c6851b47e62f37720cd8f1b0cf845adc1d1ddf48414af"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/manifest.json",
+        "bytes": 5744,
+        "sha256": "d78d32bbd528104a6969c611aec55788b540cff412b834f4451f121bca4a8c31"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+        "bytes": 86921,
+        "sha256": "c0bacbfe16fa47d527af05b1b64cbc2987e6c0dfa768119ce33e41b8d9d6a739"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/verification.json",
+        "bytes": 857,
+        "sha256": "9045d0d927a2f47f74cc9b4b6296738d06512c69e40f9fd013cf707231529bcb"
+      },
+      {
+        "path": ".local/observations-v1/public-board-cache-v5.json",
+        "bytes": 41945,
+        "sha256": "9e2bff5ff6617698dcf032ef4f77d454bc346bff07dd0d03fa5c8977493dbaab"
+      }
+    ]
+  },
+  "newOriginalArchive": {
+    "directory": ".local/preserved-2026-09-30-stage-72",
+    "verifiedAt": "2026-09-30T08:37:15.530872+00:00",
+    "archiveSha256": "9c4e4dd9bd18ec446df00c7d3735e892528bb72e498e6ccf4eb15888fbe93dc1",
+    "archiveBytes": 136633,
+    "manifestSha256": "bafb33977c434039dc46f355e88ab3e359603761afc8e5c812547d9a3813a0bf",
+    "originalFileCount": 4,
+    "uniqueBlobCount": 4,
+    "originalBytes": 929169,
+    "allCrcSizeShaAndOriginalBytesMatched": true,
+    "workingCopiesRemoved": true,
+    "workingCopiesRemovedAt": "2026-09-30T09:16:56.745051+00:00"
+  },
+  "approvedSourceFilesUnchanged": 395,
+  "approvedSourceDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+  "finalEvidenceSha256": "c13d53b6638a678eb091481d3c3ff7102b9ad5f630dca6f9f1bde38c18029de4",
+  "portsBeforeCleanup": {
+    "5173": "no-listener",
+    "8787": "no-listener"
+  },
+  "recordedBrowserProfilesAbsent": 2,
+  "astraAgentClosed": {
+    "id": "01a0f121-1f10-7a51-bfc9-951d4279ac39",
+    "previousStatus": "completed"
+  },
+  "scopeNote": "Generated research59/60 runtime copies, screens and caches came from the approved posting-presence/catalog-observations tests;64-expansion contained only empty synthetic scratch directories. Their original fixture sources remain in Git. Root dependencies and global user application histories were not cleanup targets."
+}
