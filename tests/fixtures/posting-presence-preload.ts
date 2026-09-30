@@ -22,8 +22,12 @@ const emit = Server.prototype.emit
 Server.prototype.emit = function (event: string | symbol, ...args: unknown[]) {
   if (event === 'request') {
     const [request, response] = args as [IncomingMessage, ServerResponse]
-    if (request.url?.startsWith('/api/posting-status')) response.once('finish', () => record({
-      event: 'http-response', path: request.url, method: request.method, status: response.statusCode,
+    // Capture the wire path before dispatch: the app's Express `/api` mount rewrites
+    // request.url to a router-relative path while handling. The finish record must
+    // name the same original path that the guard matched.
+    const path = request.url
+    if (path?.startsWith('/api/posting-status')) response.once('finish', () => record({
+      event: 'http-response', at: new Date(Date.now()).toISOString(), path, method: request.method, status: response.statusCode,
       ifNoneMatch: request.headers['if-none-match'] ?? null,
       etag: response.getHeader('etag') ?? null, cacheControl: response.getHeader('cache-control') ?? null,
     }))

@@ -68,6 +68,14 @@ function boardSnapshotTime(board: BoardStatus, catalog: Catalog, jobTimes: Reado
   return board.status === 'ok' && board.dataStatus !== 'unavailable' ? catalog.fetchedAt : undefined
 }
 
+/** Share legacy timestamp inference with history views, scanning job dates once. */
+export function catalogBoardSnapshotTimes(catalog: Catalog): ReadonlyMap<string, string | undefined> {
+  const jobTimes = legacyJobTimes(catalog)
+  return new Map(catalog.boards.map(board => [
+    board.companyId, boardSnapshotTime(board, catalog, jobTimes),
+  ]))
+}
+
 /** A visible return may check due public boards; the server still owns collection scheduling. */
 export function catalogNeedsRevalidation(catalog: Catalog, now: number): boolean {
   if (catalog.source === 'sample') return false

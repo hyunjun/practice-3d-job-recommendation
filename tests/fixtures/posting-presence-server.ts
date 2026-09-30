@@ -95,9 +95,16 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
   buildRoot?: string
   responses?: PresenceResponses
   companies?: unknown[]
+  /** Private artifact root. Existing callers keep the stage59 independent directory. */
+  root?: string
+  /** Fixture wall clock when the server starts. Existing callers keep the stage59 presence clock. */
+  clock?: string
 } = {}) {
   directory = path.resolve(directory)
-  if (!directory.startsWith(`${PRESENCE_PRIVATE_ROOT}${path.sep}`)) throw new Error('Presence artifacts must stay in the Stage59 independent directory')
+  const root = path.resolve(options.root ?? PRESENCE_PRIVATE_ROOT)
+  if (!directory.startsWith(`${root}${path.sep}`)) throw new Error('Presence artifacts must stay in the configured independent directory')
+  const startClock = Date.parse(options.clock ?? PRESENCE_NOW)
+  if (!Number.isFinite(startClock)) throw new Error('The presence fixture clock must be an ISO timestamp')
   const sourceRoot = options.sourceRoot ?? process.env.ORBIT_POSTING_PRESENCE_SOURCE_ROOT ?? repository
   const buildRoot = options.buildRoot ?? process.env.ORBIT_POSTING_PRESENCE_BUILD_ROOT ?? repository
   const cwd = path.join(directory, 'runtime')
@@ -141,7 +148,7 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
   await writeFile(configFile, JSON.stringify({ version: 1, mode: 'replace', companies: options.companies ?? [PRESENCE_REGISTRATION] }))
   const responsesFile = path.join(directory, 'upstream-responses.json')
   const clockFile = path.join(directory, 'clock-offset.txt')
-  await writeFile(clockFile, String(Date.parse(PRESENCE_NOW) - Date.now()))
+  await writeFile(clockFile, String(startClock - Date.now()))
   async function respond(responses: PresenceResponses) {
     const temporary = `${responsesFile}.next`
     await writeFile(temporary, JSON.stringify(responses, null, 2))

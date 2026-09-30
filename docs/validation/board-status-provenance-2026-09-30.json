@@ -1,0 +1,323 @@
+{
+  "version": 1,
+  "stage": 74,
+  "recordedAt": "2026-09-30T17:02:32.592131+00:00",
+  "baselineCommit": "0f9428b8ce3818e2fa0cebc1a981f075ddb18799",
+  "change": "Represent company failures, content success history, shared retry eligibility and collection progress without borrowing another observation's provenance.",
+  "status": "Final verification explicitly approved by all three against the same source, contract, plan and immutable evidence. Git preservation and cleanup pending.",
+  "contract": {
+    "path": "docs/design/board-status-provenance.md",
+    "sha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480"
+  },
+  "participants": {
+    "main": {
+      "role": "product implementation, integration, documentation, preservation and cleanup"
+    },
+    "astra": {
+      "role": "independent design and code/evidence review",
+      "model": "global.openai.gpt-6-astra",
+      "reasoningRequested": "max"
+    },
+    "fable": {
+      "role": "independent test design, authorship and execution",
+      "modelRequested": "claude-fable-5-1",
+      "modelReportedInCompletedDesignCalls": "claude-fable-5-1",
+      "effortRequested": "max",
+      "effortLimit": "Effective backend effort is not independently exposed.",
+      "modelReportedInCompletedCalls": "claude-fable-5-1"
+    }
+  },
+  "designGate": {
+    "decision": "DESIGN_APPROVED",
+    "allThreeExplicitlyApproved": true,
+    "sha256": "f72d4374ec7e8f2feeda9f43c696263e014842f3bc9f0b54b7a637126c6fa303",
+    "participants": {
+      "main": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+        "evidence": "main-design-approval.json",
+        "evidenceSha256": "bc4cf0218fd574eca925744832041d6ea21dad70aa21cadf8ba2b58fac0e59ee"
+      },
+      "astra": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+        "evidence": "astra-design-approval.md",
+        "evidenceSha256": "ed332727697257f5ae721a1d2f4e546df89f14da77eb14dd2d48eb179af5c50c"
+      },
+      "fable": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+        "evidence": "design-approval-01.review.md",
+        "evidenceSha256": "3230bb04f771b94bbb26dc6cff550aea40f0d13dce8a272a22a0b33390521c09"
+      }
+    },
+    "unresolvedBlockers": []
+  },
+  "implementationGate": {
+    "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+    "allThreeExplicitlyApproved": true,
+    "sha256": "80968cf37d012726306d42ad63b27eb52e3e76c2850e35dd5e2794aafbaf144c",
+    "stateDigest": "a49d2d444b6f86387579a24b2139bab890072eb6857f42045c074cee448055f9",
+    "fileCount": 408,
+    "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+    "executionPlanSha256": "3992608bcec5db3767d450995dfa67873b0cdbe58afbaaed0a46539e7a1b956c",
+    "participants": {
+      "main": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "a49d2d444b6f86387579a24b2139bab890072eb6857f42045c074cee448055f9",
+        "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+        "executionPlanSha256": "3992608bcec5db3767d450995dfa67873b0cdbe58afbaaed0a46539e7a1b956c",
+        "evidence": "main-implementation-approval.json",
+        "evidenceSha256": "164f2786c10ea62c07a225a3db62f5668467ce3c8a7c98e9d774dbdc90bebb7b"
+      },
+      "astra": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "a49d2d444b6f86387579a24b2139bab890072eb6857f42045c074cee448055f9",
+        "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+        "executionPlanSha256": "3992608bcec5db3767d450995dfa67873b0cdbe58afbaaed0a46539e7a1b956c",
+        "evidence": "astra-implementation-approval.json",
+        "evidenceSha256": "01cf8d0df859188f2b6126cea0ba67d533b4787ea10f91b7b6d640d562127283"
+      },
+      "fable": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "a49d2d444b6f86387579a24b2139bab890072eb6857f42045c074cee448055f9",
+        "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+        "executionPlanSha256": "3992608bcec5db3767d450995dfa67873b0cdbe58afbaaed0a46539e7a1b956c",
+        "evidence": "implementation-approval-04.review.md",
+        "evidenceSha256": "98bdd514d8484c48600c35d02088198c92005f708a6c9e1e5333a741330344ae",
+        "processReceiptSha256": "14eab1d0eb7cfa0581eaf30dcfe4d30c1dceae2103808453bd895a00adcc503d"
+      }
+    },
+    "unresolvedBlockers": []
+  },
+  "verificationGate": {
+    "version": 1,
+    "stage": 74,
+    "recordedAt": "2026-09-30T17:02:32.592131+00:00",
+    "decision": "VERIFICATION_APPROVED",
+    "stateDigest": "a49d2d444b6f86387579a24b2139bab890072eb6857f42045c074cee448055f9",
+    "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+    "executionPlanSha256": "3992608bcec5db3767d450995dfa67873b0cdbe58afbaaed0a46539e7a1b956c",
+    "finalEvidenceSha256": "83023c246187103595cfaeb5b04f189a233cb23ca65942c72a7e5d59b0b3e3b8",
+    "fileCount": 408,
+    "participants": {
+      "main": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "a49d2d444b6f86387579a24b2139bab890072eb6857f42045c074cee448055f9",
+        "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+        "executionPlanSha256": "3992608bcec5db3767d450995dfa67873b0cdbe58afbaaed0a46539e7a1b956c",
+        "finalEvidenceSha256": "83023c246187103595cfaeb5b04f189a233cb23ca65942c72a7e5d59b0b3e3b8",
+        "evidence": "main-final-verification-approval.json",
+        "evidenceSha256": "14d22b421b84cc399815fd83cb5f6a78f87c1ea22027218e34251aa76598368d"
+      },
+      "astra": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "a49d2d444b6f86387579a24b2139bab890072eb6857f42045c074cee448055f9",
+        "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+        "executionPlanSha256": "3992608bcec5db3767d450995dfa67873b0cdbe58afbaaed0a46539e7a1b956c",
+        "finalEvidenceSha256": "83023c246187103595cfaeb5b04f189a233cb23ca65942c72a7e5d59b0b3e3b8",
+        "evidence": "astra-final-verification-approval.md",
+        "evidenceSha256": "99181206aca62158762b9766d48aed39fdcef0879f7eda4a741cf73a323b03ec"
+      },
+      "fable": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "a49d2d444b6f86387579a24b2139bab890072eb6857f42045c074cee448055f9",
+        "contractSha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480",
+        "executionPlanSha256": "3992608bcec5db3767d450995dfa67873b0cdbe58afbaaed0a46539e7a1b956c",
+        "finalEvidenceSha256": "83023c246187103595cfaeb5b04f189a233cb23ca65942c72a7e5d59b0b3e3b8",
+        "evidence": "verification-approval-01.review.md",
+        "evidenceSha256": "75d92c0c1d2b5f58dc82168d0a548c5d35826ed721b829c9d5e8128720e48e99",
+        "processReceiptSha256": "14a3c4cbdddf84264202672128960a474daf91b00b8d7cc6ff430f2f633d1b3a",
+        "reviewLimit": "Fresh helper hashes cover final artifact/source/contract/plan. Receipt/report/power claims were independently compared by content; a shell hash command was denied, so their inner hashes were not freshly recomputed by Fable. Main and Astra separately verified execution evidence."
+      }
+    },
+    "unresolvedBlockers": [],
+    "acceptedScope": "Final selected tests and recorded limitations; Git preservation, process shutdown and cleanup follow.",
+    "allThreeExplicitlyApproved": true,
+    "sha256": "6cedbd8955bf3d2e8d67254643c9f1973ec2391f6ec3e3c706bf1ca54bad452e",
+    "testsExecuted": true,
+    "firstRun": {
+      "kind": "check",
+      "typecheck": "passed",
+      "unitFiles": 84,
+      "total": 2736,
+      "passed": 2735,
+      "failed": 1,
+      "followingBuildAndE2ENotRun": true
+    },
+    "failureCorrection": "Fullinitial+retrycompany/timeledger retained; exactfourcalloracle approvedall3. Priorfailedresult remains recorded.",
+    "secondExecution": {
+      "unitFiles": 84,
+      "unitPassed": 2736,
+      "unitFailed": 0,
+      "build": "passed",
+      "development": {
+        "cases": 93,
+        "passed": 89,
+        "failed": 4,
+        "skipped": 0,
+        "flaky": 0,
+        "retries": 0
+      },
+      "production": "notrun",
+      "failure": "Atfinish, testobserverrequest.url hadExpress/api prefixremoved; originalpathfiltercouldnotfindtheexistingHTTP200event.",
+      "correction": "All3agreedcaptureoriginalrequest.url beforeapplicationdispatch, preservingstrictmatchingandmeasuredretrybounds."
+    },
+    "selectedFinalRuns": {
+      "check": "20260930T163420866611Z-4b971d1c",
+      "build": "20260930T163456588354Z-fecdc8f6",
+      "e2e-development": "20260930T163521289513Z-da82441e",
+      "e2e-production": "20260930T164309630272Z-be1981b4"
+    },
+    "finalResults": {
+      "typecheck": "passed",
+      "unit": {
+        "files": 84,
+        "total": 2736,
+        "passed": 2736,
+        "failed": 0
+      },
+      "build": "passed",
+      "e2eDevelopment": {
+        "files": 11,
+        "total": 93,
+        "passed": 93,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "retries": 0
+      },
+      "e2eProduction": {
+        "files": 11,
+        "total": 93,
+        "passed": 93,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "retries": 0
+      }
+    },
+    "finalEvidencePath": "docs/validation/board-status-provenance-final-evidence-2026-09-30.json"
+  },
+  "discussion": [
+    {
+      "issue": "Whether only a newer presence error with retryAt should govern catalog state.",
+      "resolution": "All3 accepted the newest unresolved failure across both caches, content wins equal timestamps. Schema-valid null retry deadlines and legacy content without complete inventory refute the narrower rule."
+    },
+    {
+      "issue": "Cross-operation sharing omitted checkedAt plus60s for persisted null/short error deadlines.",
+      "resolution": "All3 accepted the effective error deadline in both directions, guarded by other.error; successful cooldowns remain independent and longer provider waits remain respected."
+    },
+    {
+      "issue": "Aggregate attempt clock versus emitted failure-row clocks.",
+      "resolution": "All3 accepted the latest actual accepted content/presence attempt for the aggregate, while failure message/time remain from the same selected failed attempt."
+    },
+    {
+      "issue": "Whether progress wording is part of this stage.",
+      "resolution": "All3 accepted separating current-run counts from catalog-wide current failures; a deferred error otherwise appears as a completed-run failure before any run request ends."
+    }
+  ],
+  "baselineDiagnostic": {
+    "syntheticOnly": true,
+    "realServiceFunction": true,
+    "serverOrProviderNetworkStarted": false,
+    "result": "Presence-only error survives cache/restart but was emitted as catalog ok/unavailable; explicit null was replaced with another company's full-content time. This is reproduction evidence, not a passing regression suite."
+  },
+  "proceduralDenials": [
+    {
+      "phase": "independent-design-01",
+      "attempt": "Directory and line-count listing via Bash",
+      "result": "Denied before execution by the review-only tool allowlist. Read/Grep/Glob completed source review; no test was executed."
+    }
+  ],
+  "referenceCapture": {
+    "directory": ".local/preserved-2026-09-30-stage-74",
+    "verifiedAt": "2026-09-30T14:52:31.428286+00:00",
+    "archiveSha256": "b37a5602163eafabe3f05cc5d915de075086d4e53abf99dbd8c931914a7596ec",
+    "archiveBytes": 164853,
+    "manifestSha256": "77831c90dacadfb0165c60b82fc9c2e40ca73944cb4c863cd719d1f5d20933e7",
+    "originalFileCount": 4,
+    "uniqueBlobCount": 4,
+    "originalBytes": 588387,
+    "allCrcSizeShaAndOriginalBytesMatched": true,
+    "workingCopiesRemoved": false
+  },
+  "limitations": [
+    "Ordinary non-forced reads retain the existing successful-content TTL; a shared deadline enables eligible forced retry rather than promising a new collection on every read.",
+    "A running collection still coalesces requests. Exact-deadline request assertions require an idle service and an otherwise eligible company.",
+    "No new immediate cross-view propagation, provider expansion, cache-format changes or initial-progress latency work.",
+    "Unanimous approval is a phase decision, not a defect-free product guarantee.",
+    "The browser evidence is limited to the eleven selected Chromium E2E files in development and production, with one worker and zero retries; it is not a complete browser-suite or cross-browser run.",
+    "Provider responses and saved records are synthetic. No live-company availability rate, external API load, production traffic or distributed collector behavior is measured.",
+    "Exact one-millisecond retry and freshness boundaries, legacy persisted records, daily-source gates and both-direction null/short retry floors are primarily unit evidence; real-server browser tests use observed timestamps from a running fixture clock.",
+    "Status reaches an existing exploration view when the app receives a catalog response. A still-fresh view does not automatically receive a saved-page presence result; the real-server test explicitly reloads before expecting that state.",
+    "Ordinary non-forced reads keep the existing successful-body TTL. Passing a shared retry deadline permits otherwise-eligible work rather than requiring a body request on every read, and active collections still coalesce requests.",
+    "The real-server fixture observes upstream and HTTP completion events. Its instrumentation has a footprint; its measured retry window is evidence for the synthetic execution, not a production latency benchmark.",
+    "The production fixture compares the served entry JavaScript with its copied build. The runner also checks the complete local build manifest before and after production E2E; this is not an audit of every served asset response.",
+    "Fable independently verified source, contract and plan hashes through its read-only identity helper. Four execution-control hashes were cross-referenced against the preserved control receipts rather than freshly recomputed by Fable; Main freshly checked the control files, Astra reviewed the controls and unchanged deltas, and the runner verifies controls at execution boundaries.",
+    "Source/control endpoint hashes and the cooperative validation lock cannot exclude an external edit-and-restore. Requested model effort is recorded, but the Fable backend does not independently expose its effective effort setting.",
+    "All-three approval is a decision to accept this stage's recorded evidence and limitations, not a guarantee that the product has no defects. Failed runs and unreachable assertions remain distinct from final successful runs.",
+    "Detailed logs, reports, browser/runtime copies, traces and screenshots are temporary. They are reviewed before cleanup; reusable tools, decisions, result summaries and hashes are preserved in Git first.",
+    "Fresh helper hashes cover final artifact/source/contract/plan. Receipt/report/power claims were independently compared by content; a shell hash command was denied, so their inner hashes were not freshly recomputed by Fable. Main and Astra separately verified execution evidence."
+  ],
+  "cleanup": {
+    "status": "pending after all3 final verification; commit/push and local tool archive must precede deletion",
+    "protectedOriginalFileCount": 18,
+    "newReferenceFileCount": 4,
+    "preview8787": "off",
+    "taskScopedPowerAssertion": "running, must be stopped before cleanup"
+  },
+  "staticTestReview": {
+    "mainFindings": [
+      {
+        "id": "M74-T1",
+        "issue": "One provider remained unheld while a two-company pending snapshot was expected.",
+        "resolution": "Fable agreed with the async-order defect; both providers are held, original three jobs and later complete recovery remain literal assertions. Main and Astra accepted."
+      },
+      {
+        "id": "M74-T2",
+        "issue": "A blocked cached read was described as another failed provider attempt.",
+        "resolution": "Comment corrected and unchanged provider-call count explicitly asserted."
+      }
+    ],
+    "astraFindings": [
+      {
+        "id": "A74-T1",
+        "issue": "Fresh browser catalog does not automatically reflect a saved-page presence check.",
+        "status": "Fable agreed and corrected in authoring03; reviewed actual files. A follow-up reset-state issue is recorded separately."
+      },
+      {
+        "id": "A74-T2",
+        "issue": "Retry-After upper allowance used an arbitrary five-second tolerance.",
+        "status": "Fable agreed and corrected in authoring03; reviewed actual files. A follow-up reset-state issue is recorded separately."
+      },
+      {
+        "id": "A74-T3",
+        "issue": "UI assertions checked aggregate/attempt labels without distinct actual time values.",
+        "status": "Fable agreed and corrected in authoring03; reviewed actual files. A follow-up reset-state issue is recorded separately."
+      },
+      {
+        "id": "A74-T4",
+        "issue": "Reload resets posting-status UI state, so the recovery test must use the initial 게시 상태 확인 button rather than 새로 확인.",
+        "status": "Fable agreed and corrected the first-check button after reload; Main and Astra approved candidate02. All later assertions unchanged."
+      }
+    ],
+    "coverageAssessment": "Astra found no additional blocker: existing whole-unit tests cover daily-source boundaries and read-only monitoring after retry eligibility. New tests cover presence provenance and both widths.",
+    "proposedE2EFileCount": 11,
+    "testsExecuted": false,
+    "runtimeExecutionStatus": "Static review preceded execution. Final complete check/build/development/production passed after the two recorded test corrections."
+  },
+  "finalReview": {
+    "fableCompletedAt": "2026-09-30T17:01:53.767367+00:00",
+    "fableModelReported": [
+      "claude-fable-5-1"
+    ],
+    "fableReviewLimit": "Fresh helper hashes cover final artifact/source/contract/plan. Receipt/report/power claims were independently compared by content; a shell hash command was denied, so their inner hashes were not freshly recomputed by Fable. Main and Astra separately verified execution evidence.",
+    "nonBlockingNotes": [
+      "Mutable stage record updated after all3 agreement.",
+      "Immutable evidence scopes power to final runs; earlier no-event captures remain archived separately.",
+      "Preview/test port checks belong to cleanup evidence and are not asserted by the immutable final artifact."
+    ],
+    "mainDisposition": "Accepted; these do not change product, tests or the approved evidence artifact."
+  }
+}

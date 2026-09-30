@@ -111,7 +111,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
   function nextRefresh(companyId: string, content: boolean): number {
     const own = (content ? boards : presences).get(companyId)
     const other = (content ? presences : boards).get(companyId)
-    return Math.max(own ? refreshAt(own) : 0, other?.error && other.retryAt ? Date.parse(other.retryAt) : 0)
+    return Math.max(own ? refreshAt(own) : 0, other?.error ? refreshAt(other) : 0)
   }
   function refreshDeadline(companyId: string, content: boolean): number {
     // An eligible deadline may be in the past. Keep it stable for conditional
@@ -180,6 +180,16 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
     await observations?.record(companies.flatMap(company => boards.get(company.id) ?? []), 'cache')
   }
 
+  function latestFailure(companyId: string) {
+    const content = boards.get(companyId)
+    const inventory = presences.get(companyId)
+    if (!content?.error) return inventory?.error ? inventory : undefined
+    if (!inventory?.error) return content
+    // A successful inventory check cannot resolve a failed content check.
+    // Keep the chosen failure's message and attempt time together.
+    return Date.parse(content.checkedAt) >= Date.parse(inventory.checkedAt) ? content : inventory
+  }
+
   function compose(partial = false): Catalog {
     const current = now()
     const jobs: Job[] = []
@@ -189,23 +199,26 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
     for (const company of companies) {
       const entry = boards.get(company.id)
       const snapshot = entry?.snapshot
+      const failed = latestFailure(company.id)
       const waiting = partial && collection?.waiting.has(company.id)
       const usable = snapshot && current - Date.parse(snapshot.fetchedAt) <= CATALOG_POLICY.maxFallbackAge
-      const dataStatus = !usable ? 'unavailable' : entry?.error || current - Date.parse(snapshot.fetchedAt) >= sourceFreshFor(company.provider) ? 'stale' : 'fresh'
+      const dataStatus = !usable ? 'unavailable' : failed || current - Date.parse(snapshot.fetchedAt) >= sourceFreshFor(company.provider) ? 'stale' : 'fresh'
       if (usable) {
         successfulDates.push(Date.parse(snapshot.fetchedAt))
         jobs.push(...snapshot.jobs.map(job => ({ ...job, stale: dataStatus === 'stale' })))
         unmappedCount = unmappedCount === null || snapshot.unmappedCount === null ? null : unmappedCount + snapshot.unmappedCount
       }
       statuses.push({
-        companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', status: waiting ? 'pending' : entry?.error ? 'error' : 'ok',
+        companyId: company.id, board: company.board!, provider: company.provider ?? 'greenhouse', status: waiting ? 'pending' : failed ? 'error' : 'ok',
         dataStatus, total: usable ? snapshot.total : 0, included: usable ? snapshot.jobs.length : 0,
-        checkedAt: entry?.checkedAt, lastSuccessAt: snapshot?.fetchedAt ?? null,
-        retryAt: !waiting && entry?.error ? iso(refreshAt(entry)) : null,
-        ...(entry?.error ? { message: entry.error } : {}),
+        checkedAt: failed?.checkedAt ?? entry?.checkedAt ?? presences.get(company.id)?.checkedAt,
+        lastSuccessAt: snapshot?.fetchedAt ?? null,
+        retryAt: !waiting && failed ? iso(nextRefresh(company.id, true)) : null,
+        ...(failed ? { message: failed.error } : {}),
       })
     }
     const entries = [...boards.values()]
+    const attempts = [...entries, ...presences.values()]
     const refreshAfter = iso(presence
       ? Math.min(...companies.map(company => refreshDeadline(company.id, true)))
       : entries.length ? Math.min(...entries.map(refreshAt)) : current + CATALOG_POLICY.minRefreshInterval)
@@ -217,7 +230,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
     }
     return {
       source: 'public', fetchedAt: successfulDates.length ? iso(Math.max(...successfulDates)) : '',
-      ...(entries.length ? { checkedAt: iso(Math.max(...entries.map(entry => Date.parse(entry.checkedAt)))) } : {}),
+      ...(attempts.length ? { checkedAt: iso(Math.max(...attempts.map(entry => Date.parse(entry.checkedAt)))) } : {}),
       refreshAfter, stale: statuses.some(board => board.dataStatus === 'stale'),
       companies, cities: CITIES, jobs, boards: statuses, unmappedCount,
     }

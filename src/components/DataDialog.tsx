@@ -1,6 +1,6 @@
 import { ArrowUpRight, CheckCircle2, ChevronDown, CircleHelp, Database, Globe2, RefreshCw, ShieldCheck } from 'lucide-react'
 import { catalogNeedsAttention, collectionHealth, formatCollectionTime, formatRetryWait } from '../../shared/catalog-health'
-import { snapshotFreshness } from '../../shared/catalog-freshness'
+import { catalogBoardSnapshotTimes, snapshotFreshness } from '../../shared/catalog-freshness'
 import { unmappedCoverage } from '../../shared/job-location'
 import { isTalentPoolJob } from '../../shared/job-posting'
 import type { Catalog } from '../../shared/types'
@@ -98,15 +98,16 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
 function BoardHistory({ catalog, loading, retryIn, onRefresh }: { catalog: Catalog; loading: boolean; retryIn: number; onRefresh: () => void }) {
   const hasHimalayas = catalog.companies.some(company => company.provider === 'himalayas')
   const hasCareers = catalog.companies.some(company => company.provider === 'careers')
+  const snapshotTimes = catalogBoardSnapshotTimes(catalog)
   return <section className="board-section">
     <div className="board-heading"><h3>게시판 조회 상태</h3><button className="text-button" disabled={loading || retryIn > 0} onClick={onRefresh}><RefreshCw size={13} />새로고침{!loading && retryIn > 0 && <span aria-hidden="true"> · {formatRetryWait(retryIn)} 후</span>}</button></div>
-    <p className="field-description">최근 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />일반 공개 게시판은 정상 확인 후 30분이 지나면 이전 조회로 표시해요.{hasHimalayas && ' Himalayas는 하루 단위 갱신에 맞춰 24시간 동안 재사용해요.'}{hasCareers && ' 회사 공식 사이트 직접 수집도 부하를 줄이기 위해 24시간 동안 재사용해요.'} 모든 출처에서 24시간을 넘긴 공고는 추천에서 제외해요. 공개 탐색·도시 비교 화면으로 돌아오거나 그 화면에서 네트워크가 다시 연결되면 오래되거나 확인하지 못한 게시판을 다시 조회해요. 게시판별 대기 시간을 지키며 검색 조건과 저장 기록은 유지합니다.</p>
+    <p className="field-description">최근 게시판 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />게시 목록·공고 내용 조회를 포함한 최근 시도이며, 정상 확인 시각은 회사마다 다릅니다.<br />일반 공개 게시판은 정상 확인 후 30분이 지나면 이전 조회로 표시해요.{hasHimalayas && ' Himalayas는 하루 단위 갱신에 맞춰 24시간 동안 재사용해요.'}{hasCareers && ' 회사 공식 사이트 직접 수집도 부하를 줄이기 위해 24시간 동안 재사용해요.'} 모든 출처에서 24시간을 넘긴 공고는 추천에서 제외해요. 공개 탐색·도시 비교 화면으로 돌아오거나 그 화면에서 네트워크가 다시 연결되면 오래되거나 확인하지 못한 게시판을 다시 조회해요. 게시판별 대기 시간을 지키며 검색 조건과 저장 기록은 유지합니다.</p>
     <details className="board-details" open={loading || catalogNeedsAttention(catalog)}>
       <summary>회사별 조회 기록<ChevronDown size={14} /></summary>
       <div className="board-list">{catalog.boards.map(board => {
         const company = catalog.companies.find(item => item.id === board.companyId)
         if (!company) return null
-        const lastSuccess = board.lastSuccessAt ?? (board.status === 'ok' ? catalog.fetchedAt : undefined)
+        const lastSuccess = snapshotTimes.get(board.companyId)
         const retained = board.dataStatus === 'stale'
         const unavailable = board.dataStatus === 'unavailable'
         const pending = board.status === 'pending'
