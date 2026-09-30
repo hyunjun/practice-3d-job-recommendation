@@ -1,0 +1,86 @@
+{
+  "recordVersion": 1,
+  "recordedOn": "2026-09-30",
+  "phase": "stage71-design",
+  "workflowCommit": "e76afd5c71a00d7815421e5f6f5a757df2b334ee",
+  "productBaselineCommit": "604e8e90ad8c421c1c23d4e4d0091ba0b60e7862",
+  "contract": {
+    "path": "docs/design/occupation-v7.md",
+    "revision": 4,
+    "sha256": "87f1ef6eb60f4ddcfe97c20b6862708915f4e54de6d26e8a0de847e036f98376"
+  },
+  "participants": [
+    {
+      "participant": "main",
+      "decision": "DESIGN_APPROVED",
+      "scope": "The entire revision4 contract at the recorded hash.",
+      "basis": "Reviewed occupational references, archived inputs, primary-position boundaries, migration, provider failure preservation and method-based observations."
+    },
+    {
+      "participant": "astra",
+      "modelConfigured": "global.openai.gpt-6-astra",
+      "reasoningRequested": "max",
+      "decision": "DESIGN_APPROVED",
+      "scope": "The entire revision4 contract at the recorded hash.",
+      "basis": "Complete final reply reports independent hash verification, resolves all three revision3 objections, accepts leadership controls and recorded limitations, and leaves implementation and verification pending."
+    },
+    {
+      "participant": "fable",
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": ["claude-fable-5-1"],
+      "resultModelUsage": ["claude-fable-5-1"],
+      "decision": "DESIGN_APPROVED",
+      "scope": "The entire revision4 content read, bound to main's independently checked hash receipt.",
+      "basis": "Checked Astra's three corrections against source, re-read all rules and matrices, accepted the leadership and available-evidence boundaries, and retained full final DEV/PROD E2E requirements.",
+      "verificationLimit": "Read-only review tools cannot compute SHA-256. Max is the explicit requested effort; effective server effort is not separately reported."
+    }
+  ],
+  "unanimousDesignApproval": true,
+  "unresolvedDesignObjections": [],
+  "resolvedDiscussion": [
+    "Primary occupation versus engineering audience, including prefixes, neutral heads and computing co-roles.",
+    "Physical electronics and supplier quality with explicit computing controls and compound data-center/hardware exclusions.",
+    "Body-dependent Failure Analysis Engineer and Specialist, physical-first mixed-duty policy, qualification/negation/other-team boundaries.",
+    "Explicit adjacent computing internship titles, negative sales/marketing controls and literal role specialties.",
+    "Method-based cache comparability rather than a blanket cache-origin exclusion.",
+    "Valid bodyless postings versus failed required-detail collection, preserving prior snapshots on failure.",
+    "Migration parity for equivalent available evidence, without reconstructing discarded source text."
+  ],
+  "acceptedLimits": [
+    "Generic Engineer, bare Engineering and Sourcing Engineer retain their broad existing interpretation.",
+    "Generic automation with a Hardware suffix differs from department-only generic automation; explicit Software QA and SDET are computing.",
+    "Mixed physical/software Failure Analysis duties are conservatively excluded unless the primary title explicitly establishes computing.",
+    "Heading and computing-internship discipline recognition remain bounded.",
+    "Existing Design Engineer qualification-only behavior is intentionally unchanged.",
+    "The v6 Failure Analysis record with preserved description evidence is a hand-authored migration mechanism control, not a claim that the current v6 title-only branch generated it.",
+    "A retained-job corpus cannot establish a population false-negative rate or current posting validity.",
+    "Existing real snapshots do not carry occupation7 method markers; new compatible observations and sufficient distinct dates are needed before a v7 delta is available."
+  ],
+  "verificationPlan": {
+    "literalRegressionCases": true,
+    "historicalFixturesExplicitlyPreserveVersion6": true,
+    "independentTestAuthor": "fable",
+    "allowedTestWriteScope": ["tests/", ".local/research/71-occupation-scope/"],
+    "frozenRetainedJobs": 6819,
+    "frozenUnfilteredRegionalRows": 512,
+    "frozenRegionalV6IncludedJobs": 64,
+    "newPostingProviderRequestsForAudit": 0,
+    "finalRequiredChecks": [
+      "type checking",
+      "full unit suite",
+      "production build",
+      "full E2E in development mode",
+      "full E2E in production mode"
+    ]
+  },
+  "gateMeaning": {
+    "authorizes": ["product implementation", "independent test authorship"],
+    "implementationReview": "pending",
+    "verificationComplete": "pending",
+    "testsRunForThisApproval": false,
+    "doesNotClaimBugFreeProduct": true
+  },
+  "provenance": "Main-authored structured record of independent final responses and shared objections, not a verbatim transcript. Raw review streams and actual posting bodies remain local while the stage is active and are excluded from public Git."
+}
