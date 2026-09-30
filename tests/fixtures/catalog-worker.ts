@@ -1,5 +1,6 @@
 import type { CatalogCollectionSnapshot, CatalogCollectionUpdate } from '../../shared/catalog-progress'
 import type { BoardStatus, Catalog, Company, Filters, Job, Profile, SavedJob } from '../../shared/types'
+import { COMPENSATION_VERSION } from '../../shared/types'
 
 // Fictional public HTTP payloads. No collector, cache, matching, normalization,
 // aggregation or product fixture helper computes the expected test results.
@@ -50,7 +51,7 @@ function job(company: 'aster' | 'birch' | 'cedar', suffix: string, title: string
     url: `https://example.org/catalog-worker/${company}/${suffix}`,
     workMode: 'onsite', employment: 'fulltime', employmentVersion: 1,
     visa: 'yes', skills: ['TypeScript'], minExperience: 3,
-    salary: { min: 100000, max: 160000, currency: 'USD' }, compensationVersion: 2,
+    salary: { min: 100000, max: 160000, currency: 'USD' }, compensationVersion: COMPENSATION_VERSION,
     qualifications: {
       version: 1,
       skills: [{

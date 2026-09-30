@@ -4,6 +4,7 @@
  * fictional protocol fixtures; "public" describes the API contract being tested.
  */
 import type { Catalog, City, Company, Job, Profile, SavedJob } from '../../shared/types'
+import { COMPENSATION_VERSION } from '../../shared/types'
 
 export const NOW = '2026-09-27T00:00:00.000Z'
 export const PREVIOUS = '2026-09-26T23:55:00.000Z'
@@ -50,7 +51,7 @@ function job(id: string, companyId: string, title: string, cityId: string, role:
     id, companyId, title, role, cityIds: [cityId],
     locationLabel: cityId === 'london' ? 'London, United Kingdom' : cityId === 'berlin' ? 'Berlin, Germany' : 'Seoul, South Korea',
     workMode: 'onsite', employment: 'fulltime', employmentVersion: 1,
-    minExperience: 3, skills: ['TypeScript'], salary: null, compensationVersion: 2, visa: 'unknown',
+    minExperience: 3, skills: ['TypeScript'], salary: null, compensationVersion: COMPENSATION_VERSION, visa: 'unknown',
     qualifications: { version: 1, skills: [], experience: [] },
     eligibility: { version: 2, rules: [] },
     roleClassification: { version: 1, roles: [role], evidence: [{ role, source: 'title', text: title }] },

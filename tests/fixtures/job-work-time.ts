@@ -1,5 +1,6 @@
 import { CITIES } from '../../shared/cities'
 import type { Catalog, Company, Filters, Job, Profile, SavedJob } from '../../shared/types'
+import { COMPENSATION_VERSION } from '../../shared/types'
 
 // Invented employers and original paragraphs only. Provider responses contain
 // no workTimeRequirements; the actual collector must interpret their full body.
@@ -139,7 +140,7 @@ export function legacyWorkTimeJob(nativeId = '4601', overrides: Partial<Job> = {
     id: `${source}-${companyId}-${nativeId}`, companyId, source,
     title: WORK_TIME_TITLES.mixed, role: 'backend', cityIds: ['berlin'], locationLabel: 'Berlin, Germany',
     workMode: 'onsite', employment: 'fulltime', employmentVersion: 1,
-    visa: 'unknown', minExperience: 3, skills: ['TypeScript'], salary: null, compensationVersion: 2,
+    visa: 'unknown', minExperience: 3, skills: ['TypeScript'], salary: null, compensationVersion: COMPENSATION_VERSION,
     remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false, remoteScopeVersion: 2,
     description: workTimeDescription(WORK_TIME_MIXED), requirements: [],
     url: `https://example.com/jobs/${companyId}-${nativeId}`,

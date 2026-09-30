@@ -1,4 +1,5 @@
 import type { Company, Job, SavedJob } from '../../shared/types'
+import { COMPENSATION_VERSION } from '../../shared/types'
 import { WORKPLACE_COUNTRY_FETCHED_AT, WORKPLACE_COUNTRY_NOTE, WORKPLACE_COUNTRY_SAVED_AT } from './workplace-countries'
 
 export const LEGACY_COUNTRY_COMPANY: Company = {
@@ -31,7 +32,7 @@ export function legacyCountryJob(overrides: Partial<Job> = {}): Job {
       }],
     },
     languageRequirements: { version: 1, rules: [] }, workTimeRequirements: { version: 1, rules: [] },
-    salary: null, compensationVersion: 2, visa: 'unknown', eligibility: { version: 2, rules: [] },
+    salary: null, compensationVersion: COMPENSATION_VERSION, visa: 'unknown', eligibility: { version: 2, rules: [] },
     remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false,
     description: 'Build observability services with TypeScript.\nMinimum requirements: 3 years of software engineering experience.',
     requirements: [], url: 'https://example.com/jobs/country-fern-5501', source: 'greenhouse',

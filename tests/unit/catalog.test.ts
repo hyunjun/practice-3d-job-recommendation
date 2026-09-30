@@ -12,6 +12,7 @@ import type { BoardCache, CachedBoard } from '../../server/board-cache'
 import { BoardFetchError, CATALOG_POLICY, CatalogUnavailableError, createCatalogService, parseRetryAfter } from '../../server/catalog-service'
 import { fetchGreenhouseBoard } from '../../server/catalog'
 import { geographicPayText } from '../fixtures/geographic-pay'
+import { NUMBER_FORMAT_LEGACY_PAY, NUMBER_FORMAT_NOTES, NUMBER_FORMAT_QUOTES } from '../fixtures/compensation-number-format'
 
 const BASE = Date.parse('2026-09-19T06:00:00.000Z')
 const companies = PUBLIC_COMPANIES.slice(0, 2)
@@ -323,6 +324,43 @@ describe('cache validation and migration', () => {
     expect(migrated.snapshot!.jobs[0]).toMatchObject({ id: prior.id, fetchedAt: iso(BASE), compensationVersion: COMPENSATION_VERSION, salary: null })
     expect(migrated.snapshot!.jobs[0].compensationRanges).toHaveLength(2)
     expect(prior.compensationVersion).toBe(1)
+  })
+
+  it('upgrades version-two truncated space-grouped pay in a cached snapshot while retaining the published index and retry state', () => {
+    const cached = snapshot(companies[0])
+    const prior = cached.snapshot!.jobs[0]
+    prior.compensationVersion = 2
+    prior.description = `Fictional ledger vacancy.\n${NUMBER_FORMAT_QUOTES.spaceGrouped}`
+    Object.assign(prior, NUMBER_FORMAT_LEGACY_PAY.spaceGrouped)
+    cached.snapshot!.publishedIds = [prior.id, `${prior.id}-outside-occupation`]
+    cached.failures = 1
+    cached.retryAt = iso(BASE + 60000)
+    const [migrated] = parseCachedBoards({ version: 5, boards: [cached] })
+    expect(migrated).toMatchObject({ checkedAt: cached.checkedAt, failures: 1, retryAt: cached.retryAt })
+    expect(migrated.snapshot).toMatchObject({ fetchedAt: iso(BASE), total: 2, publishedIds: cached.snapshot!.publishedIds })
+    expect(migrated.snapshot!.jobs[0]).toMatchObject({ id: prior.id, fetchedAt: iso(BASE), compensationVersion: COMPENSATION_VERSION, salary: { min: 88000, max: 124000, currency: 'EUR' } })
+    expect(migrated.snapshot!.jobs[0].compensationRanges).toEqual([expect.objectContaining({ min: 88000, max: 124000, currency: 'EUR', period: 'year' })])
+    expect(migrated.snapshot!.jobs[0].compensationEvidence).toBeUndefined()
+    expect(migrated.snapshot!.jobs[0].compensationNote).toBeUndefined()
+    expect(prior).toMatchObject({ compensationVersion: 2, salary: null })
+  })
+
+  it('removes a version-two comparable dotted amount from a cached snapshot and keeps the quote', () => {
+    const cached = snapshot(companies[0])
+    const prior = cached.snapshot!.jobs[0]
+    prior.compensationVersion = 2
+    prior.description = 'Annual base salary: 62.000–118.000 EUR.'
+    prior.salary = { min: 62, max: 118, currency: 'EUR' }
+    prior.compensationRanges = [{
+      label: 'Annual base salary', min: 62, max: 118, currency: 'EUR', period: 'year', basis: 'base',
+      evidence: { source: 'description', text: prior.description },
+    }]
+    const [migrated] = parseCachedBoards({ version: 5, boards: [cached] })
+    expect(migrated.snapshot!.jobs[0]).toMatchObject({ id: prior.id, fetchedAt: iso(BASE), compensationVersion: COMPENSATION_VERSION, salary: null, compensationNote: NUMBER_FORMAT_NOTES.none })
+    expect(migrated.snapshot!.jobs[0].compensationRanges).toBeUndefined()
+    expect(migrated.snapshot!.jobs[0].compensationEvidence).toEqual([expect.objectContaining({ source: 'description' })])
+    expect(migrated.snapshot!.jobs[0].compensationEvidence![0].text).toContain('62.000–118.000 EUR')
+    expect(prior.salary).toEqual({ min: 62, max: 118, currency: 'EUR' })
   })
 
   it('keeps a fresh v4 Greenhouse snapshot when migrating to a provider-aware cache', async () => {

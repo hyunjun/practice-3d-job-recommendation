@@ -1,4 +1,5 @@
 import type { Catalog, Company, Job, JobProvider, SavedJob } from '../../shared/types'
+import { COMPENSATION_VERSION } from '../../shared/types'
 import { PUBLIC_TEST_CITIES } from './public-geography'
 
 // Test-only, authored public protocol data. No runtime demo, company registry,
@@ -35,7 +36,7 @@ export function publicProtocolJob(id = 'london', overrides: Partial<PublicJob> =
     cityIds: ['london'], cityCoverageVersion: 1, locationLabel: 'London, United Kingdom',
     workMode: 'onsite', employment: 'fulltime', employmentVersion: 1,
     minExperience: years, skills, salary: { min: 130000, max: 180000, currency: 'USD' },
-    compensationVersion: 2, visa: 'yes', eligibility: { version: 2, rules: [] },
+    compensationVersion: COMPENSATION_VERSION, visa: 'yes', eligibility: { version: 2, rules: [] },
     qualifications: {
       version: 1,
       skills: skills.length ? [{

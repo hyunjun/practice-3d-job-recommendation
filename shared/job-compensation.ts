@@ -10,7 +10,7 @@ export function upgradeJobCompensation<T extends Job>(job: T, preserveUnverifiab
   const evidence = [...(job.compensationRanges?.flatMap(range => range.evidence ? [range.evidence] : []) ?? []), ...(job.compensationEvidence ?? [])]
   // Structured provider disclosures already establish their own amounts and
   // units. A parser update must not replace them with a partial stored body.
-  if (job.compensationVersion === 1 && evidence.some(item => item.source === 'board')) {
+  if (job.compensationVersion && evidence.some(item => item.source === 'board')) {
     return { ...job, compensationVersion: COMPENSATION_VERSION }
   }
   let pay: SalaryData

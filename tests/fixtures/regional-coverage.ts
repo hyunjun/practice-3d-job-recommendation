@@ -1,5 +1,6 @@
 // Literal fictional inputs only. No product registry/normalizer/upgrader computes them.
 import type { Catalog, City, Company, Filters, Job, Profile, SavedJob } from '../../shared/types'
+import { COMPENSATION_VERSION } from '../../shared/types'
 import { PUBLIC_TEST_CITIES } from './public-geography'
 
 export const REGIONAL_TIME = '2026-09-27T06:00:00.000Z'
@@ -133,7 +134,7 @@ export function regionalLegacyJob(id = 'dubai', changes: Partial<RegionalPublicJ
     id: `greenhouse-regional-cedar-${id}`, companyId: 'regional-cedar', title,
     role: 'backend', cityIds: [], locationLabel: 'Dubai, United Arab Emirates',
     workMode: 'onsite', employment: 'fulltime', employmentVersion: 1,
-    minExperience: null, skills: ['TypeScript'], salary: null, compensationVersion: 2,
+    minExperience: null, skills: ['TypeScript'], salary: null, compensationVersion: COMPENSATION_VERSION,
     visa: 'unknown', eligibility: { version: 2, rules: [] },
     qualifications: {
       version: 1, experience: [],

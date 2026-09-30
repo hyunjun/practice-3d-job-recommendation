@@ -51,7 +51,7 @@ test('regional pay, original evidence and notes survive saving and CSV while onl
   await expect(page.locator('.data-quality-list > div').filter({ hasText: '보상 조건 확인 필요' }).locator('dd')).toHaveText('2개')
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await page.getByLabel('도시, 회사 또는 포지션 검색').fill('regional pay fixture')
-  await page.locator('.mini-job-title').click()
+  await page.locator('.mini-job-title', { hasText: 'Backend Engineer — regional pay fixture' }).click()
   await expect(page.locator('.job-key-facts')).toContainText('별도 보상 조건')
   await expect(page.locator('.job-compensation dd > span')).toHaveText(['GBP 90,000–120,000 / 년', 'USD 140,000–180,000 / 년'])
   await page.locator('.compensation-evidence > summary').first().click()
@@ -172,7 +172,7 @@ test.describe('mobile pay disclosure', () => {
   test('hourly amounts and expanded original evidence remain readable and accessible', async ({ page }) => {
     await restore(page)
     await page.getByLabel('도시, 회사 또는 포지션 검색').fill('hourly pay fixture')
-    await page.locator('.mini-job-title').click()
+    await page.locator('.mini-job-title', { hasText: 'Backend Engineer — hourly pay fixture' }).click()
     await expect(page.locator('.job-compensation dd > span')).toHaveText('USD 55–65 / 시간')
     await expect(page.locator('.job-key-facts')).toContainText('보상 정보')
     await page.locator('.compensation-evidence > summary').click()

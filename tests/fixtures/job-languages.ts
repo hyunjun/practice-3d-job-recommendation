@@ -1,5 +1,6 @@
 import { CITIES } from '../../shared/cities'
 import type { Catalog, Company, Filters, Job, Profile, SavedJob } from '../../shared/types'
+import { COMPENSATION_VERSION } from '../../shared/types'
 
 // Every employer, post and paragraph here is invented. Raw responses intentionally
 // contain no languageRequirements: the real normalizers must interpret the body.
@@ -139,7 +140,7 @@ export function legacyLanguageJob(nativeId = '4501', overrides: Partial<Job> = {
     id: `${source}-${companyId}-${nativeId}`, companyId, source,
     title: LANGUAGE_TITLES.mixed, role: 'backend', cityIds: ['berlin'], locationLabel: 'Berlin, Germany',
     workMode: 'onsite', employment: 'fulltime', employmentVersion: 1,
-    visa: 'unknown', minExperience: 3, skills: ['TypeScript'], salary: null, compensationVersion: 2,
+    visa: 'unknown', minExperience: 3, skills: ['TypeScript'], salary: null, compensationVersion: COMPENSATION_VERSION,
     remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false, remoteScopeVersion: 2,
     description: languageDescription(LANGUAGE_MIXED), requirements: [],
     url: `https://example.com/jobs/${companyId}-${nativeId}`,

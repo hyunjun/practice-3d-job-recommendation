@@ -1,0 +1,1714 @@
+{
+  "version": 1,
+  "stage": 76,
+  "recordedAt": "2026-09-30T22:43:00.889990+00:00",
+  "purpose": "Immutable artifact for all3 final review; this file is not itself an approval.",
+  "baselineCommit": "b81d6dbb7fa3cdb8208f205a0540ab1e3619804e",
+  "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+  "fileCount": 419,
+  "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+  "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+  "sourceManifestSha256": "484eeba44e2f97dbe32f506097a2829dfb97a728d92a5a0e1f17bc389fe2c617",
+  "implementationGateSha256": "f169e2b2fd8e7bd536910058953fb01970052ff2d12347c99696afa5783046d3",
+  "environment": {
+    "recordedAt": "2026-09-30T21:20:13.371148+00:00",
+    "platform": "Darwin",
+    "osVersion": "27.0.1",
+    "architecture": "arm64",
+    "nodeVersion": "v26.10.0",
+    "playwrightVersion": "1.63.0",
+    "chromium": [
+      {
+        "name": "chromium",
+        "revision": "1243",
+        "installByDefault": true,
+        "browserVersion": "153.0.8010.12",
+        "title": "Chrome for Testing"
+      },
+      {
+        "name": "chromium-headless-shell",
+        "revision": "1243",
+        "installByDefault": true,
+        "browserVersion": "153.0.8010.12",
+        "title": "Chrome Headless Shell"
+      }
+    ],
+    "browserInstallReceiptSha256": "6265c6fa5bb0a94c1e86f83f7434fbd8a6d4f0b94864a91c3483eee1b6703ce2",
+    "preview8787": "remains off; no preview requested or started in this stage",
+    "verificationServers": "synthetic owned loopback servers only, started by independent executor afterall3approval",
+    "testsExecutedByThisPreparation": false,
+    "browserPath": ".local/research/76/runtime/playwright-browsers"
+  },
+  "independentExecutor": {
+    "cliModel": "claude-fable-5-1",
+    "requestedEffort": "max",
+    "backendEffectiveEffortExposed": false,
+    "role": "Independent test author and executor; Main and Astra reviewed product, tests, plan and evidence."
+  },
+  "modelCallsBeforeFinalReview": [
+    {
+      "phase": "design-discussion-01",
+      "mode": "review",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|design-discussion-01",
+      "startedAt": "2026-09-30T20:18:52.070548+00:00",
+      "endedAt": "2026-09-30T20:27:10.560142+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "fd1422c24272945b56acefe318662d03ef64edcf5dac343c011591cbe70670a8"
+    },
+    {
+      "phase": "design-review-02",
+      "mode": "review",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|design-review-02",
+      "startedAt": "2026-09-30T20:30:47.396272+00:00",
+      "endedAt": "2026-09-30T20:38:06.793881+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "61326029598406c77b453bb549e36df8156b9e60ad440750897624e16b30de72"
+    },
+    {
+      "phase": "design-review-03",
+      "mode": "review",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|design-review-03",
+      "startedAt": "2026-09-30T20:39:53.900944+00:00",
+      "endedAt": "2026-09-30T20:43:13.436892+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "03afc97db3da9acdae7d55440d2007edb4de6368704c1dbd18cf439fe64ae032"
+    },
+    {
+      "phase": "execution-01",
+      "mode": "test-execution",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|execution-01",
+      "startedAt": "2026-09-30T21:54:53.357512+00:00",
+      "endedAt": "2026-09-30T22:08:55.229811+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "b2b9d946111045c520db510aee79bbe883d8df0531705069408c799d2a620cd1"
+    },
+    {
+      "phase": "execution-02",
+      "mode": "test-execution",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|execution-02",
+      "startedAt": "2026-09-30T22:20:14.436535+00:00",
+      "endedAt": "2026-09-30T22:42:05.026876+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "fea4a10e08a38f8496c8341b711600995ab27b8e78a335169583cbd6311c59f3"
+    },
+    {
+      "phase": "implementation-review-01",
+      "mode": "review",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|implementation-review-01",
+      "startedAt": "2026-09-30T21:31:05.037788+00:00",
+      "endedAt": "2026-09-30T21:41:05.290307+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "dca0beba95974cebbc87b8c79190b711964423870cf5cf5744537b577890db67"
+    },
+    {
+      "phase": "implementation-review-02",
+      "mode": "review",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|implementation-review-02",
+      "startedAt": "2026-09-30T21:47:14.438872+00:00",
+      "endedAt": "2026-09-30T21:51:00.800246+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "8990dcf2572118054b7275941b78e647ee878a1eb4c3a2f3ec7f627f8009f766"
+    },
+    {
+      "phase": "implementation-review-03",
+      "mode": "review",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|implementation-review-03",
+      "startedAt": "2026-09-30T22:13:35.813179+00:00",
+      "endedAt": "2026-09-30T22:16:04.446308+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "bd7a639665157415d4ac37c12ba9553bd708b180a5e48e09a79009c30d0c0d42"
+    },
+    {
+      "phase": "independent-design",
+      "mode": "review",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|independent-design",
+      "startedAt": "2026-09-30T20:05:06.783608+00:00",
+      "endedAt": "2026-09-30T20:17:33.030090+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "81fd33a8e4c60f63a3928ff9f903e9f70b4b360b9e41a2bd1c9d5ad63536b3c4"
+    },
+    {
+      "phase": "test-authoring-01",
+      "mode": "test-authoring",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|test-authoring-01",
+      "startedAt": "2026-09-30T20:43:55.181832+00:00",
+      "endedAt": "2026-09-30T21:15:14.545620+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "62e41009d24adc5c6651e08615537a2921e95c8b89476e8a0c7216851ea5375c"
+    },
+    {
+      "phase": "test-authoring-02",
+      "mode": "test-authoring",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|test-authoring-02",
+      "startedAt": "2026-09-30T21:15:57.779086+00:00",
+      "endedAt": "2026-09-30T21:25:20.019951+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "55f67fad42810b57e890a0ef4d83dd0e57d5bc06a109e5f7ed7bf6649fd4f778"
+    },
+    {
+      "phase": "test-authoring-03",
+      "mode": "test-authoring",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|test-authoring-03",
+      "startedAt": "2026-09-30T21:25:46.667343+00:00",
+      "endedAt": "2026-09-30T21:30:02.881792+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "5e3339935361faa4e63f118f6d3ba73e56466952e0a1016a1dc9fc6b5bf2cc44"
+    },
+    {
+      "phase": "test-authoring-04",
+      "mode": "test-authoring",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|test-authoring-04",
+      "startedAt": "2026-09-30T21:42:35.014191+00:00",
+      "endedAt": "2026-09-30T21:46:02.339044+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "ae4095150cd49f0f8f6367d0b2141d51de507bb4e1208645db2e6bf470dd5874"
+    },
+    {
+      "phase": "test-authoring-05",
+      "mode": "test-authoring",
+      "sessionId": "081a533a-bfd5-4059-8187-42b99eac7286",
+      "actor": "081a533a-bfd5-4059-8187-42b99eac7286|test-authoring-05",
+      "startedAt": "2026-09-30T22:09:35.955456+00:00",
+      "endedAt": "2026-09-30T22:12:50.015406+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "721ef32e9a4599fe45ea46ca3c8e990e0633ba1a3527f1a2fd65f495a624e92b"
+    }
+  ],
+  "runs": [
+    {
+      "runId": "20260930T215530623696Z-9515d72d",
+      "kind": "check",
+      "status": "complete",
+      "startedAt": "2026-09-30T21:55:30.672341+00:00",
+      "endedAt": "2026-09-30T21:55:45.579909+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "check",
+        "--",
+        "--reporter=json",
+        "--outputFile=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T215530623696Z-9515d72d/vitest.json"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T215530623696Z-9515d72d/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "cbb686bada626fd9f3734dd6cc05b99ab8783ef7537b850477ea1656e62fd8dd",
+      "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+      "executionPlanSha256": "1a8d0350075d7f09314d8ee13b7e33a85d81b6a20d39a1d379390bd677fb929d",
+      "implementationGateSha256": "3c119fa4873ba4a15b64be52cbce1bb1dcda6d471e7efd8a788d517d6a5fcee1",
+      "fileCount": 419,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2479,
+        "sha256": "5f531ac55933cfe43198bdaf53ca539096c4f660403136e34c4059ff4ebb0435"
+      },
+      "cleanup": {
+        "registeredSpawns": 101,
+        "observedOwnedProcesses": 99,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 99,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 368,
+        "sha256": "479ace8030d762a146280e0added1bacba7289afed27be978777e70c8264df7b"
+      },
+      "unit": {
+        "success": true,
+        "numTotalTests": 2978,
+        "numPassedTests": 2978,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "fileCount": 89,
+        "assertionCount": 2978,
+        "nonPassed": [],
+        "report": {
+          "bytes": 1275245,
+          "sha256": "6e5f3afa98a98f1a16167b417b8894e2f34dff56e03e3b6ead8b17f0e5222545"
+        }
+      },
+      "independentActor": "081a533a-bfd5-4059-8187-42b99eac7286|execution-01"
+    },
+    {
+      "runId": "20260930T215628358306Z-900803e0",
+      "kind": "build",
+      "status": "complete",
+      "startedAt": "2026-09-30T21:56:28.399531+00:00",
+      "endedAt": "2026-09-30T21:56:31.157414+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T215628358306Z-900803e0/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "cbb686bada626fd9f3734dd6cc05b99ab8783ef7537b850477ea1656e62fd8dd",
+      "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+      "executionPlanSha256": "1a8d0350075d7f09314d8ee13b7e33a85d81b6a20d39a1d379390bd677fb929d",
+      "implementationGateSha256": "3c119fa4873ba4a15b64be52cbce1bb1dcda6d471e7efd8a788d517d6a5fcee1",
+      "fileCount": 419,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2296,
+        "sha256": "1f902a0938185a8965bc7ec875ce2665b0d8777b90bf087ae3697672d0359c7a"
+      },
+      "cleanup": {
+        "registeredSpawns": 3,
+        "observedOwnedProcesses": 5,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 5,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 12128,
+        "sha256": "a6d5eb7eee80195dfd9e4f6cec9aba9a245ee56e65512e80c87c2b03fdfb449e"
+      },
+      "build": {
+        "artifactDigest": "e8042711da2c5d65a4041be8b012254221e001bacc170090f1cc365acc8b4cb2",
+        "fileCount": 559,
+        "manifest": {
+          "bytes": 97048,
+          "sha256": "b6d245f835edfd747a880af236d89e24e26b4e3e6b48baa3b8c6dc8ef055a579"
+        }
+      },
+      "independentActor": "081a533a-bfd5-4059-8187-42b99eac7286|execution-01"
+    },
+    {
+      "runId": "20260930T215645623538Z-ee901a5d",
+      "kind": "e2e-development",
+      "status": "failed-or-invalid",
+      "startedAt": "2026-09-30T21:56:45.661860+00:00",
+      "endedAt": "2026-09-30T22:07:25.007926+00:00",
+      "exitCode": 1,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/compensation-number-format.spec.ts",
+        "tests/e2e/compensation.spec.ts",
+        "tests/e2e/job-upgrade.spec.ts",
+        "tests/e2e/saved-pages.spec.ts",
+        "tests/e2e/providers.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/catalog-retention.spec.ts",
+        "tests/e2e/regional-coverage.spec.ts",
+        "tests/e2e/job-work-time.spec.ts",
+        "tests/e2e/job-languages.spec.ts",
+        "tests/e2e/workplace-countries.spec.ts",
+        "tests/e2e/public-only.spec.ts",
+        "tests/e2e/retired-samples.spec.ts",
+        "tests/e2e/catalog.spec.ts",
+        "tests/e2e/journey.spec.ts",
+        "tests/e2e/saved-storage.spec.ts",
+        "tests/e2e/persistence.spec.ts",
+        "tests/e2e/saved-backup.spec.ts",
+        "tests/e2e/resume-import.spec.ts",
+        "tests/e2e/board-status-provenance.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T215645623538Z-ee901a5d/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "development",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/runtime/playwright-browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T215645623538Z-ee901a5d/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T215645623538Z-ee901a5d/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "cbb686bada626fd9f3734dd6cc05b99ab8783ef7537b850477ea1656e62fd8dd",
+      "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+      "executionPlanSha256": "1a8d0350075d7f09314d8ee13b7e33a85d81b6a20d39a1d379390bd677fb929d",
+      "implementationGateSha256": "3c119fa4873ba4a15b64be52cbce1bb1dcda6d471e7efd8a788d517d6a5fcee1",
+      "fileCount": 419,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 3879,
+        "sha256": "2284efc4858df24b853f88cc6f26af0c179e8b044a58774bc733364bf7b2ef07"
+      },
+      "cleanup": {
+        "registeredSpawns": 639,
+        "observedOwnedProcesses": 820,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 47,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 527271,
+        "sha256": "6421dc0a4b1b83801e5af890fff7d360d2b2dc326fd659ef5e90f039bd7bfb2d"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T21:56:46.453Z",
+          "duration": 638122.698,
+          "expected": 193,
+          "skipped": 0,
+          "unexpected": 1,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 194,
+        "files": [
+          "board-status-provenance.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-worker.spec.ts",
+          "catalog.spec.ts",
+          "compensation-number-format.spec.ts",
+          "compensation.spec.ts",
+          "job-languages.spec.ts",
+          "job-upgrade.spec.ts",
+          "job-work-time.spec.ts",
+          "journey.spec.ts",
+          "persistence.spec.ts",
+          "providers.spec.ts",
+          "public-only.spec.ts",
+          "regional-coverage.spec.ts",
+          "resume-import.spec.ts",
+          "retired-samples.spec.ts",
+          "saved-backup.spec.ts",
+          "saved-pages.spec.ts",
+          "saved-storage.spec.ts",
+          "workplace-countries.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [
+          {
+            "file": "compensation-number-format.spec.ts",
+            "title": "localized separators are read as whole amounts, and only complete annual ranges enter statistics and the known-salary filter",
+            "expectedStatus": "passed",
+            "status": "failed",
+            "retry": 0
+          }
+        ],
+        "report": {
+          "bytes": 9455698,
+          "sha256": "9df17c7c90b0000aea660bb89f5156aad90beaa18629b0cd3ab2109674d9861f"
+        }
+      },
+      "independentActor": "081a533a-bfd5-4059-8187-42b99eac7286|execution-01"
+    },
+    {
+      "runId": "20260930T222052033549Z-9b58ed60",
+      "kind": "check",
+      "status": "complete",
+      "startedAt": "2026-09-30T22:20:52.075675+00:00",
+      "endedAt": "2026-09-30T22:21:08.975691+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "check",
+        "--",
+        "--reporter=json",
+        "--outputFile=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T222052033549Z-9b58ed60/vitest.json"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T222052033549Z-9b58ed60/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+      "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+      "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+      "implementationGateSha256": "f169e2b2fd8e7bd536910058953fb01970052ff2d12347c99696afa5783046d3",
+      "fileCount": 419,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2480,
+        "sha256": "9f6ea0fc4f022a24d6f08b5ff6990b763396398357c03c3ece18ad169cd1059b"
+      },
+      "cleanup": {
+        "registeredSpawns": 99,
+        "observedOwnedProcesses": 97,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 97,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 368,
+        "sha256": "7f0c07e8ecb83e42e0fcd43530f1c220b464a9b3f1a98c253fe51c40678dca14"
+      },
+      "unit": {
+        "success": true,
+        "numTotalTests": 2978,
+        "numPassedTests": 2978,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "fileCount": 89,
+        "assertionCount": 2978,
+        "nonPassed": [],
+        "report": {
+          "bytes": 1275164,
+          "sha256": "0852d62b187d944420eaa5a74bc6a27e16f336fd682f65a2ae9ae0d6c362e8f3"
+        }
+      },
+      "independentActor": "081a533a-bfd5-4059-8187-42b99eac7286|execution-02"
+    },
+    {
+      "runId": "20260930T222125934063Z-645fe458",
+      "kind": "build",
+      "status": "complete",
+      "startedAt": "2026-09-30T22:21:25.971327+00:00",
+      "endedAt": "2026-09-30T22:21:29.223130+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T222125934063Z-645fe458/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+      "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+      "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+      "implementationGateSha256": "f169e2b2fd8e7bd536910058953fb01970052ff2d12347c99696afa5783046d3",
+      "fileCount": 419,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2298,
+        "sha256": "be5cbeaebb6b6d065a0a68397c5cf81f892615febe1c3163d0ea5893d8a71012"
+      },
+      "cleanup": {
+        "registeredSpawns": 3,
+        "observedOwnedProcesses": 5,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 5,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 12129,
+        "sha256": "1b3b40a8bd8edba63c675820d6819d315a7f54e28b19fd3b3b5b1175716ed5cb"
+      },
+      "build": {
+        "artifactDigest": "e8042711da2c5d65a4041be8b012254221e001bacc170090f1cc365acc8b4cb2",
+        "fileCount": 559,
+        "manifest": {
+          "bytes": 97048,
+          "sha256": "b6d245f835edfd747a880af236d89e24e26b4e3e6b48baa3b8c6dc8ef055a579"
+        }
+      },
+      "independentActor": "081a533a-bfd5-4059-8187-42b99eac7286|execution-02"
+    },
+    {
+      "runId": "20260930T222144594520Z-b054b024",
+      "kind": "e2e-development",
+      "status": "complete",
+      "startedAt": "2026-09-30T22:21:44.639053+00:00",
+      "endedAt": "2026-09-30T22:32:01.857141+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/compensation-number-format.spec.ts",
+        "tests/e2e/compensation.spec.ts",
+        "tests/e2e/job-upgrade.spec.ts",
+        "tests/e2e/saved-pages.spec.ts",
+        "tests/e2e/providers.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/catalog-retention.spec.ts",
+        "tests/e2e/regional-coverage.spec.ts",
+        "tests/e2e/job-work-time.spec.ts",
+        "tests/e2e/job-languages.spec.ts",
+        "tests/e2e/workplace-countries.spec.ts",
+        "tests/e2e/public-only.spec.ts",
+        "tests/e2e/retired-samples.spec.ts",
+        "tests/e2e/catalog.spec.ts",
+        "tests/e2e/journey.spec.ts",
+        "tests/e2e/saved-storage.spec.ts",
+        "tests/e2e/persistence.spec.ts",
+        "tests/e2e/saved-backup.spec.ts",
+        "tests/e2e/resume-import.spec.ts",
+        "tests/e2e/board-status-provenance.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T222144594520Z-b054b024/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "development",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/runtime/playwright-browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T222144594520Z-b054b024/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T222144594520Z-b054b024/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+      "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+      "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+      "implementationGateSha256": "f169e2b2fd8e7bd536910058953fb01970052ff2d12347c99696afa5783046d3",
+      "fileCount": 419,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 3872,
+        "sha256": "ff77a8380fa3ecbdb2bbd565e63a84634c8a4d592778f6fbb20563ed01de5623"
+      },
+      "cleanup": {
+        "registeredSpawns": 636,
+        "observedOwnedProcesses": 691,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 45,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 521669,
+        "sha256": "383d7780f9be0b14f627bf25ac80705ca296cf91fae601de41dd6f67d229bc55"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T22:21:45.445Z",
+          "duration": 615878.859,
+          "expected": 194,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 194,
+        "files": [
+          "board-status-provenance.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-worker.spec.ts",
+          "catalog.spec.ts",
+          "compensation-number-format.spec.ts",
+          "compensation.spec.ts",
+          "job-languages.spec.ts",
+          "job-upgrade.spec.ts",
+          "job-work-time.spec.ts",
+          "journey.spec.ts",
+          "persistence.spec.ts",
+          "providers.spec.ts",
+          "public-only.spec.ts",
+          "regional-coverage.spec.ts",
+          "resume-import.spec.ts",
+          "retired-samples.spec.ts",
+          "saved-backup.spec.ts",
+          "saved-pages.spec.ts",
+          "saved-storage.spec.ts",
+          "workplace-countries.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 9445595,
+          "sha256": "abf22b3b3838b92770e001327d0ab40a3ca91368d331a996c76fe2120e8b2277"
+        }
+      },
+      "independentActor": "081a533a-bfd5-4059-8187-42b99eac7286|execution-02"
+    },
+    {
+      "runId": "20260930T223233079629Z-97531f1d",
+      "kind": "e2e-production",
+      "status": "complete",
+      "startedAt": "2026-09-30T22:32:33.120140+00:00",
+      "endedAt": "2026-09-30T22:39:53.566902+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/compensation-number-format.spec.ts",
+        "tests/e2e/compensation.spec.ts",
+        "tests/e2e/job-upgrade.spec.ts",
+        "tests/e2e/saved-pages.spec.ts",
+        "tests/e2e/providers.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/catalog-retention.spec.ts",
+        "tests/e2e/regional-coverage.spec.ts",
+        "tests/e2e/job-work-time.spec.ts",
+        "tests/e2e/job-languages.spec.ts",
+        "tests/e2e/workplace-countries.spec.ts",
+        "tests/e2e/public-only.spec.ts",
+        "tests/e2e/retired-samples.spec.ts",
+        "tests/e2e/catalog.spec.ts",
+        "tests/e2e/journey.spec.ts",
+        "tests/e2e/saved-storage.spec.ts",
+        "tests/e2e/persistence.spec.ts",
+        "tests/e2e/saved-backup.spec.ts",
+        "tests/e2e/resume-import.spec.ts",
+        "tests/e2e/board-status-provenance.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T223233079629Z-97531f1d/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "production",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/runtime/playwright-browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T223233079629Z-97531f1d/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/76/verification/20260930T223233079629Z-97531f1d/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/76/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+      "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+      "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+      "implementationGateSha256": "f169e2b2fd8e7bd536910058953fb01970052ff2d12347c99696afa5783046d3",
+      "fileCount": 419,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": {
+        "proofSha256": "a23e855deb8b8204b2fd850f416e56d201ae5465ede60e5511f2d4b7346ef361",
+        "buildRunId": "20260930T222125934063Z-645fe458",
+        "artifactDigest": "e8042711da2c5d65a4041be8b012254221e001bacc170090f1cc365acc8b4cb2"
+      },
+      "receipt": {
+        "bytes": 4100,
+        "sha256": "a82bddd0a23f5f3ca72b9b8da38d3e246a1483053da13b24336642c5c1c29ec2"
+      },
+      "cleanup": {
+        "registeredSpawns": 332,
+        "observedOwnedProcesses": 769,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 45,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 521937,
+        "sha256": "85e7c2037681a46fd0d62f3d148872536a866985ab7ce0c936ae042cb8f27a84"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T22:32:34.059Z",
+          "duration": 438810.376,
+          "expected": 194,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 194,
+        "files": [
+          "board-status-provenance.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-worker.spec.ts",
+          "catalog.spec.ts",
+          "compensation-number-format.spec.ts",
+          "compensation.spec.ts",
+          "job-languages.spec.ts",
+          "job-upgrade.spec.ts",
+          "job-work-time.spec.ts",
+          "journey.spec.ts",
+          "persistence.spec.ts",
+          "providers.spec.ts",
+          "public-only.spec.ts",
+          "regional-coverage.spec.ts",
+          "resume-import.spec.ts",
+          "retired-samples.spec.ts",
+          "saved-backup.spec.ts",
+          "saved-pages.spec.ts",
+          "saved-storage.spec.ts",
+          "workplace-countries.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 9382467,
+          "sha256": "9be933cd4d7fc71e880116e350d61ad4ce4cc59f556f84da610254abb0acffa2"
+        }
+      },
+      "independentActor": "081a533a-bfd5-4059-8187-42b99eac7286|execution-02"
+    }
+  ],
+  "selectedFinalRuns": {
+    "check": "20260930T222052033549Z-9b58ed60",
+    "build": "20260930T222125934063Z-645fe458",
+    "e2e-development": "20260930T222144594520Z-b054b024",
+    "e2e-production": "20260930T223233079629Z-97531f1d"
+  },
+  "crossModeCases": {
+    "equal": true,
+    "countPerMode": 194,
+    "files": [
+      "board-status-provenance.spec.ts",
+      "catalog-retention.spec.ts",
+      "catalog-worker.spec.ts",
+      "catalog.spec.ts",
+      "compensation-number-format.spec.ts",
+      "compensation.spec.ts",
+      "job-languages.spec.ts",
+      "job-upgrade.spec.ts",
+      "job-work-time.spec.ts",
+      "journey.spec.ts",
+      "persistence.spec.ts",
+      "providers.spec.ts",
+      "public-only.spec.ts",
+      "regional-coverage.spec.ts",
+      "resume-import.spec.ts",
+      "retired-samples.spec.ts",
+      "saved-backup.spec.ts",
+      "saved-pages.spec.ts",
+      "saved-storage.spec.ts",
+      "workplace-countries.spec.ts"
+    ]
+  },
+  "sourceControlsStillMatchAfterExecution": true,
+  "protectedOriginalsUnchanged": {
+    "verified": true,
+    "fileCount": 26
+  },
+  "newReferenceArchive": {
+    "verifiedAt": "2026-09-30T20:17:30.394654+00:00",
+    "crcPassed": true,
+    "allMembersBytesAndSha256Matched": true,
+    "workingCopiesRemoved": false,
+    "archiveSha256": "d2daa74863e98ba45c2e054c777bcab84ab0c919acad84877ec97d9fca55a2c4"
+  },
+  "historicalAudit": {
+    "scope": "Preserved historical inputs, not fresh collection or current posting validity.",
+    "corpus": {
+      "jobs": 6819,
+      "beforeComparable": 1215,
+      "afterComparable": 1224,
+      "classificationCounts": {
+        "jobs": 6819,
+        "changed": 70,
+        "unchanged": 6749,
+        "structured-preserved": 2436,
+        "corrected-space": 5,
+        "dot-three-to-evidence": 10,
+        "malformed-to-evidence": 13,
+        "newly-comparable": 9,
+        "other": 42,
+        "removed-comparability": 0
+      },
+      "allSemanticChangesReviewed": true,
+      "nonPayFieldsUnchanged": true,
+      "structuredRecordsIdenticalExceptVersion": 2436,
+      "reportSha256": "661b34ecfa2ac4d8beaf55b87f0db052a1a653fb73efe0be47bcf2c29dbc75aa",
+      "classificationSha256": "b9cc3c85a4bf57ea517286b4b53041ffb083a6d64c4232b7714bc1ceb54c0663"
+    },
+    "providerPriority": {
+      "pages": 12,
+      "rawRows": 189,
+      "changedPayRows": 2,
+      "allMetadataAndWinnersUnchanged": true,
+      "reportSha256": "ef9f8ec3e6a64cfb72a21b47c52502eabcba530ef2b4d577f466a06c9f08dbcb",
+      "comparisonSha256": "87661aa7a5e7dea469f2fc6ac644950c7ebc19467ecfd9eb07aef7353310d3a4"
+    },
+    "rawGrammarInventory": {
+      "reportSha256": "cc58e188b623c9755546671d4d32bb7a8f60e8d94f9cb3638a8211d7d2c2402d",
+      "scopeLimit": "Raw numeric notation counts include non-pay prose; they are not confirmed salary counts.",
+      "inventories": [
+        {
+          "scope": "full-description",
+          "textCount": 6819,
+          "numericRunCount": 58707,
+          "byGrammar": {
+            "plain-integer": {
+              "occurrences": 47906,
+              "jobs": 6690
+            },
+            "clear-dot-decimal": {
+              "occurrences": 659,
+              "jobs": 496
+            },
+            "comma-grouped": {
+              "occurrences": 9253,
+              "jobs": 3770
+            },
+            "space-grouped": {
+              "occurrences": 72,
+              "jobs": 35
+            },
+            "repeated-dot-grouped": {
+              "occurrences": 10,
+              "jobs": 10
+            },
+            "grouped-comma-decimal": {
+              "occurrences": 0,
+              "jobs": 0
+            },
+            "ambiguous-single-dot-three": {
+              "occurrences": 317,
+              "jobs": 168
+            },
+            "unsupported-bare-comma-fraction": {
+              "occurrences": 12,
+              "jobs": 12
+            },
+            "other-or-malformed": {
+              "occurrences": 478,
+              "jobs": 287
+            }
+          },
+          "explicitSuffixOccurrences": {
+            "clear-dot-decimal:k": 6,
+            "clear-dot-decimal:m": 2,
+            "comma-grouped:k": 8,
+            "other-or-malformed:m": 1,
+            "plain-integer:k": 522,
+            "plain-integer:m": 186
+          }
+        },
+        {
+          "scope": "stored-description-evidence",
+          "textCount": 1027,
+          "numericRunCount": 2056,
+          "byGrammar": {
+            "plain-integer": {
+              "occurrences": 116,
+              "jobs": 65
+            },
+            "clear-dot-decimal": {
+              "occurrences": 5,
+              "jobs": 3
+            },
+            "comma-grouped": {
+              "occurrences": 1888,
+              "jobs": 891
+            },
+            "space-grouped": {
+              "occurrences": 10,
+              "jobs": 5
+            },
+            "repeated-dot-grouped": {
+              "occurrences": 0,
+              "jobs": 0
+            },
+            "grouped-comma-decimal": {
+              "occurrences": 0,
+              "jobs": 0
+            },
+            "ambiguous-single-dot-three": {
+              "occurrences": 28,
+              "jobs": 12
+            },
+            "unsupported-bare-comma-fraction": {
+              "occurrences": 9,
+              "jobs": 9
+            },
+            "other-or-malformed": {
+              "occurrences": 0,
+              "jobs": 0
+            }
+          },
+          "explicitSuffixOccurrences": {
+            "comma-grouped:k": 7,
+            "plain-integer:k": 50
+          }
+        }
+      ]
+    }
+  },
+  "power": {
+    "allSelectedBrowserRunsCovered": true,
+    "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+    "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+    "runs": [
+      {
+        "runId": "20260930T222144594520Z-b054b024",
+        "kind": "e2e-development",
+        "startedAt": "2026-09-30T22:21:44.639053+00:00",
+        "endedAt": "2026-09-30T22:32:01.857141+00:00",
+        "before": {
+          "path": "main/power-before-execution-02.json",
+          "sha256": "9f073d0bc67c7c91860c33937cce7846b8b248e87d4a46c309baf56d95235a69",
+          "capturedAt": "2026-09-30T22:19:53.354061+00:00",
+          "scope": "before-execution-02",
+          "pid": 5039,
+          "processIdentity": "5039  5039 Thu Oct  1 06:54:26 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "originalIdentity": "5039  5039 Thu Oct  1 06:54:26 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "sameProcess": true,
+          "sourceProcessReceiptSha256": "327e7821f6f0b83a1f33fd22c018980dc1ddb29ab068f2c39e5055ffd69656d1",
+          "matchingAssertions": [
+            "pid 5039(caffeinate): [0x0001d60d0001938f] 00:25:27 PreventUserIdleSystemSleep named: \"caffeinate command-line tool\"",
+            "pid 5039(caffeinate): [0x0001d60d00079390] 00:25:27 PreventSystemSleep named: \"caffeinate command-line tool\""
+          ],
+          "acPower": true,
+          "expiresAt": "2026-09-30T23:54:26.326320+00:00",
+          "remainingSeconds": 5672.972259,
+          "powerWindowStart": "2026-09-30T21:54:26.326320+00:00",
+          "powerWindowEnd": "2026-09-30T22:19:53.354061+00:00",
+          "events": [],
+          "limits": [
+            "Point-in-time assertion checks plus the system power-event log; not continuous instrumentation.",
+            "Only Sleep/Wake/DarkWake records within the task assertion window are retained."
+          ],
+          "bothAssertionsPresent": true
+        },
+        "after": {
+          "path": "main/power-after-execution-02.json",
+          "sha256": "3eac8c266b055e22c04db64f0a3d2ba0bb9a1ef2b80323f4e299c7c2e75a5c82",
+          "capturedAt": "2026-09-30T22:40:08.587058+00:00",
+          "scope": "after-execution-02",
+          "pid": 5039,
+          "processIdentity": "5039  5039 Thu Oct  1 06:54:26 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "originalIdentity": "5039  5039 Thu Oct  1 06:54:26 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "sameProcess": true,
+          "sourceProcessReceiptSha256": "327e7821f6f0b83a1f33fd22c018980dc1ddb29ab068f2c39e5055ffd69656d1",
+          "matchingAssertions": [
+            "pid 5039(caffeinate): [0x0001d60d0001938f] 00:45:42 PreventUserIdleSystemSleep named: \"caffeinate command-line tool\"",
+            "pid 5039(caffeinate): [0x0001d60d00079390] 00:45:42 PreventSystemSleep named: \"caffeinate command-line tool\""
+          ],
+          "acPower": true,
+          "expiresAt": "2026-09-30T23:54:26.326320+00:00",
+          "remainingSeconds": 4457.739262,
+          "powerWindowStart": "2026-09-30T21:54:26.326320+00:00",
+          "powerWindowEnd": "2026-09-30T22:40:08.587058+00:00",
+          "events": [],
+          "limits": [
+            "Point-in-time assertion checks plus the system power-event log; not continuous instrumentation.",
+            "Only Sleep/Wake/DarkWake records within the task assertion window are retained."
+          ],
+          "bothAssertionsPresent": true
+        },
+        "runEvents": [],
+        "sameOwnedProcessAtBothEndpoints": true,
+        "noSleepOrWakeDuringRun": true
+      },
+      {
+        "runId": "20260930T223233079629Z-97531f1d",
+        "kind": "e2e-production",
+        "startedAt": "2026-09-30T22:32:33.120140+00:00",
+        "endedAt": "2026-09-30T22:39:53.566902+00:00",
+        "before": {
+          "path": "main/power-before-execution-02.json",
+          "sha256": "9f073d0bc67c7c91860c33937cce7846b8b248e87d4a46c309baf56d95235a69",
+          "capturedAt": "2026-09-30T22:19:53.354061+00:00",
+          "scope": "before-execution-02",
+          "pid": 5039,
+          "processIdentity": "5039  5039 Thu Oct  1 06:54:26 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "originalIdentity": "5039  5039 Thu Oct  1 06:54:26 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "sameProcess": true,
+          "sourceProcessReceiptSha256": "327e7821f6f0b83a1f33fd22c018980dc1ddb29ab068f2c39e5055ffd69656d1",
+          "matchingAssertions": [
+            "pid 5039(caffeinate): [0x0001d60d0001938f] 00:25:27 PreventUserIdleSystemSleep named: \"caffeinate command-line tool\"",
+            "pid 5039(caffeinate): [0x0001d60d00079390] 00:25:27 PreventSystemSleep named: \"caffeinate command-line tool\""
+          ],
+          "acPower": true,
+          "expiresAt": "2026-09-30T23:54:26.326320+00:00",
+          "remainingSeconds": 5672.972259,
+          "powerWindowStart": "2026-09-30T21:54:26.326320+00:00",
+          "powerWindowEnd": "2026-09-30T22:19:53.354061+00:00",
+          "events": [],
+          "limits": [
+            "Point-in-time assertion checks plus the system power-event log; not continuous instrumentation.",
+            "Only Sleep/Wake/DarkWake records within the task assertion window are retained."
+          ],
+          "bothAssertionsPresent": true
+        },
+        "after": {
+          "path": "main/power-after-execution-02.json",
+          "sha256": "3eac8c266b055e22c04db64f0a3d2ba0bb9a1ef2b80323f4e299c7c2e75a5c82",
+          "capturedAt": "2026-09-30T22:40:08.587058+00:00",
+          "scope": "after-execution-02",
+          "pid": 5039,
+          "processIdentity": "5039  5039 Thu Oct  1 06:54:26 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "originalIdentity": "5039  5039 Thu Oct  1 06:54:26 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "sameProcess": true,
+          "sourceProcessReceiptSha256": "327e7821f6f0b83a1f33fd22c018980dc1ddb29ab068f2c39e5055ffd69656d1",
+          "matchingAssertions": [
+            "pid 5039(caffeinate): [0x0001d60d0001938f] 00:45:42 PreventUserIdleSystemSleep named: \"caffeinate command-line tool\"",
+            "pid 5039(caffeinate): [0x0001d60d00079390] 00:45:42 PreventSystemSleep named: \"caffeinate command-line tool\""
+          ],
+          "acPower": true,
+          "expiresAt": "2026-09-30T23:54:26.326320+00:00",
+          "remainingSeconds": 4457.739262,
+          "powerWindowStart": "2026-09-30T21:54:26.326320+00:00",
+          "powerWindowEnd": "2026-09-30T22:40:08.587058+00:00",
+          "events": [],
+          "limits": [
+            "Point-in-time assertion checks plus the system power-event log; not continuous instrumentation.",
+            "Only Sleep/Wake/DarkWake records within the task assertion window are retained."
+          ],
+          "bothAssertionsPresent": true
+        },
+        "runEvents": [],
+        "sameOwnedProcessAtBothEndpoints": true,
+        "noSleepOrWakeDuringRun": true
+      }
+    ],
+    "assertionRenewals": [],
+    "limits": [
+      "Point-in-time owned-process/assertion checks and filtered system event records support these runs.",
+      "All owned assertion lifecycles are preserved and must be stopped before cleanup.",
+      "No persistent power settings, display-wake or user-activity assertions were changed."
+    ]
+  },
+  "authoredCoverageAndReview": {
+    "recordedAt": "2026-09-30T22:19:19.281978+00:00",
+    "reviewer": "main",
+    "independentAuthor": "Claude Code claude-fable-5-1, requested effort max",
+    "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+    "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+    "scope": "Static coverage review; runtime pass results are recorded separately from final-source receipts.",
+    "authoredTests": {
+      "newUnitFiles": {
+        "tests/unit/compensation-number-format.test.ts": 81,
+        "tests/unit/compensation-number-boundaries.test.ts": 71
+      },
+      "existingUnitExtension": {
+        "file": "tests/unit/catalog.test.ts",
+        "addedCachedObjectMigrationCases": 2
+      },
+      "newBrowserFile": "tests/e2e/compensation-number-format.spec.ts",
+      "newBrowserCases": 4,
+      "existingBrowserProcedureCorrection": "Two requested-title clicks in tests/e2e/compensation.spec.ts avoid opening stale published results.",
+      "currentVersionFixtureUpdates": 7,
+      "syntheticPublicDataOnly": true
+    },
+    "literalExpectedBehaviors": [
+      "Whole plain/space/comma/dot numeric grammar with explicit values, safe integer limits and legacy shorthand; ambiguous or malformed tokens retain evidence.",
+      "Complete valid ranges and atomic rejection of malformed endpoints across connector, sign, multiplier, trailing currency and supported slash-period boundaries.",
+      "LF, CRLF and CR numeric list/wrapped-range distinction; bounded dense-input recognition without increasing normal test timeouts.",
+      "Version1/2 text-derived records are reinterpreted; structured board compensation remains authoritative, and unsupported future versions are rejected.",
+      "Saved status, notes, dates, original text, reload persistence and CSV remain intact; unrecoverable legacy amounts retain the earlier-record label.",
+      "Desktop five-posting catalog: two comparable annual salaries, three requiring review, exact EUR88000–124000 and USD150000 rows, partial Colorado/Portugal evidence, known-salary filter of two and USD133k city median.",
+      "Separate city-label/monthly catalog: one of two comparable, EUR51000–76000 annual and PLN29000–32900 monthly, no invented geographic scope, USD70k median from one posting.",
+      "Mobile320px ambiguity evidence and corrected range: no horizontal dialog overflow and no axe WCAG2A/2AA/2.1AA violations."
+    ],
+    "oracleReview": "Displayed amounts, notes, counts, titles, dates and median values are literal expected outcomes. Provider normalization constructs fixture inputs; expected pay values are not computed from the implementation under test. Exact numeric output and original evidence are asserted separately.",
+    "selectedBrowserFiles": [
+      "tests/e2e/compensation-number-format.spec.ts",
+      "tests/e2e/compensation.spec.ts",
+      "tests/e2e/job-upgrade.spec.ts",
+      "tests/e2e/saved-pages.spec.ts",
+      "tests/e2e/providers.spec.ts",
+      "tests/e2e/catalog-worker.spec.ts",
+      "tests/e2e/catalog-retention.spec.ts",
+      "tests/e2e/regional-coverage.spec.ts",
+      "tests/e2e/job-work-time.spec.ts",
+      "tests/e2e/job-languages.spec.ts",
+      "tests/e2e/workplace-countries.spec.ts",
+      "tests/e2e/public-only.spec.ts",
+      "tests/e2e/retired-samples.spec.ts",
+      "tests/e2e/catalog.spec.ts",
+      "tests/e2e/journey.spec.ts",
+      "tests/e2e/saved-storage.spec.ts",
+      "tests/e2e/persistence.spec.ts",
+      "tests/e2e/saved-backup.spec.ts",
+      "tests/e2e/resume-import.spec.ts",
+      "tests/e2e/board-status-provenance.spec.ts"
+    ],
+    "selectionLimit": "The same selected20specifications must pass in both modes; this is not every repository browser specification or every transitive fixture consumer.",
+    "cacheScopeLimit": "The new cached-object unit tests exercise parseCachedBoards. Existing file-cache/restart coverage remains; no new live disk-I/O browser test is claimed.",
+    "visualReview": {
+      "status": "reviewed",
+      "reviewer": "main",
+      "entries": [
+        {
+          "mode": "development",
+          "runId": "20260930T222144594520Z-b054b024",
+          "path": "verification/20260930T222144594520Z-b054b024/playwright-results/compensation-number-format-15813-and-the-known-salary-filter/desktop-corrected-range.png",
+          "sha256": "e9c505ef6e71d481c57a519ba37d8c60d58c3ea0e63db805c8ee4d17bebc2c91",
+          "bytes": 184388,
+          "dimensions": [
+            1440,
+            960
+          ],
+          "reviewer": "main",
+          "actuallyViewed": true,
+          "assessment": "At1440px, the expanded compensation block shows EUR88,000–124,000/year and the original space-grouped quote separately. Key facts show EUR88–124k and approximate USD97–136k/year. Text, details controls and fixed action buttons are readable without overlap in the captured scrolled dialog.",
+          "decision": "no-issue-observed-in-capture",
+          "reporterAttachmentPath": "verification/20260930T222144594520Z-b054b024/playwright-results/compensation-number-format-15813-and-the-known-salary-filter/attachments/desktop-corrected-range-8374207ff0edb624dd6f959bf62413b41e1df7bd.png",
+          "reporterAttachmentSha256": "e9c505ef6e71d481c57a519ba37d8c60d58c3ea0e63db805c8ee4d17bebc2c91",
+          "reporterAttachmentByteMatch": true
+        },
+        {
+          "mode": "development",
+          "runId": "20260930T222144594520Z-b054b024",
+          "path": "verification/20260930T222144594520Z-b054b024/playwright-results/compensation-number-format-b5ed4-ble-and-accessible-at-320px/mobile-ambiguous-evidence.png",
+          "sha256": "2e477e1d7d39259afda122fa3abf28ab7300dc33a98e821be23f003238b5c220",
+          "bytes": 51165,
+          "dimensions": [
+            320,
+            780
+          ],
+          "reviewer": "main",
+          "actuallyViewed": true,
+          "assessment": "At320px, compensation-review-needed and the evidence-only note are visible. The original62.000–118.000EUR wording remains in a wrapping quote with no invented numeric amount row. The card and footer actions fit within the viewport.",
+          "decision": "no-issue-observed-in-capture",
+          "reporterAttachmentPath": "verification/20260930T222144594520Z-b054b024/playwright-results/compensation-number-format-b5ed4-ble-and-accessible-at-320px/attachments/mobile-ambiguous-evidence-564a1fc30e574d9ccfae0dd84f9efc0d3b3bfcc7.png",
+          "reporterAttachmentSha256": "2e477e1d7d39259afda122fa3abf28ab7300dc33a98e821be23f003238b5c220",
+          "reporterAttachmentByteMatch": true
+        },
+        {
+          "mode": "development",
+          "runId": "20260930T222144594520Z-b054b024",
+          "path": "verification/20260930T222144594520Z-b054b024/playwright-results/compensation-number-format-b5ed4-ble-and-accessible-at-320px/mobile-corrected-range.png",
+          "sha256": "e4d17e030433d69404f518ad74bb83ee72e1701841e6e2c795deea0b5e3f092d",
+          "bytes": 45382,
+          "dimensions": [
+            320,
+            780
+          ],
+          "reviewer": "main",
+          "actuallyViewed": true,
+          "assessment": "At320px, EUR88–124k key facts and EUR88,000–124,000/year detail row are legible with ordinary wrapping. The original-evidence disclosure and footer actions fit the dialog; no horizontal clipping is visible.",
+          "decision": "no-issue-observed-in-capture",
+          "reporterAttachmentPath": "verification/20260930T222144594520Z-b054b024/playwright-results/compensation-number-format-b5ed4-ble-and-accessible-at-320px/attachments/mobile-corrected-range-f85abc95f6c29d9cb507fbd674065e996d64d54d.png",
+          "reporterAttachmentSha256": "e4d17e030433d69404f518ad74bb83ee72e1701841e6e2c795deea0b5e3f092d",
+          "reporterAttachmentByteMatch": true
+        },
+        {
+          "mode": "production",
+          "runId": "20260930T223233079629Z-97531f1d",
+          "path": "verification/20260930T223233079629Z-97531f1d/playwright-results/compensation-number-format-15813-and-the-known-salary-filter/desktop-corrected-range.png",
+          "sha256": "e9c505ef6e71d481c57a519ba37d8c60d58c3ea0e63db805c8ee4d17bebc2c91",
+          "bytes": 184388,
+          "dimensions": [
+            1440,
+            960
+          ],
+          "reviewer": "main",
+          "actuallyViewed": true,
+          "assessment": "At1440px, the expanded compensation block shows EUR88,000–124,000/year and the original space-grouped quote separately. Key facts show EUR88–124k and approximate USD97–136k/year. Text, details controls and fixed action buttons are readable without overlap in the captured scrolled dialog.",
+          "decision": "no-issue-observed-in-capture",
+          "identicalBytesToDevelopment": true,
+          "reporterAttachmentPath": "verification/20260930T223233079629Z-97531f1d/playwright-results/compensation-number-format-15813-and-the-known-salary-filter/attachments/desktop-corrected-range-fa172b76c8f5f10d6e876b9a39e31577823c147b.png",
+          "reporterAttachmentSha256": "e9c505ef6e71d481c57a519ba37d8c60d58c3ea0e63db805c8ee4d17bebc2c91",
+          "reporterAttachmentByteMatch": true
+        },
+        {
+          "mode": "production",
+          "runId": "20260930T223233079629Z-97531f1d",
+          "path": "verification/20260930T223233079629Z-97531f1d/playwright-results/compensation-number-format-b5ed4-ble-and-accessible-at-320px/mobile-ambiguous-evidence.png",
+          "sha256": "2e477e1d7d39259afda122fa3abf28ab7300dc33a98e821be23f003238b5c220",
+          "bytes": 51165,
+          "dimensions": [
+            320,
+            780
+          ],
+          "reviewer": "main",
+          "actuallyViewed": true,
+          "assessment": "At320px, compensation-review-needed and the evidence-only note are visible. The original62.000–118.000EUR wording remains in a wrapping quote with no invented numeric amount row. The card and footer actions fit within the viewport.",
+          "decision": "no-issue-observed-in-capture",
+          "identicalBytesToDevelopment": true,
+          "reporterAttachmentPath": "verification/20260930T223233079629Z-97531f1d/playwright-results/compensation-number-format-b5ed4-ble-and-accessible-at-320px/attachments/mobile-ambiguous-evidence-6dfb4146c936113694d15a9e848fcc8da8aa3f83.png",
+          "reporterAttachmentSha256": "2e477e1d7d39259afda122fa3abf28ab7300dc33a98e821be23f003238b5c220",
+          "reporterAttachmentByteMatch": true
+        },
+        {
+          "mode": "production",
+          "runId": "20260930T223233079629Z-97531f1d",
+          "path": "verification/20260930T223233079629Z-97531f1d/playwright-results/compensation-number-format-b5ed4-ble-and-accessible-at-320px/mobile-corrected-range.png",
+          "sha256": "e4d17e030433d69404f518ad74bb83ee72e1701841e6e2c795deea0b5e3f092d",
+          "bytes": 45382,
+          "dimensions": [
+            320,
+            780
+          ],
+          "reviewer": "main",
+          "actuallyViewed": true,
+          "assessment": "At320px, EUR88–124k key facts and EUR88,000–124,000/year detail row are legible with ordinary wrapping. The original-evidence disclosure and footer actions fit the dialog; no horizontal clipping is visible.",
+          "decision": "no-issue-observed-in-capture",
+          "identicalBytesToDevelopment": true,
+          "reporterAttachmentPath": "verification/20260930T223233079629Z-97531f1d/playwright-results/compensation-number-format-b5ed4-ble-and-accessible-at-320px/attachments/mobile-corrected-range-38d7c595911f499aa241354c2a5fc2efdd90b0b3.png",
+          "reporterAttachmentSha256": "e4d17e030433d69404f518ad74bb83ee72e1701841e6e2c795deea0b5e3f092d",
+          "reporterAttachmentByteMatch": true
+        }
+      ],
+      "scopes": [
+        "Desktop1440px corrected range with original quote",
+        "Mobile320px ambiguous evidence",
+        "Mobile320px corrected range"
+      ],
+      "limits": [
+        "Both modes were visually inspected from actual test-produced screenshots. This reviews these captures, not the whole application or browser suite.",
+        "The aggregate runtime outcomes must still be verified from terminal reports.",
+        "Screenshots remain temporary review artifacts, with hashes/conclusions preserved before cleanup."
+      ],
+      "detailRecords": [
+        "main/visual-review-development.json",
+        "main/visual-review-production.json"
+      ],
+      "priorFailureReview": "main/execution-01-failure-visual-review.json"
+    },
+    "crossModeActualCaseReview": {
+      "path": "main/cross-mode-review.json",
+      "sha256": "02eca7eb04b6c9bfb64c9dc3e811b946b1c3ddbe3a29db9773a84e0c5bc945d1",
+      "identicalCaseCount": 194,
+      "allCasesHaveExactlyOnePassingResult": true
+    }
+  },
+  "earlierFailuresAndResolutions": {
+    "createdAt": "2026-09-30T22:11:03.239503+00:00",
+    "stage": 76,
+    "status": "Final-source commands completed successfully; final unanimous evidence review remains pending.",
+    "designDisagreements": {
+      "resolvedAt": "candidate3 unanimous design gate",
+      "record": "Ambiguous single-dot-three notation, supported decimal-comma and multiplier families, complete numeric/range envelopes, slash annotations and numeric-line boundaries were discussed before implementation. Earlier unapproved interpretations were not counted as completed designs."
+    },
+    "productStaticFindings": [
+      {
+        "ids": [
+          "M1"
+        ],
+        "problem": "Trailing currency could be borrowed by the next endpoint, splitting a monthly PLN range.",
+        "resolution": "Bind a marker to its owned token and preserve the full range."
+      },
+      {
+        "ids": [
+          "M2",
+          "A76-P4"
+        ],
+        "problem": "Dash after a city/pay label could be rejected as a unary minus; a broad initial exception also accepted arbitrary negative prose.",
+        "resolution": "Bounded known-city/pay-label punctuation with whitespace checks, without scope/period/currency inference."
+      },
+      {
+        "ids": [
+          "M3",
+          "A76-P5"
+        ],
+        "problem": "Slash handling rejected legacy prose and could rescue a denominator from malformed numeric expressions.",
+        "resolution": "Explicit supported period annotations, legacy nonnumeric slash prose and whole progressing invalid numeric tails."
+      },
+      {
+        "ids": [
+          "A76-P1"
+        ],
+        "problem": "Tight range connectors and signed right endpoints had incorrect ownership.",
+        "resolution": "Distinguish complete range connectors from actual unary signs; reject the full malformed range."
+      },
+      {
+        "ids": [
+          "A76-P2"
+        ],
+        "problem": "Numeric continuation after an annotation could rescue a smaller prefix; a later variant lost trailing currency and misleadingly preserved old saved salary.",
+        "resolution": "Keep the complete invalid span and recover only its own terminal currency as evidence."
+      },
+      {
+        "ids": [
+          "A76-P3"
+        ],
+        "problem": "CR-only numeric lists could be mistaken for unsupported wrapped ranges.",
+        "resolution": "Preserve consistent LF, CRLF and CR boundaries."
+      },
+      {
+        "ids": [
+          "A76-P6"
+        ],
+        "problem": "Repeated label lookbehind could perform quadratic work on dense input.",
+        "resolution": "Only inspect the bounded 128-character label window when the required punctuation exists."
+      }
+    ],
+    "earlierImplementationGate": {
+      "revision": "01",
+      "outcome": "withheld",
+      "finding": "A76-T1",
+      "problem": "After changing a query, an unqualified click could select the previous published result before the worker responded.",
+      "resolution": "Fable scoped clicks to the requested literal title in both selected compensation specs; outputs, retries and timeouts unchanged. All3 approved candidate02 before execution."
+    },
+    "firstExecution": {
+      "sourceStateDigest": "cbb686bada626fd9f3734dd6cc05b99ab8783ef7537b850477ea1656e62fd8dd",
+      "check": "2978/2978 passed; 89 files",
+      "build": "passed",
+      "development": {
+        "runId": "20260930T215645623538Z-ee901a5d",
+        "passed": 193,
+        "failed": 1,
+        "skipped": 0,
+        "flaky": 0,
+        "retries": 0
+      },
+      "production": "not started after failed DEV command",
+      "finding": "A76-T2 (Astra record alias A76-E1)",
+      "classification": "test oracle/locator scope",
+      "problem": "The panel-wide negative EUR 54 check conflicts with the explicitly required original Portugal quote. The exact sole USD numeric row expectation passed.",
+      "agreement": "Main, Astra and Fable independently classified the contradictory ancestor-wide assertion. Fable explicitly agreed and applied the numeric-row locator correction in authoring05; all3 approved the exact corrected source/tests/plan in gate03.",
+      "unreachedFlow": "Later numeric-bullet, known-salary filter and city-median assertions in that failed case did not execute.",
+      "finalRerun": {
+        "sourceStateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+        "runs": {
+          "check": "20260930T222052033549Z-9b58ed60",
+          "build": "20260930T222125934063Z-645fe458",
+          "e2e-development": "20260930T222144594520Z-b054b024",
+          "e2e-production": "20260930T223233079629Z-97531f1d"
+        },
+        "unitPassed": 2978,
+        "unitFiles": 89,
+        "developmentPassed": 194,
+        "productionPassed": 194,
+        "skippedFlakyOrRetries": 0,
+        "previouslyUnreachedFlowNowPassedInBothModes": true,
+        "oldFailedRunRemainsFailed": true
+      }
+    },
+    "backendCallErrors": [
+      {
+        "recordedAt": "2026-09-30T21:52:01.395051+00:00",
+        "agentId": "01a0f19e-59f2-7010-a421-a260d679393f",
+        "phase": "implementation-review-02",
+        "status": "errored",
+        "message": "We’re currently experiencing high demand, which may cause temporary errors.",
+        "approvalInferred": false,
+        "response": "Retry the same bounded review with the same requested Astra/max role and unchanged source/plan",
+        "stateDigest": "cbb686bada626fd9f3734dd6cc05b99ab8783ef7537b850477ea1656e62fd8dd"
+      }
+    ],
+    "evidence": [
+      {
+        "path": "collaboration/design-discussion-01.md",
+        "sha256": "f1d82d223e36a29b5e70063f9e3be91cb22dac95c1d0dce9a100cde20fdbac6c"
+      },
+      {
+        "path": "collaboration/design-discussion-addendum-01.md",
+        "sha256": "ca7b16321dd5502ecccb188923c222c31afa57dc240a9dadd9e6c81a0c788d79"
+      },
+      {
+        "path": "collaboration/main-design-review-03.md",
+        "sha256": "057d4926ebe580fd01f198aa9f00438ddb084df666950cad2d14573b46d951f8"
+      },
+      {
+        "path": "collaboration/astra-product-review-01.md",
+        "sha256": "1ff69187ccd62e0a451c16414932c9ac670a98ae3ef820f522540117f0219d22"
+      },
+      {
+        "path": "collaboration/astra-product-review-02.md",
+        "sha256": "fe963491c179b7087671026514d5fd2d54229778595da07fbf43602db5e9a226"
+      },
+      {
+        "path": "collaboration/astra-product-review-03.md",
+        "sha256": "3f5026716b7d3cd5596f84f07df407431cf06a3043d112f108c9fe1d1d982424"
+      },
+      {
+        "path": "collaboration/astra-product-review-04.md",
+        "sha256": "4fe23230a0cfbe8a9c66cf03192aeb34840c116f9ea7f91c58582746f30a738f"
+      },
+      {
+        "path": "collaboration/astra-product-review-05.md",
+        "sha256": "2730b2167e2741347b69bca1e7bbf4c37aa20e4eefc01d969ca806b93a4b27ee"
+      },
+      {
+        "path": "collaboration/main-product-review-05.md",
+        "sha256": "c7593c6fe4499ce7a0d3ea20982433830d907f3b68be7cf434c85c62c50acc26"
+      },
+      {
+        "path": "collaboration/astra-implementation-review-01.json",
+        "sha256": "0f9a3a44a6959ba24e2c8491f31f421f2aafb6e2ed86733d57c1476c8c62f3df"
+      },
+      {
+        "path": "collaboration/implementation-discussion-01.md",
+        "sha256": "c751ea813aaf78d6b5e4b2724d9150024098347c9a9286da971d593ea4cc16b4"
+      },
+      {
+        "path": "independent/test-authoring-04.md",
+        "sha256": "536b21ece295844d3e05d32ec88995089c8bfe0a4aa4583ea682b14d4b35b3e8"
+      },
+      {
+        "path": "collaboration/execution-discussion-01.md",
+        "sha256": "45d533c675d13f06af20230d720cb1a79500535898cec859c7ad2525493e6650"
+      },
+      {
+        "path": "collaboration/astra-execution-01-failure-review.json",
+        "sha256": "01cb0867058c3f0e9eaa034ca161c721857abb0cb14f433985152dd4d5c0a9e0"
+      },
+      {
+        "path": "collaboration/execution-01.review.md",
+        "sha256": "537d7dcd970e3c0f618e4fbc0d010ccdf02c98034fd2096789ea00ecb2d8e62b"
+      },
+      {
+        "path": "main/execution-01-failure-visual-review.json",
+        "sha256": "e0a1f897e5959ecab8e207715604a929dfb03718994d1a16d47851a645e2cbcc"
+      },
+      {
+        "path": "main/verification-summary-02.json",
+        "sha256": "5c5b258631d59b231f03fce00aaffe0aef78885644b1f6d9cbafe760c1a4b2e4"
+      },
+      {
+        "path": "collaboration/astra-call-errors.json",
+        "sha256": "bfe7cc06a4d6320b0c8d32834148181e02457b6de1c172f9cbd68ff1600594d1"
+      },
+      {
+        "path": "independent/test-authoring-05.md",
+        "sha256": "c9e63e60b25a6da30c138d2ac4a1d377b06ffcf7c49e96e3d89258958eb9e75d"
+      },
+      {
+        "path": "collaboration/implementation-gate.json",
+        "sha256": "f169e2b2fd8e7bd536910058953fb01970052ff2d12347c99696afa5783046d3"
+      },
+      {
+        "path": "collaboration/main-implementation-review-03.json",
+        "sha256": "bd5de6e1e109ceb29ad23686cbce1d437c77af0c273ea46cc9ad81f6f834a5b8"
+      },
+      {
+        "path": "collaboration/astra-implementation-review-03.json",
+        "sha256": "78a4a0f587aad95d808820bb66e896305b70f2f5329873cc17436110eef0c7c3"
+      },
+      {
+        "path": "collaboration/implementation-review-03.review.md",
+        "sha256": "2d8f99bfcccf712b4fd70600ed77a5c1912b45d541749bf8df49c4ebb50505a6"
+      },
+      {
+        "path": "collaboration/astra-final-source-pre-review.json",
+        "sha256": "f67dd5f4ea1c31a2da0e791120776ffc682ac5603f685450debc844a34b4c542"
+      },
+      {
+        "path": "main/verification-summary-03.json",
+        "sha256": "6c0305f7d0866342753933ee2a6176576867427be1d263577105c20bc03c615f"
+      },
+      {
+        "path": "main/final-power-evidence.json",
+        "sha256": "adcdb7494d5b57cf370690c1eb1f077bce0229861a4d0d4159b9ca757a73c1e6"
+      },
+      {
+        "path": "main/unit-scratch-review.json",
+        "sha256": "e389119770dbe1d0a14c8e00f080a2793b541b7d8ce561d1306c0c8c3241cb9c"
+      }
+    ],
+    "recordedAt": "2026-09-30T22:40:56.387577+00:00",
+    "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+    "interimRecord": {
+      "path": "main/failure-history-before-rerun.json",
+      "sha256": "908f00740bcb71e258ead5652909f002fcd2152d52e2a778bcebd3f197d41848",
+      "expandedEvidenceSinceCapture": [
+        {
+          "path": "collaboration/astra-execution-01-failure-review.json",
+          "interimSha256": "a2b09bc643c9bb9671cec0ed26842e779c701039909f176092bf9f7d3057aa50",
+          "currentSha256": "01cb0867058c3f0e9eaa034ca161c721857abb0cb14f433985152dd4d5c0a9e0",
+          "reason": "Astra appended the terminal DEV result to its preliminary failure assessment; the original finding and initial-running scope are retained."
+        }
+      ]
+    },
+    "preCleanupInventoryPreparation": {
+      "record": "main/unit-scratch-review.json",
+      "issue": "An initial read-only scratch inventory assumed the wrong second fixture date and stopped before creating a report or deleting files.",
+      "correction": "The source fixture explicitly sets September24 and26. Actual file contents and producer source were checked, and the inventory now uses those dates. Astra independently verified all26file sizes, hashes and contents.",
+      "scope": "Inventory preparation only, no product or regression-test expectation was changed."
+    }
+  },
+  "limitations": {
+    "scope": "Stage 76 compensation number notation and version-3 migration",
+    "limitations": [
+      "The selected 20 E2E specifications run in development and production. They are a reviewed regression scope, not every repository E2E specification or every transitive fixture consumer.",
+      "New cache migration unit cases exercise cached catalog objects. They do not constitute newly added live disk-I/O or server-restart E2E cases.",
+      "Historical audits reuse preserved snapshots and response bodies. They do not establish that those postings are still open or that all current provider formats are covered.",
+      "The 2,436 structured preservation proofs cover entire jobs containing board-source compensation evidence except compensationVersion, not complete CachedBoard containers. The Himalayas comparison covers the winner, identity, provenance and other fields emitted by that diagnostic, not every possible normalized-job or original-response field.",
+      "Raw numeric grammar counts include non-pay text and must not be interpreted as confirmed salary or defect counts.",
+      "The recognizer joins supported numeric tokens, connectors and annotations. Word-form per-year connectors, intervening geographic prose and other unsupported text retain their existing interpretation; this change does not guarantee that every unsupported prose shape rejects every numeric value.",
+      "Known-city and pay-label punctuation is distinguished from a unary minus using bounded lookbehind. It does not infer geographic salary applicability, period or currency from a city.",
+      "Raw source values are not repaired based on plausibility. An explicit K suffix or implausibly low source amount retains its literal meaning if the grammar is otherwise valid.",
+      "Existing compensation-kind and period inference are unchanged. Separately observed signing-bonus-as-base and review-frequency-as-period examples remain candidates for a later independently designed stage.",
+      "The requested review settings are GPT-6 Astra/max and Claude Code Fable 5.1/max. Claude response metadata identifies the actual model, but does not expose the effective backend effort.",
+      "Unanimous review is a decision to advance on the recorded evidence. It is not a guarantee of a defect-free product or correctness outside the checked scope.",
+      "Reproducible raw logs, screenshots, traces, build outputs, browser downloads and temporary working files are removed only after conclusions, relevant hashes and reusable tools are preserved. Irreproducible original inputs and observation history remain ignored local data."
+    ]
+  }
+}

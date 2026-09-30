@@ -1,10 +1,9 @@
 import { normalizeCompensation } from './compensation'
+import { PAY_CURRENCY_CODES as CODES, payNumberMentions as mentions } from './pay-numbers'
+import type { PayNumberMention as Mention } from './pay-numbers'
 import type { CompensationInput, SalaryData } from './compensation'
 import type { CompensationRange, FactEvidence } from './types'
 
-const CODES = 'USD|EUR|GBP|CAD|SGD|AUD|KRW|JPY|CHF|PLN|INR|SEK|NOK|DKK|NZD|HKD|CNY|BRL|MXN|CZK|HUF|RON|TRY|ZAR|AED|ILS'
-const MARKER = `(?:US\\$|CA\\$|C\\$|A\\$|AU\\$|S\\$|SG\\$|NZ\\$|HK\\$|R\\$|(?:${CODES})(?![A-Za-z])|[$€£¥₩])`
-const NUMBER = '(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\.\\d+)?'
 const PAY = /\b(?:salary|salaries|compensation|remuneration|base (?:pay|range)|pay (?:range|rate|band)|hourly (?:pay|rate)|on[- ]target earnings|OTE)\b/i
 const NON_BASE = /^[\s,:;]*(?:(?:plus|and|with|an?|annual|yearly|monthly|target|discretionary|additional|cash|sign[- ]on|signing)\s+)*(?:equity|stock|bonus|stipend|allowance|budget|reimbursement)\b/i
 const TOTAL = /\b(?:total (?:annual |cash |target )?(?:compensation|pay|remuneration)|on[- ]target earnings|OTE)\b/i
@@ -13,45 +12,6 @@ const GEO = new RegExp(String.raw`\b(?:${GEO_NAME})\b`, 'i')
 const GEO_LABEL = new RegExp(String.raw`^(?:${GEO_NAME})(?:\s*(?:,|/|&|and)\s*(?:${GEO_NAME}))*(?:\s*\((?:${CODES})\))?$`, 'i')
 const ONE_SIDED = /\b(?:up to|from|starting (?:at|from)|at least|minimum of|maximum of|more than|over)\s*$/i
 const MAX_TEXT = 100000
-
-interface Mention {
-  index: number
-  end: number
-  raw: string
-  min: number
-  max: number
-  markers: string[]
-  single: boolean
-}
-
-function amount(value: string, suffix?: string): number {
-  return Number(value.replaceAll(',', '')) * (suffix?.toLowerCase() === 'm' ? 1000000 : suffix?.toLowerCase() === 'k' ? 1000 : 1)
-}
-
-function mentions(text: string): Mention[] {
-  const found: Mention[] = []
-  const ranges = new RegExp(`(${MARKER})?[ \\t]*(${NUMBER})[ \\t]*(?:([km])(?![A-Za-z]))?[ \\t]*(?:[-–—−]|\\bto\\b|\\bthrough\\b)[ \\t]*(${MARKER})?[ \\t]*(${NUMBER})[ \\t]*(?:([km])(?![A-Za-z]))?[ \\t]*(${MARKER})?(?!\\d|[,.]\\d|[A-Za-z])`, 'gi')
-  for (const match of text.matchAll(ranges)) {
-    if (!match[1] && !match[4] && !match[7]) continue
-    const left = match[3] || (Number(match[2].replaceAll(',', '')) < 1000 ? match[6] : undefined)
-    const right = match[6] || (Number(match[5].replaceAll(',', '')) < 1000 ? match[3] : undefined)
-    found.push({
-      index: match.index, end: match.index + match[0].length, raw: match[0].trim(),
-      min: amount(match[2], left), max: amount(match[5], right),
-      markers: [match[1], match[4], match[7]].filter(Boolean), single: false,
-    })
-  }
-  const singles = new RegExp(`(${MARKER})?[ \\t]*(${NUMBER})[ \\t]*(?:([km])(?![A-Za-z]))?[ \\t]*(${MARKER})?(?!\\d|[,.]\\d|[A-Za-z])`, 'gi')
-  for (const match of text.matchAll(singles)) {
-    if ((!match[1] && !match[4]) || found.some(item => match.index < item.end && match.index + match[0].length > item.index)) continue
-    found.push({
-      index: match.index, end: match.index + match[0].length, raw: match[0].trim(),
-      min: amount(match[2], match[3]), max: amount(match[2], match[3]),
-      markers: [match[1], match[4]].filter(Boolean), single: true,
-    })
-  }
-  return found.sort((a, b) => a.index - b.index).slice(0, 101)
-}
 
 export function payPeriod(text: string): CompensationRange['period'] {
   const monetary = new RegExp(`[$€£¥₩]\\s*\\d|\\b(?:${CODES})\\s*\\d|\\d[\\d, .]*\\b(?:${CODES})\\b`, 'i')

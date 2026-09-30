@@ -764,3 +764,11 @@ Himalayas는 전체 회사 커리어 목록을 대신하지 않는 원격 공고
 이전 가상 공고의 메모·지원 상태·원본은 기존 IndexedDB의 메타데이터 보관함에 원래 항목 전체로 남깁니다. 보관과 활성 목록에서의 제거를 같은 트랜잭션에서 처리하고, 기존 탭의 재기록·용량 부족·중단·중복 ID를 검증합니다. 공개 공고의 저장 기록은 유지하며, 외부 파일의 가상 공고는 제외 수량을 안내하고 선택한 원본 파일에 남깁니다.
 
 현재 동작과 보관·삭제 범위는 [브라우저 저장 기록](saved-storage.md), 수집 대상과 실제 반영 수량은 [지역·산업별 출처 조사](regional-industry-sources.md), 완료한 검사는 [단계별 검증 기록](improvements.md)에 정리합니다. 실제 수집 원문과 화면은 `.local/`에 보관하고 공개 테스트에는 가상 자료를 사용합니다.
+
+## 보상 금액의 숫자 표기 — 2026-10-01
+
+- [Unicode TR35 Number Symbols](https://unicode.org/reports/tr35/tr35-numbers.html#Number_Symbols)는 소수점과 그룹 구분자를 로케일별로 정의합니다. [Parsing Numbers](https://unicode.org/reports/tr35/tr35-numbers.html#Parsing_Numbers)는 겹치는 기호를 문맥으로 구분하고 모호한 입력을 사용 전에 다시 표시하도록 안내합니다. 공고의 통화·근무지·금액 크기로 로케일을 추정하지 않고, 지원하는 문법과 모호한 경우의 원문 표시를 명시했습니다.
+- [Greenhouse Job Board API](https://docs.greenhouse.io/job-board.html)의 `pay_input_ranges`는 `min_cents`·`max_cents`·통화를 별도 필드로 제공합니다. 숫자 표기 수정은 본문에서 읽은 금액에 적용하고 구조화된 숫자는 보존합니다.
+- 과거 수집본의 공백·점 표기와 잘못된 쉼표 사례를 조사했습니다. 현재 공고가 계속 유효한지 새로 조회한 결과는 아닙니다. [설계와 지원 범위](design/compensation-number-format.md)에 모호성·범위 경계·기존 자료 업그레이드·독립 검증 조건을 기록했습니다.
+
+당시 참고 문서 응답은 무시되는 `.local/preserved-2026-10-01-stage-76/`에 압축 보존합니다. 실제 공고 원본은 기존 `.local/preserved-2026-09-28/historical-inputs.zip`을 재사용하며 공개 테스트에 본문을 복사하지 않습니다.

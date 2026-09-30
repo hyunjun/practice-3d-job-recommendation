@@ -1,0 +1,275 @@
+{
+  "version": 1,
+  "stage": 76,
+  "recordedAt": "2026-09-30T22:53:08.899755+00:00",
+  "title": "Whole compensation numeric tokens, range boundaries and version3 reinterpretation",
+  "baselineCommit": "b81d6dbb7fa3cdb8208f205a0540ab1e3619804e",
+  "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+  "sourceFileCount": 419,
+  "contractPath": "docs/design/compensation-number-format.md",
+  "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+  "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+  "finalEvidence": {
+    "path": "docs/validation/compensation-number-format-final-evidence-2026-10-01.json",
+    "sha256": "3a461b1226c8b9a942e845e239087133d94d974d67812a69ae634aec3ff00d0a"
+  },
+  "designApproval": {
+    "all3Approved": true,
+    "gateSha256": "25004d0175dadc7dc76d33000fbd8992639befb39f2688a94b1cb116c02a154a",
+    "participants": {
+      "main": "DESIGN_APPROVED",
+      "astra": "DESIGN_APPROVED",
+      "fable": "DESIGN_APPROVED"
+    }
+  },
+  "implementationApproval": {
+    "revision": "03",
+    "all3Approved": true,
+    "gateSha256": "f169e2b2fd8e7bd536910058953fb01970052ff2d12347c99696afa5783046d3"
+  },
+  "finalVerificationGate": {
+    "stage": 76,
+    "phase": "final-verification",
+    "recordedAt": "2026-09-30T22:52:01.263246+00:00",
+    "revision": "01",
+    "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+    "fileCount": 419,
+    "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+    "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+    "sourceManifestSha256": "484eeba44e2f97dbe32f506097a2829dfb97a728d92a5a0e1f17bc389fe2c617",
+    "implementationGateSha256": "f169e2b2fd8e7bd536910058953fb01970052ff2d12347c99696afa5783046d3",
+    "finalEvidencePath": "docs/validation/compensation-number-format-final-evidence-2026-10-01.json",
+    "finalEvidenceSha256": "3a461b1226c8b9a942e845e239087133d94d974d67812a69ae634aec3ff00d0a",
+    "participants": {
+      "main": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+        "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+        "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+        "finalEvidenceSha256": "3a461b1226c8b9a942e845e239087133d94d974d67812a69ae634aec3ff00d0a",
+        "reviewPath": "collaboration/main-final-review-01.json",
+        "reviewSha256": "66f5fc148f8ff40c2a2878e833d5b774e7f8335f8bd1db255d33a65694ef6a5d",
+        "unresolvedBlockers": []
+      },
+      "astra": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+        "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+        "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+        "finalEvidenceSha256": "3a461b1226c8b9a942e845e239087133d94d974d67812a69ae634aec3ff00d0a",
+        "reviewPath": "collaboration/astra-final-review-01.json",
+        "reviewSha256": "533b19cf352dd422a15a1618c2781ea9e7ed9c56ab3856ba583e75c70cde6b50",
+        "unresolvedBlockers": []
+      },
+      "fable": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "fd14f53434ae18b1721f7194a5ac6e1647a5d5e653999a56dea8d83239438359",
+        "contractSha256": "7352148ab01ee0f4ac47c1ecea2e5bd832ea2a100125f0a08c00622642e9f5df",
+        "executionPlanSha256": "f120192668f710f9e43e3c6e5842b6791d04d4827703b52304f3013e75dda130",
+        "finalEvidenceSha256": "3a461b1226c8b9a942e845e239087133d94d974d67812a69ae634aec3ff00d0a",
+        "reviewPath": "collaboration/final-review-01.review.md",
+        "reviewSha256": "217873179a2bbe60f31046cb86ca1b9e75ff1033e4e739ee7881f5c3d3e56db5",
+        "unresolvedBlockers": []
+      }
+    },
+    "unresolvedBlockers": [],
+    "fableCallReceiptSha256": "61e529a728b09ea209c5a99711cb1254a4c1a5fa267fab211c6d2215d3cc8dbe",
+    "meaning": "All3 approve the recorded final verification. Git preservation and verified temporary cleanup must still finish before stage completion."
+  },
+  "validation": {
+    "typecheck": "passed",
+    "unit": {
+      "files": 89,
+      "passed": 2978,
+      "failed": 0,
+      "pending": 0,
+      "todo": 0
+    },
+    "build": "passed",
+    "e2e": {
+      "filesPerMode": 20,
+      "developmentPassed": 194,
+      "productionPassed": 194,
+      "sameCaseIdentities": true,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0
+    },
+    "selectedRuns": {
+      "check": "20260930T222052033549Z-9b58ed60",
+      "build": "20260930T222125934063Z-645fe458",
+      "e2e-development": "20260930T222144594520Z-b054b024",
+      "e2e-production": "20260930T223233079629Z-97531f1d"
+    },
+    "screenshotsActuallyReviewedPerMode": 3,
+    "all3IndependentlyViewedRequiredScreenshots": true
+  },
+  "historicalDiagnostics": {
+    "scope": "Preserved historical inputs, not fresh collection or current posting validity.",
+    "corpus": {
+      "jobs": 6819,
+      "beforeComparable": 1215,
+      "afterComparable": 1224,
+      "classificationCounts": {
+        "jobs": 6819,
+        "changed": 70,
+        "unchanged": 6749,
+        "structured-preserved": 2436,
+        "corrected-space": 5,
+        "dot-three-to-evidence": 10,
+        "malformed-to-evidence": 13,
+        "newly-comparable": 9,
+        "other": 42,
+        "removed-comparability": 0
+      },
+      "allSemanticChangesReviewed": true,
+      "nonPayFieldsUnchanged": true,
+      "structuredRecordsIdenticalExceptVersion": 2436,
+      "reportSha256": "661b34ecfa2ac4d8beaf55b87f0db052a1a653fb73efe0be47bcf2c29dbc75aa",
+      "classificationSha256": "b9cc3c85a4bf57ea517286b4b53041ffb083a6d64c4232b7714bc1ceb54c0663"
+    },
+    "providerPriority": {
+      "pages": 12,
+      "rawRows": 189,
+      "changedPayRows": 2,
+      "allMetadataAndWinnersUnchanged": true,
+      "reportSha256": "ef9f8ec3e6a64cfb72a21b47c52502eabcba530ef2b4d577f466a06c9f08dbcb",
+      "comparisonSha256": "87661aa7a5e7dea469f2fc6ac644950c7ebc19467ecfd9eb07aef7353310d3a4"
+    },
+    "rawGrammarInventory": {
+      "reportSha256": "cc58e188b623c9755546671d4d32bb7a8f60e8d94f9cb3638a8211d7d2c2402d",
+      "scopeLimit": "Raw numeric notation counts include non-pay prose; they are not confirmed salary counts.",
+      "inventories": [
+        {
+          "scope": "full-description",
+          "textCount": 6819,
+          "numericRunCount": 58707,
+          "byGrammar": {
+            "plain-integer": {
+              "occurrences": 47906,
+              "jobs": 6690
+            },
+            "clear-dot-decimal": {
+              "occurrences": 659,
+              "jobs": 496
+            },
+            "comma-grouped": {
+              "occurrences": 9253,
+              "jobs": 3770
+            },
+            "space-grouped": {
+              "occurrences": 72,
+              "jobs": 35
+            },
+            "repeated-dot-grouped": {
+              "occurrences": 10,
+              "jobs": 10
+            },
+            "grouped-comma-decimal": {
+              "occurrences": 0,
+              "jobs": 0
+            },
+            "ambiguous-single-dot-three": {
+              "occurrences": 317,
+              "jobs": 168
+            },
+            "unsupported-bare-comma-fraction": {
+              "occurrences": 12,
+              "jobs": 12
+            },
+            "other-or-malformed": {
+              "occurrences": 478,
+              "jobs": 287
+            }
+          },
+          "explicitSuffixOccurrences": {
+            "clear-dot-decimal:k": 6,
+            "clear-dot-decimal:m": 2,
+            "comma-grouped:k": 8,
+            "other-or-malformed:m": 1,
+            "plain-integer:k": 522,
+            "plain-integer:m": 186
+          }
+        },
+        {
+          "scope": "stored-description-evidence",
+          "textCount": 1027,
+          "numericRunCount": 2056,
+          "byGrammar": {
+            "plain-integer": {
+              "occurrences": 116,
+              "jobs": 65
+            },
+            "clear-dot-decimal": {
+              "occurrences": 5,
+              "jobs": 3
+            },
+            "comma-grouped": {
+              "occurrences": 1888,
+              "jobs": 891
+            },
+            "space-grouped": {
+              "occurrences": 10,
+              "jobs": 5
+            },
+            "repeated-dot-grouped": {
+              "occurrences": 0,
+              "jobs": 0
+            },
+            "grouped-comma-decimal": {
+              "occurrences": 0,
+              "jobs": 0
+            },
+            "ambiguous-single-dot-three": {
+              "occurrences": 28,
+              "jobs": 12
+            },
+            "unsupported-bare-comma-fraction": {
+              "occurrences": 9,
+              "jobs": 9
+            },
+            "other-or-malformed": {
+              "occurrences": 0,
+              "jobs": 0
+            }
+          },
+          "explicitSuffixOccurrences": {
+            "comma-grouped:k": 7,
+            "plain-integer:k": 50
+          }
+        }
+      ]
+    }
+  },
+  "failedExecution01": {
+    "runId": "20260930T215645623538Z-ee901a5d",
+    "sourceStateDigest": "cbb686bada626fd9f3734dd6cc05b99ab8783ef7537b850477ea1656e62fd8dd",
+    "passed": 193,
+    "failed": 1,
+    "productionNotStartedAfterFailure": true,
+    "finding": "A76-T2/A76-E1: the test incorrectly excluded raw quote text from the whole evidence panel. Fable scoped the exclusion to numeric rows; exact amount/evidence and later-flow expectations were retained.",
+    "finalSourceRerunPassed": true
+  },
+  "limits": [
+    "The selected 20 E2E specifications run in development and production. They are a reviewed regression scope, not every repository E2E specification or every transitive fixture consumer.",
+    "New cache migration unit cases exercise cached catalog objects. They do not constitute newly added live disk-I/O or server-restart E2E cases.",
+    "Historical audits reuse preserved snapshots and response bodies. They do not establish that those postings are still open or that all current provider formats are covered.",
+    "The 2,436 structured preservation proofs cover entire jobs containing board-source compensation evidence except compensationVersion, not complete CachedBoard containers. The Himalayas comparison covers the winner, identity, provenance and other fields emitted by that diagnostic, not every possible normalized-job or original-response field.",
+    "Raw numeric grammar counts include non-pay text and must not be interpreted as confirmed salary or defect counts.",
+    "The recognizer joins supported numeric tokens, connectors and annotations. Word-form per-year connectors, intervening geographic prose and other unsupported text retain their existing interpretation; this change does not guarantee that every unsupported prose shape rejects every numeric value.",
+    "Known-city and pay-label punctuation is distinguished from a unary minus using bounded lookbehind. It does not infer geographic salary applicability, period or currency from a city.",
+    "Raw source values are not repaired based on plausibility. An explicit K suffix or implausibly low source amount retains its literal meaning if the grammar is otherwise valid.",
+    "Existing compensation-kind and period inference are unchanged. Separately observed signing-bonus-as-base and review-frequency-as-period examples remain candidates for a later independently designed stage.",
+    "The requested review settings are GPT-6 Astra/max and Claude Code Fable 5.1/max. Claude response metadata identifies the actual model, but does not expose the effective backend effort.",
+    "Unanimous review is a decision to advance on the recorded evidence. It is not a guarantee of a defect-free product or correctness outside the checked scope.",
+    "Reproducible raw logs, screenshots, traces, build outputs, browser downloads and temporary working files are removed only after conclusions, relevant hashes and reusable tools are preserved. Irreproducible original inputs and observation history remain ignored local data."
+  ],
+  "preservationAndCleanup": {
+    "status": "pending-follow-up-record",
+    "localOnlyToolArchiveRef": "archive/cleanup-2026-10-01/stage-76-verification-tools",
+    "plannedCleanupReport": "docs/validation/compensation-number-format-cleanup-2026-10-01.json",
+    "originalInputsAndObservationsRemainIgnoredLocalData": true,
+    "note": "Final verification approval precedes the scoped product commit and verified temporary cleanup. Later cleanup documentation records actual completion without modifying this approved evidence artifact."
+  }
+}
