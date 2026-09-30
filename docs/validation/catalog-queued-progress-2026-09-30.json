@@ -1,10 +1,10 @@
 {
   "version": 1,
   "stage": 75,
-  "recordedAt": "2026-09-30T19:54:13.272585+00:00",
+  "recordedAt": "2026-09-30T19:57:15.818153+00:00",
   "baselineCommit": "bb27a9fd941b765f5c4ff9e07f9567f2720092a6",
   "change": "Publish a negotiated waiting catalog before active presence work finishes, retain truthful actual collection counts and complete observable operation lifecycles.",
-  "status": "All3 explicitly approved the same final source/contract/plan/evidence. All required final checks passed. Product/test/doc commit and push, local archive and cleanup are next.",
+  "status": "Complete: all3 final approval, all required checks passed, implementation committed and pushed, useful local evidence archived in Git, all stage temporary material removed, originals verified and owned processes stopped.",
   "contract": {
     "path": "docs/design/catalog-queued-progress.md",
     "sha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9"
@@ -214,7 +214,8 @@
     "uniqueBlobCount": 3,
     "originalBytes": 94176,
     "allCrcSizeShaAndOriginalBytesMatched": true,
-    "workingCopiesRemoved": false
+    "workingCopiesRemoved": true,
+    "workingCopiesRemovedAt": "2026-09-30T19:56:13.749197+00:00"
   },
   "limitations": [
     "Initial response is independent of the active upstream presence dependency after cache initialization; no numeric startup or provider-latency guarantee.",
@@ -224,14 +225,37 @@
     "All3 agreement is a stage decision, not a defect-free guarantee."
   ],
   "cleanup": {
-    "status": "pending after verification, final agreement and Git preservation",
-    "protectedOriginalFileCount": 22,
-    "newReferenceFileCount": 4,
+    "status": "complete",
+    "report": "docs/validation/catalog-queued-progress-cleanup-2026-09-30.json",
+    "reportSha256": "e011a848360766a9955ac9aed29f478abd9b7c749cc21c9f37a4cf959c3b54c2",
+    "completedAt": "2026-09-30T19:56:14.133813+00:00",
+    "localAllocatedKiB": {
+      "before": 2294008,
+      "after": 243036
+    },
+    "remainingOriginalAndPreservationFileCount": 26,
+    "protectedExistingFileCount": 22,
+    "sourceAndTestsUnchanged": true,
+    "sourceFileCount": 414,
+    "finalEvidenceUnchanged": true,
+    "modelCallsTerminal": 15,
+    "astraClosed": true,
+    "taskScopedPowerAssertionsStopped": 2,
     "portsWithoutListeners": [
       5173,
       8787
     ],
-    "taskScopedPowerAssertion": "running; stop before final cleanup"
+    "worktreeCount": 1,
+    "localToolArchive": {
+      "verifiedAt": "2026-09-30T19:56:01.759231+00:00",
+      "localOnlyRef": "refs/heads/archive/cleanup-2026-09-30/stage-75-verification-tools",
+      "commit": "c01c91e06abbe913e06897c29f24357f1cc85a59",
+      "baseProductCommit": "052d85f193182dafdaaea481eaf969846c6d1843",
+      "fileCount": 167,
+      "allGitBlobsMatchOriginalBytes": true,
+      "manifestSha256": "2f57762357cb439d24227e2589481834fc8862b3f85de1593707159adb449c24",
+      "pushed": false
+    }
   },
   "staticFindings": [
     {
@@ -456,5 +480,13 @@
     "main": "Fresh identity and13 actual receipt/log/report files; protected22 originals matched.",
     "astra": "Fresh identity,559 build files,8 served-build proofs,22 protected originals and reference ZIP contents verified.",
     "fable": "Fresh hashes and content review within current-stage tool roots; all8screenshots reviewed; reliance limits stated."
+  },
+  "productCommit": "052d85f193182dafdaaea481eaf969846c6d1843",
+  "productPushedTo": "origin/main",
+  "evidenceRetention": {
+    "authoredToolsReviewsAndReceipts": "Preserved in the local-only Git archive above; original paths can be restored from its archive-manifest.json.",
+    "rawLogsReportsImagesTracesBrowserAndBuildCopies": "Reviewed, summarized with hashes in public evidence, then deleted as reproducible task output.",
+    "historicalLocalPaths": "Paths in immutable evidence refer to the pre-cleanup snapshot. They no longer exist as working files.",
+    "irreproducibleOriginals": "Existing22 files plus4 new reference ZIP/preservation files remain ignored/local."
   }
 }
