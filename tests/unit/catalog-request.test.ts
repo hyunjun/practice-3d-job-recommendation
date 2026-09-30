@@ -36,7 +36,8 @@ describe('browser collection protocol', () => {
     expect(onUpdate.mock.lastCall![1].done).toBe(true)
     await vi.advanceTimersByTimeAsync(120000)
     expect(fetcher).toHaveBeenCalledTimes(4)
-    expect(fetcher.mock.calls[0]).toMatchObject(['/api/catalog?source=public', { headers: { Prefer: 'respond-async' } }])
+    // Stage75: the browser asks for the negotiated waiting representation explicitly.
+    expect(fetcher.mock.calls[0]).toMatchObject(['/api/catalog?source=public', { headers: { Prefer: 'respond-async, orbit-progress=queued' } }])
     expect(fetcher.mock.calls.slice(1).map(call => call[0])).toEqual([
       `/api/catalog/progress?id=${COLLECTION_ID}&after=0`, `/api/catalog/progress?id=${COLLECTION_ID}&after=0`,
       `/api/catalog/progress?id=${COLLECTION_ID}&after=1`,

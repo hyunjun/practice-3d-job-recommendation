@@ -24,9 +24,51 @@ export const compressResponses: RequestHandler = (request, response, next) => {
 interface PublicSources {
   getCatalog: (refresh: boolean) => Promise<Catalog>
   getPostingStatus: (refresh: boolean, content?: boolean) => Promise<PostingStatusIndex>
-  getProgressiveCatalog?: (refresh: boolean) => Promise<{ catalog: Catalog; progress: CatalogProgress | null }>
+  getProgressiveCatalog?: (refresh: boolean, queued?: boolean) => Promise<{ catalog: Catalog; progress: CatalogProgress | null }>
   getCatalogProgress?: (id: string, after: number) => CatalogCollectionUpdate | null
   getObservations?: () => Promise<ObservationHistory>
+}
+
+/** Split list/parameter delimiters without treating quoted content as preferences. */
+function splitQuoted(value: string, delimiter: string): string[] | null {
+  const parts: string[] = []
+  let start = 0
+  let quoted = false
+  let escaped = false
+  for (let index = 0; index < value.length; index++) {
+    const character = value[index]
+    if (escaped) escaped = false
+    else if (quoted && character === '\\') escaped = true
+    else if (character === '"') quoted = !quoted
+    else if (!quoted && character === delimiter) {
+      parts.push(value.slice(start, index))
+      start = index + 1
+    }
+  }
+  if (quoted || escaped) return null
+  parts.push(value.slice(start))
+  return parts
+}
+
+const preferenceToken = /^[!#$%&'*+\-.^_`|~0-9a-z]+$/i
+const preferenceHead = /^([!#$%&'*+\-.^_`|~0-9a-z]+)(?:[ \t]*=[ \t]*(.*))?$/i
+const quotedPreference = /^"(?:[\t\x20-\x21\x23-\x5b\x5d-\x7e\x80-\xff]|\\[\t\x20-\x7e\x80-\xff])*"$/
+
+function preferences(header?: string): Map<string, string | null | undefined> {
+  const values = new Map<string, string | null | undefined>()
+  for (const item of splitQuoted(header ?? '', ',') ?? []) {
+    const head = splitQuoted(item, ';')?.[0].trim().match(preferenceHead)
+    if (!head) continue
+    const name = head[1].toLowerCase()
+    if (values.has(name)) continue
+    // Even an unknown/invalid first value cannot be replaced by a later duplicate.
+    values.set(name, undefined)
+    const raw = head[2]?.trim()
+    if (raw === undefined || raw === '') values.set(name, null)
+    else if (preferenceToken.test(raw)) values.set(name, raw)
+    else if (quotedPreference.test(raw)) values.set(name, raw.slice(1, -1).replace(/\\(.)/g, '$1') || null)
+  }
+  return values
 }
 
 export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCatalog, getCatalogProgress, getObservations }: PublicSources): Router {
@@ -49,11 +91,13 @@ export function createApiRouter({ getCatalog, getPostingStatus, getProgressiveCa
       // opts into an immediate snapshot and a read-only progress resource.
       // Legacy source names use the same public collector; no fictional
       // postings are generated, including for clients using the old URL.
-      if (getProgressiveCatalog && getCatalogProgress
-        && request.get('Prefer')?.split(',').some(value => /^respond-async(?:\s*;|$)/i.test(value.trim()))) {
-        const result = await getProgressiveCatalog(request.query.refresh === '1')
+      const requested = preferences(request.get('Prefer'))
+      if (getProgressiveCatalog && getCatalogProgress && requested.get('respond-async') === null) {
+        const queued = requested.get('orbit-progress') === 'queued'
+        const refresh = request.query.refresh === '1'
+        const result = queued ? await getProgressiveCatalog(refresh, true) : await getProgressiveCatalog(refresh)
         if (result.progress) {
-          response.setHeader('Preference-Applied', 'respond-async')
+          response.setHeader('Preference-Applied', queued ? 'respond-async, orbit-progress=queued' : 'respond-async')
           response.setHeader('Location', `/api/catalog/progress?id=${encodeURIComponent(result.progress.id)}&after=${result.progress.revision}`)
           response.setHeader('Retry-After', '1')
           response.status(202).json(result)

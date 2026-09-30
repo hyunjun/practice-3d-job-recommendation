@@ -1,0 +1,1282 @@
+{
+  "version": 1,
+  "stage": 75,
+  "recordedAt": "2026-09-30T19:45:38.980382+00:00",
+  "purpose": "Immutable artifact for all3 final review; this file is not itself an approval.",
+  "baselineCommit": "bb27a9fd941b765f5c4ff9e07f9567f2720092a6",
+  "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+  "fileCount": 414,
+  "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+  "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+  "sourceManifestSha256": "372d8a43c590124f287845b2e695da0904c14835e50942ea07a81f3802ffc25c",
+  "implementationGateSha256": "0a789029d2c0161ade4bd08dc7f151ce7a904f7d6d0c1e20ae06c3093574db73",
+  "environment": {
+    "stage": 75,
+    "recordedAt": "2026-09-30T17:55:06.769747+00:00",
+    "versions": {
+      "node": {
+        "command": [
+          "node",
+          "--version"
+        ],
+        "output": "v26.10.0"
+      },
+      "npm": {
+        "command": [
+          "npm",
+          "--version"
+        ],
+        "output": "11.19.1"
+      },
+      "claude": {
+        "command": [
+          "claude",
+          "--version"
+        ],
+        "output": "2.1.277 (Claude Code)"
+      },
+      "platform": {
+        "command": [
+          "uname",
+          "-sm"
+        ],
+        "output": "Darwin arm64"
+      }
+    },
+    "packages": {
+      "typescript": "7.0.2",
+      "vite": "8.3.0",
+      "vitest": "5.0.1",
+      "playwright": "1.63.0",
+      "esbuild": "0.28.2",
+      "tsx": "4.23.13"
+    },
+    "packageLockSha256": "b3700954c00aeace2ac1855d22648cceffcae4aa1c7056eec5e608faccf1ed7e",
+    "browserPreparation": {
+      "startedAt": "2026-09-30T17:30:44.049908+00:00",
+      "purpose": "Download matching Playwright Chromium only; no test, browser session or server.",
+      "command": [
+        "node",
+        "node_modules/playwright/cli.js",
+        "install",
+        "chromium"
+      ],
+      "browserPath": ".local/research/75/runtime/playwright-browsers",
+      "playwrightVersion": "1.63.0",
+      "endedAt": "2026-09-30T17:31:03.574125+00:00",
+      "exitCode": 0,
+      "directories": [
+        ".links",
+        "chromium-1243",
+        "chromium_headless_shell-1243",
+        "ffmpeg-1011"
+      ],
+      "unifiedExecSession": 85017,
+      "commandSessionTerminal": true,
+      "sourceReceiptSha256": "2d1a11dcff3401aa21a8d688d587895364577be56f67d6a2dfc8d86d26a4a316",
+      "browserMetadata": [
+        {
+          "name": "chromium",
+          "revision": "1243",
+          "installByDefault": true,
+          "browserVersion": "153.0.8010.12",
+          "title": "Chrome for Testing"
+        },
+        {
+          "name": "chromium-headless-shell",
+          "revision": "1243",
+          "installByDefault": true,
+          "browserVersion": "153.0.8010.12",
+          "title": "Chrome Headless Shell"
+        },
+        {
+          "name": "firefox",
+          "revision": "1543",
+          "installByDefault": true,
+          "browserVersion": "155.0",
+          "title": "Firefox"
+        },
+        {
+          "name": "webkit",
+          "revision": "2359",
+          "installByDefault": true,
+          "revisionOverrides": {
+            "mac14": "2251",
+            "mac14-arm64": "2251"
+          },
+          "browserVersion": "26.6",
+          "title": "WebKit"
+        },
+        {
+          "name": "ffmpeg",
+          "revision": "1011",
+          "installByDefault": true
+        },
+        {
+          "name": "winldd",
+          "revision": "1007",
+          "installByDefault": false
+        },
+        {
+          "name": "android",
+          "revision": "1001",
+          "installByDefault": false
+        }
+      ]
+    },
+    "testsExecutedByThisCapture": false,
+    "limits": [
+      "This records installed versions and the browser download receipt.",
+      "Browser launch, type checking and behavior are verified by the independent execution phase."
+    ]
+  },
+  "independentExecutor": {
+    "cliModel": "claude-fable-5-1",
+    "requestedEffort": "max",
+    "backendEffectiveEffortExposed": false,
+    "role": "Independent test author and executor; Main and Astra reviewed product, tests, plan and evidence."
+  },
+  "modelCallsBeforeFinalReview": [
+    {
+      "phase": "design-approval-01",
+      "mode": "review",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|design-approval-01",
+      "startedAt": "2026-09-30T17:26:32.465016+00:00",
+      "endedAt": "2026-09-30T17:34:30.421929+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "748c7411905b07a3e943ff70daaa36b9ac26ab3001a40113e366063baa279c82"
+    },
+    {
+      "phase": "design-approval-02",
+      "mode": "review",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|design-approval-02",
+      "startedAt": "2026-09-30T17:39:01.171412+00:00",
+      "endedAt": "2026-09-30T17:41:57.662334+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "16a01a17ab0e871df3cfd3469cc6eed766d7b63343b1cac985371c221bd6803c"
+    },
+    {
+      "phase": "implementation-review-01",
+      "mode": "review",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|implementation-review-01",
+      "startedAt": "2026-09-30T18:50:59.027869+00:00",
+      "endedAt": "2026-09-30T18:57:46.551179+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "ac9eb45dbc553c1f6409874768167344673390e92fb0bf55e7a150ba0ec61a6d"
+    },
+    {
+      "phase": "implementation-review-02",
+      "mode": "review",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|implementation-review-02",
+      "startedAt": "2026-09-30T19:09:46.035423+00:00",
+      "endedAt": "2026-09-30T19:14:01.736264+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "bfcecebf3b96f97d8335d8bc6a80e952df3ad39a3d4dd1b70c38699b155e68c3"
+    },
+    {
+      "phase": "implementation-review-03",
+      "mode": "review",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|implementation-review-03",
+      "startedAt": "2026-09-30T19:19:19.362800+00:00",
+      "endedAt": "2026-09-30T19:20:11.446348+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "8ee0515672f63c32c1a30b59f3a516a10d102996538be5e66ae103e7f2ad0157"
+    },
+    {
+      "phase": "independent-design-01",
+      "mode": "review",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|independent-design-01",
+      "startedAt": "2026-09-30T17:07:18.040892+00:00",
+      "endedAt": "2026-09-30T17:21:42.487603+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "0b8b5e7c5db2a8f673b048f5e49f12ff4a29ba429695309d8c66fcd868b6bdd5"
+    },
+    {
+      "phase": "test-authoring-01",
+      "mode": "test-authoring",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|test-authoring-01",
+      "startedAt": "2026-09-30T17:43:57.384364+00:00",
+      "endedAt": "2026-09-30T18:25:56.111058+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "9f467f11a80867a46ece659809365bb660d403e8665795392bff1dfa0df48395"
+    },
+    {
+      "phase": "test-authoring-02",
+      "mode": "test-authoring",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|test-authoring-02",
+      "startedAt": "2026-09-30T18:26:41.415979+00:00",
+      "endedAt": "2026-09-30T18:40:06.569341+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "c50c6c0b918e0d01cd1aee40a36e04f84d7dd4914e72d1a74bdae067dfc32e89"
+    },
+    {
+      "phase": "test-authoring-03",
+      "mode": "test-authoring",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|test-authoring-03",
+      "startedAt": "2026-09-30T18:42:52.983840+00:00",
+      "endedAt": "2026-09-30T18:46:39.039536+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "5c6e3807b2c94d78f096ce16fe34ce599296ded297b0de6a8212136dc4a861db"
+    },
+    {
+      "phase": "test-authoring-04",
+      "mode": "test-authoring",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|test-authoring-04",
+      "startedAt": "2026-09-30T18:48:14.647085+00:00",
+      "endedAt": "2026-09-30T18:50:03.737164+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "b0cc508438ea074a834d65bbc12b08cf5259978c67cba82a4b5af8ffbbb22919"
+    },
+    {
+      "phase": "test-authoring-05",
+      "mode": "test-authoring",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|test-authoring-05",
+      "startedAt": "2026-09-30T18:58:30.267111+00:00",
+      "endedAt": "2026-09-30T19:09:09.626007+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "4f985babc41f092e5369b3bcc866f1c5d121e209468f81d983a2b5a12b735681"
+    },
+    {
+      "phase": "test-authoring-06",
+      "mode": "test-authoring",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|test-authoring-06",
+      "startedAt": "2026-09-30T19:17:39.700715+00:00",
+      "endedAt": "2026-09-30T19:18:48.790499+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "cefc3d12eba24da276ce797626e7fd3bc467b46f8129ce5e698c5c566ba1c25e"
+    },
+    {
+      "phase": "verification-01",
+      "mode": "test-execution",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|verification-01",
+      "startedAt": "2026-09-30T19:14:42.811534+00:00",
+      "endedAt": "2026-09-30T19:17:04.460143+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "9e479ffc77947cabbe160fdada5db535b8f37c7a744e69e3019c7f1e28f0cab9"
+    },
+    {
+      "phase": "verification-02",
+      "mode": "test-execution",
+      "sessionId": "ef90ff1f-319a-4c66-80c4-7884353a48f6",
+      "actor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|verification-02",
+      "startedAt": "2026-09-30T19:21:02.275817+00:00",
+      "endedAt": "2026-09-30T19:44:37.590969+00:00",
+      "exitCode": 0,
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "initialModel": "claude-fable-5-1",
+      "responseModels": [
+        "claude-fable-5-1"
+      ],
+      "interrupted": false,
+      "runnerError": null,
+      "processStatus": "complete",
+      "receiptSha256": "21a18afcf1de9437dd179061fb8ce68a3371d1db061ea5eaa296fb7e47e286e0"
+    }
+  ],
+  "runs": [
+    {
+      "runId": "20260930T191513672677Z-6d52d398",
+      "kind": "check",
+      "status": "failed-or-invalid",
+      "startedAt": "2026-09-30T19:15:13.718484+00:00",
+      "endedAt": "2026-09-30T19:15:16.103994+00:00",
+      "exitCode": 1,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "check",
+        "--",
+        "--reporter=json",
+        "--outputFile=/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T191513672677Z-6d52d398/vitest.json"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T191513672677Z-6d52d398/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/75/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "36c03f537c29f6aac410af91d1ac983056dd9a792b4d5676dbe9700da3ca78ae",
+      "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+      "executionPlanSha256": "14d1483e3e6d15bfbd2b4283b4188319a095bcb8fb903d0d500845efd29816c1",
+      "implementationGateSha256": "c8aea28d1ee42f0145597c6cf7d83ee5ddb54da48f4acb77996c6f81fd32cc15",
+      "fileCount": 414,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2489,
+        "sha256": "043b87e3a0bbdb67a02200d67a3e5b4908514f17e526ce5346c4d2b8976e6e66"
+      },
+      "cleanup": {
+        "registeredSpawns": 1,
+        "observedOwnedProcesses": 3,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 2,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 669,
+        "sha256": "d5b70562ad1f2e47f2d16adf8622c2fb6d6de174e5c3dab24b14a728d87bd6c4"
+      },
+      "independentActor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|verification-01"
+    },
+    {
+      "runId": "20260930T192133845519Z-2d203897",
+      "kind": "check",
+      "status": "complete",
+      "startedAt": "2026-09-30T19:21:33.886443+00:00",
+      "endedAt": "2026-09-30T19:21:48.284967+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "check",
+        "--",
+        "--reporter=json",
+        "--outputFile=/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T192133845519Z-2d203897/vitest.json"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T192133845519Z-2d203897/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/75/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+      "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+      "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+      "implementationGateSha256": "0a789029d2c0161ade4bd08dc7f151ce7a904f7d6d0c1e20ae06c3093574db73",
+      "fileCount": 414,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2483,
+        "sha256": "9099b540e6828c7ee288fb39701d027827a36b5f534102ea37e599421c1e664e"
+      },
+      "cleanup": {
+        "registeredSpawns": 98,
+        "observedOwnedProcesses": 97,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 96,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 368,
+        "sha256": "e8be56cc36fcca3bf844e79755e93209925959e9233963ddf452345a537fc184"
+      },
+      "unit": {
+        "success": true,
+        "numTotalTests": 2824,
+        "numPassedTests": 2824,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "fileCount": 87,
+        "assertionCount": 2824,
+        "nonPassed": [],
+        "report": {
+          "bytes": 1205594,
+          "sha256": "250714312357b7f9a1137c3214197002bbf509988faf8d2d66ed71fc4c446b0b"
+        }
+      },
+      "independentActor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|verification-02"
+    },
+    {
+      "runId": "20260930T192539227237Z-9031d55d",
+      "kind": "build",
+      "status": "complete",
+      "startedAt": "2026-09-30T19:25:39.269189+00:00",
+      "endedAt": "2026-09-30T19:25:42.351943+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T192539227237Z-9031d55d/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/75/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+      "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+      "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+      "implementationGateSha256": "0a789029d2c0161ade4bd08dc7f151ce7a904f7d6d0c1e20ae06c3093574db73",
+      "fileCount": 414,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2301,
+        "sha256": "9c6d80239689faabe85a49137fa5990276f859de54443c641c68729d09daf6ae"
+      },
+      "cleanup": {
+        "registeredSpawns": 3,
+        "observedOwnedProcesses": 5,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 5,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 12129,
+        "sha256": "b60456a29f852e3982f8c37bfbd72ac95d152d27ffe9c7ff10eaa7d5300a72b3"
+      },
+      "build": {
+        "artifactDigest": "81d15ae408cd72e24bf51bab626e36ee4d06d6ac0e259a1f284933ddb32b4df5",
+        "fileCount": 559,
+        "manifest": {
+          "bytes": 97048,
+          "sha256": "3075f78beab66ef190d807f809758ac4f2dc87ae4e8dce4a2e6ef2b0a5dc1974"
+        }
+      },
+      "independentActor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|verification-02"
+    },
+    {
+      "runId": "20260930T192637508374Z-b5175a56",
+      "kind": "e2e-development",
+      "status": "complete",
+      "startedAt": "2026-09-30T19:26:37.551622+00:00",
+      "endedAt": "2026-09-30T19:36:08.270337+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/catalog-queued-progress.spec.ts",
+        "tests/e2e/catalog-queued-progress-server.spec.ts",
+        "tests/e2e/catalog-progress.spec.ts",
+        "tests/e2e/board-status-provenance.spec.ts",
+        "tests/e2e/board-status-provenance-server.spec.ts",
+        "tests/e2e/catalog-retention.spec.ts",
+        "tests/e2e/catalog-retention-gesture.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/posting-presence.spec.ts",
+        "tests/e2e/posting-status.spec.ts",
+        "tests/e2e/saved-pages.spec.ts",
+        "tests/e2e/http-cache.spec.ts",
+        "tests/e2e/catalog-revalidation.spec.ts",
+        "tests/e2e/globe-responsiveness.spec.ts",
+        "tests/e2e/catalog-validation.spec.ts",
+        "tests/e2e/search-recovery.spec.ts",
+        "tests/e2e/search-recovery-scope.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T192637508374Z-b5175a56/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "development",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/research/75/runtime/playwright-browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T192637508374Z-b5175a56/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T192637508374Z-b5175a56/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/75/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+      "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+      "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+      "implementationGateSha256": "0a789029d2c0161ade4bd08dc7f151ce7a904f7d6d0c1e20ae06c3093574db73",
+      "fileCount": 414,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 3846,
+        "sha256": "e5c6e47bc20d675810dd6f50f2661de0fdfd9f3594ae3fea96640a40275c3714"
+      },
+      "cleanup": {
+        "registeredSpawns": 771,
+        "observedOwnedProcesses": 683,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 93,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 418011,
+        "sha256": "3e23c7094c814830d73d3fbab77f3c341a20678213376b89adee62183470624c"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T19:26:38.504Z",
+          "duration": 569342.1599999999,
+          "expected": 157,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 157,
+        "files": [
+          "board-status-provenance-server.spec.ts",
+          "board-status-provenance.spec.ts",
+          "catalog-progress.spec.ts",
+          "catalog-queued-progress-server.spec.ts",
+          "catalog-queued-progress.spec.ts",
+          "catalog-retention-gesture.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-revalidation.spec.ts",
+          "catalog-validation.spec.ts",
+          "catalog-worker.spec.ts",
+          "globe-responsiveness.spec.ts",
+          "http-cache.spec.ts",
+          "posting-presence.spec.ts",
+          "posting-status.spec.ts",
+          "saved-pages.spec.ts",
+          "search-recovery-scope.spec.ts",
+          "search-recovery.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 1488185,
+          "sha256": "9d8a82687e6ebaaf742f5a2f571a742242b96e4196e67b7f654b8db55516c4a8"
+        }
+      },
+      "independentActor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|verification-02"
+    },
+    {
+      "runId": "20260930T193655977255Z-2032e5cd",
+      "kind": "e2e-production",
+      "status": "complete",
+      "startedAt": "2026-09-30T19:36:56.034682+00:00",
+      "endedAt": "2026-09-30T19:43:40.933921+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/catalog-queued-progress.spec.ts",
+        "tests/e2e/catalog-queued-progress-server.spec.ts",
+        "tests/e2e/catalog-progress.spec.ts",
+        "tests/e2e/board-status-provenance.spec.ts",
+        "tests/e2e/board-status-provenance-server.spec.ts",
+        "tests/e2e/catalog-retention.spec.ts",
+        "tests/e2e/catalog-retention-gesture.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/posting-presence.spec.ts",
+        "tests/e2e/posting-status.spec.ts",
+        "tests/e2e/saved-pages.spec.ts",
+        "tests/e2e/http-cache.spec.ts",
+        "tests/e2e/catalog-revalidation.spec.ts",
+        "tests/e2e/globe-responsiveness.spec.ts",
+        "tests/e2e/catalog-validation.spec.ts",
+        "tests/e2e/search-recovery.spec.ts",
+        "tests/e2e/search-recovery-scope.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T193655977255Z-2032e5cd/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "production",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/research/75/runtime/playwright-browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T193655977255Z-2032e5cd/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/75/verification/20260930T193655977255Z-2032e5cd/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/75/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+      "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+      "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+      "implementationGateSha256": "0a789029d2c0161ade4bd08dc7f151ce7a904f7d6d0c1e20ae06c3093574db73",
+      "fileCount": 414,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": {
+        "proofSha256": "c70127f14793d5f4828dd4ff8237424324bb8da199e43fd00ec6a088c98be227",
+        "buildRunId": "20260930T192539227237Z-9031d55d",
+        "artifactDigest": "81d15ae408cd72e24bf51bab626e36ee4d06d6ac0e259a1f284933ddb32b4df5"
+      },
+      "receipt": {
+        "bytes": 4074,
+        "sha256": "bdd6b5e3a9f174705cbc8aec6d22cbc6af18baef17a8eac6d8ad10d885f3e198"
+      },
+      "cleanup": {
+        "registeredSpawns": 481,
+        "observedOwnedProcesses": 665,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 55,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 416794,
+        "sha256": "39c6eebe593e1cc381a347aaf6ed60d624e45fcd1a08ca0d8f1edf8f2868f146"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T19:36:57.015Z",
+          "duration": 403482.956,
+          "expected": 157,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 157,
+        "files": [
+          "board-status-provenance-server.spec.ts",
+          "board-status-provenance.spec.ts",
+          "catalog-progress.spec.ts",
+          "catalog-queued-progress-server.spec.ts",
+          "catalog-queued-progress.spec.ts",
+          "catalog-retention-gesture.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-revalidation.spec.ts",
+          "catalog-validation.spec.ts",
+          "catalog-worker.spec.ts",
+          "globe-responsiveness.spec.ts",
+          "http-cache.spec.ts",
+          "posting-presence.spec.ts",
+          "posting-status.spec.ts",
+          "saved-pages.spec.ts",
+          "search-recovery-scope.spec.ts",
+          "search-recovery.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 1435717,
+          "sha256": "929031270222a07282e82555f95efca785db025813ac0ee593098f2a4171f32c"
+        }
+      },
+      "independentActor": "ef90ff1f-319a-4c66-80c4-7884353a48f6|verification-02"
+    }
+  ],
+  "selectedFinalRuns": {
+    "check": "20260930T192133845519Z-2d203897",
+    "build": "20260930T192539227237Z-9031d55d",
+    "e2e-development": "20260930T192637508374Z-b5175a56",
+    "e2e-production": "20260930T193655977255Z-2032e5cd"
+  },
+  "crossModeCases": {
+    "equal": true,
+    "countPerMode": 157,
+    "files": [
+      "board-status-provenance-server.spec.ts",
+      "board-status-provenance.spec.ts",
+      "catalog-progress.spec.ts",
+      "catalog-queued-progress-server.spec.ts",
+      "catalog-queued-progress.spec.ts",
+      "catalog-retention-gesture.spec.ts",
+      "catalog-retention.spec.ts",
+      "catalog-revalidation.spec.ts",
+      "catalog-validation.spec.ts",
+      "catalog-worker.spec.ts",
+      "globe-responsiveness.spec.ts",
+      "http-cache.spec.ts",
+      "posting-presence.spec.ts",
+      "posting-status.spec.ts",
+      "saved-pages.spec.ts",
+      "search-recovery-scope.spec.ts",
+      "search-recovery.spec.ts"
+    ]
+  },
+  "sourceControlsStillMatchAfterExecution": true,
+  "protectedOriginalsUnchanged": {
+    "verified": true,
+    "fileCount": 22
+  },
+  "newReferenceArchive": {
+    "directory": ".local/preserved-2026-09-30-stage-75",
+    "verifiedAt": "2026-09-30T17:19:19.092377+00:00",
+    "archiveSha256": "9e0e53f5b3e2e6596e482827cc24c8e59b573e6ebc4033aae807ea5fbea96a62",
+    "archiveBytes": 30805,
+    "manifestSha256": "a2edc4d0944ec6e7286d43c38eb84a4bf331ce451361e90ade6c762f410f3dbf",
+    "originalFileCount": 3,
+    "uniqueBlobCount": 3,
+    "originalBytes": 94176,
+    "allCrcSizeShaAndOriginalBytesMatched": true,
+    "workingCopiesRemoved": false
+  },
+  "power": {
+    "allSelectedBrowserRunsCovered": true,
+    "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+    "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+    "runs": [
+      {
+        "runId": "20260930T192637508374Z-b5175a56",
+        "kind": "e2e-development",
+        "startedAt": "2026-09-30T19:26:37.551622+00:00",
+        "endedAt": "2026-09-30T19:36:08.270337+00:00",
+        "before": {
+          "path": "main/power-before-execution-02.json",
+          "sha256": "508c6be3a5535c710abf35d11e9de56b6d91ce7e7dd0ffe6c5bdf0c9af63eb97",
+          "capturedAt": "2026-09-30T19:20:49.923968+00:00",
+          "scope": "before-execution-02",
+          "pid": 81532,
+          "processIdentity": "81532 81532 Thu Oct  1 03:29:59 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "originalIdentity": "81532 81532 Thu Oct  1 03:29:59 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "sameProcess": true,
+          "sourceProcessReceiptSha256": "3135abbb3d503bb748070715812b9b00ffb0eae9539ce74b0c120d10654eb312",
+          "matchingAssertions": [
+            "pid 81532(caffeinate): [0x0001a62200018c87] 00:50:50 PreventUserIdleSystemSleep named: \"caffeinate command-line tool\"",
+            "pid 81532(caffeinate): [0x0001a62200078c88] 00:50:50 PreventSystemSleep named: \"caffeinate command-line tool\""
+          ],
+          "acPower": true,
+          "expiresAt": "2026-09-30T20:29:59.129394+00:00",
+          "remainingSeconds": 4149.205426,
+          "powerWindowStart": "2026-09-30T18:29:59.129394+00:00",
+          "powerWindowEnd": "2026-09-30T19:20:49.923968+00:00",
+          "events": [],
+          "limits": [
+            "Point-in-time assertion checks plus the system power-event log; not continuous instrumentation.",
+            "Only Sleep/Wake/DarkWake records within the task assertion window are retained."
+          ],
+          "bothAssertionsPresent": true
+        },
+        "after": {
+          "path": "main/power-after-execution-02.json",
+          "sha256": "a6f3a3a59547abe4eb92f5e9aa1d053fb74c467877fe1fa7d9ebeb1145504eb2",
+          "capturedAt": "2026-09-30T19:44:24.366983+00:00",
+          "scope": "after-execution-02",
+          "pid": 81532,
+          "processIdentity": "81532 81532 Thu Oct  1 03:29:59 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "originalIdentity": "81532 81532 Thu Oct  1 03:29:59 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "sameProcess": true,
+          "sourceProcessReceiptSha256": "3135abbb3d503bb748070715812b9b00ffb0eae9539ce74b0c120d10654eb312",
+          "matchingAssertions": [
+            "pid 81532(caffeinate): [0x0001a62200018c87] 01:14:25 PreventUserIdleSystemSleep named: \"caffeinate command-line tool\"",
+            "pid 81532(caffeinate): [0x0001a62200078c88] 01:14:25 PreventSystemSleep named: \"caffeinate command-line tool\""
+          ],
+          "acPower": true,
+          "expiresAt": "2026-09-30T20:29:59.129394+00:00",
+          "remainingSeconds": 2734.762411,
+          "powerWindowStart": "2026-09-30T18:29:59.129394+00:00",
+          "powerWindowEnd": "2026-09-30T19:44:24.366983+00:00",
+          "events": [],
+          "limits": [
+            "Point-in-time assertion checks plus the system power-event log; not continuous instrumentation.",
+            "Only Sleep/Wake/DarkWake records within the task assertion window are retained."
+          ],
+          "bothAssertionsPresent": true
+        },
+        "runEvents": [],
+        "sameOwnedProcessAtBothEndpoints": true,
+        "noSleepOrWakeDuringRun": true
+      },
+      {
+        "runId": "20260930T193655977255Z-2032e5cd",
+        "kind": "e2e-production",
+        "startedAt": "2026-09-30T19:36:56.034682+00:00",
+        "endedAt": "2026-09-30T19:43:40.933921+00:00",
+        "before": {
+          "path": "main/power-before-execution-02.json",
+          "sha256": "508c6be3a5535c710abf35d11e9de56b6d91ce7e7dd0ffe6c5bdf0c9af63eb97",
+          "capturedAt": "2026-09-30T19:20:49.923968+00:00",
+          "scope": "before-execution-02",
+          "pid": 81532,
+          "processIdentity": "81532 81532 Thu Oct  1 03:29:59 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "originalIdentity": "81532 81532 Thu Oct  1 03:29:59 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "sameProcess": true,
+          "sourceProcessReceiptSha256": "3135abbb3d503bb748070715812b9b00ffb0eae9539ce74b0c120d10654eb312",
+          "matchingAssertions": [
+            "pid 81532(caffeinate): [0x0001a62200018c87] 00:50:50 PreventUserIdleSystemSleep named: \"caffeinate command-line tool\"",
+            "pid 81532(caffeinate): [0x0001a62200078c88] 00:50:50 PreventSystemSleep named: \"caffeinate command-line tool\""
+          ],
+          "acPower": true,
+          "expiresAt": "2026-09-30T20:29:59.129394+00:00",
+          "remainingSeconds": 4149.205426,
+          "powerWindowStart": "2026-09-30T18:29:59.129394+00:00",
+          "powerWindowEnd": "2026-09-30T19:20:49.923968+00:00",
+          "events": [],
+          "limits": [
+            "Point-in-time assertion checks plus the system power-event log; not continuous instrumentation.",
+            "Only Sleep/Wake/DarkWake records within the task assertion window are retained."
+          ],
+          "bothAssertionsPresent": true
+        },
+        "after": {
+          "path": "main/power-after-execution-02.json",
+          "sha256": "a6f3a3a59547abe4eb92f5e9aa1d053fb74c467877fe1fa7d9ebeb1145504eb2",
+          "capturedAt": "2026-09-30T19:44:24.366983+00:00",
+          "scope": "after-execution-02",
+          "pid": 81532,
+          "processIdentity": "81532 81532 Thu Oct  1 03:29:59 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "originalIdentity": "81532 81532 Thu Oct  1 03:29:59 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "sameProcess": true,
+          "sourceProcessReceiptSha256": "3135abbb3d503bb748070715812b9b00ffb0eae9539ce74b0c120d10654eb312",
+          "matchingAssertions": [
+            "pid 81532(caffeinate): [0x0001a62200018c87] 01:14:25 PreventUserIdleSystemSleep named: \"caffeinate command-line tool\"",
+            "pid 81532(caffeinate): [0x0001a62200078c88] 01:14:25 PreventSystemSleep named: \"caffeinate command-line tool\""
+          ],
+          "acPower": true,
+          "expiresAt": "2026-09-30T20:29:59.129394+00:00",
+          "remainingSeconds": 2734.762411,
+          "powerWindowStart": "2026-09-30T18:29:59.129394+00:00",
+          "powerWindowEnd": "2026-09-30T19:44:24.366983+00:00",
+          "events": [],
+          "limits": [
+            "Point-in-time assertion checks plus the system power-event log; not continuous instrumentation.",
+            "Only Sleep/Wake/DarkWake records within the task assertion window are retained."
+          ],
+          "bothAssertionsPresent": true
+        },
+        "runEvents": [],
+        "sameOwnedProcessAtBothEndpoints": true,
+        "noSleepOrWakeDuringRun": true
+      }
+    ],
+    "assertionRenewals": [
+      {
+        "path": "main/power-renewal-01.json",
+        "sha256": "fd92f893c57d6f281a88f00feea842eb3d8cb920161aec5f1e249d6eedf09f67",
+        "recordedAt": "2026-09-30T18:29:52.277611+00:00",
+        "purpose": "Renew before final reviews and browser execution; no browser runs have started.",
+        "retiredReceipt": "keep-awake-process-01.json",
+        "retiredReceiptSha256": "39668d64cf52068f2a42a860a11eb09b32d98ed8231154e96896a3da8abd5bcd",
+        "checks": [
+          {
+            "pid": 98938,
+            "recordedIdentityAbsent": true,
+            "exitCode": 1
+          },
+          {
+            "pid": 98937,
+            "recordedIdentityAbsent": true,
+            "exitCode": 1
+          }
+        ],
+        "previousExecSession": 85737,
+        "previousSessionTerminalExit": 0,
+        "newAssertionPending": false,
+        "newExecSession": 76176,
+        "newReceiptAtStart": {
+          "startedAt": "2026-09-30T18:29:59.129394+00:00",
+          "args": [
+            "/usr/bin/caffeinate",
+            "-i",
+            "-s",
+            "-t",
+            "7200"
+          ],
+          "pid": 81532,
+          "identity": "81532 81532 Thu Oct  1 03:29:59 2026     /usr/bin/caffeinate -i -s -t 7200",
+          "wrapperPid": 81530,
+          "wrapperIdentity": "81530 81530 Thu Oct  1 03:29:59 2026     /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python .local/research/75/main/keep-awake.py",
+          "scope": "Only stage75 analysis/review/verification; expires after7200s and is explicitly stopped before cleanup.",
+          "persistentSettingsChanged": false,
+          "displayOrUserActivityAssertion": false,
+          "status": "running",
+          "exitCode": null
+        },
+        "newAssertionCaptureSha256": "155b2e5b3f6cb91d00d4dd1b58fa93a33b3d6c37f388a4838ab7179fa314d748",
+        "newExpiresAt": "2026-09-30T20:29:59.129394+00:00"
+      }
+    ],
+    "limits": [
+      "Point-in-time owned-process/assertion checks and filtered system event records support these runs.",
+      "All owned assertion lifecycles are preserved and must be stopped before cleanup.",
+      "No persistent power settings, display-wake or user-activity assertions were changed."
+    ]
+  },
+  "authoredCoverageAndReview": {
+    "stage": 75,
+    "reviewer": "main",
+    "recordedAt": "2026-09-30T18:53:27.264205+00:00",
+    "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+    "assessment": "Authored coverage and static integration review. Execution results are separate receipts; no test pass is claimed here.",
+    "groups": [
+      {
+        "area": "Service lifecycle and collection ownership",
+        "files": [
+          "tests/unit/catalog-queued-progress.test.ts",
+          "tests/unit/helpers/board-status-provenance.ts"
+        ],
+        "coverage": [
+          "Cold/fresh/retained/normal-empty waiting response before held presence release.",
+          "Metadata-only revisions and actual target selection at handoff, including zero work.",
+          "Force intent joins, retry floors, ordinary/daily TTL boundaries, legacy sharing and restart.",
+          "Sync/async error reporters, stable terminal failures and retained accepted memory.",
+          "Exceptional body/list workers drain siblings before releasing ownership.",
+          "New presence request waiting behind failed bodies observes existing failure without starting list work or inventing list history."
+        ]
+      },
+      {
+        "area": "Real HTTP and negotiation",
+        "files": [
+          "tests/unit/catalog-queued-progress-transport.test.ts"
+        ],
+        "coverage": [
+          "Negotiated waiting, legacy/sync responses, no-store/Location/Retry-After, ETag revalidation.",
+          "Quoted/empty values, first duplicate precedence, parameter vs capability, refresh intent.",
+          "Fixed operation503 and repeat lifetime; unavailable deadline and posting-status generic503.",
+          "Router entry is observed before releasing a held dependency; literal response times are controlled before release."
+        ]
+      },
+      {
+        "area": "Decoder and browser transport",
+        "files": [
+          "tests/unit/catalog-queued-decoder.test.ts",
+          "tests/fixtures/catalog-queued-progress.ts"
+        ],
+        "coverage": [
+          "Unknown/null waiting denominator, positive/frozen collecting counts and true zero completion.",
+          "Direct waiting-to-partial/full/zero transitions, phase-less legacy responses.",
+          "Atomic invalid-update rejection, replacement/identity checks, unchanged body-success history.",
+          "Exact extended request header and monitor URLs; stop after completion/error."
+        ]
+      },
+      {
+        "area": "User-visible browser flows",
+        "files": [
+          "tests/e2e/catalog-queued-progress.spec.ts",
+          "tests/e2e/catalog-queued-progress-server.spec.ts"
+        ],
+        "coverage": [
+          "1440px and320px; polite waiting status without determinate counts/bar.",
+          "Waiting metadata and actual one/two-company handoff through the real server and pipeline.",
+          "Cache timestamps, saved notes/status and query preserved; navigation cancels and rejoins.",
+          "Normal zero completion, unavailable outcome, fixed-error recovery and search-recovery suppression.",
+          "Synthetic upstream ledgers, strict accessibility findings and overflow checks."
+        ]
+      },
+      {
+        "area": "Related regression",
+        "files": [
+          "tests/e2e/catalog-queued-progress.spec.ts",
+          "tests/e2e/catalog-queued-progress-server.spec.ts",
+          "tests/e2e/catalog-progress.spec.ts",
+          "tests/e2e/board-status-provenance.spec.ts",
+          "tests/e2e/board-status-provenance-server.spec.ts",
+          "tests/e2e/catalog-retention.spec.ts",
+          "tests/e2e/catalog-retention-gesture.spec.ts",
+          "tests/e2e/catalog-worker.spec.ts",
+          "tests/e2e/posting-presence.spec.ts",
+          "tests/e2e/posting-status.spec.ts",
+          "tests/e2e/saved-pages.spec.ts",
+          "tests/e2e/http-cache.spec.ts",
+          "tests/e2e/catalog-revalidation.spec.ts",
+          "tests/e2e/globe-responsiveness.spec.ts",
+          "tests/e2e/catalog-validation.spec.ts",
+          "tests/e2e/search-recovery.spec.ts",
+          "tests/e2e/search-recovery-scope.spec.ts"
+        ],
+        "coverage": [
+          "The execution plan selects17 E2E files in both development and production.",
+          "Full type/unit check and build also required. Actual report inventories determine final executed counts."
+        ]
+      }
+    ],
+    "reviewCorrections": [
+      "Astra product findings fixed in candidate02 and covered by reporter/empty-preference regressions.",
+      "Main interim setup/oracle/coverage findings resolved through Fable authoring02-04; draft observations are not runtime failures.",
+      "Both dependency-failure and superseded-metadata boundaries explicitly agreed by all3 without a product-contract change."
+    ],
+    "browserVisualReview": {
+      "development": {
+        "evidence": "main/visual-review-development.json",
+        "sha256": "d7efbd4181217aec24c30d6bad9bbb1a438c67324ae3d4a72302b11ddd76a865",
+        "reviewedImages": 5,
+        "blockingFindings": []
+      },
+      "production": {
+        "evidence": "main/visual-review-production.json",
+        "sha256": "3079a96b74aabf2d25fdd92ebf34fd8e2fc627f2b72900d46efa528d114cbb2c",
+        "reviewedImages": 3,
+        "blockingFindings": []
+      }
+    },
+    "testsExecutedAtThisAssessment": false,
+    "additionalStaticReview": {
+      "candidate": "01",
+      "reviewer": "astra",
+      "decision": "IMPLEMENTATION_REVIEW_WITHHELD",
+      "blockers": [
+        "A75-T1",
+        "A75-T2",
+        "A75-T3"
+      ],
+      "mainAgrees": true,
+      "correctionPhase": "Fable authoring05 corrected all three static blockers; all3 review02 approved. Subsequent authoring06 typing fixes and all3 review03 produced the final passing candidate."
+    },
+    "firstExecutionTypingCorrections": "All3 candidate03 review approved both exact fixes; final independent check passed types and2824 units/87files.",
+    "finalizedAt": "2026-09-30T19:45:22.564018+00:00",
+    "assessmentScope": "Coverage groups were authored and assessed statically before execution. The exact current candidate subsequently passed the independent commands recorded below; image observations are separate from automated assertions.",
+    "executedVerification": {
+      "sourceDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+      "typecheck": "passed",
+      "units": {
+        "files": 87,
+        "passed": 2824,
+        "newStage75Cases": 88
+      },
+      "build": "passed",
+      "e2eDevelopment": {
+        "files": 17,
+        "passed": 157,
+        "newStage75Cases": 18
+      },
+      "e2eProduction": {
+        "files": 17,
+        "passed": 157,
+        "newStage75Cases": 18
+      },
+      "failedSkippedFlakyRetryAttempts": 0,
+      "sameCasesAcrossModes": true,
+      "independentExecutor": "claude-fable-5-1, requested max, verification-02",
+      "finalAll3EvidenceApproval": "pending"
+    }
+  },
+  "earlierFailuresAndResolutions": {
+    "stage": 75,
+    "recordedAt": "2026-09-30T18:56:53.885976+00:00",
+    "status": "One actual failed command retained: initial tsc failed before Vitest. Corrected final candidate03 passed full check/build/DEV/PROD independently.",
+    "designRevisions": [
+      {
+        "finding": "Queued membership and deferred counts must follow actual body work at handoff; fresh metadata still needs a queued view.",
+        "resolution": "All3 approved final contract using null waiting total and recomputed eligible body membership."
+      },
+      {
+        "finding": "Unexpected presence-cache/reporting rejection had an unspecified HTTP boundary.",
+        "resolution": "Baseline diagnostic confirmed rejection; final all3 contract specifies stable fixed503 in both phases, owned-worker drain and preserved memory."
+      }
+    ],
+    "preExecutionStaticProductFindings": [
+      {
+        "finding": "Async error-reporter rejection could be unobserved.",
+        "resolution": "Candidate02 awaits async reporters at load/save boundaries and guards secondary completion-reporting errors. Astra approved and Fable authored regressions."
+      },
+      {
+        "finding": "Quoted-empty respond-async value was not treated as the RFC7240 empty preference value.",
+        "resolution": "Candidate02 normalizes empty values while retaining first-duplicate semantics and conservative quoted delimiter parsing."
+      }
+    ],
+    "preExecutionStaticTestFindings": {
+      "source": "main/test-review-in-progress.json and independent/test-authoring-02.md through test-authoring-04.md",
+      "resolution": "Held-promise deadlock, persistence count/setup, deterministic clock, literal oracles, real router/provider gates, worker-drain coverage, cleanup, waiting timestamp guard and delivered-only metadata expectations corrected before execution.",
+      "classification": "Static review findings, not failed runtime tests."
+    },
+    "boundaryAgreements": [
+      "A new presence request awaiting an unexpectedly failed body operation rejects through existing generic posting-status503/Retry-After60; it does not invent list failures.",
+      "Terminal fixed/unavailable/expired errors may supersede undelivered final metadata; preserve what the client received, without guaranteeing later row delivery."
+    ],
+    "executionFailures": [
+      {
+        "id": "F75-check-01",
+        "runId": "20260930T191513672677Z-6d52d398",
+        "kind": "check",
+        "stateDigest": "36c03f537c29f6aac410af91d1ac983056dd9a792b4d5676dbe9700da3ca78ae",
+        "executionPlanSha256": "14d1483e3e6d15bfbd2b4283b4188319a095bcb8fb903d0d500845efd29816c1",
+        "startedAt": "2026-09-30T19:15:13.718484+00:00",
+        "endedAt": "2026-09-30T19:15:16.103994+00:00",
+        "exitCode": 1,
+        "classification": "Test TypeScript compilation errors; not product runtime, unit result or browser failure.",
+        "messages": [
+          "catalog-queued-progress-server.spec.ts208 TS2345: general string passed to literal URL union includes.",
+          "catalog-queued-progress.test.ts893 TS2493: zero-argument mock infers empty call tuple, oracle reads argument0."
+        ],
+        "mainProposal": "Preserve all assertions and behavior; use correctly typed URL membership/equality and callback error argument. Fable owns test-only correction.",
+        "receiptSha256": "043b87e3a0bbdb67a02200d67a3e5b4908514f17e526ce5346c4d2b8976e6e66",
+        "commandLogSha256": "d5b70562ad1f2e47f2d16adf8622c2fb6d6de174e5c3dab24b14a728d87bd6c4",
+        "cleanupRemaining": [],
+        "unitExecuted": false,
+        "buildExecuted": false,
+        "browserExecuted": false,
+        "resolution": "All3 agreed and Fable corrected only two test type declarations. All3 candidate03 review approved; verification02 passed types,2824units/87files, build and same157E2E in DEV and PROD. No assertion weakened, skipped or retried."
+      }
+    ],
+    "permissionObservation": {
+      "source": "main/authoring-hash-command-restriction.json",
+      "reason": "Fable dontAsk command allowlist declined an arbitrary shasum/wc command.",
+      "resolution": "Already approved read-only source identity helper independently hashes all source/test bytes. No repository permission change or new approval requested."
+    },
+    "preExecutionFullReviewFindings": {
+      "reviewer": "astra",
+      "decision": "IMPLEMENTATION_REVIEW_WITHHELD",
+      "candidateStateDigest": "32f67c84a0a7cfbe28ba19c4049371f36deeb64b411bb689c65817a91d582913",
+      "issues": [
+        "Missing orderLedger.indexOf method in transport test",
+        "Mixed Promise.all spread loses tuple result typing in service test",
+        "Running clock makes exact browser poll histories nondeterministic"
+      ],
+      "mainDisposition": "Agreed after direct static inspection",
+      "fablePriorDisposition": "Approved candidate01 before findings shared; authoring05 requested explicit discussion and test-only correction.",
+      "runtimeFailure": false,
+      "fableDisposition": "Authoring05 explicitly agrees with all three, corrected exactly three tests, no tests executed.",
+      "resolution": "All3 review02 explicitly approved corrected source/contract/plan; old candidate retained."
+    }
+  },
+  "limitations": [
+    "The queued response is independent of the active upstream presence dependency after cache initialization. This is an ordering guarantee, not a numeric startup-latency or provider-performance claim.",
+    "Validation uses synthetic employers, postings, clocks and provider gates. It does not measure live-company availability, provider traffic or behavior under production load.",
+    "Collection ownership and progress remain local to one server process. Multiple replicas require separate coordination; this change does not introduce shared storage or distributed locking.",
+    "The existing browser monitoring deadline includes time spent waiting for presence. A long operation can still require manual reconnection after the ten-minute monitoring limit.",
+    "Provider TTLs, manual-refresh minimums, error backoff and posting-body retention policies still determine eligibility. A later catalog request is not guaranteed to avoid provider calls in every state.",
+    "The production cache-error reporter is synchronous. Injected async or throwing reporters exercise the service extension boundary and its unexpected-failure contract.",
+    "Claude Code reports the requested model identity, but effective backend reasoning effort is not independently exposed. The requested effort is max.",
+    "Unanimous agreement is a decision to advance the reviewed stage. It does not establish defect-free behavior or correctness outside the reviewed and executed scope."
+  ]
+}

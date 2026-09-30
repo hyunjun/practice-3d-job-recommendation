@@ -37,11 +37,23 @@ export function gate() {
   return { promise, release }
 }
 
+/** One provider request boundary as the service saw it, in call order across both operations. */
+export interface ProviderEvent {
+  kind: 'list' | 'body'
+  companyId: string
+  phase: 'start' | 'end'
+  outcome?: 'ok' | 'error'
+}
+
 export function provenanceHarness(options: {
   bodies?: CachedBoard[]
   presences?: CachedPresence[]
   at?: string
   companies?: Company[]
+  /** Stage75: the service's error reporter. The product default logs; tests may make it throw or return a promise. */
+  onCacheError?: (error: unknown) => void | Promise<void>
+  /** Stage75: the service's jitter source, a supported option. A bounded throwing source injects a worker fault. */
+  random?: () => number
 } = {}) {
   let time = Date.parse(options.at ?? PROVENANCE_BASE)
   const companies = options.companies ?? PROVENANCE_COMPANIES
@@ -49,18 +61,47 @@ export function provenanceHarness(options: {
   const presenceCache = memoryRecords<CachedPresence>(options.presences)
   const observationCache = observationMemory()
   const fetchBoard = vi.fn(async (company: Company, fetchedAt: string): Promise<BoardResult> => contentResult(company, fetchedAt))
-  const fetchPresence = vi.fn(async (company: Company): Promise<PresenceResult> => presenceResult(company))
+  const fetchPresence = vi.fn(async (company: Company, _fetchedAt?: string): Promise<PresenceResult> => presenceResult(company))
   const now = () => time
+  // Stage75: a shared ledger across list and body work. The service calls thin
+  // recorders that delegate synchronously to the mocks above, so existing
+  // `fetchBoard`/`fetchPresence` mock APIs and call counts are unchanged.
+  const ledger: ProviderEvent[] = []
+  function recorded<A extends unknown[], R>(kind: ProviderEvent['kind'], target: (...args: A) => Promise<R>) {
+    return (...args: A): Promise<R> => {
+      const company = args[0] as Company
+      ledger.push({ kind, companyId: company.id, phase: 'start' })
+      let result: Promise<R>
+      try {
+        result = target(...args)
+      } catch (error) {
+        ledger.push({ kind, companyId: company.id, phase: 'end', outcome: 'error' })
+        throw error
+      }
+      return result.then(value => {
+        ledger.push({ kind, companyId: company.id, phase: 'end', outcome: 'ok' })
+        return value
+      }, (error: unknown) => {
+        ledger.push({ kind, companyId: company.id, phase: 'end', outcome: 'error' })
+        throw error
+      })
+    }
+  }
   return {
     companies, cache, presenceCache, observationCache, fetchBoard, fetchPresence, now,
     /** A fresh service instance over the same persisted records, like a process restart. */
     start: () => createCatalogService({
-      companies, cache, fetchBoard, presence: { cache: presenceCache, fetchBoard: fetchPresence },
-      observations: createObservationStore({ companies, cache: observationCache, now }), now, random: () => 0,
+      companies, cache,
+      fetchBoard: recorded('body', (company: Company, fetchedAt: string) => fetchBoard(company, fetchedAt)),
+      presence: { cache: presenceCache, fetchBoard: recorded('list', (company: Company, fetchedAt: string) => fetchPresence(company, fetchedAt)) },
+      observations: createObservationStore({ companies, cache: observationCache, now }), now, random: options.random ?? (() => 0),
+      ...(options.onCacheError ? { onCacheError: options.onCacheError } : {}),
     }),
     at: (value: string) => { time = Date.parse(value) },
     bodyCalls: () => fetchBoard.mock.calls.map(([company]) => company.id),
     listCalls: () => fetchPresence.mock.calls.map(([company]) => company.id),
+    /** Copy of the provider ledger in call order. */
+    ledger: () => ledger.map(event => ({ ...event })),
     /** Make one company's public-list check fail, optionally with a provider Retry-After deadline. */
     failList(companyId: string, message: string, retryAfter?: string) {
       fetchPresence.mockImplementation(async company => {
@@ -82,6 +123,21 @@ export function provenanceHarness(options: {
       const current = fetchBoard.getMockImplementation()
         ?? (async (company: Company, fetchedAt: string) => contentResult(company, fetchedAt))
       fetchBoard.mockImplementation(async (company, fetchedAt) => {
+        if (companyIds.includes(company.id)) await held.promise
+        return current(company, fetchedAt)
+      })
+      return held
+    },
+    /**
+     * Stage75: hold the named companies' public-list checks until released, keeping
+     * the currently mocked result or failure. Call `failList` before `holdList` so a
+     * held company still fails on release. Separate calls give independent gates.
+     */
+    holdList(...companyIds: string[]) {
+      const held = gate()
+      const current = fetchPresence.getMockImplementation()
+        ?? (async (company: Company, _fetchedAt?: string) => presenceResult(company))
+      fetchPresence.mockImplementation(async (company, fetchedAt) => {
         if (companyIds.includes(company.id)) await held.promise
         return current(company, fetchedAt)
       })

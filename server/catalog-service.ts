@@ -41,6 +41,12 @@ export class CatalogProgressGoneError extends Error {
   constructor() { super('수집 진행 정보를 다시 연결해야 해요. 다시 조회하면 현재 공고부터 이어서 확인합니다.') }
 }
 
+export class CatalogOperationError extends Error {
+  constructor(cause: unknown) {
+    super('공고 조회를 완료하지 못했어요. 다시 조회해 주세요.', { cause })
+  }
+}
+
 export function parseRetryAfter(value: string | null, now: number): number | undefined {
   if (!value?.trim()) return undefined
   const trimmed = value.trim()
@@ -70,7 +76,7 @@ interface Options {
   observations?: ObservationStore
   now?: () => number
   random?: () => number
-  onCacheError?: (error: unknown) => void
+  onCacheError?: (error: unknown) => void | Promise<void>
 }
 
 export function createCatalogService({ companies, cache, fetchBoard, presence, observations, now = Date.now, random = Math.random, onCacheError = console.warn }: Options) {
@@ -86,18 +92,25 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
   interface Collection {
     id: string
     revision: number
+    phase: 'waiting-for-presence' | 'collecting'
+    force: boolean
     total: number
     waiting: Set<string>
     settled: Map<string, number>
     done: boolean
+    error: CatalogOperationError | null
+    ready: Promise<void>
+    completion: Promise<void>
   }
   // One shared collection and at most one revision number per company, not a
   // history of large catalog snapshots. Monitoring never schedules providers.
   let collection: Collection | null = null
-  const progress = (run: Collection): CatalogProgress => ({
-    id: run.id, revision: run.revision, total: run.total,
-    completed: run.total - run.waiting.size, done: run.done,
-  })
+  const progress = (run: Collection): CatalogProgress => run.phase === 'waiting-for-presence'
+    ? { id: run.id, revision: run.revision, phase: run.phase, total: null, completed: 0, done: false }
+    : {
+      id: run.id, revision: run.revision, phase: run.phase, total: run.total,
+      completed: run.total - run.waiting.size, done: run.done,
+    }
   const revisions = new WeakMap<BoardSnapshot, Promise<NonNullable<PostingBoard['listing']>['jobs']>>()
   const iso = (time: number) => new Date(time).toISOString()
   const refreshAt = (entry: Pick<CachedBoard, 'checkedAt' | 'error' | 'retryAt' | 'provider'>) => Math.max(
@@ -158,8 +171,8 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
   }
   async function initialize() {
     const [loaded, presenceEntries] = await Promise.all([
-      cache.load().catch(error => { onCacheError(error); return [] }),
-      presence?.cache.load().catch(error => { onCacheError(error); return [] }) ?? [],
+      cache.load().catch(async error => { await onCacheError(error); return [] }),
+      presence?.cache.load().catch(async error => { await onCacheError(error); return [] }) ?? [],
     ])
     const loadedPresence = parseCachedPresence({ version: 1, boards: presenceEntries })
     for (const company of companies) {
@@ -398,12 +411,20 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
 
   async function persistPresence() {
     if (!presence) return
-    try { await presence.cache.save(companies.flatMap(company => presences.get(company.id) ?? [])) } catch (error) { onCacheError(error) }
+    try { await presence.cache.save(companies.flatMap(company => presences.get(company.id) ?? [])) } catch (error) { await onCacheError(error) }
+  }
+
+  async function settleWorkers(workers: Promise<void>[]): Promise<void> {
+    // An exceptional worker must not release serialization while its siblings
+    // still own provider requests. Ordinary provider failures stay per board.
+    const results = await Promise.allSettled(workers)
+    const failed = results.find(result => result.status === 'rejected')
+    if (failed) throw failed.reason
   }
 
   async function refresh(due: Company[], run: Collection): Promise<void> {
     let cursor = 0
-    await Promise.all(Array.from({ length: Math.min(CATALOG_POLICY.concurrency, due.length) }, async () => {
+    await settleWorkers(Array.from({ length: Math.min(CATALOG_POLICY.concurrency, due.length) }, async () => {
       while (cursor < due.length) {
         const company = due[cursor++]
         await collect(company)
@@ -412,41 +433,84 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       }
     }))
     // Provider completion order must not reorder the persisted board inventory.
-    try { await cache.save(companies.flatMap(company => boards.get(company.id) ?? [])) } catch (error) { onCacheError(error) }
+    try { await cache.save(companies.flatMap(company => boards.get(company.id) ?? [])) } catch (error) { await onCacheError(error) }
     await persistPresence()
     await observations?.record(companies.flatMap(company => boards.get(company.id) ?? []), 'collection')
   }
 
-  async function startCollection(force: boolean): Promise<void> {
-    await (initialized ??= initialize())
-    if (presencePending) await presencePending
-    if (pending) return
+  function dueCompanies(force: boolean): Company[] {
     const current = now()
-    const due = companies.filter(company => {
+    return companies.filter(company => {
       const entry = boards.get(company.id)
       if (presence && current < nextRefresh(company.id, true)) return false
       if (!entry) return true
       if (entry.error) return current >= refreshAt(entry)
       return current - Date.parse(entry.checkedAt) >= (force ? sourceRefreshInterval(company.provider) : sourceFreshFor(company.provider))
     })
-    if (!due.length) return
+  }
+
+  async function startCollection(force: boolean): Promise<Collection | null> {
+    await (initialized ??= initialize())
+    if (pending) {
+      const active = collection!
+      if (active.phase === 'waiting-for-presence') active.force ||= force
+      return active
+    }
+    const dependency = presencePending
+    const due = dependency ? null : dueCompanies(force)
+    if (due?.length === 0) return null
+
+    let release!: () => void
+    let complete!: () => void
+    let reject!: (error: CatalogOperationError) => void
+    const ready = new Promise<void>(resolve => { release = resolve })
+    const completion = new Promise<void>((resolve, fail) => { complete = resolve; reject = fail })
     const run: Collection = {
-      id: randomUUID(), revision: 0, total: due.length,
-      waiting: new Set(due.map(company => company.id)), settled: new Map(), done: false,
+      id: randomUUID(), revision: 0, phase: dependency ? 'waiting-for-presence' : 'collecting',
+      force, total: due?.length ?? 0,
+      waiting: new Set(due?.map(company => company.id)), settled: new Map(), done: false,
+      error: null, ready, completion,
     }
     collection = run
-    pending = refresh(due, run).finally(() => {
+    pending = completion
+    // Observe the shared rejection even if every HTTP client has disconnected.
+    // A failing error reporter must not create a second, unobserved rejection.
+    void completion.catch(async error => {
+      try { await onCacheError(error.cause) } catch { /* The operation already exposes its terminal failure. */ }
+    })
+    const finish = (error: CatalogOperationError | null = null) => {
+      run.error = error
       run.done = true
       run.revision++
-      pending = null
-    })
-    // Provider failures are recorded per board. Do not leave a rejected
-    // background promise unobserved if persistence/error reporting itself fails.
-    void pending.catch(onCacheError)
+      if (pending === completion) pending = null
+      release()
+      if (error) reject(error)
+      else complete()
+    }
+    const execute = async () => {
+      let selected = due
+      if (dependency) {
+        await dependency
+        selected = dueCompanies(run.force)
+        run.phase = 'collecting'
+        run.total = selected.length
+        run.waiting = new Set(selected.map(company => company.id))
+        run.revision++
+      }
+      // No queue-only cache write or collection observation. Legacy readers
+      // are released by finish, after zero-work completion becomes observable.
+      if (!selected?.length) return
+      release()
+      await refresh(selected, run)
+    }
+    void execute().then(() => finish(), cause => finish(new CatalogOperationError(cause)))
+    return run
   }
 
   async function ensurePresence(force: boolean): Promise<void> {
     await (initialized ??= initialize())
+    // Join the original list operation before considering bodies queued behind it.
+    if (presencePending) return presencePending
     if (pending) await pending
     if (presencePending) return presencePending
     const current = now()
@@ -457,19 +521,24 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
         || current - Date.parse(entry.checkedAt) >= (force ? sourceRefreshInterval(company.provider) : sourceFreshFor(company.provider))
     })
     if (!due.length) return
-    presencePending = (async () => {
+    const task = (async () => {
       let cursor = 0
-      await Promise.all(Array.from({ length: Math.min(CATALOG_POLICY.concurrency, due.length) }, async () => {
-        while (cursor < due.length) await collectPresence(due[cursor++])
+      await settleWorkers(Array.from({ length: Math.min(CATALOG_POLICY.concurrency, due.length) }, async () => {
+        while (cursor < due.length) {
+          await collectPresence(due[cursor++])
+          // Accepted list results change metadata only. Polls never advance a run.
+          if (collection?.phase === 'waiting-for-presence' && !collection.done) collection.revision++
+        }
       }))
       await persistPresence()
-    })().finally(() => { presencePending = null })
-    await presencePending
+    })().finally(() => { if (presencePending === task) presencePending = null })
+    presencePending = task
+    await task
   }
 
   async function ensureFresh(force: boolean): Promise<void> {
-    await startCollection(force)
-    await pending
+    const run = await startCollection(force)
+    await run?.completion
   }
 
   return {
@@ -482,15 +551,19 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       await ensureFresh(force)
       return compose()
     },
-    async getProgressive(force = false): Promise<{ catalog: Catalog; progress: CatalogProgress | null }> {
-      await startCollection(force)
-      const running = collection && !collection.done
-      return { catalog: compose(Boolean(running)), progress: running ? progress(collection!) : null }
+    async getProgressive(force = false, queued = false): Promise<{ catalog: Catalog; progress: CatalogProgress | null }> {
+      const run = await startCollection(force)
+      if (run && ((!queued && run.phase === 'waiting-for-presence')
+        || run.phase === 'collecting' && run.total === 0 && !run.done)) await run.ready
+      if (run?.error) throw run.error
+      const running = run && !run.done
+      return { catalog: compose(Boolean(running)), progress: running ? progress(run) : null }
     },
     readProgress(id: string, after: number): CatalogCollectionUpdate | null {
       const run = collection
       if (!run || run.id !== id) throw new CatalogProgressGoneError()
       if (!Number.isSafeInteger(after) || after < 0 || after > run.revision) throw new RangeError('잘못된 수집 진행 번호입니다.')
+      if (run.error) throw run.error
       if (after === run.revision && !run.done) return null
       const companyIds = [...run.settled].filter(([, revision]) => revision > after).map(([companyId]) => companyId)
       const changed = new Set(companyIds)

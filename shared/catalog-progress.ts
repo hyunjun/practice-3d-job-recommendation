@@ -1,13 +1,23 @@
 import type { Catalog, Job } from './types'
 
-/** Counts settled company requests, including failures; this is not a time estimate. */
-export interface CatalogProgress {
+interface CatalogOperation {
   id: string
   revision: number
+}
+
+/** A waiting operation has no body-company denominator until eligibility is selected. */
+export type CatalogProgress = CatalogOperation & ({
+  phase: 'waiting-for-presence'
+  total: null
+  completed: 0
+  done: false
+} | {
+  /** Absent in responses from earlier servers. */
+  phase?: 'collecting'
   total: number
   completed: number
   done: boolean
-}
+})
 
 export interface CatalogCollectionSnapshot {
   catalog: Catalog

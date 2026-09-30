@@ -19,10 +19,16 @@ function readCatalog(value: unknown, partial = false): Catalog {
 function readProgress(value: unknown, catalog: Catalog): CatalogProgress {
   if (!record(value) || typeof value.id !== 'string' || !/^[a-f0-9-]{36}$/i.test(value.id)
     || !Number.isSafeInteger(value.revision) || (value.revision as number) < 0
-    || !Number.isSafeInteger(value.total) || (value.total as number) < 1 || (value.total as number) > catalog.companies.length
+    || value.phase !== undefined && value.phase !== 'waiting-for-presence' && value.phase !== 'collecting'
+    || typeof value.done !== 'boolean') throw malformed()
+  const pending = catalog.boards.filter(board => board.status === 'pending').length
+  if (value.phase === 'waiting-for-presence') {
+    if (value.total !== null || value.completed !== 0 || value.done || pending !== 0) throw malformed()
+  } else if (!Number.isSafeInteger(value.total) || (value.total as number) < 0 || (value.total as number) > catalog.companies.length
+    || value.total === 0 && (value.phase !== 'collecting' || !value.done)
     || !Number.isSafeInteger(value.completed) || (value.completed as number) < 0 || (value.completed as number) > (value.total as number)
-    || typeof value.done !== 'boolean' || value.done && value.completed !== value.total
-    || catalog.boards.filter(board => board.status === 'pending').length !== (value.total as number) - (value.completed as number)) throw malformed()
+    || value.done && value.completed !== value.total
+    || pending !== (value.total as number) - (value.completed as number)) throw malformed()
   return value as unknown as CatalogProgress
 }
 
@@ -44,16 +50,23 @@ function readUpdate(value: unknown, previous: CatalogCollectionSnapshot): Catalo
   const replaced = new Set(value.companyIds)
   const previousBoards = new Map(previous.catalog.boards.map(board => [board.companyId, board]))
   const boards = new Map(catalog.boards.map(board => [board.companyId, board]))
-  if (progress.id !== previous.progress.id || progress.total !== previous.progress.total || progress.completed < previous.progress.completed
-    || progress.revision < previous.progress.revision || progress.revision === previous.progress.revision && !progress.done
+  const wasWaiting = previous.progress.phase === 'waiting-for-presence'
+  const waiting = progress.phase === 'waiting-for-presence'
+  if (progress.id !== previous.progress.id || !wasWaiting && (waiting || progress.total !== previous.progress.total)
+    || progress.completed < previous.progress.completed
+    || progress.revision < previous.progress.revision
+    || progress.revision === previous.progress.revision && (!progress.done || !previous.progress.done)
     || replaced.size !== value.companyIds.length || value.companyIds.some(id => typeof id !== 'string' || !companies.has(id))
+    || waiting && (replaced.size !== 0 || catalog.jobs.length !== 0)
+    || wasWaiting && !waiting && replaced.size !== progress.completed
     || catalog.boards.length !== previous.catalog.boards.length || boards.size !== catalog.boards.length
     || catalog.boards.some(board => {
       const prior = previousBoards.get(board.companyId)
       return !prior || board.board !== prior.board || (board.provider ?? 'greenhouse') !== (prior.provider ?? 'greenhouse')
         || prior.status === 'pending' && board.status !== 'pending' && !replaced.has(board.companyId)
-        || prior.status !== 'pending' && board.status === 'pending'
+        || !wasWaiting && prior.status !== 'pending' && board.status === 'pending'
         || replaced.has(board.companyId) && board.status === 'pending'
+        || wasWaiting && !replaced.has(board.companyId) && board.lastSuccessAt !== prior.lastSuccessAt
     })
     || catalog.jobs.some(job => !replaced.has(job.companyId)
       || job.source !== (companies.get(job.companyId)?.provider ?? 'greenhouse')
@@ -129,7 +142,7 @@ export async function requestCatalogStream<T>({
   let response: Response
   try {
     response = await fetch(`/api/catalog?source=public${refresh ? '&refresh=1' : ''}`, {
-      headers: { Prefer: 'respond-async' }, signal: AbortSignal.any([signal, AbortSignal.timeout(150_000)]),
+      headers: { Prefer: 'respond-async, orbit-progress=queued' }, signal: AbortSignal.any([signal, AbortSignal.timeout(150_000)]),
     })
   } catch (error) {
     if (signal.aborted) throw error

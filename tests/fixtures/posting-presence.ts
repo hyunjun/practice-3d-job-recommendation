@@ -52,6 +52,11 @@ export interface PresenceResponse {
   headers?: Record<string, string>
   delayMs?: number
   failure?: string
+  /**
+   * Stage75: hold this upstream response until the test releases the named gate
+   * through the server fixture. Absent by default, so existing responses are unchanged.
+   */
+  gate?: string
 }
 export type PresenceResponses = Record<string, PresenceResponse>
 export type PresenceScenario = 'complete' | 'empty' | 'partial-final' | 'duplicate-page'

@@ -185,8 +185,11 @@ Wise의 `User Researcher`가 AI 도구를 사용하는 업무 문구 때문에 �
 | [RFC 7240 §4.1: respond-async](https://www.rfc-editor.org/rfc/rfc7240.html#section-4.1) | 클라이언트가 비동기 응답을 선호함을 알리고 서버가 `202`와 후속 주소로 응답할 수 있음 | 기존 카탈로그 요청에 선택적으로 적용하며 기존 전체 JSON 응답도 유지 |
 | [MDN: 202 Accepted](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/202) | 요청을 받아들였다는 응답이며 처리 완료·성공을 보장하지 않음 | 수집 시작과 정상 완료를 구분하고, 전부 실패한 수집을 정상 빈 목록으로 표시하지 않음 |
 | [MDN: progressbar role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/progressbar_role) | 네이티브 `progress`, 접근 가능한 이름, 범위에 맞는 현재 값과 필요한 `aria-valuetext` | 처리된 회사 수로 진행을 표시하고 남은 시간·성공률처럼 표현하지 않음 |
+| [WCAG 2.2 · 4.1.3 Status Messages](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html) | 대기·진행·결과 안내를 초점 이동 없이 프로그램적으로 전달 | 앞선 게시 상태 확인을 기다릴 때 상태 안내를 제공하고, 실제 본문 수집 대상이 정해진 뒤 진행 막대를 표시 |
 
-2026-09-19 원문을 확인했습니다. RFC는 구체적인 진행 확인·결과 병합 방식을 정하지 않으므로 [회사별 변경분 계약](catalog-progress.md)은 이 프로젝트에서 정의했습니다. 진행을 읽는 요청은 외부 게시판의 재조회와 분리하고, 완료된 회사의 공고만 추가 전송합니다. 연결 오류·취소 후에는 이미 받은 결과와 저장 기록을 유지하며 진행 번호가 다른 수집의 결과는 섞지 않습니다.
+2026-09-19 RFC와 MDN 원문을 확인했습니다. RFC는 구체적인 진행 확인·결과 병합 방식을 정하지 않으므로 [회사별 변경분 계약](catalog-progress.md)은 이 프로젝트에서 정의했습니다. 진행을 읽는 요청은 외부 게시판의 재조회와 분리하고, 완료된 회사의 공고만 추가 전송합니다. 연결 오류·취소 후에는 이미 받은 결과와 저장 기록을 유지하며 진행 번호가 다른 수집의 결과는 섞지 않습니다.
+
+2026-09-30 UTC에 RFC 7240을 다시 확인하고 WCAG 상태 안내 문서를 조사했습니다. 대기 표현은 명시적인 `orbit-progress=queued` 확장으로 요청하며 기존 클라이언트의 고정 회사 수 계약을 유지합니다. RFC §2의 첫 중복 preference 우선, quoted string과 빈 값의 동등성도 적용합니다. 대기 중에는 본문을 다시 보내지 않고 수락한 게시판 상태를 갱신하며, 목록 확인이 끝나면 실제 본문 수집 대상 수를 정합니다. [대기 상태 설계](design/catalog-queued-progress.md)에 호환·실패·접근성 기준과 한계를 정리했습니다.
 
 ## 밴쿠버와 캐나다 원격 공고
 

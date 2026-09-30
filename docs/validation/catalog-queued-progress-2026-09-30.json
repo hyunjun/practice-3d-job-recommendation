@@ -1,0 +1,460 @@
+{
+  "version": 1,
+  "stage": 75,
+  "recordedAt": "2026-09-30T19:54:13.272585+00:00",
+  "baselineCommit": "bb27a9fd941b765f5c4ff9e07f9567f2720092a6",
+  "change": "Publish a negotiated waiting catalog before active presence work finishes, retain truthful actual collection counts and complete observable operation lifecycles.",
+  "status": "All3 explicitly approved the same final source/contract/plan/evidence. All required final checks passed. Product/test/doc commit and push, local archive and cleanup are next.",
+  "contract": {
+    "path": "docs/design/catalog-queued-progress.md",
+    "sha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9"
+  },
+  "participants": {
+    "main": {
+      "role": "product implementation, integration, docs, preservation and cleanup"
+    },
+    "astra": {
+      "role": "independent design, code, control and evidence review",
+      "model": "global.openai.gpt-6-astra",
+      "reasoningRequested": "max"
+    },
+    "fable": {
+      "role": "independent test design, authorship and execution",
+      "modelRequested": "claude-fable-5-1",
+      "modelReportedInCompletedCalls": "claude-fable-5-1",
+      "effortRequested": "max",
+      "effortLimit": "Effective backend effort is not independently exposed."
+    }
+  },
+  "designGate": {
+    "version": 1,
+    "stage": 75,
+    "recordedAt": "2026-09-30T17:43:40.498467+00:00",
+    "decision": "DESIGN_APPROVED",
+    "contract": "docs/design/catalog-queued-progress.md",
+    "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+    "participants": {
+      "main": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "evidence": "main-design-approval.json",
+        "evidenceSha256": "7324ebbfc754d75e3bc354a30b420e0753212e7055c30969685011e8895a0d2f"
+      },
+      "astra": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "evidence": "astra-design-approval.json",
+        "evidenceSha256": "df6e471aa8f6811c99328c2ddbc215118e58c3fad645d10a8a51b684170457b7"
+      },
+      "fable": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "evidence": "design-approval-02.review.md",
+        "evidenceSha256": "a484620234e7acfacba3e186c29a1b4610e0c678c22226af065c8b71cf343e2c",
+        "processReceiptSha256": "16a01a17ab0e871df3cfd3469cc6eed766d7b63343b1cac985371c221bd6803c"
+      }
+    },
+    "unresolvedBlockers": [],
+    "acceptedClarifications": [
+      "Legacy/retry/cache policies remain conditional; no universal promise that every later retry avoids providers.",
+      "Waiting copy literal will be fixed at implementation review.",
+      "Valid failed-operation progress requests repeat503; out-of-range revisions retain separate validation.",
+      "Exact post-initial revision values are not test oracles; accepted events/handoff/completion must advance revisions."
+    ],
+    "sha256": "6fa7b99337f4a5055d3224b00a160935666e321ecbcf512c37adee50436ca8a0",
+    "allThreeExplicitlyApproved": true
+  },
+  "implementationGate": {
+    "version": 1,
+    "stage": 75,
+    "recordedAt": "2026-09-30T19:20:44.508318+00:00",
+    "candidate": 3,
+    "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+    "fileCount": 414,
+    "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+    "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+    "participants": {
+      "main": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+        "evidence": "main-implementation-review-03.json",
+        "evidenceSha256": "271c748d04cd57e4efebbd6f7499cd8d4d9a3b30f88b6569535e2d98e2c4fc28"
+      },
+      "astra": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+        "evidence": "astra-implementation-review-03.json",
+        "evidenceSha256": "02e13072e1bae6c64b71f5e35a51608915871c5deb6b1856c35e21c0e0c540d0"
+      },
+      "fable": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+        "evidence": "implementation-review-03.review.md",
+        "evidenceSha256": "fc5f37d80efcc6a76571833abf5e24e0de0f7eee6f011ed8e7a6f62e2d9b0d33",
+        "processReceiptSha256": "8ee0515672f63c32c1a30b59f3a516a10d102996538be5e66ae103e7f2ad0157"
+      }
+    },
+    "unresolvedBlockers": [],
+    "runtimeStatus": "First typecheck failure retained. All3 approve corrected candidate03 full check/build/DEV/PROD; final verification remains pending.",
+    "sha256": "0a789029d2c0161ade4bd08dc7f151ce7a904f7d6d0c1e20ae06c3093574db73",
+    "allThreeExplicitlyApproved": true
+  },
+  "verificationGate": {
+    "version": 1,
+    "stage": 75,
+    "recordedAt": "2026-09-30T19:54:13.272585+00:00",
+    "decision": "VERIFICATION_APPROVED",
+    "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+    "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+    "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+    "finalEvidenceSha256": "454befd45e7647b5fa5c4883717d45ff49b5142a2dacc0ecd342849c1de2ccd6",
+    "fileCount": 414,
+    "participants": {
+      "main": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+        "finalEvidenceSha256": "454befd45e7647b5fa5c4883717d45ff49b5142a2dacc0ecd342849c1de2ccd6",
+        "evidence": "main-final-verification-approval.json",
+        "evidenceSha256": "57a049377302af8034257bb6a8fa82f2db19718c8c58f71545da31cf79eccfc9"
+      },
+      "astra": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+        "finalEvidenceSha256": "454befd45e7647b5fa5c4883717d45ff49b5142a2dacc0ecd342849c1de2ccd6",
+        "evidence": "astra-final-verification-approval.json",
+        "evidenceSha256": "3e0848ebc7220f441fa19f364b4f5e6e9d6244db900bc094a31c03108bd46987"
+      },
+      "fable": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+        "finalEvidenceSha256": "454befd45e7647b5fa5c4883717d45ff49b5142a2dacc0ecd342849c1de2ccd6",
+        "evidence": "verification-approval-01.review.md",
+        "evidenceSha256": "ae14b3b3016b4368bf7b34687f2f0023e53170e9046ac47643c0dc780d944930",
+        "processReceiptSha256": "484f54ed9364df5850621e4ecde21a426e39e69729d66c8fb6f05cc003f30f39",
+        "reviewLimit": "Fresh helper hashes cover current source/contract/plan/evidence, actual reports/receipts/logs/build manifest, current-stage references and8 images. Earlier22 originals are outside helper roots: Fable relies on recorded checks; Main and Astra separately verified them. ZIP CRCs/build-artifact digest/process/power instrumentation are recorded-check reliance, explicitly stated."
+      }
+    },
+    "unresolvedBlockers": [],
+    "acceptedScope": "Final selected tests and recorded limitations. Commit/push, local Git tool/evidence preservation, owned-process shutdown and verified cleanup follow.",
+    "sha256": "1e9453e42aa9fe4a81f556cd4123f6054f7a89e57d85b39868cbf905e18b0926",
+    "allThreeExplicitlyApproved": true
+  },
+  "discussion": [
+    {
+      "id": "D75-counts",
+      "mainAndAstra": "Unknown total while queued; freeze actual body-company count at handoff. A newly deferred company is not a completed body attempt.",
+      "fableInitial": "Freeze due membership at queue time; newly deferred companies count as completed failures without body fetch.",
+      "status": "Resolved: all3 explicitly approved candidate02."
+    },
+    {
+      "id": "D75-fresh",
+      "mainAndAstra": "Publish fresh bodies immediately with waiting and subsequent presence metadata, then zero-body completion if eligible set is empty.",
+      "fableInitial": "Immediately finish with cached200/304; later presence metadata waits for another catalog request.",
+      "status": "Resolved: all3 explicitly approved candidate02."
+    },
+    {
+      "id": "D75-presence-join",
+      "fableInitial": "Additional presence clients join active presence even behind a new queued catalog.",
+      "mainAndAstraDisposition": "Adopted in contract; prevent queued bodies from delaying original presence completion.",
+      "status": "Resolved: all3 explicitly approved candidate02."
+    },
+    {
+      "id": "D75-rejection",
+      "fableInitial": "Presence cannot reject; omit rejection coverage.",
+      "evidence": "main/baseline-presence-rejection.json proves a supported callback path rejects with no body calls.",
+      "mainAndAstraDisposition": "Require terminal observable rejection and no unhandled promise.",
+      "status": "Resolved: all3 explicitly approved candidate02."
+    },
+    {
+      "id": "B75-terminal-failure",
+      "fable": "Requires explicit status, error body, repeated-poll lifetime and pre/post-handoff boundary.",
+      "mainResolution": "Same fixed503 error-only before/after handoff for unexpected rejection; expected nonthrowing cache errors retain existing best-effort behavior. Accepted bodies are preserved in memory. All owned work drains before ownership is released.",
+      "candidate02": "docs/design/catalog-queued-progress.md",
+      "status": "Resolved: all3 explicitly approved candidate02."
+    }
+  ],
+  "baselineDiagnostics": [
+    {
+      "path": "main/baseline-initial-wait.json",
+      "sha256": "d75c35e03e8d07f88a02a2429b66e20e8c5e5603228d078d57da3eac30c06b51",
+      "purpose": "Held real-service presence dependency blocks both cold and fresh-body progressive initial results. Synthetic only; no server/browser/live provider."
+    },
+    {
+      "path": "main/baseline-presence-rejection.json",
+      "sha256": "458db8fcc8e4cdd2202122fcdf0f6651b485b607d2300bcd7305ef3ea1c00349",
+      "purpose": "Supported throwing save/error-reporter callbacks reject both presence and progressive waiters, with zero body requests. Diagnostic only."
+    }
+  ],
+  "controlReview": {
+    "decision": "CONTROL_STATIC_REVIEW_OK",
+    "participant": "astra",
+    "evidence": "collaboration/astra-control-review.md",
+    "sha256": "2d9c2a36dea4d95eddf2e7b9d4a4eabb59a50cf1ec0a4cfa97e55ca32664dc98",
+    "scope": "Static inspection and byte comparisons; not CLI permission enforcement or test execution."
+  },
+  "referenceCapture": {
+    "directory": ".local/preserved-2026-09-30-stage-75",
+    "verifiedAt": "2026-09-30T17:19:19.092377+00:00",
+    "archiveSha256": "9e0e53f5b3e2e6596e482827cc24c8e59b573e6ebc4033aae807ea5fbea96a62",
+    "archiveBytes": 30805,
+    "manifestSha256": "a2edc4d0944ec6e7286d43c38eb84a4bf331ce451361e90ade6c762f410f3dbf",
+    "originalFileCount": 3,
+    "uniqueBlobCount": 3,
+    "originalBytes": 94176,
+    "allCrcSizeShaAndOriginalBytesMatched": true,
+    "workingCopiesRemoved": false
+  },
+  "limitations": [
+    "Initial response is independent of the active upstream presence dependency after cache initialization; no numeric startup or provider-latency guarantee.",
+    "One-process collection and existing provider policies remain. No live-company availability or API load measurement.",
+    "Queue time counts toward the existing ten-minute client monitor limit; search-recovery suggestions remain suppressed while waiting.",
+    "Explicit queue capability preserves the positive fixed-total legacy protocol; new clients still accept phase-less earlier-server progress.",
+    "All3 agreement is a stage decision, not a defect-free guarantee."
+  ],
+  "cleanup": {
+    "status": "pending after verification, final agreement and Git preservation",
+    "protectedOriginalFileCount": 22,
+    "newReferenceFileCount": 4,
+    "portsWithoutListeners": [
+      5173,
+      8787
+    ],
+    "taskScopedPowerAssertion": "running; stop before final cleanup"
+  },
+  "staticFindings": [
+    {
+      "id": "I75-async-reporter",
+      "reviewer": "astra",
+      "finding": "Rejected asynchronous onCacheError returns were not observed by synchronous try/catch.",
+      "disposition": "Main awaited cache load/save reporting and contained secondary completion-reporting rejection in product candidate02. Astra approved and dedicated independent regressions passed in the final full check.",
+      "runtimeTestFailure": false
+    },
+    {
+      "id": "I75-empty-preference",
+      "reviewer": "astra",
+      "finding": "An empty quoted respond-async value incorrectly selected blocking transport despite RFC7240 omitted-value equivalence.",
+      "disposition": "Main normalized empty preference values while preserving first occurrence in product candidate02. Independent transport/decoder regressions passed in the final full check.",
+      "runtimeTestFailure": false
+    }
+  ],
+  "productCandidate": {
+    "path": "main/product-candidate-02.json",
+    "sha256": "2196a66c30b781e2660a270aa48115c29dbcce6f5705678dbe606b191c559d18"
+  },
+  "productStaticReview": {
+    "decision": "PRODUCT_STATIC_REVIEW_OK",
+    "recordedAt": "2026-09-30T18:00:25.226541+00:00",
+    "reviewer": "astra",
+    "agent": "01a0f19e-59f2-7010-a421-a260d679393f",
+    "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+    "candidatePath": "main/product-candidate-02.json",
+    "candidateSha256": "2196a66c30b781e2660a270aa48115c29dbcce6f5705678dbe606b191c559d18",
+    "files": [
+      {
+        "path": "server/catalog-service.ts",
+        "bytes": 29028,
+        "sha256": "ee389b9ad56873a0abe8ca04c8d6abda8a235df0c4bfe61696a3487426c21425"
+      },
+      {
+        "path": "server/catalog.ts",
+        "bytes": 3710,
+        "sha256": "34a09c34f99059fb032fe93a0384e3a1b27f5b18e8d5ac7c7278fd8f7a234869"
+      },
+      {
+        "path": "server/http.ts",
+        "bytes": 9063,
+        "sha256": "d9b62c05fde96ed4caf45a457c4a4a7d9d26d2df7b5ba26ed6a1b9e97d67f170"
+      },
+      {
+        "path": "shared/catalog-progress.ts",
+        "bytes": 1683,
+        "sha256": "70c66f7401d3468c66ddf30be6d2881df84b6f1dd7018447b65b9589ad5cd930"
+      },
+      {
+        "path": "src/lib/catalog-request.ts",
+        "bytes": 10241,
+        "sha256": "bfc5d8533c3bdb2195a9d1880ad5b624289c36c3f96fc090f21d384b8053cbb3"
+      },
+      {
+        "path": "src/components/CollectionProgress.tsx",
+        "bytes": 2173,
+        "sha256": "759b7be0eaf72315a659b3c31fd212b92197caae034ae2e8572447c554cdf0aa"
+      }
+    ],
+    "blockers": [],
+    "resolved": [
+      "Cache callbacks await asynchronous reporters; secondary reporting rejection is contained.",
+      "Empty preference values normalize correctly while retaining first-duplicate precedence."
+    ],
+    "scope": "Product candidate only. The all3 source/test/plan implementation gate remains pending."
+  },
+  "interimTestReview": {
+    "reviewer": "main",
+    "evidence": "main/test-review-in-progress.json",
+    "sha256": "751a0e84c9fd84c5eb1ca3cc62e19f5eb1ff94f337037ee71307d8f79cf03903",
+    "status": "Static findings corrected in Fable authoring02-04; actual router/provider entry gates and literal boundary expectations reviewed by Main. Runtime validation pending.",
+    "testsExecuted": false,
+    "finalDisposition": "Independent authoring02-06 corrected the recorded static and typing findings; all3 candidate03 reviewed exact final source/tests/plan, and full independent check/build/DEV/PROD passed."
+  },
+  "hashCommandRestriction": {
+    "recordedAt": "2026-09-30T18:43:22.877129+00:00",
+    "phase": "test-authoring-02",
+    "toolUseId": "toolu_bdrk_016dvzz7RUWrPsrxG4mXkUYK",
+    "attemptedCommand": "shasum -a 256 server/catalog-service.ts server/catalog.ts server/http.ts shared/catalog-progress.ts src/lib/catalog-request.ts src/components/CollectionProgress.tsx && wc -c server/catalog-service.ts server/http.ts",
+    "executed": false,
+    "reason": "Claude Code dontAsk mode rejected an arbitrary Bash command outside the explicit authoring allowlist.",
+    "impact": "Per-file product hashes were not independently recomputed in this authoring call; it was not a source/test/plan approval.",
+    "resolution": "Use the already allowed read-only stage-identity.py default command to independently hash the complete final source/test state and bind the final manifest/plan. No permission or helper expansion is needed.",
+    "notARepositoryFilesystemPermissionFailure": true
+  },
+  "sourceIdentity": {
+    "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+    "fileCount": 414,
+    "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9"
+  },
+  "executionPlanSha256": "1ec41ae8a450105877df0c706276d8f4bd854a7c2d3d6788dc1c51cc47303a18",
+  "boundaryAgreements": [
+    "New presence behind unexpectedly failed body work preserves existing generic posting-status503/Retry-After60 and starts no list work.",
+    "Terminal fixed/unavailable/expired errors may supersede undelivered metadata; preserve only received metadata and do not guarantee later row delivery."
+  ],
+  "firstExecutionFailure": {
+    "classification": "Test TypeScript compilation errors",
+    "locations": [
+      "tests/e2e/catalog-queued-progress-server.spec.ts:208",
+      "tests/unit/catalog-queued-progress.test.ts:893"
+    ],
+    "productRuntimeVerdict": null,
+    "allThreeAgreeOnCorrection": true
+  },
+  "earlierImplementationGate": {
+    "version": 1,
+    "stage": 75,
+    "recordedAt": "2026-09-30T19:14:26.980273+00:00",
+    "candidate": 2,
+    "stateDigest": "36c03f537c29f6aac410af91d1ac983056dd9a792b4d5676dbe9700da3ca78ae",
+    "fileCount": 414,
+    "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+    "executionPlanSha256": "14d1483e3e6d15bfbd2b4283b4188319a095bcb8fb903d0d500845efd29816c1",
+    "participants": {
+      "main": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "36c03f537c29f6aac410af91d1ac983056dd9a792b4d5676dbe9700da3ca78ae",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "executionPlanSha256": "14d1483e3e6d15bfbd2b4283b4188319a095bcb8fb903d0d500845efd29816c1",
+        "evidence": "main-implementation-review-02.json",
+        "evidenceSha256": "65d260caa87fd87924a53abe376835dc8bdbe197d7b35a4e3750b7e7ac001a23"
+      },
+      "astra": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "36c03f537c29f6aac410af91d1ac983056dd9a792b4d5676dbe9700da3ca78ae",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "executionPlanSha256": "14d1483e3e6d15bfbd2b4283b4188319a095bcb8fb903d0d500845efd29816c1",
+        "evidence": "astra-implementation-review-02.json",
+        "evidenceSha256": "19e25d7488557a9b58c7f286d958980e380f15ae6ad2db471061624234e3cd21"
+      },
+      "fable": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "36c03f537c29f6aac410af91d1ac983056dd9a792b4d5676dbe9700da3ca78ae",
+        "contractSha256": "9b921a4966c0b0234f1da12dd9115d742b419d2cf0add334a2fe245d305feff9",
+        "executionPlanSha256": "14d1483e3e6d15bfbd2b4283b4188319a095bcb8fb903d0d500845efd29816c1",
+        "evidence": "implementation-review-02.review.md",
+        "evidenceSha256": "bf4977b8810bc16e09821448c8caec1721d170460167a22aecdc10a6e9ff3766",
+        "processReceiptSha256": "bfcecebf3b96f97d8335d8bc6a80e952df3ad39a3d4dd1b70c38699b155e68c3"
+      }
+    },
+    "unresolvedBlockers": [],
+    "runtimeStatus": "No tests run. All3 approves execution of the current frozen candidate and exact plan; actual final verification approval follows successful completed commands.",
+    "sha256": "c8aea28d1ee42f0145597c6cf7d83ee5ddb54da48f4acb77996c6f81fd32cc15",
+    "allThreeExplicitlyApproved": true
+  },
+  "verificationProgress": {
+    "stateDigest": "32b18b0712c839d7e9c98e644f1758c87f7ce83379a7158bc52ec5a89d7c4c18",
+    "check": {
+      "runId": "20260930T192133845519Z-2d203897",
+      "exitCode": 0,
+      "typecheck": "passed",
+      "unitFileCount": 87,
+      "unitCount": 2824,
+      "failed": 0,
+      "pending": 0,
+      "todo": 0
+    },
+    "build": {
+      "runId": "20260930T192539227237Z-9031d55d",
+      "exitCode": 0,
+      "sameSourceAndPlan": true
+    },
+    "e2eDevelopment": {
+      "runId": "20260930T192637508374Z-b5175a56",
+      "status": "complete",
+      "exitCode": 0,
+      "fileCount": 17,
+      "caseCount": 157,
+      "attemptCount": 157,
+      "unexpected": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retryAttempts": 0,
+      "errors": [],
+      "reportSha256": "9d8a82687e6ebaaf742f5a2f571a742242b96e4196e67b7f654b8db55516c4a8"
+    },
+    "e2eProduction": {
+      "runId": "20260930T193655977255Z-2032e5cd",
+      "caseCount": 157,
+      "fileCount": 17,
+      "attemptCount": 157,
+      "unexpected": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retryAttempts": 0,
+      "errors": [],
+      "reportSha256": "929031270222a07282e82555f95efca785db025813ac0ee593098f2a4171f32c",
+      "status": "complete",
+      "exitCode": 0
+    },
+    "finalAll3Approval": "VERIFICATION_APPROVED",
+    "crossModeCasesEqual": true
+  },
+  "finalEvidence": {
+    "path": "docs/validation/catalog-queued-progress-final-evidence-2026-09-30.json",
+    "sha256": "454befd45e7647b5fa5c4883717d45ff49b5142a2dacc0ecd342849c1de2ccd6"
+  },
+  "selectedE2EFileCount": 17,
+  "failureHistory": {
+    "staticReview": "A75-T1/T2/T3 corrected in authoring05 and reviewed by all3; product candidate01 async reporter/empty preference findings corrected in product02.",
+    "actualFailedRuns": [
+      {
+        "runId": "20260930T191513672677Z-6d52d398",
+        "phase": "tsc before Vitest",
+        "classification": "two test type declaration defects",
+        "resolution": "All3 agreed; Fable authoring06 corrected exact lines without changing expectations. Final full candidate03 checks passed."
+      }
+    ],
+    "executedUnitBuildBrowserFailuresAfterCorrection": 0
+  },
+  "visualReview": {
+    "reviewer": "main",
+    "developmentImages": 5,
+    "productionImages": 3,
+    "blockingFindings": [],
+    "scope": "Selected actual1440px/320px synthetic flat-map screenshots; automated tests also exercise real WebGL. No numeric performance or pixel-diff claim."
+  },
+  "finalReviewLimit": "Fresh helper hashes cover current source/contract/plan/evidence, actual reports/receipts/logs/build manifest, current-stage references and8 images. Earlier22 originals are outside helper roots: Fable relies on recorded checks; Main and Astra separately verified them. ZIP CRCs/build-artifact digest/process/power instrumentation are recorded-check reliance, explicitly stated.",
+  "sourceIntegrityReview": {
+    "main": "Fresh identity and13 actual receipt/log/report files; protected22 originals matched.",
+    "astra": "Fresh identity,559 build files,8 served-build proofs,22 protected originals and reference ZIP contents verified.",
+    "fable": "Fresh hashes and content review within current-stage tool roots; all8screenshots reviewed; reliance limits stated."
+  }
+}

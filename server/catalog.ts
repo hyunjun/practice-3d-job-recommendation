@@ -53,9 +53,9 @@ export const getPublicCatalog = async (refresh = false) => {
   await initializePublicCatalog()
   return service!.get(refresh)
 }
-export const getProgressivePublicCatalog = async (refresh = false) => {
+export const getProgressivePublicCatalog = async (refresh = false, queued = false) => {
   await initializePublicCatalog()
-  return service!.getProgressive(refresh)
+  return service!.getProgressive(refresh, queued)
 }
 export const getPublicCatalogProgress = (id: string, after: number) => {
   if (!service) throw new CatalogProgressGoneError()

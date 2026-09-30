@@ -145,6 +145,7 @@ export function expectGlobeTraffic(state: Awaited<ReturnType<typeof installGlobe
   for (const request of state.requests) {
     expect(request.method).toBe('GET')
     expect(request.body).toBeNull()
-    if (request.path === '/api/catalog?source=public') expect(request.prefer).toBe('respond-async')
+    // Stage75: the browser's exact extended preference (docs/design/catalog-queued-progress.md).
+    if (request.path === '/api/catalog?source=public') expect(request.prefer).toBe('respond-async, orbit-progress=queued')
   }
 }

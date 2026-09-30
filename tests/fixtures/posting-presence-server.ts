@@ -3,7 +3,7 @@ import { spawn, execFile } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createWriteStream } from 'node:fs'
-import { mkdir, readFile, readdir, realpath, rename, symlink, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { createServer } from 'node:net'
 import path from 'node:path'
@@ -112,6 +112,10 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
   let hmrPort = mode === 'development' ? await availablePort() : undefined
   while (hmrPort === port) hmrPort = await availablePort()
   await mkdir(path.join(cwd, '.local'), { recursive: true })
+  // Stage75: release markers for deterministic upstream gates. Responses without a
+  // `gate` never consult this directory, so existing suites are unchanged.
+  const gates = path.join(directory, 'gates')
+  await mkdir(gates, { recursive: true })
   if (mode === 'production') {
     await Promise.all([
       copyFixture(path.join(buildRoot, 'dist'), path.join(cwd, 'dist')),
@@ -178,6 +182,7 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
         ...process.env, NODE_ENV: mode, PORT: String(port), HOST: '127.0.0.1',
         ORBIT_BOARDS_FILE: configFile, ORBIT_POSTING_PRESENCE_RESPONSES: responsesFile,
         ORBIT_POSTING_PRESENCE_REQUEST_LOG: requestLog, ORBIT_POSTING_PRESENCE_CLOCK: clockFile,
+        ORBIT_POSTING_PRESENCE_GATES: gates,
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     })
@@ -258,6 +263,14 @@ export async function createPostingPresenceServer(directory: string, mode: Prese
   return {
     directory, cwd, origin, configFile, runs, start, stop, respond, events, verifyProductionBytes,
     requests: async () => (await events()).filter(event => event.event === 'request') as unknown as PresenceRequest[],
+    /** Stage75: open a named upstream gate; every held response waiting on it proceeds. */
+    async release(gate: string) {
+      await writeFile(path.join(gates, `${gate}.release`), new Date().toISOString())
+    },
+    /** Stage75: close every gate again, e.g. before a second scenario on the same server. */
+    async resetGates() {
+      for (const marker of await readdir(gates)) await rm(path.join(gates, marker), { force: true })
+    },
     async advance(milliseconds: number) {
       const offset = Number(await readFile(clockFile, 'utf8')) + milliseconds
       await writeFile(`${clockFile}.next`, String(offset))
