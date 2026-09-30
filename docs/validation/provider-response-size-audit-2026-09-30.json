@@ -1,0 +1,264 @@
+{
+  "version": 2,
+  "measuredAt": "2026-09-30T07:20:11.157511+00:00",
+  "scope": "Preserved individual HTTP JSON captures from stage57/61 raw collections and stage63/64 main response captures; not all current providers or aggregate caches",
+  "inputManifestSha256": "431aea357cf79fb7a64bf7725182ebce7f34f3e0811f164992b6a443fa767514",
+  "inputArchive": ".local/preserved-2026-09-28/historical-inputs.zip",
+  "captureCount": 1448,
+  "distinctBodyCount": 1296,
+  "receiptMatchedCount": 1448,
+  "receiptLengthMatchedCount": 1304,
+  "jsonParseSuccessCount": 1448,
+  "additionalNonJsonBodyCount": 84,
+  "additionalNonJsonMaxBytes": 376710,
+  "byHost": {
+    "api.ashbyhq.com": {
+      "count": 11,
+      "successfulStatusCount": 11,
+      "maxBytes": 14499831,
+      "largest": {
+        "path": "research/57/candidate-collection-01/raw/001.json",
+        "bytes": 14499831,
+        "sha256": "f0ba26dc8c788ba2b5da1158dd9ff0b0fd66e87f7a29f176626627bdb2825719",
+        "matchedReceipt": true,
+        "receiptHasLength": true,
+        "status": 200,
+        "url": "https://api.ashbyhq.com/posting-api/job-board/openai?includeCompensation=true",
+        "receivedAt": "2026-09-26T03:58:33.169Z",
+        "jsonKind": "dict"
+      }
+    },
+    "boards-api.greenhouse.io": {
+      "count": 40,
+      "successfulStatusCount": 40,
+      "maxBytes": 29492267,
+      "largest": {
+        "path": "research/57/candidate-collection-01/raw/009.json",
+        "bytes": 29492267,
+        "sha256": "6e68614c18a51ed682391203d921cab971aae480a51a20b28411460451aca6e1",
+        "matchedReceipt": true,
+        "receiptHasLength": true,
+        "status": 200,
+        "url": "https://boards-api.greenhouse.io/v1/boards/spacex/jobs?content=true&pay_transparency=true",
+        "receivedAt": "2026-09-26T03:58:35.557Z",
+        "jsonKind": "dict"
+      }
+    },
+    "api.lever.co": {
+      "count": 23,
+      "successfulStatusCount": 23,
+      "maxBytes": 1067962,
+      "largest": {
+        "path": "research/61/live-additions/raw/0192.json",
+        "bytes": 1067962,
+        "sha256": "3d2d14891a5ff04ce4b8761bc6c617a05f3eb51c4454af0ade4e045e1fcd8d5b",
+        "matchedReceipt": true,
+        "receiptHasLength": true,
+        "status": 200,
+        "url": "https://api.lever.co/v0/postings/palantir?mode=json&limit=50&skip=250",
+        "receivedAt": "2026-09-26T14:34:01.053Z",
+        "jsonKind": "list"
+      }
+    },
+    "api.smartrecruiters.com": {
+      "count": 1335,
+      "successfulStatusCount": 1335,
+      "maxBytes": 324711,
+      "largest": {
+        "path": "research/64-expansion/main/live-ats-1/responses/0065.body",
+        "bytes": 324711,
+        "sha256": "d7a5c41e1595f2743e125595cb762622c03e96f809a4c4e0252691651fd69c3c",
+        "matchedReceipt": true,
+        "receiptHasLength": true,
+        "status": 200,
+        "url": "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings?limit=100&offset=2500&destination=PUBLIC",
+        "receivedAt": "2026-09-26T22:48:19.549Z",
+        "jsonKind": "dict"
+      }
+    },
+    "apply.workable.com": {
+      "count": 3,
+      "successfulStatusCount": 3,
+      "maxBytes": 2240345,
+      "largest": {
+        "path": "research/63/main/live-1/responses/003.body",
+        "bytes": 2240345,
+        "sha256": "e2ea4e94f9168b96c3e457bcde0055e041c64afba01c8566d8607d4d1aab8245",
+        "matchedReceipt": true,
+        "receiptHasLength": true,
+        "status": 200,
+        "url": "https://apply.workable.com/api/v1/widget/accounts/mercari?details=true",
+        "receivedAt": "2026-09-26T16:06:47.123Z",
+        "jsonKind": "dict"
+      }
+    },
+    "himalayas.app": {
+      "count": 12,
+      "successfulStatusCount": 12,
+      "maxBytes": 239118,
+      "largest": {
+        "path": "research/63/main/live-1/responses/008.body",
+        "bytes": 239118,
+        "sha256": "7cdc46dec393d40b52dcd2a20400415ad6fdb3eb2b2ae3643179bc2903920abd",
+        "matchedReceipt": true,
+        "receiptHasLength": true,
+        "status": 200,
+        "url": "https://himalayas.app/jobs/api/search?company=salesforce&sort=recent&page=3",
+        "receivedAt": "2026-09-26T16:06:51.483Z",
+        "jsonKind": "dict"
+      }
+    },
+    "jobs.booking.com": {
+      "count": 4,
+      "successfulStatusCount": 4,
+      "maxBytes": 1707268,
+      "largest": {
+        "path": "research/64-expansion/main/live-careers-1/responses/0001.body",
+        "bytes": 1707268,
+        "sha256": "38ff1c21de781351ab0c9eea75e34d12ba05a9b1d6f69ca2ca423106f79e3e3a",
+        "matchedReceipt": true,
+        "receiptHasLength": true,
+        "status": 200,
+        "url": "https://jobs.booking.com/api/jobs?page=1&limit=100&sortBy=relevance&descending=false&internal=false",
+        "receivedAt": "2026-09-26T22:47:21.606Z",
+        "jsonKind": "dict"
+      }
+    },
+    "apply.starbucks.com": {
+      "count": 20,
+      "successfulStatusCount": 20,
+      "maxBytes": 29444,
+      "largest": {
+        "path": "research/64-expansion/main/live-careers-1/responses/0018.body",
+        "bytes": 29444,
+        "sha256": "5e3803df800d3dad953aa4ad8e09da1df7193edac77184a3a55b93d3fbb7ea88",
+        "matchedReceipt": true,
+        "receiptHasLength": true,
+        "status": 200,
+        "url": "https://apply.starbucks.com/api/pcsx/position_details?position_id=481081002160&domain=starbucks.com&hl=en",
+        "receivedAt": "2026-09-26T22:47:41.157Z",
+        "jsonKind": "dict"
+      }
+    }
+  },
+  "largest": [
+    {
+      "path": "research/57/candidate-collection-01/raw/009.json",
+      "bytes": 29492267,
+      "sha256": "6e68614c18a51ed682391203d921cab971aae480a51a20b28411460451aca6e1",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://boards-api.greenhouse.io/v1/boards/spacex/jobs?content=true&pay_transparency=true",
+      "receivedAt": "2026-09-26T03:58:35.557Z",
+      "jsonKind": "dict"
+    },
+    {
+      "path": "research/57/candidate-collection-01/raw/001.json",
+      "bytes": 14499831,
+      "sha256": "f0ba26dc8c788ba2b5da1158dd9ff0b0fd66e87f7a29f176626627bdb2825719",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://api.ashbyhq.com/posting-api/job-board/openai?includeCompensation=true",
+      "receivedAt": "2026-09-26T03:58:33.169Z",
+      "jsonKind": "dict"
+    },
+    {
+      "path": "research/64-expansion/main/live-ats-1/responses/0614.body",
+      "bytes": 11569886,
+      "sha256": "0a5a9065e34169eba86245376ed524a193f5751e7e123433d97e67006878c3e5",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://boards-api.greenhouse.io/v1/boards/lucidmotors/jobs?content=true&pay_transparency=true",
+      "receivedAt": "2026-09-26T22:50:20.038Z",
+      "jsonKind": "dict"
+    },
+    {
+      "path": "research/57/candidate-collection-01/raw/011.json",
+      "bytes": 10449910,
+      "sha256": "eee28d33144aa41f96e5b3188681553e4159b831014da3fd68ccc860aad404b1",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://boards-api.greenhouse.io/v1/boards/databricks/jobs?content=true&pay_transparency=true",
+      "receivedAt": "2026-09-26T03:58:39.437Z",
+      "jsonKind": "dict"
+    },
+    {
+      "path": "research/64-expansion/main/live-ats-1/responses/0029.body",
+      "bytes": 10144249,
+      "sha256": "4791b7e12f98beeb5f8ea13fd92a12fa9d02e08271fa916d0af906338104d115",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://api.ashbyhq.com/posting-api/job-board/airwallex?includeCompensation=true",
+      "receivedAt": "2026-09-26T22:48:01.228Z",
+      "jsonKind": "dict"
+    },
+    {
+      "path": "research/57/live-default-01/raw/0009.json",
+      "bytes": 9183821,
+      "sha256": "9fdeabad17ed9a26fbd66299c0b8b3d62e5f5aae9933f8020dadc91b0f291f8f",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://boards-api.greenhouse.io/v1/boards/anthropic/jobs?content=true&pay_transparency=true",
+      "receivedAt": "2026-09-26T04:07:53.565Z",
+      "jsonKind": "dict"
+    },
+    {
+      "path": "research/57/live-default-01/raw/0004.json",
+      "bytes": 6911319,
+      "sha256": "1f6064125e0789067b8fa7e0b801fb2b34f9edb7d1c5ce92b3f599ee439a0170",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://boards-api.greenhouse.io/v1/boards/cloudflare/jobs?content=true&pay_transparency=true",
+      "receivedAt": "2026-09-26T04:07:51.257Z",
+      "jsonKind": "dict"
+    },
+    {
+      "path": "research/64-expansion/main/live-ats-1/responses/0615.body",
+      "bytes": 5848459,
+      "sha256": "fab14900d2547522c8290b267d09b9a2fea213f263307cbed227b3b71c7c8013",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://boards-api.greenhouse.io/v1/boards/agoda/jobs?content=true&pay_transparency=true",
+      "receivedAt": "2026-09-26T22:50:22.216Z",
+      "jsonKind": "dict"
+    },
+    {
+      "path": "research/57/live-default-01/raw/0005.json",
+      "bytes": 5805018,
+      "sha256": "3d504fb1292b1b756e24c47ac6b25cd2ffd4b590e36934d62fe4cbf81f162743",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://boards-api.greenhouse.io/v1/boards/datadog/jobs?content=true&pay_transparency=true",
+      "receivedAt": "2026-09-26T04:07:49.772Z",
+      "jsonKind": "dict"
+    },
+    {
+      "path": "research/57/live-default-01/raw/0001.json",
+      "bytes": 5466644,
+      "sha256": "8cdf4bcd1c9a67c7f45c9cab81aad8ce2deb7f9b68fd04343450d0e5d850dd48",
+      "matchedReceipt": true,
+      "receiptHasLength": true,
+      "status": 200,
+      "url": "https://boards-api.greenhouse.io/v1/boards/stripe/jobs?content=true&pay_transparency=true",
+      "receivedAt": "2026-09-26T04:07:52.359Z",
+      "jsonKind": "dict"
+    }
+  ],
+  "proposedLimitBytes": 67108864,
+  "withinProposedLimitCount": 1448,
+  "limitations": [
+    "Recorded decoded body lengths, not compressed wire sizes or peak process memory.",
+    "Historical observations; no provider is contacted and no freshness timestamp is updated.",
+    "A byte cap does not bound JSON object expansion, aggregate concurrency memory, or total collection work."
+  ],
+  "retention": "Original paths identify entries in .local/preserved-2026-09-28/historical-inputs.zip via its manifest, not live extracted files. This public record contains aggregate measurements and source references only."
+}

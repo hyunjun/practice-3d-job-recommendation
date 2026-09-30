@@ -1,0 +1,417 @@
+{
+  "version": 1,
+  "stage": 72,
+  "recordedAt": "2026-09-30T09:09:22.883647+00:00",
+  "status": "verification-approved-awaiting-Git-preservation-and-cleanup",
+  "baselineCommit": "c7830112dc2da58d002da7698cd82147a5272876",
+  "previousGoalTurn": "progress: stage71 implemented, independently verified, committed, pushed and cleaned",
+  "models": {
+    "main": "Main implementation/integration agent",
+    "astra": {
+      "modelRequested": "global.openai.gpt-6-astra",
+      "reasoningRequested": "max",
+      "agentId": "01a0f121-1f10-7a51-bfc9-951d4279ac39"
+    },
+    "fable": {
+      "modelRequested": "claude-fable-5-1",
+      "effortRequested": "max",
+      "reportedResponseModel": "claude-fable-5-1",
+      "sessionId": "20d44c8e-ba8c-4a80-98fb-5fd6aa06f5a6"
+    }
+  },
+  "modelLimitations": [
+    "Requested max effort is recorded; effective backend effort is not independently exposed.",
+    "All3 decisions require explicit approval; command exit0 or silence is not approval."
+  ],
+  "design": {
+    "version": 1,
+    "contract": "docs/design/provider-response-bounds.md",
+    "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+    "recordedAt": "2026-09-30T07:26:17.309530+00:00",
+    "participants": {
+      "main": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+        "basis": "Independent proposal, archived response audit, reconciled contract and affected validation scope reviewed."
+      },
+      "astra": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+        "agentId": "01a0f121-1f10-7a51-bfc9-951d4279ac39",
+        "modelRequested": "global.openai.gpt-6-astra",
+        "effortRequested": "max",
+        "quote": "DESIGN_APPROVED — design1. All previously identified design blockers are resolved, including application timeout attribution, stream-only JSON enforcement, primary-error precedence, and reader unlocking. I accept the reconciled contract and specified 11-spec DEV/PROD verification scope plus full check/build."
+      },
+      "fable": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+        "sessionId": "20d44c8e-ba8c-4a80-98fb-5fd6aa06f5a6",
+        "modelRequested": "claude-fable-5-1",
+        "effortRequested": "max",
+        "quote": "**DESIGN_APPROVED** for `docs/design/provider-response-bounds.md` design 1 at SHA-256 `0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4`. I computed this myself with the permitted helper, which also reported state digest `cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8` over 387 files and helper SHA-256 `a133d74d8d071ecd85aa803d1da03653eb03cd7caf98bb06c2c524c3c4914c5d`. Both match the prompt and main c7830112. This approves the whole contract as read and authorizes implementation and test authorship. It is not an implementation review, no test has run, and it claims nothing about product correctness.",
+        "identityComputedIndependently": true,
+        "reviewSource": ".local/research/72-response-bounds/collaboration/design-review-01.review.md"
+      }
+    },
+    "completedAt": "2026-09-30T07:29:35.338006+00:00",
+    "executionScopeAddition": {
+      "file": "tests/e2e/source-expansion.spec.ts",
+      "reason": "Fable identified browser coverage for non-empty Zalando/Starbucks HTML details; main accepts; exact expanded command set will receive all3 implementation-review approval."
+    }
+  },
+  "research": {
+    "audit": "docs/validation/provider-response-size-audit-2026-09-30.json",
+    "auditSha256": "bb9ba07677745cc80a8d8e63b54dd986dc9ee159ec676995cad91a5d6021d24e",
+    "references": [
+      {
+        "name": "undici",
+        "url": "https://github.com/nodejs/undici/blob/main/README.md",
+        "finalUrl": "https://github.com/nodejs/undici/blob/main/README.md",
+        "status": 200,
+        "startedAt": "2026-09-30T07:05:24.664Z",
+        "endedAt": "2026-09-30T07:05:25.375Z",
+        "bytes": 634986,
+        "sha256": "48b1edab8d917cd25bedd8d2899f6eea22c72689a64e455f0393e2f0c046074a"
+      },
+      {
+        "name": "response-json",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/json",
+        "finalUrl": "https://developer.mozilla.org/en-US/docs/Web/API/Response/json",
+        "status": 200,
+        "startedAt": "2026-09-30T07:05:24.700Z",
+        "endedAt": "2026-09-30T07:05:24.911Z",
+        "bytes": 154078,
+        "sha256": "aa3d23d2e57347c3fa75e4307ceb1d6e9c5b0763151d6fe65c811c84589ef5b2"
+      },
+      {
+        "name": "node-json",
+        "url": "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop",
+        "finalUrl": "https://nodejs.org/learn/asynchronous-work/dont-block-the-event-loop",
+        "status": 200,
+        "startedAt": "2026-09-30T07:05:24.701Z",
+        "endedAt": "2026-09-30T07:05:24.877Z",
+        "bytes": 138708,
+        "sha256": "36b2860ff17c4e7d87b91d17a43499dd0912de0adc810792fccaceea4570ded7"
+      }
+    ],
+    "providerRequestsMadeThisStage": 0
+  },
+  "verification": {
+    "status": "passed",
+    "required": [
+      "npm run check",
+      "npm run build",
+      "12 affected E2E specs in development",
+      "same12 E2E specs in production"
+    ],
+    "note": "Exactly four approved commands ran once on the final source:full type/unit check, build,82-case DEV and82-case PROD. No product test failed, was skipped or retried. All3 final evidence review is complete.",
+    "completed": [
+      {
+        "kind": "check",
+        "runId": "20260930T083056268307Z-9b2554a7",
+        "status": "complete",
+        "receipt": {
+          "bytes": 2544,
+          "sha256": "193c150882460f50ca0b8cad0cec522b82d778835e6e8afcb7880df68cec52b2"
+        },
+        "unit": {
+          "success": true,
+          "numTotalTests": 2688,
+          "numPassedTests": 2688,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "fileCount": 81,
+          "assertionCount": 2688,
+          "nonPassed": [],
+          "report": {
+            "bytes": 1145678,
+            "sha256": "86b297bab744dff92f62cdcd8123097345f89b778df900f9075b9135bca9b991"
+          }
+        }
+      },
+      {
+        "kind": "build",
+        "runId": "20260930T083235756630Z-e2b2429c",
+        "status": "complete",
+        "receipt": {
+          "bytes": 2346,
+          "sha256": "f8d62918ee0133c98d9c9a7fa8a5e2cc21175f64d0f0bc432ad0235d53b04649"
+        },
+        "build": {
+          "artifactDigest": "90561ca5a8f6aea7267b32b2f19949bdf447ac676f398d7fc1d3f2899a697f26",
+          "fileCount": 559,
+          "manifest": {
+            "bytes": 97048,
+            "sha256": "1e48d94f323a30085ee1b6eac4122591f5563ff7ccf676d49411d7f0238f6128"
+          }
+        }
+      },
+      {
+        "kind": "e2e-development",
+        "runId": "20260930T083334396123Z-c7e840c7",
+        "status": "complete",
+        "receipt": {
+          "bytes": 3651,
+          "sha256": "8540efb48be715e89fb03ef5397dec504b858290b380d53e50bbbddc48fe3333"
+        },
+        "e2e": {
+          "stats": {
+            "startTime": "2026-09-30T08:33:35.303Z",
+            "duration": 768731.658,
+            "expected": 82,
+            "skipped": 0,
+            "unexpected": 0,
+            "flaky": 0
+          },
+          "errors": [],
+          "caseCount": 82,
+          "files": [
+            "bulk-inventory.spec.ts",
+            "catalog-lifecycle.spec.ts",
+            "catalog-observations.spec.ts",
+            "catalog-progress.spec.ts",
+            "http-cache.spec.ts",
+            "lever-pagination.spec.ts",
+            "posting-presence.spec.ts",
+            "providers.spec.ts",
+            "public-coverage.spec.ts",
+            "response-bounds.spec.ts",
+            "source-expansion.spec.ts",
+            "source-integrations.spec.ts"
+          ],
+          "retryAttempts": 0,
+          "nonPassedResults": [],
+          "report": {
+            "bytes": 496389,
+            "sha256": "7dc0a8bba567d37d04cef627d135e1eb33c46ef4e320b18ec266c5670d65b968"
+          }
+        }
+      },
+      {
+        "kind": "e2e-production",
+        "runId": "20260930T084649399557Z-d02b607a",
+        "status": "complete",
+        "receipt": {
+          "bytes": 3875,
+          "sha256": "48321dd4ded756ba9360efbd139f1029ff1691ad358b02d6d91b2e3fa2d07586"
+        },
+        "e2e": {
+          "stats": {
+            "startTime": "2026-09-30T08:46:50.415Z",
+            "duration": 692642.095,
+            "expected": 82,
+            "skipped": 0,
+            "unexpected": 0,
+            "flaky": 0
+          },
+          "errors": [],
+          "caseCount": 82,
+          "files": [
+            "bulk-inventory.spec.ts",
+            "catalog-lifecycle.spec.ts",
+            "catalog-observations.spec.ts",
+            "catalog-progress.spec.ts",
+            "http-cache.spec.ts",
+            "lever-pagination.spec.ts",
+            "posting-presence.spec.ts",
+            "providers.spec.ts",
+            "public-coverage.spec.ts",
+            "response-bounds.spec.ts",
+            "source-expansion.spec.ts",
+            "source-integrations.spec.ts"
+          ],
+          "retryAttempts": 0,
+          "nonPassedResults": [],
+          "report": {
+            "bytes": 493750,
+            "sha256": "fde3737906b238c6114a0d869aff8947e8d01e857ed3fc42ae1f03a9d85fd559"
+          }
+        }
+      }
+    ],
+    "independentPartialReview": {
+      "reviewer": "global.openai.gpt-6-astra",
+      "reasoningRequested": "max",
+      "agentId": "01a0f121-1f10-7a51-bfc9-951d4279ac39",
+      "recordedAt": "2026-09-30T08:39:16.544386+00:00",
+      "scope": [
+        "20260930T083056268307Z-9b2554a7",
+        "20260930T083235756630Z-e2b2429c"
+      ],
+      "decision": "completed-check-and-build-evidence-confirmed-no-concrete-issue",
+      "quote": "Check: exit 0; 2,688/2,688 tests passed across 81 files, with zero failed, pending, or todo tests. All corrected reader and service cases appear as passed. Build: exit 0; independently hashed all 559 artifact files. They match the manifest digest 90561ca5a8f6aea7267b32b2f19949bdf447ac676f398d7fc1d3f2899a697f26. Both receipts match the frozen source, controls, plan, and implementation gate. Neither records interruption, timeout, runner error, registry error, or remaining owned processes. Main’s completed summary rows and evidence hashes match the raw files. The summarizer is read-only and leaves active DEV reporter results unset. E2E completion and final verification approval remain pending."
+    },
+    "independentDevelopmentReview": {
+      "reviewer": "global.openai.gpt-6-astra",
+      "reasoningRequested": "max",
+      "agentId": "01a0f121-1f10-7a51-bfc9-951d4279ac39",
+      "recordedAt": "2026-09-30T08:51:47.134226+00:00",
+      "runId": "20260930T083334396123Z-c7e840c7",
+      "decision": "completed-development-evidence-confirmed-no-concrete-issue",
+      "quote": "82/82 passed, exactly12 requested files, one attempt per case; zero skipped, unexpected, flaky, retries, or global reporter errors. Source, contract, plan, gate and controls match. Both widths demonstrate retained09:00 snapshots and saved application/exploration state through failure/restart, sibling refresh and09:04 recovery. Both observations record68160060 enqueued bytes of75497472 followed by cancellation, including prefetch, not accepted reader bytes or memory use. All four response-bounds fixture lifetimes record normal exit and closure. DEV cleanup records no residuals or forced intervention. Both320px screenshots are readable; artifact hashes and Main summary match. PROD and final verification approval remain pending."
+    }
+  },
+  "cleanup": {
+    "status": "pending-Git-preservation-and-cleanup",
+    "preview8787": "off",
+    "protectedOriginalFileCount": 10,
+    "preparedOriginalArchive": {
+      "directory": ".local/preserved-2026-09-30-stage-72",
+      "verifiedAt": "2026-09-30T08:37:15.530872+00:00",
+      "archiveSha256": "9c4e4dd9bd18ec446df00c7d3735e892528bb72e498e6ccf4eb15888fbe93dc1",
+      "archiveBytes": 136633,
+      "manifestSha256": "bafb33977c434039dc46f355e88ab3e359603761afc8e5c812547d9a3813a0bf",
+      "originalFileCount": 4,
+      "uniqueBlobCount": 4,
+      "originalBytes": 929169,
+      "allCrcSizeShaAndOriginalBytesMatched": true,
+      "workingCopiesRemoved": false
+    }
+  },
+  "preExecutionFindings": [
+    {
+      "kind": "test-design",
+      "finding": "Finite cap+1 bodies may finish before the client observes the excess byte; underlying cancel hooks need not run after a stream closes.",
+      "disposition": "Accepted; exact-cap and cap+1 retained, open-source and cap+8MiB cancellation probes added; closed-source case checks size and unlocked reader. Main reviewed and accepts; final Astra review of the frozen source remains pending.",
+      "finalDisposition": "Accepted and resolved in all3 final review; no unresolved blocker."
+    },
+    {
+      "kind": "verification-controls",
+      "finding": "Static review identified exit-status, captured-plan identity, concurrency, artifact ownership, process cleanup/cancellation, registration and compiled-build provenance gaps.",
+      "disposition": "Main corrected; Astra confirmed the three remaining concrete blockers resolved by static inspection. Full implementation approval and runtime verification are still pending.",
+      "finalDisposition": "Accepted and resolved in all3 final review; no unresolved blocker."
+    },
+    {
+      "kind": "test-design",
+      "id": "native-header-handoff",
+      "finding": "Server write completion plus a short delay does not establish that native fetch has returned a Response before reset or abort.",
+      "disposition": "Fable accepted and added an acknowledgement of the native Response before controlled reset/abort, a pre-header failure boundary case, and response-arrival checks for native deadlines. Main reviewed and accepts; final Astra approval pending.",
+      "finalDisposition": "Accepted and resolved in all3 final review; no unresolved blocker."
+    },
+    {
+      "kind": "test-design",
+      "id": "smartrecruiters-presence",
+      "finding": "The oversized-detail service case omits presence. A later direct fetchPresence proves a new listing succeeds, not preservation of prior v2 presence state.",
+      "disposition": "Fable accepted and extended the existing real-provider scenario with presence/cache, literal retained publication/body timestamps, sibling refresh, saved-posting state and restart/no-extra-request assertions. Main reviewed and accepts; final Astra approval pending.",
+      "finalDisposition": "Accepted and resolved in all3 final review; no unresolved blocker."
+    }
+  ],
+  "implementationReview": {
+    "status": "all3-approved",
+    "version": 1,
+    "stage": 72,
+    "recordedAt": "2026-09-30T08:30:35.749932+00:00",
+    "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+    "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+    "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+    "fileCount": 395,
+    "participants": {
+      "main": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "reviewer": "main",
+        "recordedAt": "2026-09-30T08:26:07.599695+00:00",
+        "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+        "fileCount": 395,
+        "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+        "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+        "basis": "Reviewed sole product diff, independent tests and corrected native handoff/presence/finite-stream probes, explicit expectations, 12-spec DEV/PROD scope, controls and accepted limits. No product test executed yet.",
+        "integrationEdit": "After Fable completed correction02, Main changed only the HTML inventory test description from one more byte to oversized list, matching its cap+8MiB input. Assertions and fixture behavior were not changed."
+      },
+      "astra": {
+        "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+        "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+        "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "agentId": "01a0f121-1f10-7a51-bfc9-951d4279ac39",
+        "modelRequested": "global.openai.gpt-6-astra",
+        "reasoningRequested": "max",
+        "identityAndPlanComputedIndependently": true,
+        "quote": "The sole product diff conforms to the approved design. Native Response handoff and pre-header coverage, retained SmartRecruiters v2 presence through restart, and corrected cancellation oracles resolve the blockers. Cap+1 boundaries remain covered. No remaining concrete blocker to executing this plan after all three implementation approvals. I ran no validation and made no edits. Final verification approval remains pending."
+      },
+      "fable": {
+        "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+        "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+        "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "sessionId": "20d44c8e-ba8c-4a80-98fb-5fd6aa06f5a6",
+        "modelRequested": "claude-fable-5-1",
+        "reportedResponseModels": [
+          "claude-fable-5-1"
+        ],
+        "effortRequested": "max",
+        "reviewSha256": "cbe47bb30a0f56e40a315c9ae20da22ce82f33a7b8d36dd1fb1944f1c556bdf7",
+        "processReceiptSha256": "83d8453644e8504dc78879d728588fc62553f400cbf95779048dae04a337343c",
+        "sourceIdentityComputedIndependently": true,
+        "planHashLimitation": "Fable compared plan content field by field and bound approval to the Main-computed hash, independently verified by Astra; Fable tools cannot hash the plan.",
+        "quote": "No remaining blocker to starting the specified verification. This approval authorizes running the reviewed plan; it is not a verification approval, and no test success is inferred from it."
+      }
+    },
+    "gateSha256": "1d18b09b2a4ab8c0d8afb50471de8968a8d39de68cafc3fa37850173e0c7f219"
+  },
+  "finalVerification": {
+    "status": "all3-approved",
+    "version": 1,
+    "stage": 72,
+    "recordedAt": "2026-09-30T09:09:22.883647+00:00",
+    "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+    "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+    "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+    "finalEvidenceSha256": "c13d53b6638a678eb091481d3c3ff7102b9ad5f630dca6f9f1bde38c18029de4",
+    "finalEvidenceFile": "docs/validation/provider-response-bounds-final-evidence-2026-09-30.json",
+    "participants": {
+      "main": {
+        "decision": "VERIFICATION_APPROVED",
+        "reviewer": "main",
+        "recordedAt": "2026-09-30T09:01:47.910554+00:00",
+        "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+        "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+        "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+        "finalEvidenceSha256": "c13d53b6638a678eb091481d3c3ff7102b9ad5f630dca6f9f1bde38c18029de4",
+        "basis": "All4 required runs passed with unchanged source/controls and no skipped/flaky/retry outcomes; same82cases across modes; native boundaries and real-app state/recovery assertions, served build bytes, fixture closure and protected originals reviewed. Prose/path corrections are recorded, not test failures. Accepted limits retained."
+      },
+      "astra": {
+        "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+        "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+        "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+        "finalEvidenceSha256": "c13d53b6638a678eb091481d3c3ff7102b9ad5f630dca6f9f1bde38c18029de4",
+        "decision": "VERIFICATION_APPROVED",
+        "agentId": "01a0f121-1f10-7a51-bfc9-951d4279ac39",
+        "modelRequested": "global.openai.gpt-6-astra",
+        "reasoningRequested": "max",
+        "hashesVerifiedIndependently": true,
+        "quote": "Evidence faithfully records81 unit files /2688 passed tests, successful build, identical82/82 DEV and PROD cases, eight closed fixture lifetimes, and clean executor completion. Protected originals and the new archive verify; ports5173/8787 have no listeners. The prose and aggregation corrections are accurately disclosed. No remaining blocker in my review. Stage cleanup and Git preservation remain next actions after unanimous agreement; neither is completed yet."
+      },
+      "fable": {
+        "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+        "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+        "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+        "finalEvidenceSha256": "c13d53b6638a678eb091481d3c3ff7102b9ad5f630dca6f9f1bde38c18029de4",
+        "decision": "VERIFICATION_APPROVED",
+        "sessionId": "20d44c8e-ba8c-4a80-98fb-5fd6aa06f5a6",
+        "modelRequested": "claude-fable-5-1",
+        "reportedModels": [
+          "claude-fable-5-1"
+        ],
+        "effortRequested": "max",
+        "reviewSha256": "1c719b86d3d7d16fbcb53c286027b2bd0f24abf1002577282e6ee68cb8ccf0a4",
+        "processReceiptSha256": "be4b8d30b23a37e5df38f65781ec9e94e90ed69f5c39a9999b44eafc359a0447",
+        "sourceAndContractComputedIndependently": true,
+        "arbitraryFileHashLimitation": "Approval binds to Main-computed evidence/reporter/receipt hashes independently checked by Astra; Fable compared actual contents and did not claim arbitrary-file hashing.",
+        "unitFileCountCorrectionAcknowledged": true,
+        "quote": "My execution prose said all82 unit files. That was wrong. I recounted the raw Vitest testResults array:81 unit files with2688tests passed.82 is the E2E case count per mode. No unresolved blocker to preserving this completed stage in Git and then removing task temporaries and owned processes, with original archives and observations retained. Cleanup has not happened yet."
+      }
+    },
+    "gateSha256": "d152778fc2982098089f17250a330107f38ed01103b820ac7bbc0e2c1d7c2680"
+  },
+  "postExecutionReviewCorrections": [
+    {
+      "finding": "Main read-only aggregation initially used the wrong fixture receipt directory.",
+      "resolution": "Corrected to bounds-server; completed byte/case/original comparisons without changing or rerunning product tests."
+    },
+    {
+      "finding": "Fable execution prose said82 unit files.",
+      "resolution": "Fable explicitly recounted and corrected to81unitfiles/2688tests;82 is each E2E case count. Final raw-evidence record already used81."
+    }
+  ]
+}

@@ -1,0 +1,623 @@
+{
+  "version": 1,
+  "stage": 72,
+  "recordedAt": "2026-09-30T09:01:47.907278+00:00",
+  "purpose": "Immutable final command evidence for all3 review. Phase decisions and cleanup completion are recorded separately.",
+  "baselineCommit": "c7830112dc2da58d002da7698cd82147a5272876",
+  "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+  "fileCount": 395,
+  "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+  "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+  "implementationGateSha256": "1d18b09b2a4ab8c0d8afb50471de8968a8d39de68cafc3fa37850173e0c7f219",
+  "sourceManifestSha256": "c4db02cb9ff55dc9d3c6e2ef84bc7af2865bbca7ab1812ccb2707fe828357d87",
+  "environment": {
+    "node": "v26.10.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "os": "27.0.0",
+    "tools": [
+      {
+        "name": "@playwright/test",
+        "version": "1.63.0"
+      },
+      {
+        "name": "vitest",
+        "version": "5.0.1"
+      },
+      {
+        "name": "typescript",
+        "version": "7.0.2"
+      }
+    ]
+  },
+  "independentExecutor": {
+    "requestedModel": "claude-fable-5-1",
+    "reportedModels": [
+      "claude-fable-5-1"
+    ],
+    "requestedEffort": "max",
+    "sessionId": "20d44c8e-ba8c-4a80-98fb-5fd6aa06f5a6",
+    "actor": "20d44c8e-ba8c-4a80-98fb-5fd6aa06f5a6|execution-01",
+    "processStatus": "complete",
+    "exitCode": 0,
+    "interrupted": false,
+    "runnerError": null,
+    "remainingOwnedProcesses": 0,
+    "receiptSha256": "b55e8d3c5e461a4e46afea3c84aea1161394a81fcb4033a8383d46c63d447ae4",
+    "reviewSha256": "5f3be65deeaa5486918187df4ffe09e4e97916662de00f90fcbd7280e7ddf268",
+    "hashVerificationLimit": "Fable independently read reporter/receipt contents. Tools could compute source/contract identity, but report and receipt file hashes are Main-computed and independently checked by Astra."
+  },
+  "runs": [
+    {
+      "runId": "20260930T083056268307Z-9b2554a7",
+      "kind": "check",
+      "status": "complete",
+      "startedAt": "2026-09-30T08:30:56.310154+00:00",
+      "endedAt": "2026-09-30T08:31:09.555607+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "check",
+        "--",
+        "--reporter=json",
+        "--outputFile=/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/verification/20260930T083056268307Z-9b2554a7/vitest.json"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/verification/20260930T083056268307Z-9b2554a7/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+      "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+      "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+      "implementationGateSha256": "1d18b09b2a4ab8c0d8afb50471de8968a8d39de68cafc3fa37850173e0c7f219",
+      "fileCount": 395,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2544,
+        "sha256": "193c150882460f50ca0b8cad0cec522b82d778835e6e8afcb7880df68cec52b2"
+      },
+      "cleanup": {
+        "registeredSpawns": 92,
+        "observedOwnedProcesses": 91,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 90,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 400,
+        "sha256": "92907f2876a6ea69a27aa331333babf20816ef81c9d571713590d6c469fe2b94"
+      },
+      "unit": {
+        "success": true,
+        "numTotalTests": 2688,
+        "numPassedTests": 2688,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "fileCount": 81,
+        "assertionCount": 2688,
+        "nonPassed": [],
+        "report": {
+          "bytes": 1145678,
+          "sha256": "86b297bab744dff92f62cdcd8123097345f89b778df900f9075b9135bca9b991"
+        }
+      }
+    },
+    {
+      "runId": "20260930T083235756630Z-e2b2429c",
+      "kind": "build",
+      "status": "complete",
+      "startedAt": "2026-09-30T08:32:35.794587+00:00",
+      "endedAt": "2026-09-30T08:32:38.947166+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/verification/20260930T083235756630Z-e2b2429c/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+      "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+      "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+      "implementationGateSha256": "1d18b09b2a4ab8c0d8afb50471de8968a8d39de68cafc3fa37850173e0c7f219",
+      "fileCount": 395,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2346,
+        "sha256": "f8d62918ee0133c98d9c9a7fa8a5e2cc21175f64d0f0bc432ad0235d53b04649"
+      },
+      "cleanup": {
+        "registeredSpawns": 3,
+        "observedOwnedProcesses": 6,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 5,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 12129,
+        "sha256": "eb23bc5d3b722da08a206c257222528c3c1d0beca9fca97313a0f458e2588026"
+      },
+      "build": {
+        "artifactDigest": "90561ca5a8f6aea7267b32b2f19949bdf447ac676f398d7fc1d3f2899a697f26",
+        "fileCount": 559,
+        "manifest": {
+          "bytes": 97048,
+          "sha256": "1e48d94f323a30085ee1b6eac4122591f5563ff7ccf676d49411d7f0238f6128"
+        }
+      }
+    },
+    {
+      "runId": "20260930T083334396123Z-c7e840c7",
+      "kind": "e2e-development",
+      "status": "complete",
+      "startedAt": "2026-09-30T08:33:34.436485+00:00",
+      "endedAt": "2026-09-30T08:46:24.502460+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/response-bounds.spec.ts",
+        "tests/e2e/providers.spec.ts",
+        "tests/e2e/lever-pagination.spec.ts",
+        "tests/e2e/bulk-inventory.spec.ts",
+        "tests/e2e/posting-presence.spec.ts",
+        "tests/e2e/source-integrations.spec.ts",
+        "tests/e2e/public-coverage.spec.ts",
+        "tests/e2e/source-expansion.spec.ts",
+        "tests/e2e/catalog-progress.spec.ts",
+        "tests/e2e/catalog-lifecycle.spec.ts",
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/http-cache.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/verification/20260930T083334396123Z-c7e840c7/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "development",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/playwright/browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/verification/20260930T083334396123Z-c7e840c7/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/verification/20260930T083334396123Z-c7e840c7/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+      "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+      "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+      "implementationGateSha256": "1d18b09b2a4ab8c0d8afb50471de8968a8d39de68cafc3fa37850173e0c7f219",
+      "fileCount": 395,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 3651,
+        "sha256": "8540efb48be715e89fb03ef5397dec504b858290b380d53e50bbbddc48fe3333"
+      },
+      "cleanup": {
+        "registeredSpawns": 1460,
+        "observedOwnedProcesses": 522,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 148,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 247206,
+        "sha256": "7b72c6603feae35176f926fc5ebc4f63f0dfdba486cbe4b27051fa793c89ef60"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T08:33:35.303Z",
+          "duration": 768731.658,
+          "expected": 82,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 82,
+        "files": [
+          "bulk-inventory.spec.ts",
+          "catalog-lifecycle.spec.ts",
+          "catalog-observations.spec.ts",
+          "catalog-progress.spec.ts",
+          "http-cache.spec.ts",
+          "lever-pagination.spec.ts",
+          "posting-presence.spec.ts",
+          "providers.spec.ts",
+          "public-coverage.spec.ts",
+          "response-bounds.spec.ts",
+          "source-expansion.spec.ts",
+          "source-integrations.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 496389,
+          "sha256": "7dc0a8bba567d37d04cef627d135e1eb33c46ef4e320b18ec266c5670d65b968"
+        }
+      }
+    },
+    {
+      "runId": "20260930T084649399557Z-d02b607a",
+      "kind": "e2e-production",
+      "status": "complete",
+      "startedAt": "2026-09-30T08:46:49.436602+00:00",
+      "endedAt": "2026-09-30T08:58:23.915188+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/response-bounds.spec.ts",
+        "tests/e2e/providers.spec.ts",
+        "tests/e2e/lever-pagination.spec.ts",
+        "tests/e2e/bulk-inventory.spec.ts",
+        "tests/e2e/posting-presence.spec.ts",
+        "tests/e2e/source-integrations.spec.ts",
+        "tests/e2e/public-coverage.spec.ts",
+        "tests/e2e/source-expansion.spec.ts",
+        "tests/e2e/catalog-progress.spec.ts",
+        "tests/e2e/catalog-lifecycle.spec.ts",
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/http-cache.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/verification/20260930T084649399557Z-d02b607a/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "production",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/playwright/browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/verification/20260930T084649399557Z-d02b607a/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/verification/20260930T084649399557Z-d02b607a/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/72-response-bounds/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "c72ef6df0c384ba40b105ec06fb3aaacffcb2774d8cfb982698463997c5554a2",
+      "contractSha256": "0e929e584715674cc556fac4d4ec66f3229b0d1cc244137ed49d4fc7db1377f4",
+      "executionPlanSha256": "bc15fbed05ad3bbf9b7f8b2392eab289e125a06f1f2d9754d1389b58d6b1c289",
+      "implementationGateSha256": "1d18b09b2a4ab8c0d8afb50471de8968a8d39de68cafc3fa37850173e0c7f219",
+      "fileCount": 395,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": {
+        "proofSha256": "f86ed7c90dcebd8bc6db11cbe982762184ff204f92e0c4b2d404c38b0f479848",
+        "buildRunId": "20260930T083235756630Z-e2b2429c",
+        "artifactDigest": "90561ca5a8f6aea7267b32b2f19949bdf447ac676f398d7fc1d3f2899a697f26"
+      },
+      "receipt": {
+        "bytes": 3875,
+        "sha256": "48321dd4ded756ba9360efbd139f1029ff1691ad358b02d6d91b2e3fa2d07586"
+      },
+      "cleanup": {
+        "registeredSpawns": 845,
+        "observedOwnedProcesses": 553,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 98,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 241652,
+        "sha256": "edae28fe857d2d2b2498e8c2bbc6a114947ef97b949c998f2b7539fbe30c85e1"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T08:46:50.415Z",
+          "duration": 692642.095,
+          "expected": 82,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 82,
+        "files": [
+          "bulk-inventory.spec.ts",
+          "catalog-lifecycle.spec.ts",
+          "catalog-observations.spec.ts",
+          "catalog-progress.spec.ts",
+          "http-cache.spec.ts",
+          "lever-pagination.spec.ts",
+          "posting-presence.spec.ts",
+          "providers.spec.ts",
+          "public-coverage.spec.ts",
+          "response-bounds.spec.ts",
+          "source-expansion.spec.ts",
+          "source-integrations.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 493750,
+          "sha256": "fde3737906b238c6114a0d869aff8947e8d01e857ed3fc42ae1f03a9d85fd559"
+        }
+      }
+    }
+  ],
+  "crossModeCases": {
+    "identical": true,
+    "countPerMode": 82,
+    "identityFields": [
+      "file",
+      "id",
+      "suite",
+      "title",
+      "project"
+    ],
+    "canonicalSha256": "6af48617506ea2978d09aa65456615824cb5b0100d2337246a69070d47e69664",
+    "fullComparisonSha256": "5e25cce388d672e674d63a7dbdd9ffd777f85dfe2227dbcae2ec5a3686205409"
+  },
+  "responseBoundsScenarios": [
+    {
+      "mode": "e2e-development",
+      "originalPath": ".local/research/72-response-bounds/verification/20260930T083334396123Z-c7e840c7/playwright-results/response-bounds-over-cap-b-27e22-then-a-normal-feed-recovers/response-bounds-observation.json",
+      "observationSha256": "4443552323e778b2571a973ac47d1f4567ded607847e5abe5dbb98a91ebf5687",
+      "fixtureReceiptSha256": "d0c54419f9c3d75d36cbcffc80b84899f15fb3e5328a1828a766fd1b593b88f7",
+      "fixtureLifetimes": 2,
+      "allFixtureLifetimesClosedNormally": true,
+      "streams": [
+        {
+          "kind": "stream",
+          "url": "https://boards-api.greenhouse.io/v1/boards/CedarBounds72/jobs?content=true&pay_transparency=true",
+          "declaredBytes": 75497472,
+          "pulledBytes": 68160060,
+          "cancelled": true,
+          "reason": "undefined"
+        }
+      ],
+      "upstreamRequests": 6,
+      "upstreamNetworkSentCount": 0,
+      "failures": {
+        "pageErrors": [],
+        "failedResources": [],
+        "unexpectedRequests": []
+      }
+    },
+    {
+      "mode": "e2e-development",
+      "originalPath": ".local/research/72-response-bounds/verification/20260930T083334396123Z-c7e840c7/playwright-results/response-bounds-over-cap-b-8d91a-then-a-normal-feed-recovers/response-bounds-observation.json",
+      "observationSha256": "cffc63d0d3975544f00dcdf7c0421e7666c88705e2e5388bcde11eb0913280ce",
+      "fixtureReceiptSha256": "7ded646705b80956b2fecabd628c7324fff78a81d87e36f44c4646597aac7af3",
+      "fixtureLifetimes": 2,
+      "allFixtureLifetimesClosedNormally": true,
+      "streams": [
+        {
+          "kind": "stream",
+          "url": "https://boards-api.greenhouse.io/v1/boards/CedarBounds72/jobs?content=true&pay_transparency=true",
+          "declaredBytes": 75497472,
+          "pulledBytes": 68160060,
+          "cancelled": true,
+          "reason": "undefined"
+        }
+      ],
+      "upstreamRequests": 6,
+      "upstreamNetworkSentCount": 0,
+      "failures": {
+        "pageErrors": [],
+        "failedResources": [],
+        "unexpectedRequests": []
+      }
+    },
+    {
+      "mode": "e2e-production",
+      "originalPath": ".local/research/72-response-bounds/verification/20260930T084649399557Z-d02b607a/playwright-results/response-bounds-over-cap-b-27e22-then-a-normal-feed-recovers/response-bounds-observation.json",
+      "observationSha256": "14ae15c5bcb28f1d53aef6f719dda6de3490fb2c597e1201f318d6d79772a006",
+      "fixtureReceiptSha256": "004642d3d6d982e85578acca8f9debd9f5539a0b042eaa32ad5d4737f5961d4f",
+      "fixtureLifetimes": 2,
+      "allFixtureLifetimesClosedNormally": true,
+      "streams": [
+        {
+          "kind": "stream",
+          "url": "https://boards-api.greenhouse.io/v1/boards/CedarBounds72/jobs?content=true&pay_transparency=true",
+          "declaredBytes": 75497472,
+          "pulledBytes": 68160060,
+          "cancelled": true,
+          "reason": "undefined"
+        }
+      ],
+      "upstreamRequests": 6,
+      "upstreamNetworkSentCount": 0,
+      "failures": {
+        "pageErrors": [],
+        "failedResources": [],
+        "unexpectedRequests": []
+      },
+      "servedBuild": {
+        "entry": "/assets/index-D6E6oOuo.js",
+        "bytes": 689413,
+        "sha256": "b1c0a291e094c738bd76c48ef955fb02d142b05d8782698a028464a32a4fafab",
+        "receiptSha256": "cd5ee0c50fd073aaef231ef15bfc44013109e426b8b7c52fd8bc3ce629eef063"
+      }
+    },
+    {
+      "mode": "e2e-production",
+      "originalPath": ".local/research/72-response-bounds/verification/20260930T084649399557Z-d02b607a/playwright-results/response-bounds-over-cap-b-8d91a-then-a-normal-feed-recovers/response-bounds-observation.json",
+      "observationSha256": "235853a7bd00fac5c0b2aa6c354804574598427625bc951a07efca927a265b82",
+      "fixtureReceiptSha256": "30656e6b1f32d953ea68226518eddf508c4273dc248a733dcfcd1e2fde944c6d",
+      "fixtureLifetimes": 2,
+      "allFixtureLifetimesClosedNormally": true,
+      "streams": [
+        {
+          "kind": "stream",
+          "url": "https://boards-api.greenhouse.io/v1/boards/CedarBounds72/jobs?content=true&pay_transparency=true",
+          "declaredBytes": 75497472,
+          "pulledBytes": 68160060,
+          "cancelled": true,
+          "reason": "undefined"
+        }
+      ],
+      "upstreamRequests": 6,
+      "upstreamNetworkSentCount": 0,
+      "failures": {
+        "pageErrors": [],
+        "failedResources": [],
+        "unexpectedRequests": []
+      },
+      "servedBuild": {
+        "entry": "/assets/index-D6E6oOuo.js",
+        "bytes": 689413,
+        "sha256": "b1c0a291e094c738bd76c48ef955fb02d142b05d8782698a028464a32a4fafab",
+        "receiptSha256": "cd5ee0c50fd073aaef231ef15bfc44013109e426b8b7c52fd8bc3ce629eef063"
+      }
+    }
+  ],
+  "visualReview": [
+    {
+      "path": ".local/research/72-response-bounds/verification/20260930T083334396123Z-c7e840c7/playwright-results/response-bounds-over-cap-b-27e22-then-a-normal-feed-recovers/bounds-retained-board-320.png",
+      "bytes": 74503,
+      "sha256": "e193b06649816eb1c76e69863d8f64cba76361272a4c8ba404d2a1f7fcec09de",
+      "reviewedBy": "main",
+      "review": "At320px, retained-board error/last-success text and saved unknown-state notice, note and applied status are legible within the viewport. No visual issue found in these two captured states."
+    },
+    {
+      "path": ".local/research/72-response-bounds/verification/20260930T083334396123Z-c7e840c7/playwright-results/response-bounds-over-cap-b-27e22-then-a-normal-feed-recovers/bounds-unknown-saved-320.png",
+      "bytes": 97911,
+      "sha256": "84cfdd4ee5080a6567a646cdc4fdd27ecc3dadcfe64d4fd738d7e74e3fb0dbcc",
+      "reviewedBy": "main",
+      "review": "At320px, retained-board error/last-success text and saved unknown-state notice, note and applied status are legible within the viewport. No visual issue found in these two captured states."
+    }
+  ],
+  "preservation": {
+    "baselineOriginalsUnchanged": {
+      "fileCount": 10,
+      "files": [
+        {
+          "path": ".local/preserved-2026-09-28/historical-inputs.zip",
+          "bytes": 247075859,
+          "sha256": "b7114d8f6bce0ea43236ba54601eeccbfab7593493f936ad1842291a475dd85a"
+        },
+        {
+          "path": ".local/preserved-2026-09-28/manifest.json",
+          "bytes": 1063467,
+          "sha256": "431aea357cf79fb7a64bf7725182ebce7f34f3e0811f164992b6a443fa767514"
+        },
+        {
+          "path": ".local/preserved-2026-09-28/measurement-context.json",
+          "bytes": 1812,
+          "sha256": "2ea40e36f2db7463359563c550b3c05bff79107a099a1ea82de8a8da14a9ffd8"
+        },
+        {
+          "path": ".local/preserved-2026-09-28/supplements.json",
+          "bytes": 265,
+          "sha256": "6a5b0903a2724203fbed0fb8051903cd21639d562a2cc642809dbf94c22d829d"
+        },
+        {
+          "path": ".local/preserved-2026-09-28/verification.json",
+          "bytes": 440,
+          "sha256": "e7220fa27d755609e1c4a32fc69e0577fd1f7ad49217031fc295b93971ee9397"
+        },
+        {
+          "path": ".local/preserved-2026-09-30/README.md",
+          "bytes": 914,
+          "sha256": "c6ac62ebef0890438e9c6851b47e62f37720cd8f1b0cf845adc1d1ddf48414af"
+        },
+        {
+          "path": ".local/preserved-2026-09-30/manifest.json",
+          "bytes": 5744,
+          "sha256": "d78d32bbd528104a6969c611aec55788b540cff412b834f4451f121bca4a8c31"
+        },
+        {
+          "path": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+          "bytes": 86921,
+          "sha256": "c0bacbfe16fa47d527af05b1b64cbc2987e6c0dfa768119ce33e41b8d9d6a739"
+        },
+        {
+          "path": ".local/preserved-2026-09-30/verification.json",
+          "bytes": 857,
+          "sha256": "9045d0d927a2f47f74cc9b4b6296738d06512c69e40f9fd013cf707231529bcb"
+        },
+        {
+          "path": ".local/observations-v1/public-board-cache-v5.json",
+          "bytes": 41945,
+          "sha256": "9e2bff5ff6617698dcf032ef4f77d454bc346bff07dd0d03fa5c8977493dbaab"
+        }
+      ]
+    },
+    "newOriginalArchive": {
+      "directory": ".local/preserved-2026-09-30-stage-72",
+      "verifiedAt": "2026-09-30T08:37:15.530872+00:00",
+      "archiveSha256": "9c4e4dd9bd18ec446df00c7d3735e892528bb72e498e6ccf4eb15888fbe93dc1",
+      "archiveBytes": 136633,
+      "manifestSha256": "bafb33977c434039dc46f355e88ab3e359603761afc8e5c812547d9a3813a0bf",
+      "originalFileCount": 4,
+      "uniqueBlobCount": 4,
+      "originalBytes": 929169,
+      "allCrcSizeShaAndOriginalBytesMatched": true,
+      "workingCopiesRemoved": false
+    }
+  },
+  "ownedPreviewAndSuitePorts": {
+    "5173": "no-listener",
+    "8787": "no-listener"
+  },
+  "reviewCorrections": [
+    {
+      "recordedAt": "2026-09-30T09:00:45.559320+00:00",
+      "finding": "Main initial read-only artifact aggregation assumed fixture receipts were beside the observation file. They are in bounds-server/. This caused FileNotFoundError before the aggregate was written.",
+      "resolution": "Read the existing test fixture output path, corrected only the local read-only aggregation path, and reran artifact comparison. No product/test file or expectation changed; no product test was rerun.",
+      "status": "corrected-and-cross-checks-complete"
+    },
+    {
+      "finding": "Fable execution prose says82 unit files; the raw Vitest report contains81 files and2688 passed tests.82 is the E2E case count per mode.",
+      "resolution": "Final evidence uses the raw report:81 unit files. Fable acknowledgement is requested in the final same-evidence review. No product/test change or rerun is required for this prose correction."
+    }
+  ],
+  "limits": [
+    "Per-response decoded-byte bounds do not guarantee aggregate memory, total pagination bytes or synchronous parse duration.",
+    "Normal startup speed and an actual memory/connection exhaustion incident were not measured.",
+    "Native wire compression is tested by loopback unit tests; browser scenarios use real ReadableStream responses inside the real app process.",
+    "Source enqueued byte counts include prefetch and are not accepted-reader-byte or process-memory measurements.",
+    "82 affected E2E cases in12files per mode; the previous stage489-case full runs are not this stage evidence.",
+    "HTML mid-body abort wording remains unspecified; existing message/retryAfter behavior is preserved.",
+    "Requested max effort is recorded; effective backend effort is not independently exposed.",
+    "Chromium stderr contains native CVDisplayLink/GCM diagnostics; no assertion, page-resource, or global reporter failure resulted.",
+    "Temporary raw artifacts are present for review now and will be removed after approved Git preservation. Their hashes and useful results will remain."
+  ]
+}
