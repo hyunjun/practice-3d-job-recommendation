@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "stage": 71,
-  "recordedAt": "2026-09-30T06:45:07.053054+00:00",
-  "status": "verified_and_unanimously_approved_pending_preservation_and_cleanup",
+  "recordedAt": "2026-09-30T06:51:48.062601+00:00",
+  "status": "verified_and_preserved_cleanup_pending",
   "change": "Occupation v7 primary-role/own-duty classification, preserved historical records, independent regression coverage, and managed Playwright browser default.",
   "contract": {
     "path": "docs/design/occupation-v7.md",
@@ -645,7 +645,7 @@
     "unanimousAt": "2026-09-30T06:45:07.053054+00:00"
   },
   "cleanup": {
-    "status": "new_unique_inputs_preserved_awaiting_git_preservation",
+    "status": "git_and_unique_input_preservation_verified_cleanup_pending",
     "protectedPaths": [
       ".local/preserved-2026-09-28/",
       ".local/observations-v1/",
@@ -715,7 +715,18 @@
       ],
       "originalSourcesUnchanged": true,
       "originalsDeleted": false
-    }
+    },
+    "sourceArchive": {
+      "branch": "archive/cleanup-2026-09-30/stage-71-verification-tools",
+      "commit": "bb6e239e2d6ec34b55512cf239a9a34d4198a380",
+      "parentProductCommit": "650885b45506ed6030116e391a1df17eddc75ea9",
+      "fileCount": 26,
+      "allGitBlobsMatchOriginalBytesAndModes": true,
+      "manifestSha256": "c7ffeb7259775d6d8077f8150427b94a4659fec2824e3a190f7f4775ce8fc148",
+      "pushed": false
+    },
+    "preservationRecord": "docs/validation/local-cleanup-2026-09-30.json",
+    "documentation": "docs/local-cleanup-2026-09-30.md"
   },
   "limits": [
     "The agreed scope is a bounded classification heuristic, not general natural-language understanding.",

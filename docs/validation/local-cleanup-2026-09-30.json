@@ -1,0 +1,482 @@
+{
+  "schemaVersion": 1,
+  "stage": 71,
+  "recordedAt": "2026-09-30T06:50:26.028195+00:00",
+  "status": "preservation_verified_before_cleanup",
+  "productCommit": "650885b45506ed6030116e391a1df17eddc75ea9",
+  "sourceStateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+  "productVerification": {
+    "evidencePath": "docs/validation/occupation-v7-final-evidence-2026-09-30.json",
+    "evidenceSha256": "ebb2455684d214dbb899f23f0760fcd3cabcac58d1bafb7550100499f92e3b4d",
+    "allThreeApproved": true
+  },
+  "cleanupDesign": {
+    "path": "docs/validation/occupation-v7-cleanup-design-2026-09-30.json",
+    "packetSha256": "f9761898bdc0b0ada9f786bb3bbda0f5888ae5d7411c4405816d12bb0519bc51",
+    "planSha256": "9ff2e87e3f46f6b854ed09df3105fa8e499eed8b00859308989fdb625e4c21ee",
+    "privateInputPlanSha256": "ae8692da764e849c46123a412c8c60880d7f22136553f4a7f0d7264bae1b3628",
+    "allThreeApproved": true
+  },
+  "sourceArchive": {
+    "verifiedAt": "2026-09-30T06:47:35.374926+00:00",
+    "branch": "archive/cleanup-2026-09-30/stage-71-verification-tools",
+    "commit": "bb6e239e2d6ec34b55512cf239a9a34d4198a380",
+    "parentProductCommit": "650885b45506ed6030116e391a1df17eddc75ea9",
+    "fileCount": 26,
+    "allGitBlobsMatchOriginalBytesAndModes": true,
+    "allSourceSha256Verified": true,
+    "manifestPath": ".local/research/71-occupation-scope/collaboration/source-archive-manifest.json",
+    "manifestSha256": "c7ffeb7259775d6d8077f8150427b94a4659fec2824e3a190f7f4775ce8fc148",
+    "onlyExpectedArchivePathsChanged": true,
+    "existingArchiveRefsUnchanged": true,
+    "mainWorkingTreeClean": true,
+    "pushed": false,
+    "entries": [
+      {
+        "path": ".local/research/71-occupation-scope/audit-baseline.mts",
+        "bytes": 5910,
+        "sha256": "1cb46dcee7d58f6dc2ee035658a1e42fff918a2aa15854244b5be7f0c47ccd43",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "37b1754318cdff66881dea437881c8accdad009b"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/report-impact.mts",
+        "bytes": 7413,
+        "sha256": "af3257dcc670f9f543ad90087e811f1f09e7cf16b9a4e32daecabbfa691a34ec",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "ca4fcbde3dbff471f08ff4814bc23bc357810e5a"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/implementation-05.proposed.ts",
+        "bytes": 28060,
+        "sha256": "b06ce449a51a36d3f05eebec5d998d88b2e7235c496056863d5b64d028081b70",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "d59a20c8ae90a348091ba4df83b1096aa5091ef1"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/implementation-07.proposed.ts",
+        "bytes": 29002,
+        "sha256": "2258bd3e9b3b069c7e1745b175434d6b771616c768c0804d6e80515d8bcdd870",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "52fda08936b2c2fb9b9f91a48826f345dd161e06"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/run-validation.py",
+        "bytes": 11154,
+        "sha256": "5c7f6fd944c28f672b4b1fd7aed9911e894f8345e57a9ae634ec5ee0247d409d",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "9ed76667667160da06102b095f65f369059c89ba"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/validation_control.py",
+        "bytes": 9995,
+        "sha256": "75a16b896a8218ecebe94cecb509a1076cf1e447ee6e542db47d80be5d0741a2",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "49565ed3584b932f478a01e85592d87fc93bfec6"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/run-claude-review.py",
+        "bytes": 4771,
+        "sha256": "83839ce5589e8d1ecbc37f47cc8befe0751aa3955475a99407c66c0a43b8dc9c",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "1e7c8fb9905cda43aebd0bc1c6cf5e36e26756a8"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/stage_identity.py",
+        "bytes": 1372,
+        "sha256": "f8454c726b1d3680891bc233152c390b4491c7e2ee1b2a550161b838b1c2a3a1",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "7d1e846001f64eb133c55ab1062928154367c278"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/run-claude-review.py",
+        "bytes": 4771,
+        "sha256": "83839ce5589e8d1ecbc37f47cc8befe0751aa3955475a99407c66c0a43b8dc9c",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "1e7c8fb9905cda43aebd0bc1c6cf5e36e26756a8"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/run-validation.py",
+        "bytes": 9441,
+        "sha256": "75754968ddf83d99e825499d1e4b030b5f6115a585ccf0cbf288487c25997da3",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "2f8ada6d9d0984f67ff041f3de0c7edc49db7850"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/stage_identity.py",
+        "bytes": 1372,
+        "sha256": "f8454c726b1d3680891bc233152c390b4491c7e2ee1b2a550161b838b1c2a3a1",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "7d1e846001f64eb133c55ab1062928154367c278"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/validation_control.py",
+        "bytes": 9995,
+        "sha256": "75a16b896a8218ecebe94cecb509a1076cf1e447ee6e542db47d80be5d0741a2",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "49565ed3584b932f478a01e85592d87fc93bfec6"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/README.md",
+        "bytes": 84952,
+        "sha256": "5a4a14501b5c2593c791db020a39e4bad8ef0f609745b65881b61b1e2e28721b",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "f217924a0e3a615684627e6983070a9a2a9ce4c1"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/manifest.json",
+        "bytes": 1789,
+        "sha256": "0ae3ddf69b3c794112dbe3a82a68c0c24301e5623e567c0faf16b9005897a023",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "8327d9b831f9ee12d0a383db0d158104189a8235"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/playwright.config.ts",
+        "bytes": 1831,
+        "sha256": "008fd2db640c31afc41d6d63fc518f8bc96b66dd5887e7f4f107ef67ef2b86a4",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "0445e1d5fbdd7121f0e55e2c21aac2a9e85bfdbe"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/tests/e2e/catalog-observations.spec.ts",
+        "bytes": 27482,
+        "sha256": "9f75e46c7d0e51bc73e014e9345c219fa178e5895a7ba2dd9783fa8ff8e017c1",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "bad2778fdf6884e4f0d15605ee0442d8da54b285"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/tests/e2e/occupation-v7.spec.ts",
+        "bytes": 22103,
+        "sha256": "f517331f95d06e4811b8d9df210f2cdca03351287f8dc8d2fefd5889930da15f",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "63cbe9b996eeac094a4d585449982564dfde3063"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/.local/research/71-occupation-scope/collaboration/run-validation.py",
+        "bytes": 10949,
+        "sha256": "efb991cb3669781a5462dd31be86208c3f8f18be66d78ab1b5174a01a6b703e0",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "7f13ff335efa0dccfb43d96454df6efeac70943a"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/README.md",
+        "bytes": 84952,
+        "sha256": "5a4a14501b5c2593c791db020a39e4bad8ef0f609745b65881b61b1e2e28721b",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "f217924a0e3a615684627e6983070a9a2a9ce4c1"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/manifest.json",
+        "bytes": 851,
+        "sha256": "4932792aab2f877c3fc4aa748c4c197d96808f275b3734471f40916c0d83b25a",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "e7189b48934be4e9adeeb152b345777f098e8076"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/playwright.config.ts",
+        "bytes": 1831,
+        "sha256": "008fd2db640c31afc41d6d63fc518f8bc96b66dd5887e7f4f107ef67ef2b86a4",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "0445e1d5fbdd7121f0e55e2c21aac2a9e85bfdbe"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/execution-plan-01-sources/run-claude-review.py",
+        "bytes": 4722,
+        "sha256": "26c53e2dbebf3dc5f52ecef2583b66e39f22c22aed0cfaaeb861660cf7db4aa0",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "f707db709c857bc5c8367cb1e50840a1991346cc"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/execution-plan-01-sources/run-validation.py",
+        "bytes": 6454,
+        "sha256": "8920e896328306ada1f67029c88759047deadbdd2a8a78fc890dcd1e53cd1c60",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "6c9aaf3923a1416c7dd64f4322d97bbd2bd90047"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/execution-plan-01-sources/validation_control.py",
+        "bytes": 6415,
+        "sha256": "b2c40b6f2ff68f2389a3ca5eca39486baee9a635e5e5961e789b0d393bee81b6",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "f3281eed7253d6d8940dd81e46ca606daaadfeec"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/source-archive-README.md",
+        "bytes": 5134,
+        "sha256": "409ee1a8e4609a31de58591d9f4a3a3375e9959afa5dbdcaaca7cc8d03d72d2a",
+        "originalMode": "0o644",
+        "gitMode": "100644",
+        "gitBlob": "aafc806141985441e616825aeef42ed0cace4d19"
+      },
+      {
+        "path": ".local/research/71-occupation-scope/collaboration/source-archive-manifest.json",
+        "bytes": 9770,
+        "sha256": "c7ffeb7259775d6d8077f8150427b94a4659fec2824e3a190f7f4775ce8fc148",
+        "gitMode": "100644",
+        "gitBlob": "e32ef7146397fde5bbb42124b1e119a76ebb3500"
+      }
+    ]
+  },
+  "newPrivateInputArchive": {
+    "verifiedAt": "2026-09-30T06:45:50.140400+00:00",
+    "archivePath": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+    "archiveBytes": 86921,
+    "archiveSha256": "c0bacbfe16fa47d527af05b1b64cbc2987e6c0dfa768119ce33e41b8d9d6a739",
+    "manifestSha256": "d78d32bbd528104a6969c611aec55788b540cff412b834f4451f121bca4a8c31",
+    "uniqueBlobs": 9,
+    "uniqueBytes": 681251,
+    "zipEntries": 10,
+    "allEntriesSizeCrcAndSha256Verified": true,
+    "manifestInsideAndOutsideEqual": true,
+    "externalReferencesVerified": [
+      {
+        "path": ".local/research/71-occupation-scope/references/software-development.html",
+        "archive": ".local/preserved-2026-09-28/historical-inputs.zip",
+        "sha256": "4b323fdd8a671efd44190d3fe60e4388f04446183b436f39b1d6666befd199cc",
+        "bytes": 261766
+      }
+    ],
+    "originalSourcesUnchanged": true,
+    "originalsDeleted": false
+  },
+  "protectedBefore": {
+    "checkedAt": "2026-09-30T06:50:26.028195+00:00",
+    "files": [
+      {
+        "path": ".local/preserved-2026-09-28/historical-inputs.zip",
+        "bytes": 247075859,
+        "sha256": "b7114d8f6bce0ea43236ba54601eeccbfab7593493f936ad1842291a475dd85a"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/manifest.json",
+        "bytes": 1063467,
+        "sha256": "431aea357cf79fb7a64bf7725182ebce7f34f3e0811f164992b6a443fa767514"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/measurement-context.json",
+        "bytes": 1812,
+        "sha256": "2ea40e36f2db7463359563c550b3c05bff79107a099a1ea82de8a8da14a9ffd8"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/supplements.json",
+        "bytes": 265,
+        "sha256": "6a5b0903a2724203fbed0fb8051903cd21639d562a2cc642809dbf94c22d829d"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/verification.json",
+        "bytes": 440,
+        "sha256": "e7220fa27d755609e1c4a32fc69e0577fd1f7ad49217031fc295b93971ee9397"
+      },
+      {
+        "path": ".local/observations-v1/public-board-cache-v5.json",
+        "bytes": 41945,
+        "sha256": "9e2bff5ff6617698dcf032ef4f77d454bc346bff07dd0d03fa5c8977493dbaab"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/README.md",
+        "bytes": 914,
+        "sha256": "c6ac62ebef0890438e9c6851b47e62f37720cd8f1b0cf845adc1d1ddf48414af"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/manifest.json",
+        "bytes": 5744,
+        "sha256": "d78d32bbd528104a6969c611aec55788b540cff412b834f4451f121bca4a8c31"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+        "bytes": 86921,
+        "sha256": "c0bacbfe16fa47d527af05b1b64cbc2987e6c0dfa768119ce33e41b8d9d6a739"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/verification.json",
+        "bytes": 857,
+        "sha256": "9045d0d927a2f47f74cc9b4b6296738d06512c69e40f9fd013cf707231529bcb"
+      }
+    ],
+    "fileCount": 10
+  },
+  "originalProtectedFilesUnchanged": true,
+  "existingArchiveRefs": [
+    "refs/heads/archive/cleanup-2026-09-28/performance-tools a166bc1b63b51369a0ab85be288c7d6b72aa2a65",
+    "refs/heads/archive/cleanup-2026-09-28/stage-67-worker d809a342826002a95cd2ad8077e500d64c8148bd",
+    "refs/heads/archive/cleanup-2026-09-28/stage-68-presentation 2db0aca81bf0dfb7d1d3a5bfec1ddfade9eb8382",
+    "refs/heads/archive/cleanup-2026-09-28/stage-70-regions f0eff9092504c461ff7c4abc37660f00b65b02dd"
+  ],
+  "legacyReport": {
+    "recordedAt": "2026-09-30T05:32:03.371901+00:00",
+    "status": "aggregate preserved for final cleanup record; originals not deleted",
+    "paths": [
+      "playwright-report/index.html",
+      "test-results/.last-run.json"
+    ],
+    "reportSha256": "5841152a485b9c0749afe38c84e2b1cd693d270385bc6f2fd71bd72212a4b31b",
+    "lastRunSha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "startedAt": "2026-09-19T19:54:06.277000+00:00",
+    "durationMs": 296034.589,
+    "stats": {
+      "total": 116,
+      "expected": 116,
+      "unexpected": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "ok": true
+    },
+    "globalErrors": 0,
+    "limit": "Pre-existing old report, source identity not established; not current stage verification. Authored source is not present in these two generated files."
+  },
+  "additionalHistoricalInputRecovery": {
+    "oldArchiveOriginalPath": "research/70-regional-coverage/collect-01/collected-boards-v5.json",
+    "auditDestination": ".local/research/71-occupation-scope/inputs/regional-boards-v5.json",
+    "sha256": "63c8d2f6898bed9f19adca4f1ca935cffefd6b5e203cc9c83fbaf5070e406c77",
+    "bytes": 659280
+  },
+  "plannedRemovalRoots": [
+    ".local/research",
+    ".local/verification",
+    ".local/playwright",
+    ".local/e2e-default",
+    "dist",
+    "dist-server",
+    "public/pdf",
+    "node_modules/.vite",
+    "node_modules/.vite-temp",
+    "playwright-report",
+    "test-results"
+  ],
+  "plannedOwnedSystemProfiles": [
+    {
+      "basename": "playwright_chromiumdev_profile-1f5LtE",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "initial failed DEV error log"
+      ],
+      "existedAtPreCleanupCheck": true
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-Ou9fYQ",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "initial failed DEV error log"
+      ],
+      "existedAtPreCleanupCheck": true
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-U9Vi4B",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "initial failed DEV error log"
+      ],
+      "existedAtPreCleanupCheck": false
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-WqP84l",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "initial failed DEV error log"
+      ],
+      "existedAtPreCleanupCheck": false
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-dU6L1Z",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "initial failed DEV error log"
+      ],
+      "existedAtPreCleanupCheck": false
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-h7okD1",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "initial failed DEV error log"
+      ],
+      "existedAtPreCleanupCheck": false
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-rkfkC7",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "initial failed DEV error log"
+      ],
+      "existedAtPreCleanupCheck": true
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-ruX1Np",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "initial failed DEV error log"
+      ],
+      "existedAtPreCleanupCheck": false
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-vWpeZI",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "initial failed DEV error log"
+      ],
+      "existedAtPreCleanupCheck": false
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-jnnnQY",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "20260930T044914754949Z-02625923"
+      ],
+      "existedAtPreCleanupCheck": false
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-8Y5D5V",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "20260930T051421259737Z-3c9e0bbe"
+      ],
+      "existedAtPreCleanupCheck": false
+    },
+    {
+      "basename": "playwright_chromiumdev_profile-bjETEp",
+      "recordedOwnedPathMatchesOsTempRoot": true,
+      "ownershipEvidence": [
+        "20260930T055013227105Z-a4e037b7"
+      ],
+      "existedAtPreCleanupCheck": false
+    }
+  ],
+  "profilePathBinding": "Each basename was verified against the exact owned launch/error path and the current OS temporary directory. Recheck all live processes and existing profile open files immediately before deletion.",
+  "beforeMeasurement": {
+    "measuredAt": "2026-09-30T06:50:26.028195+00:00",
+    "localKiB": 7867216,
+    "filesystemAvailableKiB": 27015788,
+    "scope": "Directory allocation and filesystem availability are separate measurements."
+  },
+  "afterCleanup": null,
+  "limits": [
+    "This record is committed before deletion; status is not cleanup complete.",
+    "Plan01-era stage_identity bytes were not captured; preserved drafts are not an exact runnable reconstruction of plan01.",
+    "Raw verification artifact paths are historical after cleanup; hashes,selected findings and approved source/decision records are retained.",
+    "No new E2E is claimed for documentation/archival operations; final functional verification remains the same387-file source state."
+  ]
+}
