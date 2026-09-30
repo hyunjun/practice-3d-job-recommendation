@@ -1,10 +1,10 @@
 {
   "version": 1,
   "stage": 74,
-  "recordedAt": "2026-09-30T17:02:32.592131+00:00",
+  "recordedAt": "2026-09-30T17:03:53.235330+00:00",
   "baselineCommit": "0f9428b8ce3818e2fa0cebc1a981f075ddb18799",
   "change": "Represent company failures, content success history, shared retry eligibility and collection progress without borrowing another observation's provenance.",
-  "status": "Final verification explicitly approved by all three against the same source, contract, plan and immutable evidence. Git preservation and cleanup pending.",
+  "status": "Complete: all3 final verification approved, product commit pushed, reusable tools/decisions archived locally, owned processes stopped and temporary files removed. The continuous improvement goal remains active.",
   "contract": {
     "path": "docs/design/board-status-provenance.md",
     "sha256": "79d73c780a349d395b79ac0ba19ce91c638d9cc2881955c9e7aeb112cffd9480"
@@ -240,7 +240,8 @@
     "uniqueBlobCount": 4,
     "originalBytes": 588387,
     "allCrcSizeShaAndOriginalBytesMatched": true,
-    "workingCopiesRemoved": false
+    "workingCopiesRemoved": true,
+    "workingCopiesRemovedAt": "2026-09-30T17:03:52.793881+00:00"
   },
   "limitations": [
     "Ordinary non-forced reads retain the existing successful-content TTL; a shared deadline enables eligible forced retry rather than promising a new collection on every read.",
@@ -261,11 +262,35 @@
     "Fresh helper hashes cover final artifact/source/contract/plan. Receipt/report/power claims were independently compared by content; a shell hash command was denied, so their inner hashes were not freshly recomputed by Fable. Main and Astra separately verified execution evidence."
   ],
   "cleanup": {
-    "status": "pending after all3 final verification; commit/push and local tool archive must precede deletion",
+    "status": "completed",
+    "report": "docs/validation/board-status-provenance-cleanup-2026-09-30.json",
+    "reportSha256": "12461e9056e0f893f5ac7555f7252a7953a6ef255e70b37920fc70b9677d28c1",
+    "completedAt": "2026-09-30T17:03:53.235330+00:00",
     "protectedOriginalFileCount": 18,
-    "newReferenceFileCount": 4,
+    "protectedOriginalsUnchanged": true,
+    "remainingLocalFileCount": 22,
+    "localAllocatedKiB": {
+      "before": 3137308,
+      "after": 242992
+    },
+    "removed": [
+      ".local/e2e-default",
+      ".local/research",
+      "dist",
+      "dist-server",
+      "public/pdf",
+      "node_modules/.vite",
+      "node_modules/.vite-temp"
+    ],
+    "sourceAndTestsUnchanged": true,
+    "sourceFileCount": 408,
     "preview8787": "off",
-    "taskScopedPowerAssertion": "running, must be stopped before cleanup"
+    "test5173": "off",
+    "astraClosed": true,
+    "fableCallsTerminal": 16,
+    "taskScopedPowerAssertion": "all three recorded lifecycles stopped; original wrapper and child identities absent",
+    "worktreeCount": 1,
+    "rawReportsAndScreenshots": "reviewed then deleted; Git preserves useful summaries, failures, decisions and hashes"
   },
   "staticTestReview": {
     "mainFindings": [
@@ -319,5 +344,19 @@
       "Preview/test port checks belong to cleanup evidence and are not asserted by the immutable final artifact."
     ],
     "mainDisposition": "Accepted; these do not change product, tests or the approved evidence artifact."
+  },
+  "preservation": {
+    "productCommit": "62a5e75720d8e3760bcf2420df6991f1be412fd4",
+    "productPushedTo": "origin/main",
+    "localToolArchive": {
+      "verifiedAt": "2026-09-30T17:03:44.172286+00:00",
+      "localOnlyRef": "refs/heads/archive/cleanup-2026-09-30/stage-74-verification-tools",
+      "commit": "3a863be4670bfa24df858bf30aab05c3f48fe20f",
+      "baseProductCommit": "62a5e75720d8e3760bcf2420df6991f1be412fd4",
+      "fileCount": 170,
+      "allGitBlobsMatchOriginalBytes": true,
+      "manifestSha256": "5cd3b789e7a7d5999b36541c292f9abdf0f322c101afea82177e9522fefa5884",
+      "pushed": false
+    }
   }
 }

@@ -155,3 +155,24 @@ Worker 실패 후 공고 만료와 검색 조건을 정확히 표시하는 개�
 16개 Fable CLI 호출과 검증 실행의 소유 서버·브라우저가 모두 종료됐고 Astra agent도 닫았습니다. 검증 중 사용한 작업 전용 잠자기 방지 프로세스는 소유자를 확인해 명시적으로 종료했으며 영구 전원 설정은 변경하지 않았습니다. 루트 의존성과 사용자 앱의 전역 기록은 유지합니다. 제품이나 테스트를 수정하지 않은 정리 과정에 E2E를 다시 실행하지 않았습니다.
 
 [정리 결과](validation/catalog-resilience-cleanup-2026-09-30.json)에 실제 삭제 경로·시각·남은 파일·해시·프로세스 종료를 기록했습니다. [최종 검증 근거](validation/catalog-resilience-final-evidence-2026-09-30.json)는 전원 승인 당시의 바이트 그대로 유지하며, 그 안의 원시 자료 위치는 정리 이전 시점의 기록입니다. 디렉터리 할당 사용량 감소는 파일시스템 전체 여유 공간의 증가를 측정한 값이 아닙니다.
+
+## 2026-09-30 · 74단계 종료 후 정리
+
+회사별 실패·정상 본문 확인·재시도 시각의 근거를 바로잡는 개선을 `62a5e75720d8e3760bcf2420df6991f1be412fd4`로 커밋하고 `origin/main`에 push한 뒤 정리했습니다. 설계·구현 검토·최종 검증에서 주 담당, GPT-6 Astra Max, Claude Code Fable 5.1 Max가 같은 해시에 명시적으로 동의했습니다. 최종 타입 검사·단위 2,736개/84파일·빌드와 관련 11파일의 개발 93개·배포 93개 E2E가 통과했습니다. 두 차례 실패와 테스트 수정, 검증의 범위와 한계는 [단계 기록](validation/board-status-provenance-2026-09-30.json)에 구분해 남겼습니다.
+
+재사용할 도구·설계 논의·합의·실행 결과 **170개 파일**을 로컬 브랜치 `archive/cleanup-2026-09-30/stage-74-verification-tools`의 `3a863be4670bfa24df858bf30aab05c3f48fe20f`로 먼저 보존했습니다. 모든 Git blob이 원래 바이트와 같음을 확인했으며 이 브랜치는 push하지 않았습니다. 해당 커밋의 `.local/research/74/main/archive-manifest.json`에 원래 경로·크기·해시가 있고, `.local/research/74/ARCHIVE-README.md`에 복원 범위와 새 실행의 준비 조건이 있습니다. 상세 로그·모델 스트림·화면·trace는 검토를 마친 뒤 삭제했습니다.
+
+| 항목 | 정리 결과 |
+| --- | --- |
+| `.local/` 할당 사용량 (`du -sk`) | 3,137,308 KiB / 2.99 GiB → 242,992 KiB / 237.30 MiB |
+| 삭제한 작업 영역 | `.local/e2e-default`, `.local/research`, `dist`, `dist-server`, `public/pdf`, `node_modules/.vite`, `node_modules/.vite-temp` |
+| 남은 `.local/` 파일 | 관측·압축 원본·보존 정보 22개 |
+| 기존 보관 자료·관측 | 18개 파일의 크기·SHA-256 불변 |
+| 검증받은 제품·테스트 소스 | 408개 파일의 SHA-256 불변 |
+| 실행 환경 | 프로젝트 worktree 1곳, 확인용 8787·검증용 5173 포트에 리스너 없음 |
+
+남은 폴더는 기존 `observations-v1/`, `preserved-2026-09-28/`, `preserved-2026-09-30/`, `preserved-2026-09-30-stage-72/`, `preserved-2026-09-30-stage-73/`와 새 `preserved-2026-09-30-stage-74/`입니다. 새 폴더에는 당시 RFC 9110·9111 응답과 조회 기록 총 4개를 압축한 `stage-74-reference-inputs.zip`, manifest, 검증 기록, README를 남겼습니다. 원본 588,387바이트를 164,853바이트 ZIP으로 보존했으며 SHA-256은 `b37a5602163eafabe3f05cc5d915de075086d4e53abf99dbd8c931914a7596ec`입니다. ZIP 항목·CRC·크기·해시와 작업 원본을 삭제 전에 대조했고, 삭제 후에도 ZIP·manifest와 기존 18개 파일의 해시가 같음을 확인했습니다.
+
+16개 Fable CLI 호출과 검증 실행의 소유 서버·브라우저가 모두 종료됐고 Astra agent도 닫았습니다. 검증 중 갱신해 사용한 작업 전용 잠자기 방지의 세 실행은 소유 wrapper와 자식 프로세스를 확인해 모두 종료했습니다. 영구 전원 설정은 바꾸지 않았습니다. 루트 의존성과 사용자 앱의 전역 기록은 유지합니다.
+
+[정리 결과](validation/board-status-provenance-cleanup-2026-09-30.json)에 실제 삭제 경로·시각·남은 파일·해시·프로세스 종료를 기록했습니다. [최종 검증 근거](validation/board-status-provenance-final-evidence-2026-09-30.json)는 승인 당시의 바이트 그대로 유지하며, 그 안의 원시 자료 위치는 정리 이전 시점의 기록입니다. 제품·테스트를 수정하지 않은 정리 과정에서 E2E를 다시 실행하지 않았습니다. 디렉터리 할당 사용량 감소는 파일시스템 전체 여유 공간의 증가를 측정한 값이 아닙니다.

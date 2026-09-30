@@ -1,0 +1,453 @@
+{
+  "version": 1,
+  "stage": 74,
+  "startedAt": "2026-09-30T17:03:49.503406+00:00",
+  "completedAt": "2026-09-30T17:03:53.235330+00:00",
+  "productCommit": "62a5e75720d8e3760bcf2420df6991f1be412fd4",
+  "localToolArchive": {
+    "verifiedAt": "2026-09-30T17:03:44.172286+00:00",
+    "localOnlyRef": "refs/heads/archive/cleanup-2026-09-30/stage-74-verification-tools",
+    "commit": "3a863be4670bfa24df858bf30aab05c3f48fe20f",
+    "baseProductCommit": "62a5e75720d8e3760bcf2420df6991f1be412fd4",
+    "fileCount": 170,
+    "allGitBlobsMatchOriginalBytes": true,
+    "manifestSha256": "5cd3b789e7a7d5999b36541c292f9abdf0f322c101afea82177e9522fefa5884",
+    "pushed": false
+  },
+  "approvedFinalEvidenceSha256": "83023c246187103595cfaeb5b04f189a233cb23ca65942c72a7e5d59b0b3e3b8",
+  "stateDigest": "a49d2d444b6f86387579a24b2139bab890072eb6857f42045c074cee448055f9",
+  "sourceFileCount": 408,
+  "sourceAndTestsUnchanged": true,
+  "protectedOriginalsUnchanged": [
+    {
+      "path": ".local/observations-v1/public-board-cache-v5.json",
+      "bytes": 41945,
+      "sha256": "9e2bff5ff6617698dcf032ef4f77d454bc346bff07dd0d03fa5c8977493dbaab"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/historical-inputs.zip",
+      "bytes": 247075859,
+      "sha256": "b7114d8f6bce0ea43236ba54601eeccbfab7593493f936ad1842291a475dd85a"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/manifest.json",
+      "bytes": 1063467,
+      "sha256": "431aea357cf79fb7a64bf7725182ebce7f34f3e0811f164992b6a443fa767514"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/measurement-context.json",
+      "bytes": 1812,
+      "sha256": "2ea40e36f2db7463359563c550b3c05bff79107a099a1ea82de8a8da14a9ffd8"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/supplements.json",
+      "bytes": 265,
+      "sha256": "6a5b0903a2724203fbed0fb8051903cd21639d562a2cc642809dbf94c22d829d"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/verification.json",
+      "bytes": 440,
+      "sha256": "e7220fa27d755609e1c4a32fc69e0577fd1f7ad49217031fc295b93971ee9397"
+    },
+    {
+      "path": ".local/preserved-2026-09-30/README.md",
+      "bytes": 914,
+      "sha256": "c6ac62ebef0890438e9c6851b47e62f37720cd8f1b0cf845adc1d1ddf48414af"
+    },
+    {
+      "path": ".local/preserved-2026-09-30/manifest.json",
+      "bytes": 5744,
+      "sha256": "d78d32bbd528104a6969c611aec55788b540cff412b834f4451f121bca4a8c31"
+    },
+    {
+      "path": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+      "bytes": 86921,
+      "sha256": "c0bacbfe16fa47d527af05b1b64cbc2987e6c0dfa768119ce33e41b8d9d6a739"
+    },
+    {
+      "path": ".local/preserved-2026-09-30/verification.json",
+      "bytes": 857,
+      "sha256": "9045d0d927a2f47f74cc9b4b6296738d06512c69e40f9fd013cf707231529bcb"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-72/README.md",
+      "bytes": 741,
+      "sha256": "af2d8ab06d750f681cc61fde74299fbaa199afeb0e469cfa8bfc068d48cf1cf2"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-72/manifest.json",
+      "bytes": 2756,
+      "sha256": "bafb33977c434039dc46f355e88ab3e359603761afc8e5c812547d9a3813a0bf"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-72/stage-72-reference-inputs.zip",
+      "bytes": 136633,
+      "sha256": "9c4e4dd9bd18ec446df00c7d3735e892528bb72e498e6ccf4eb15888fbe93dc1"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-72/verification.json",
+      "bytes": 477,
+      "sha256": "3ec4bf6b1a3f2faaec5e115e6d9316913b8ce8e7d816090491bbfbfa5e749633"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-73/README.md",
+      "bytes": 831,
+      "sha256": "0453cff4cae0132f45a7e317bc1e43da516275423680c51345e52863ca06afcd"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-73/manifest.json",
+      "bytes": 2520,
+      "sha256": "1b3679ab7f1c76b1dc8f387babe06d39513529e4000611edc4b9887707a091e5"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-73/stage-73-reference-inputs.zip",
+      "bytes": 168080,
+      "sha256": "e7ecd8140dca896d6e8a82963def4c1e481c2e0b5d2c4c4b6f662556ca336850"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-73/verification.json",
+      "bytes": 533,
+      "sha256": "3bd824bf4ac821cb4ba7f8216f94b99ba35756561b8ba68279fc57475d981f6a"
+    }
+  ],
+  "newReferenceArchive": {
+    "directory": ".local/preserved-2026-09-30-stage-74",
+    "verifiedAt": "2026-09-30T14:52:31.428286+00:00",
+    "archiveSha256": "b37a5602163eafabe3f05cc5d915de075086d4e53abf99dbd8c931914a7596ec",
+    "archiveBytes": 164853,
+    "manifestSha256": "77831c90dacadfb0165c60b82fc9c2e40ca73944cb4c863cd719d1f5d20933e7",
+    "originalFileCount": 4,
+    "uniqueBlobCount": 4,
+    "originalBytes": 588387,
+    "allCrcSizeShaAndOriginalBytesMatched": true,
+    "workingCopiesRemoved": true,
+    "workingCopiesRemovedAt": "2026-09-30T17:03:52.793881+00:00"
+  },
+  "removed": [
+    {
+      "path": ".local/e2e-default",
+      "allocatedKiB": 18476
+    },
+    {
+      "path": ".local/research",
+      "allocatedKiB": 2875840
+    },
+    {
+      "path": "dist",
+      "allocatedKiB": 15636
+    },
+    {
+      "path": "dist-server",
+      "allocatedKiB": 372
+    },
+    {
+      "path": "public/pdf",
+      "allocatedKiB": 4380
+    },
+    {
+      "path": "node_modules/.vite",
+      "allocatedKiB": 8
+    },
+    {
+      "path": "node_modules/.vite-temp",
+      "allocatedKiB": 0
+    }
+  ],
+  "localAllocatedKiB": {
+    "before": 3137308,
+    "after": 242992
+  },
+  "remainingLocalFiles": [
+    {
+      "path": ".local/observations-v1/public-board-cache-v5.json",
+      "bytes": 41945,
+      "sha256": "9e2bff5ff6617698dcf032ef4f77d454bc346bff07dd0d03fa5c8977493dbaab"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/historical-inputs.zip",
+      "bytes": 247075859,
+      "sha256": "b7114d8f6bce0ea43236ba54601eeccbfab7593493f936ad1842291a475dd85a"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/manifest.json",
+      "bytes": 1063467,
+      "sha256": "431aea357cf79fb7a64bf7725182ebce7f34f3e0811f164992b6a443fa767514"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/measurement-context.json",
+      "bytes": 1812,
+      "sha256": "2ea40e36f2db7463359563c550b3c05bff79107a099a1ea82de8a8da14a9ffd8"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/supplements.json",
+      "bytes": 265,
+      "sha256": "6a5b0903a2724203fbed0fb8051903cd21639d562a2cc642809dbf94c22d829d"
+    },
+    {
+      "path": ".local/preserved-2026-09-28/verification.json",
+      "bytes": 440,
+      "sha256": "e7220fa27d755609e1c4a32fc69e0577fd1f7ad49217031fc295b93971ee9397"
+    },
+    {
+      "path": ".local/preserved-2026-09-30/README.md",
+      "bytes": 914,
+      "sha256": "c6ac62ebef0890438e9c6851b47e62f37720cd8f1b0cf845adc1d1ddf48414af"
+    },
+    {
+      "path": ".local/preserved-2026-09-30/manifest.json",
+      "bytes": 5744,
+      "sha256": "d78d32bbd528104a6969c611aec55788b540cff412b834f4451f121bca4a8c31"
+    },
+    {
+      "path": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+      "bytes": 86921,
+      "sha256": "c0bacbfe16fa47d527af05b1b64cbc2987e6c0dfa768119ce33e41b8d9d6a739"
+    },
+    {
+      "path": ".local/preserved-2026-09-30/verification.json",
+      "bytes": 857,
+      "sha256": "9045d0d927a2f47f74cc9b4b6296738d06512c69e40f9fd013cf707231529bcb"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-72/README.md",
+      "bytes": 741,
+      "sha256": "af2d8ab06d750f681cc61fde74299fbaa199afeb0e469cfa8bfc068d48cf1cf2"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-72/manifest.json",
+      "bytes": 2756,
+      "sha256": "bafb33977c434039dc46f355e88ab3e359603761afc8e5c812547d9a3813a0bf"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-72/stage-72-reference-inputs.zip",
+      "bytes": 136633,
+      "sha256": "9c4e4dd9bd18ec446df00c7d3735e892528bb72e498e6ccf4eb15888fbe93dc1"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-72/verification.json",
+      "bytes": 477,
+      "sha256": "3ec4bf6b1a3f2faaec5e115e6d9316913b8ce8e7d816090491bbfbfa5e749633"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-73/README.md",
+      "bytes": 831,
+      "sha256": "0453cff4cae0132f45a7e317bc1e43da516275423680c51345e52863ca06afcd"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-73/manifest.json",
+      "bytes": 2520,
+      "sha256": "1b3679ab7f1c76b1dc8f387babe06d39513529e4000611edc4b9887707a091e5"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-73/stage-73-reference-inputs.zip",
+      "bytes": 168080,
+      "sha256": "e7ecd8140dca896d6e8a82963def4c1e481c2e0b5d2c4c4b6f662556ca336850"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-73/verification.json",
+      "bytes": 533,
+      "sha256": "3bd824bf4ac821cb4ba7f8216f94b99ba35756561b8ba68279fc57475d981f6a"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-74/README.md",
+      "bytes": 451,
+      "sha256": "77916d760d61f1430a51d4d1536d7398d1a0db468d4d6f84fe8f6f771ac7c9e1"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-74/manifest.json",
+      "bytes": 1379,
+      "sha256": "77831c90dacadfb0165c60b82fc9c2e40ca73944cb4c863cd719d1f5d20933e7"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-74/stage-74-reference-inputs.zip",
+      "bytes": 164853,
+      "sha256": "b37a5602163eafabe3f05cc5d915de075086d4e53abf99dbd8c931914a7596ec"
+    },
+    {
+      "path": ".local/preserved-2026-09-30-stage-74/verification.json",
+      "bytes": 532,
+      "sha256": "4be71f2f5e1906c8c53b06094b71359a0c92b757fa19243606ae745c8c4041f9"
+    }
+  ],
+  "processes": {
+    "modelCalls": [
+      {
+        "phase": "design-approval-01",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T15:07:14.934544+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "implementation-approval-01",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:06:00.241614+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "implementation-approval-02",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:09:51.725696+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "implementation-approval-03",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:17:04.162467+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "implementation-approval-04",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:31:27.144237+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "independent-design-01",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T15:00:22.905977+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "test-authoring-01",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T15:44:51.464361+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "test-authoring-02",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T15:50:51.334678+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "test-authoring-03",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:00:23.274413+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "test-authoring-04",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:07:44.788933+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "test-authoring-05",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:15:43.480400+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "test-authoring-06",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:29:54.474270+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "test-execution-01",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:12:36.595675+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "test-execution-02",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:27:44.567673+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "test-execution-03",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T16:52:06.251702+00:00",
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "phase": "verification-approval-01",
+        "exitCode": 0,
+        "endedAt": "2026-09-30T17:01:53.767367+00:00",
+        "remainingOwnedProcesses": 0
+      }
+    ],
+    "astraClosed": true,
+    "validationRunsTerminalWithoutResiduals": true,
+    "taskScopedPowerAssertionsStopped": [
+      {
+        "startedAt": "2026-09-30T14:49:25.280169+00:00",
+        "args": [
+          "/usr/bin/caffeinate",
+          "-i",
+          "-s",
+          "-t",
+          "7200"
+        ],
+        "pid": 35330,
+        "identity": "35330 35330 Wed Sep 30 23:49:25 2026     /usr/bin/caffeinate -i -s -t 7200",
+        "wrapperPid": 35327,
+        "wrapperIdentity": "35327 35327 Wed Sep 30 23:49:25 2026     /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python .local/research/74/main/keep-awake.py",
+        "scope": "Only stage74 analysis/review/verification; expires after7200s and is explicitly stopped before cleanup.",
+        "persistentSettingsChanged": false,
+        "displayOrUserActivityAssertion": false,
+        "status": "stopped",
+        "exitCode": -15,
+        "endedAt": "2026-09-30T16:01:59.678064+00:00",
+        "explicitlyStopped": true,
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "startedAt": "2026-09-30T16:02:17.352688+00:00",
+        "args": [
+          "/usr/bin/caffeinate",
+          "-i",
+          "-s",
+          "-t",
+          "7200"
+        ],
+        "pid": 7994,
+        "identity": "7994  7994 Thu Oct  1 01:02:17 2026     /usr/bin/caffeinate -i -s -t 7200",
+        "wrapperPid": 7984,
+        "wrapperIdentity": "7984  7984 Thu Oct  1 01:02:17 2026     /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python .local/research/74/main/keep-awake.py",
+        "scope": "Only stage74 analysis/review/verification; expires after7200s and is explicitly stopped before cleanup.",
+        "persistentSettingsChanged": false,
+        "displayOrUserActivityAssertion": false,
+        "status": "stopped",
+        "exitCode": -15,
+        "endedAt": "2026-09-30T16:32:43.002494+00:00",
+        "explicitlyStopped": true,
+        "remainingOwnedProcesses": 0
+      },
+      {
+        "startedAt": "2026-09-30T16:33:07.719563+00:00",
+        "args": [
+          "/usr/bin/caffeinate",
+          "-i",
+          "-s",
+          "-t",
+          "7200"
+        ],
+        "pid": 48466,
+        "identity": "48466 48466 Thu Oct  1 01:33:07 2026     /usr/bin/caffeinate -i -s -t 7200",
+        "wrapperPid": 48465,
+        "wrapperIdentity": "48465 48465 Thu Oct  1 01:33:07 2026     /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python .local/research/74/main/keep-awake.py",
+        "scope": "Only stage74 analysis/review/verification; expires after7200s and is explicitly stopped before cleanup.",
+        "persistentSettingsChanged": false,
+        "displayOrUserActivityAssertion": false,
+        "status": "stopped",
+        "exitCode": -15,
+        "endedAt": "2026-09-30T17:03:16.948332+00:00",
+        "explicitlyStopped": true,
+        "remainingOwnedProcesses": 0
+      }
+    ],
+    "portsWithoutListeners": [
+      5173,
+      8787
+    ],
+    "worktreeCount": 1
+  },
+  "limits": [
+    "Directory allocated-size change is not a measurement of total filesystem free-space recovery.",
+    "Raw logs, reports, traces and screenshots were reviewed before deletion. Useful results and hashes remain in Git.",
+    "Root dependencies and unrelated user/global application records are outside this cleanup.",
+    "Cleanup did not change product/tests or rerun E2E; it verified preserved files and ownership evidence."
+  ]
+}
