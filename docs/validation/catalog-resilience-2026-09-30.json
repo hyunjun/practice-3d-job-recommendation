@@ -1,9 +1,9 @@
 {
   "version": 1,
   "stage": 73,
-  "recordedAt": "2026-09-30T14:43:25.564382+00:00",
+  "recordedAt": "2026-09-30T14:45:28.335440+00:00",
   "change": "Keep displayed recommendations honest about freshness and applied intent after a catalog Worker failure.",
-  "status": "All3 final verification approved on the immutable final evidence; stage commit/push and verified cleanup next.",
+  "status": "Stage complete: all3 final verification approved, product committed and pushed, valuable local tools archived and task temporaries removed.",
   "baselineCommit": "2c86417c68687980b132426ae7b5c7d2fafa57ed",
   "contract": {
     "path": "docs/design/catalog-resilience.md",
@@ -822,9 +822,34 @@
     "The startup-constructor observer preserves the native fetch promise/Response and proves same-attempt cancellation, with an instrumentation footprint. Only finished/no-error or failed/ERR_ABORTED terminal orderings are accepted; neither implies measured server-resource savings."
   ],
   "cleanup": {
-    "status": "pending after all3 approval and stage commit/push",
+    "status": "complete",
+    "completedAt": "2026-09-30T14:44:36.119730+00:00",
+    "report": "docs/validation/catalog-resilience-cleanup-2026-09-30.json",
+    "reportSha256": "c4f9f7ebf8ad52b7b0d85c3eb939f83c0d5116e378998986aa4a3b0779847e3c",
     "preview8787": "off",
-    "prepared": "Stage-local archive and cleanup plans prepared; nothing removed while verification is pending."
+    "test5173": "off",
+    "localToolArchive": {
+      "verifiedAt": "2026-09-30T14:44:30.184990+00:00",
+      "localOnlyRef": "refs/heads/archive/cleanup-2026-09-30/stage-73-verification-tools",
+      "commit": "0843f8e239d26321fe1e61aa845b14b0d8a4c19e",
+      "baseProductCommit": "1dcf936fa0b320f03d3b8081108867550c71a8a4",
+      "fileCount": 167,
+      "allGitBlobsMatchOriginalBytes": true,
+      "manifestSha256": "ddad7deacc3c57e2ef6510a91b681faf755bcf1f059fb089ea0888bbb3c6d404",
+      "pushed": false
+    },
+    "localAllocatedKiB": {
+      "before": 926684,
+      "after": 242816
+    },
+    "remainingLocalFileCount": 18,
+    "protectedOriginalFilesUnchanged": 14,
+    "sourceAndTestsUnchanged": true,
+    "modelCallsTerminal": 16,
+    "astraClosed": true,
+    "taskScopedPowerAssertionStopped": true,
+    "rawArtifactsRemoved": true,
+    "note": "The immutable all3-approved evidence remains unchanged as a pre-cleanup snapshot. Raw logs/reports/traces/screenshots and working reference copies no longer exist at its historical paths; useful receipts/tools/decisions are in the local-only archive and original references in the local ZIP."
   },
   "nextCandidate": "Server Gap1: catalog board error/retry/success-time provenance when a presence failure defers content collection; no broad re-audit planned.",
   "testsAuthored": {
@@ -958,5 +983,7 @@
     "sha256": "f6bcf046c6d155da0f04b353da88e71e589663fb6c8006c9d1bd5100a595133c",
     "immutable": true,
     "meaning": "All3-reviewed snapshot before cleanup; raw artifacts are removed only after preservation and separately recorded cleanup."
-  }
+  },
+  "productCommit": "1dcf936fa0b320f03d3b8081108867550c71a8a4",
+  "productCommitPushedTo": "origin/main"
 }
