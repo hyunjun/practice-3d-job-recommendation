@@ -107,7 +107,7 @@ async function expectFinanceSaved(page: Page) {
       title: 'Strategic Finance Lead, Platform & Engineering', description: FINANCE_DESCRIPTION,
       updatedAt: '2026-09-25T06:07:08.000Z', fetchedAt: '2026-09-27T02:00:00.000Z',
       url: 'https://example.org/fable-ledger/101',
-      occupation: { version: 6, category: 'other', departments: ['All Departments', 'Finance'] },
+      occupation: { version: 7, category: 'other', departments: ['All Departments', 'Finance'] },
     },
   })
   return records
@@ -152,7 +152,7 @@ for (const width of [1440, 320]) {
       job: {
         id: 'ashby-fable-ledger-201', source: 'ashby', title: 'Backend Software Engineer, Finance Ledger',
         description: FINANCE_SOFTWARE_DESCRIPTION, url: 'https://example.org/fable-ledger/201',
-        fetchedAt: '2026-09-27T02:00:00.000Z', occupation: { version: 6, category: 'engineering' },
+        fetchedAt: '2026-09-27T02:00:00.000Z', occupation: { version: 7, category: 'engineering' },
       },
     })
     await page.getByRole('button', { name: '미주', exact: true }).click()

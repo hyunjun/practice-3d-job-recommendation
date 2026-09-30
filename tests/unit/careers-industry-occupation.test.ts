@@ -18,16 +18,16 @@ import { SEARCH_PROFILE, searchCatalog } from '../fixtures/search-catalog'
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
-describe('v6 position scope across retailers and manufacturers', () => {
+describe('v7 position scope across retailers and manufacturers', () => {
   it.each(INDUSTRY_CASES)('$title / $category keeps the literal position boundary', fixture => {
     const assessment = occupationFacts(fixture)
-    expect(assessment).toMatchObject({ version: 6, category: fixture.category })
+    expect(assessment).toMatchObject({ version: 7, category: fixture.category })
     const job = normalizeCareerPosting({
       id: '642000', title: fixture.title, description: fixture.description, departments: fixture.departments,
       url: 'https://jobs.zalando.com/en/jobs/642000', locations: [{ label: 'Berlin, Germany' }],
     }, 'zalando', CAREERS_NOW)
     if (fixture.included) {
-      expect(job).toMatchObject({ id: 'careers-zalando-642000', title: fixture.title, occupation: { version: 6, category: fixture.category } })
+      expect(job).toMatchObject({ id: 'careers-zalando-642000', title: fixture.title, occupation: { version: 7, category: fixture.category } })
       expect(isTechnicalJob(job!)).toBe(true)
     } else expect(job).toBeNull()
   })
@@ -66,7 +66,7 @@ describe('v6 position scope across retailers and manufacturers', () => {
   })
 })
 
-describe('v5 source snapshots survive v6 reclassification', () => {
+describe('v5 source snapshots survive v7 reclassification', () => {
   it('updates search and cached inclusion while preserving source clocks, IDs, totals and input bytes', () => {
     const jobs = industryV5Jobs()
     const input = { version: 5, boards: [{
@@ -88,7 +88,7 @@ describe('v5 source snapshots survive v6 reclassification', () => {
     expect(loaded[0].snapshot?.jobs[0]).toMatchObject({
       title: 'Design Engineer', description: SOFTWARE_DESIGN_BODY,
       fetchedAt: '2026-10-02T10:00:00.000Z', updatedAt: '2026-10-01T12:00:00.000Z',
-      occupation: { version: 6, category: 'engineering' },
+      occupation: { version: 7, category: 'engineering' },
     })
     expect(parseCachedBoards({ version: 5, boards: loaded })).toEqual(loaded)
     const catalog = { ...searchCatalog(jobs), companies: [careersCompany('zalando')] }
@@ -104,7 +104,7 @@ describe('v5 source snapshots survive v6 reclassification', () => {
     const original = industryV5Saved()
     const bytes = JSON.stringify(original)
     const migrated = upgradeJobOccupation(original.job)
-    expect(migrated.occupation).toMatchObject({ version: 6, category: 'other' })
+    expect(migrated.occupation).toMatchObject({ version: 7, category: 'other' })
     expect({ ...migrated, occupation: original.job.occupation }).toEqual(original.job)
     const decoded = decodeSavedJobs(JSON.stringify([original]))
     expect(decoded.omitted).toBe(0)
@@ -117,7 +117,7 @@ describe('v5 source snapshots survive v6 reclassification', () => {
         id: 'careers-zalando-642001', source: 'careers', title: 'Design Engineer', description: TEXTILE_DESIGN_BODY,
         url: 'https://jobs.zalando.com/en/jobs/642001',
         fetchedAt: '2026-10-02T10:00:00.000Z', updatedAt: '2026-10-01T12:00:00.000Z',
-        occupation: { version: 6, category: 'other' },
+        occupation: { version: 7, category: 'other' },
       },
     })
     expect(parseSavedImport(createSavedBackup([saved])).groups[0].variants[0]).toEqual(saved)

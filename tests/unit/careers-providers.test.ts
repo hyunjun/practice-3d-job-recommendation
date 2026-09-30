@@ -43,7 +43,7 @@ describe('three allowlisted careers sources through the real collectors', () => 
       expect(job.fetchedAt).toBe('2026-10-02T10:00:00.000Z')
       expect(job.updatedAt).toBe(source.updatedAt)
       expect(job.employment).toBe('fulltime')
-      expect(job.occupation).toMatchObject({ version: 6, category: 'engineering' })
+      expect(job.occupation).toMatchObject({ version: 7, category: 'engineering' })
     }
     expect(JSON.stringify(responses)).toBe(before)
   })

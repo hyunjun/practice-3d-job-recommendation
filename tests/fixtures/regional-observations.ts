@@ -2,7 +2,7 @@ import type { ObservationHistory, ObservationSeries, ObservationStats } from '..
 import type { CachedBoard } from '../../server/board-cache'
 import { regionalLegacyJob, type RegionalPublicJob } from './regional-coverage'
 
-export const REGIONAL_CURRENT_METHOD = 'observations-2.cities-1.occupation-6.roles-1.qualifications-1.remote-3.employment-1.purpose-1'
+export const REGIONAL_CURRENT_METHOD = 'observations-2.cities-1.occupation-7.roles-1.qualifications-1.remote-3.employment-1.purpose-1'
 export const REGIONAL_LEGACY_METHOD = 'observations-1.occupation-6.roles-1.qualifications-1.remote-2.employment-1.purpose-1'
 // SHA256 of the literal synthetic board identity, authored without product helpers.
 export const REGIONAL_SCOPE = {

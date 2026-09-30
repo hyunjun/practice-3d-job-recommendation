@@ -1,0 +1,795 @@
+{
+  "schemaVersion": 1,
+  "stage": 71,
+  "recordedAt": "2026-09-30T06:45:07.053054+00:00",
+  "status": "verified_and_unanimously_approved_pending_preservation_and_cleanup",
+  "change": "Occupation v7 primary-role/own-duty classification, preserved historical records, independent regression coverage, and managed Playwright browser default.",
+  "contract": {
+    "path": "docs/design/occupation-v7.md",
+    "revision": 4,
+    "sha256": "87f1ef6eb60f4ddcfe97c20b6862708915f4e54de6d26e8a0de847e036f98376"
+  },
+  "participants": {
+    "main": {
+      "role": "product implementation, integration, real-data audit, documentation and cleanup"
+    },
+    "astra": {
+      "requestedModel": "global.openai.gpt-6-astra",
+      "requestedReasoning": "max",
+      "role": "independent design and read-only code review"
+    },
+    "fable": {
+      "requestedModel": "claude-fable-5-1",
+      "requestedEffort": "max",
+      "role": "independent fixture/test authoring and execution",
+      "observedModelIds": [
+        "claude-fable-5-1"
+      ]
+    }
+  },
+  "modelSettingLimit": "Requested max is recorded; backend effective effort is not independently exposed.",
+  "reviewedFinalState": {
+    "baseCommit": "ebf4cc7a8abf17f4c2e426518f22d7cf69d219ae",
+    "codeAndTestsDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+    "fileCount": 387,
+    "algorithm": "SHA256 of sorted path + NUL + file SHA256 + newline for Git-tracked/nonignored source,test,config,script,public-asset files; excludes docs and ignored execution artifacts.",
+    "productSource": {
+      "files": [
+        {
+          "path": "shared/job-occupation.ts",
+          "sha256": "5a5f555b1336c6d1702c4ce70b4d4201d82e1a10687f2677b6603ef1f08a5b2f"
+        },
+        {
+          "path": "shared/types.ts",
+          "sha256": "086a274118ca159ef9607dc7505bae034f4accd34266488cd871dc10404c2851"
+        },
+        {
+          "path": "shared/schemas.ts",
+          "sha256": "259c16da93b60fc4e8bb76c5acd6eeea10c21851ca4ba53b0e5e18af91e13023"
+        }
+      ],
+      "sourceDigest": "7f95238034dcb0ecc49f71275d3bafaf2b58b3f58c1f4739c1c013803e1afb20"
+    },
+    "reviewDocuments": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "0fae39e9229c09bc0420616a9e7f2d09cc6cc22151d35f8ebb818a9962956a4f"
+      },
+      {
+        "path": "docs/continuous-improvement.md",
+        "sha256": "870136af96aff0f6044a6f20264e9302a26dc34398620034ec75879d94bc3758"
+      },
+      {
+        "path": "docs/design/occupation-v7.md",
+        "sha256": "87f1ef6eb60f4ddcfe97c20b6862708915f4e54de6d26e8a0de847e036f98376"
+      },
+      {
+        "path": "README.md",
+        "sha256": "3123e08efed1eb28043ea74ffd0d258cc338dbaef74b12485ff2b7308b58bc0e"
+      },
+      {
+        "path": "docs/occupation-v7-audit.md",
+        "sha256": "4ca182691cf5b03150b65d9ae2749628c4a65231272d40b2a08b85271fc0d7e5"
+      }
+    ],
+    "codeDirectories": [
+      "public",
+      "scripts",
+      "server",
+      "shared",
+      "src",
+      "tests"
+    ],
+    "rootFiles": [
+      ".env.example",
+      "index.html",
+      "package-lock.json",
+      "package.json",
+      "playwright.config.ts",
+      "tsconfig.json",
+      "tsconfig.node.json",
+      "vite.config.ts",
+      "vitest.config.ts"
+    ],
+    "fileEnumerationCommand": "git ls-files --cached --others --exclude-standard -z",
+    "reviewDocumentsStage": "Implementation readiness before final execution; final evidence records final documentation separately."
+  },
+  "implementationReadiness": {
+    "decision": "all_three_approved",
+    "stateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+    "finalVerificationApproved": true
+  },
+  "executionHelpers": {
+    "planDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+    "files": [
+      {
+        "path": "run-validation.py",
+        "sha256": "5c7f6fd944c28f672b4b1fd7aed9911e894f8345e57a9ae634ec5ee0247d409d"
+      },
+      {
+        "path": "validation_control.py",
+        "sha256": "75a16b896a8218ecebe94cecb509a1076cf1e447ee6e542db47d80be5d0741a2"
+      },
+      {
+        "path": "run-claude-review.py",
+        "sha256": "83839ce5589e8d1ecbc37f47cc8befe0751aa3955475a99407c66c0a43b8dc9c"
+      },
+      {
+        "path": "stage_identity.py",
+        "sha256": "f8454c726b1d3680891bc233152c390b4491c7e2ee1b2a550161b838b1c2a3a1"
+      }
+    ],
+    "scope": "check,build,full DEV,full PROD; no channel override and no private fixture mode overrides",
+    "retention": "Temporary helper sources will be preserved in a local archival Git branch before removal."
+  },
+  "realDataAudit": {
+    "generatedAt": "2026-09-30T03:04:53.661Z",
+    "retained": {
+      "rows": 6819,
+      "previouslyExplorable": 6819,
+      "nowExplorable": 6802,
+      "reclassifiedOther": 17,
+      "byCause": {
+        "primary recruiting position": 2,
+        "physical failure-analysis duties": 6,
+        "physical electronics position": 3,
+        "physical supplier quality": 6
+      },
+      "byCompany": {
+        "openai": {
+          "before": 326,
+          "after": 325,
+          "removed": 1
+        },
+        "spacex": {
+          "before": 813,
+          "after": 809,
+          "removed": 4
+        },
+        "zoox": {
+          "before": 110,
+          "after": 108,
+          "removed": 2
+        },
+        "halter": {
+          "before": 33,
+          "after": 23,
+          "removed": 10
+        }
+      }
+    },
+    "raw": {
+      "rows": 512,
+      "previouslyIncluded": 64,
+      "nowIncluded": 55,
+      "removed": 10,
+      "added": 1,
+      "addedCause": "primary firmware internship"
+    },
+    "manualNegativeControls": 17,
+    "positiveControlCount": 3,
+    "originalInputsUnchanged": true,
+    "upgradedFieldsOutsideOccupationUnchanged": true,
+    "cacheRead": {
+      "boards": 130,
+      "included": 6802,
+      "exactExpectedIds": true,
+      "inventoryAndSourceClocksUnchanged": true,
+      "originalObservationMethodsUnchanged": true
+    },
+    "networkRequests": 0,
+    "limits": [
+      "Historical archived inputs, not live posting validity or current company hiring counts.",
+      "All changed retained rows and named controls were reviewed; not a manual review of every unchanged job.",
+      "A retained cache cannot estimate population false-negative rates; raw coverage is limited to six regional sources.",
+      "Schema/cache consistency checks do not replace independent literal unit and E2E tests."
+    ]
+  },
+  "reviewCorrections": [
+    "Primary role versus engineering audience; computing co-roles versus physical title compounds and generic internships.",
+    "Own software failure-analysis duties versus physical work, other-team work, qualifications, negation and incidental tools.",
+    "Bounded role introduction and Unicode duty-heading recognition; public fixture provider typing.",
+    "New E2E explicitly expands the remounted seven-result card after empty searches without changing expected titles/counts.",
+    "Observation fixture inherits the bare suite mode, validates values and rejects conflicting explicit overrides.",
+    "Execution clears private mode overrides so the mode repair is exercised, then clears browser channel override to exercise the new repository default."
+  ],
+  "initialFailureAssessment": {
+    "initialFullDev": {
+      "passed": 428,
+      "failed": 61,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "lifecycleTextFailures": 57,
+    "assertionOnlyFailuresInitiallyUnresolved": 3,
+    "knownNewTestActionOmission": 1,
+    "overAttributionCorrected": "A blanket attribution of all60non-omission failures to environment was withdrawn; three failures had timing evidence only.",
+    "systemLogEvidence": "One owned Chrome had a loginwindow/libquit force-quit path about32seconds after the first observed startup message; initiating caller not identified.",
+    "diagnosticComparison": {
+      "originalFailureCasesRetested": 16,
+      "thoseNowPassing": 16,
+      "originalFailuresOutsideDiagnostic": 45
+    },
+    "limits": "Targeted passes do not replace the full suites or identify the original termination caller.",
+    "finalComparison": {
+      "initialFailures": 61,
+      "finalDevelopmentPassed": 61,
+      "finalProductionPassed": 61,
+      "all489CaseIdentitiesEqual": true,
+      "matchingKey": "file + full suite/test title + project; never source line number"
+    }
+  },
+  "browser": {
+    "default": "Playwright-managed chromium channel",
+    "testedManifestVersion": "153.0.8010.12",
+    "revision": "1243",
+    "initialSystemChromeVersion": "154.0.8037.58",
+    "observedDiagnosticDevSameProcessLifetime": "at least7minutes22seconds",
+    "diagnosticProdLiveVersionObserved": false,
+    "defaultReproduction": [
+      "npx playwright install chromium",
+      "npm run test:e2e",
+      "npm run build",
+      "ORBIT_TEST_MODE=production npm run test:e2e"
+    ],
+    "optionalSystemChrome": "PLAYWRIGHT_CHANNEL=chrome npm run test:e2e",
+    "finalRuntimeObservations": [
+      {
+        "mode": "development",
+        "observedAt": "2026-09-30T05:15:41.696542+00:00",
+        "invocationId": "20260930T051421259737Z-3c9e0bbe",
+        "actualBundleVersion": "153.0.8010.12",
+        "actualBundleIdentifier": "com.google.chrome.for.testing",
+        "ownedProcessObserved": true,
+        "channelOverride": null
+      },
+      {
+        "mode": "production",
+        "observedAt": "2026-09-30T05:50:50.828128+00:00",
+        "invocationId": "20260930T055013227105Z-a4e037b7",
+        "actualBundleVersion": "153.0.8010.12",
+        "actualBundleIdentifier": "com.google.chrome.for.testing",
+        "ownedProcessObserved": true,
+        "channelOverride": null
+      }
+    ]
+  },
+  "runs": [
+    {
+      "invocationId": "20260930T034718482617Z-4489420b",
+      "kind": "check",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T03:47:18.619950+00:00",
+      "endedAt": "2026-09-30T03:47:30.091910+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": null,
+      "stateDigest": "fef74242df9c9bfb89b38ed4af7e43fbcb478892d9fc5a422c472505f6544319",
+      "executionPlanDigest": "07435180112abe6bb137f3963f2a270f127b17e1d15534b2c29458c3ec89ca7a",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "unitResult": {
+        "filesPassed": 79,
+        "testsPassed": 2641
+      }
+    },
+    {
+      "invocationId": "20260930T034748054641Z-c36aa147",
+      "kind": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T03:47:48.206880+00:00",
+      "endedAt": "2026-09-30T03:47:51.316859+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": null,
+      "stateDigest": "fef74242df9c9bfb89b38ed4af7e43fbcb478892d9fc5a422c472505f6544319",
+      "executionPlanDigest": "07435180112abe6bb137f3963f2a270f127b17e1d15534b2c29458c3ec89ca7a",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null
+    },
+    {
+      "invocationId": "20260930T034809515385Z-12674b37",
+      "kind": "e2e-development",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "--reporter=list,json"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T03:48:09.650344+00:00",
+      "endedAt": "2026-09-30T04:20:57.360056+00:00",
+      "status": "failed-or-interrupted",
+      "exitCode": 1,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": "development",
+      "stateDigest": "fef74242df9c9bfb89b38ed4af7e43fbcb478892d9fc5a422c472505f6544319",
+      "executionPlanDigest": "07435180112abe6bb137f3963f2a270f127b17e1d15534b2c29458c3ec89ca7a",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "playwright": {
+        "startTime": "2026-09-30T03:48:10.256Z",
+        "duration": 1966393.778,
+        "expected": 428,
+        "skipped": 0,
+        "unexpected": 61,
+        "flaky": 0
+      },
+      "globalErrorCount": 0,
+      "reportSha256": "cbe0ee15c806221dacacb553add19b8b0c43627b7004220691ece28094925271",
+      "resultAttempts": 489,
+      "retryAttempts": 0
+    },
+    {
+      "invocationId": "20260930T044840979487Z-584613e0",
+      "kind": "check",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T04:48:41.111162+00:00",
+      "endedAt": "2026-09-30T04:48:52.286593+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": null,
+      "stateDigest": "df178b443b39964563176fb9b236e1d68b0ed3c4a681aa78723eb34978a464fb",
+      "executionPlanDigest": "e7b6505b6031c5f3895469a778b24311e74fde56bcd5c5d56437af84bc3c1375",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "unitResult": {
+        "filesPassed": 79,
+        "testsPassed": 2641
+      }
+    },
+    {
+      "invocationId": "20260930T044859729630Z-ca7f87a9",
+      "kind": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T04:48:59.860446+00:00",
+      "endedAt": "2026-09-30T04:49:02.480103+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": null,
+      "stateDigest": "df178b443b39964563176fb9b236e1d68b0ed3c4a681aa78723eb34978a464fb",
+      "executionPlanDigest": "e7b6505b6031c5f3895469a778b24311e74fde56bcd5c5d56437af84bc3c1375",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null
+    },
+    {
+      "invocationId": "20260930T044914754949Z-02625923",
+      "kind": "e2e-development-targeted",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "tests/e2e/occupation-v7.spec.ts",
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/bulk-inventory.spec.ts",
+        "tests/e2e/source-expansion.spec.ts",
+        "tests/e2e/job-languages.spec.ts",
+        "tests/e2e/posting-presence.spec.ts",
+        "tests/e2e/search-recovery-scope.spec.ts",
+        "--reporter=list,json"
+      ],
+      "testPaths": [
+        "tests/e2e/occupation-v7.spec.ts",
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/bulk-inventory.spec.ts",
+        "tests/e2e/source-expansion.spec.ts",
+        "tests/e2e/job-languages.spec.ts",
+        "tests/e2e/posting-presence.spec.ts",
+        "tests/e2e/search-recovery-scope.spec.ts"
+      ],
+      "startedAt": "2026-09-30T04:49:14.886658+00:00",
+      "endedAt": "2026-09-30T04:58:08.595549+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": false,
+      "mode": "development",
+      "stateDigest": "df178b443b39964563176fb9b236e1d68b0ed3c4a681aa78723eb34978a464fb",
+      "executionPlanDigest": "e7b6505b6031c5f3895469a778b24311e74fde56bcd5c5d56437af84bc3c1375",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "playwright": {
+        "startTime": "2026-09-30T04:49:15.472Z",
+        "duration": 532858.745,
+        "expected": 64,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "globalErrorCount": 0,
+      "reportSha256": "791862472d0a1dcd5d0ada6f3c0af4d59601c4745c1f32c0f190f51404e49922",
+      "resultAttempts": 64,
+      "retryAttempts": 0
+    },
+    {
+      "invocationId": "20260930T045835717606Z-8797b72d",
+      "kind": "e2e-production-targeted",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/occupation-v7.spec.ts",
+        "--reporter=list,json"
+      ],
+      "testPaths": [
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/occupation-v7.spec.ts"
+      ],
+      "startedAt": "2026-09-30T04:58:35.851158+00:00",
+      "endedAt": "2026-09-30T04:59:31.298300+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": false,
+      "mode": "production",
+      "stateDigest": "df178b443b39964563176fb9b236e1d68b0ed3c4a681aa78723eb34978a464fb",
+      "executionPlanDigest": "e7b6505b6031c5f3895469a778b24311e74fde56bcd5c5d56437af84bc3c1375",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "playwright": {
+        "startTime": "2026-09-30T04:58:36.445Z",
+        "duration": 54594.978,
+        "expected": 13,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "globalErrorCount": 0,
+      "reportSha256": "bae627a4f798879005e2d152fc57722c519a5ea1cca0a97d3344edd1ad497846",
+      "resultAttempts": 13,
+      "retryAttempts": 0
+    },
+    {
+      "invocationId": "20260930T051350618199Z-7d1c5d20",
+      "kind": "check",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T05:13:50.763748+00:00",
+      "endedAt": "2026-09-30T05:14:01.313739+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": null,
+      "stateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+      "executionPlanDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "unitResult": {
+        "filesPassed": 79,
+        "testsPassed": 2641
+      }
+    },
+    {
+      "invocationId": "20260930T051407484486Z-fccc36e9",
+      "kind": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T05:14:07.618211+00:00",
+      "endedAt": "2026-09-30T05:14:10.208600+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": null,
+      "stateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+      "executionPlanDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null
+    },
+    {
+      "invocationId": "20260930T051421259737Z-3c9e0bbe",
+      "kind": "e2e-development",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "--reporter=list,json"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T05:14:21.392184+00:00",
+      "endedAt": "2026-09-30T05:49:53.429680+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": "development",
+      "stateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+      "executionPlanDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "playwright": {
+        "startTime": "2026-09-30T05:14:21.968Z",
+        "duration": 2130372.292,
+        "expected": 489,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "globalErrorCount": 0,
+      "reportSha256": "93ef87d9069ec31d77cbf8b31a46ea358975fd60509d2fca3b887f958450fc9d",
+      "resultAttempts": 489,
+      "retryAttempts": 0
+    },
+    {
+      "invocationId": "20260930T055013227105Z-a4e037b7",
+      "kind": "e2e-production",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "--reporter=list,json"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T05:50:13.363746+00:00",
+      "endedAt": "2026-09-30T06:19:19.428547+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": "production",
+      "stateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+      "executionPlanDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "runnerError": null,
+      "ownedProcessesRemaining": 0,
+      "playwright": {
+        "startTime": "2026-09-30T05:50:14.007Z",
+        "duration": 1744669.767,
+        "expected": 489,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "globalErrorCount": 0,
+      "reportSha256": "75e7a242b9e90526f8e7a6616fd980212272d8482948a392d0bed9987b81d180",
+      "resultAttempts": 489,
+      "retryAttempts": 0
+    }
+  ],
+  "finalVerification": {
+    "status": "all_three_approved",
+    "participants": {
+      "main": {
+        "decision": "FINAL_VERIFICATION_APPROVED",
+        "record": "main-final-verification-01.review.md",
+        "recordSha256": "8b05fd2045659d41397f6f21a759e93703c833f70b9eba9e9dbb3efc0f238e7c",
+        "sourceStateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+        "evidenceSha256": "ebb2455684d214dbb899f23f0760fcd3cabcac58d1bafb7550100499f92e3b4d"
+      },
+      "astra": {
+        "decision": "FINAL_VERIFICATION_APPROVED",
+        "record": "astra-final-verification-01.review.md",
+        "recordSha256": "12895919edacd53185498e7e649314603b3a37f92fe585fe884153b302daae86",
+        "sourceStateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+        "evidenceSha256": "ebb2455684d214dbb899f23f0760fcd3cabcac58d1bafb7550100499f92e3b4d"
+      },
+      "fable": {
+        "decision": "FINAL_VERIFICATION_APPROVED",
+        "record": "claude-final-evidence-review-01.review.md",
+        "hashBindingLimit": "Read/Glob/Grep cannot computeSHA256; approval binds read content to agreeing recorded digests, independently computed by main and Astra.",
+        "recordSha256": "62177424a2c26fe1cb01f1c186439ddcc479705b82d4248dff5e967441c9e82a",
+        "sourceStateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+        "evidenceSha256": "ebb2455684d214dbb899f23f0760fcd3cabcac58d1bafb7550100499f92e3b4d"
+      }
+    },
+    "evidence": {
+      "path": "docs/validation/occupation-v7-final-evidence-2026-09-30.json",
+      "sha256": "ebb2455684d214dbb899f23f0760fcd3cabcac58d1bafb7550100499f92e3b4d"
+    },
+    "sourceStateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+    "unanimousAt": "2026-09-30T06:45:07.053054+00:00"
+  },
+  "cleanup": {
+    "status": "new_unique_inputs_preserved_awaiting_git_preservation",
+    "protectedPaths": [
+      ".local/preserved-2026-09-28/",
+      ".local/observations-v1/",
+      ".local/preserved-2026-09-30/"
+    ],
+    "policy": "Delete reproducible task outputs and exact owned temporary browser profiles; preserve reusable source/findings/results in Git first and protect irreproducible archived inputs/history.",
+    "actualCleanupRecord": null,
+    "independentReviewCorrection": "Astra identified missing unique manual judgments, historical reference responses and fetch receipts. Revised design retains9newblobs681251bytes and references1duplicateHTML in the protected older archive; main and Astra approve design, Fable review pending.",
+    "reviewCorrection": "Fable approved final product verification but found three omitted plan01 helper snapshots; cleanup design and source inventory revised separately before any deletion.",
+    "design": {
+      "revision": 3,
+      "path": "docs/validation/occupation-v7-cleanup-design-2026-09-30.json",
+      "sha256": "f9761898bdc0b0ada9f786bb3bbda0f5888ae5d7411c4405816d12bb0519bc51",
+      "planSha256": "9ff2e87e3f46f6b854ed09df3105fa8e499eed8b00859308989fdb625e4c21ee",
+      "privateInputPlanSha256": "ae8692da764e849c46123a412c8c60880d7f22136553f4a7f0d7264bae1b3628",
+      "status": "all_three_approved",
+      "participants": {
+        "main": {
+          "decision": "CLEANUP_DESIGN_APPROVED",
+          "reason": "Accept Fable correction,preserve all24sources,and retain explicit design hashes/content and artifact-deletion notice."
+        },
+        "astra": {
+          "decision": "CLEANUP_DESIGN_APPROVED",
+          "record": "astra-cleanup-design-03.review.md",
+          "independentHashVerification": true
+        },
+        "fable": {
+          "decision": "CLEANUP_DESIGN_APPROVED",
+          "record": "claude-cleanup-design-03.review.md",
+          "hashBindingLimit": "Read/Glob/Grep cannot computeSHA256; content bound to recorded digests, independently checked by main and Astra."
+        }
+      },
+      "unanimousAt": "2026-09-30T06:45:07.053054+00:00"
+    },
+    "reviewCorrections": [
+      {
+        "reviewer": "Astra",
+        "finding": "Manual judgments, recovery map and dated reference inputs not covered by old archive.",
+        "resolution": "Preserve9newblobs681251bytes and reference1identical prior HTML blob."
+      },
+      {
+        "reviewer": "Fable",
+        "finding": "Three distinct plan01 helper source snapshots omitted from21-file inventory.",
+        "resolution": "Inventory24files with all3labelled superseded; README and source/archive guards retained.",
+        "selfCorrection": "The earlier claim that the drafts lack stage_identity imports was withdrawn: all3import that module. Distinct hashes and other omitted control features still establish distinctness.",
+        "remainingLimit": "Plan01-era stage_identity bytes were not captured; preserve current module without claiming an exact runnable plan01 reconstruction."
+      }
+    ],
+    "newInputArchive": {
+      "verifiedAt": "2026-09-30T06:45:50.140400+00:00",
+      "archivePath": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+      "archiveBytes": 86921,
+      "archiveSha256": "c0bacbfe16fa47d527af05b1b64cbc2987e6c0dfa768119ce33e41b8d9d6a739",
+      "manifestSha256": "d78d32bbd528104a6969c611aec55788b540cff412b834f4451f121bca4a8c31",
+      "uniqueBlobs": 9,
+      "uniqueBytes": 681251,
+      "zipEntries": 10,
+      "allEntriesSizeCrcAndSha256Verified": true,
+      "manifestInsideAndOutsideEqual": true,
+      "externalReferencesVerified": [
+        {
+          "path": ".local/research/71-occupation-scope/references/software-development.html",
+          "archive": ".local/preserved-2026-09-28/historical-inputs.zip",
+          "sha256": "4b323fdd8a671efd44190d3fe60e4388f04446183b436f39b1d6666befd199cc",
+          "bytes": 261766
+        }
+      ],
+      "originalSourcesUnchanged": true,
+      "originalsDeleted": false
+    }
+  },
+  "limits": [
+    "The agreed scope is a bounded classification heuristic, not general natural-language understanding.",
+    "Frozen archived data does not establish current posting validity, current hiring counts or population error rates.",
+    "Older saved records can use only retained body/evidence.",
+    "Unanimous review is a stage decision, not a guarantee of no defects."
+  ],
+  "earlierDesignDecisions": {
+    "browser-diagnostic-design-03": {
+      "gate": {
+        "recordedAt": "2026-09-30T04:35:45.143386+00:00",
+        "revision": "browser-diagnostic-design-03",
+        "document": "browser-diagnostic-design-03.md",
+        "documentSha256": "32fe398ff8788e46b66d27f44937a7af8c2e81e142afd9242e18f1156f334c09",
+        "participants": {
+          "main": {
+            "decision": "DIAGNOSTIC_DESIGN_APPROVED",
+            "documentSha256": "32fe398ff8788e46b66d27f44937a7af8c2e81e142afd9242e18f1156f334c09",
+            "reason": "Accept Fable coverage blocker; bare suite mode with fixture overrides cleared, unchanged oracles and diagnosis before any further repair. Preserve root-cause uncertainty."
+          },
+          "astra": {
+            "decision": "DIAGNOSTIC_DESIGN_APPROVED",
+            "documentSha256": "32fe398ff8788e46b66d27f44937a7af8c2e81e142afd9242e18f1156f334c09",
+            "record": "astra-diagnostic-design-03.review.md",
+            "independentHashVerification": true
+          },
+          "fable": {
+            "decision": "DIAGNOSTIC_DESIGN_APPROVED",
+            "documentSha256": "32fe398ff8788e46b66d27f44937a7af8c2e81e142afd9242e18f1156f334c09",
+            "record": "claude-test-repair-01.md",
+            "hashBinding": "Fable's tools (Read/Glob/Grep/Edit/Write) cannot compute SHA-256. The decision is bound to the full read content of browser-diagnostic-design-03.md and to the hash provided in main's request and independently verified by Astra.",
+            "reason": "Revision 3 resolves the revision-2 blocker: the runner sets only bare ORBIT_TEST_MODE and clears the four fixture-specific overrides, so the final runs prove the observation-mode fallback. Diagnostic target sets, decision rule and fresh-diagnosis rule for later collapses are acceptable. No remaining design blocker.",
+            "recordOrder": "Recorded after the main and astra entries and before any test edit; Fable has no clock tool, so no timestamp is asserted here."
+          }
+        },
+        "unanimous": true,
+        "implementation": "authorized",
+        "implementationScope": "Fable: tests/e2e/occupation-v7.spec.ts expansion action and tests/e2e/catalog-observations.spec.ts mode resolver only. Main: local runner environment (bare ORBIT_TEST_MODE, cleared fixture overrides, matched browser). All exact changes still need three-party implementation/execution review before any command runs.",
+        "updatedAt": "2026-09-30T04:37:13.714249+00:00"
+      },
+      "documentContent": "# Stage 71: browser interruption diagnosis and persistent test repairs\n\nRevision 3 supersedes revision2. It includes Fable's execution-mode coverage correction, Astra's mode/reproduction refinements, and the concrete occupation-v7 failure found during the initial full DEV run. That run uses frozen source/test state `fef74242df9c9bfb89b38ed4af7e43fbcb478892d9fc5a422c472505f6544319`.\n\n## Evidence and limits\n\n- Several unrelated tests lose their browser/page/request session before their assertion deadline. Observed count mismatches remain unresolved; they are not passed checks.\n- Independent source inspection did not identify a shared browser closure or premature fixture-server cleanup in sampled paths.\n- System Chrome is 154.0.8037.58. Playwright 1.63 requests Chromium 153.0.8010.12 revision 1243. This mismatch is a hypothesis, not an established root cause.\n- A sampled resource reading showed about 2.119 GiB aggregate owned test RSS on a 16 GiB machine with 39% free memory. Earlier resource spikes are not excluded.\n- `catalog-observations.spec.ts` currently defaults its private fixture to development using only `ORBIT_OBSERVATIONS_MODE`; the runner sets `ORBIT_TEST_MODE`. This is a concrete production coverage gap independent of the DEV closures.\n- The new occupation-v7 320px test expects seven Engineer titles after previously searching terms with zero results. Its captured screen reports seven matches and one collapsed preview, with `전체 7개 공고 보기` available. The test omits expansion after the company card was removed and then remounted. See `main-e2e-triage-01.md`; Fable must independently review this assessment.\n\n- Main's narrow system log query for owned Chrome PID10765 found `force quit (caller responsible for termination)` through loginwindow about32.08 seconds after the first observed startup message. The initiating caller remains unidentified. This supplements the timing lead without assigning a browser vendor, macOS policy, host-app or Playwright cause; see `main-browser-termination-01.md`.\n\n## Proposed diagnosis and repair sequence\n\n1. Let the initial full DEV command finish. Preserve its actual report, failure evidence and environment. Fable independently reports the result. Do not edit frozen product/tests/helpers during the active command.\n2. Fable reviews and repairs the occupation-v7 action sequence where justified by the evidence: explicitly expand the restored seven-result company card. Retain every literal title/count, empty-search outcome, query/filter/refresh assertion, saved note/status and export/import expectation. Do not reduce the seven-title expectation or change product behavior merely to satisfy a test setup omission.\n3. Fable makes the observation fixture inherit `ORBIT_OBSERVATIONS_MODE ?? ORBIT_TEST_MODE ?? 'development'`, validates supported values, and rejects conflicting explicit overrides. Retain or add the smallest actual `/api/health` mode assertion tied to the requested suite mode. Bare `ORBIT_TEST_MODE=production` must exercise the private production fixture. An observation-only explicit mode remains usable when the suite mode is not explicitly set.\n4. Main updates only the local execution environment helper to use the Playwright-matched browser downloaded by the official installer under the ignored stage directory. Set absolute `PLAYWRIGHT_BROWSERS_PATH` and `PLAYWRIGHT_CHANNEL=chromium`. Set only `ORBIT_TEST_MODE` to the requested DEV/PROD mode. Explicitly remove inherited `ORBIT_OBSERVATIONS_MODE`, `ORBIT_SURVEY_MODE`, `ORBIT_POSTING_PRESENCE_MODE` and `ORBIT_SOURCE_INTEGRATION_MODE` from the command environment; do not force these fixture-specific overrides. This exercises the ordinary suite-mode inheritance and prevents the runner from masking a broken fallback. Record the browser identity and the cleared override names. No expectation or timeout is relaxed.\n5. Freeze and review exact changed tests and all execution helpers, binding all three implementation/execution decisions to the new hashes before commands run.\n6. Fable runs the final relevant type/unit/build checks and representative originally failing E2E files, with the matched browser and unchanged behavioral expectations. The DEV target set is occupation-v7, catalog-observations, bulk-inventory, source-expansion, job-languages, posting-presence, and search-recovery-scope. It covers the known test repair, unresolved count/attribute/title mismatches, and long individual tests. Then run PROD targets catalog-observations and occupation-v7 using the bare suite mode after a build. Save all results. Disappearing closures support, but do not prove, the browser-compatibility hypothesis; persistent similar closures show that version matching does not by itself explain or resolve the failure. Mixed outcomes are diagnosed individually.\n7. Discuss remaining concrete failures together. Fix a demonstrated product/test defect with the appropriate owner and repeat affected checks. A later unexpected card collapse, including after a nonempty refresh, requires fresh diagnosis; it is not preclassified as another missing expansion action. No skipped test, reduced expectation, ignored failure or partial execution can substitute for required full final suites.\n8. After reviewing the browser diagnostic evidence, decide together whether to make bundled `chromium` the repository's default (`PLAYWRIGHT_CHANNEL=chrome` remains explicit opt-in). Main prepares any config/README change, and all three review its exact content before final execution. README must give durable installation and DEV/build/PROD reproduction commands; deleted stage-local paths cannot be permanent prerequisites.\n9. Complete full final DEV and PROD E2E on the final source/test/config state using only the bare suite mode and no fixture-specific overrides, along with applicable type/unit/build checks. All three must explicitly approve the final verification evidence. Unresolved root-cause uncertainty is recorded separately from demonstrated passing coverage.\n10. Preserve useful findings/results/consensus and reusable source in Git before deleting stage-created browser downloads, reports, traces, screenshots, fixture workspaces, builds/caches, scripts and owned processes. Protect the original archive and observation history.\n\nMain's decision: `DIAGNOSTIC_DESIGN_APPROVED`. This is design approval only; implementation and verification approval remain pending.\n",
+      "documentSha256": "32fe398ff8788e46b66d27f44937a7af8c2e81e142afd9242e18f1156f334c09"
+    },
+    "browser-default-design-01": {
+      "gate": {
+        "recordedAt": "2026-09-30T05:03:18.085182+00:00",
+        "revision": "browser-default-design-01",
+        "document": "browser-default-design-01.md",
+        "documentSha256": "09166b57a6066de7918866cfacae1be6154d469c1c72ef56eb137d44953593f6",
+        "participants": {
+          "main": {
+            "decision": "BROWSER_DEFAULT_DESIGN_APPROVED",
+            "documentSha256": "09166b57a6066de7918866cfacae1be6154d469c1c72ef56eb137d44953593f6"
+          },
+          "astra": {
+            "decision": "BROWSER_DEFAULT_DESIGN_APPROVED",
+            "documentSha256": "09166b57a6066de7918866cfacae1be6154d469c1c72ef56eb137d44953593f6",
+            "record": "astra-browser-default-design-01.review.md",
+            "independentHashVerification": true
+          },
+          "fable": {
+            "decision": "BROWSER_DEFAULT_DESIGN_APPROVED",
+            "documentSha256": "09166b57a6066de7918866cfacae1be6154d469c1c72ef56eb137d44953593f6",
+            "record": "claude-browser-default-design-01.review.md",
+            "hashBinding": "Full read content bound to supplied SHA256; no independent hash computation with Read/Glob/Grep."
+          }
+        },
+        "unanimous": true,
+        "implementation": "authorized",
+        "updatedAt": "2026-09-30T05:07:22.072500+00:00"
+      },
+      "documentContent": "# Browser-default design revision1 after completed diagnostics\n\nStatus: proposed final configuration change; main approves this design, Astra/Fable decisions pending. No config/README/runner change has been applied. Completed diagnostics were64/64 DEV and13/13 PROD, with no skipped/flaky results, source changes or owned leftovers. Sixteen corresponding initial failures passed;45 other original failures still require full rerun. See diagnostic-results-01.json, diagnostic-case-comparison.json and claude-diagnostic-execution-01.review.md.\n\n## Proposed persistent behavior\n\nThe repository's default Playwright channel becomes the Chromium distributed for its pinned Playwright version. An explicit `PLAYWRIGHT_CHANNEL=chrome` remains available for a separate system-Chrome check.\n\nIn `playwright.config.ts`, remove the `existsSync` import and `hasSystemChrome` detection. Change only the channel fallback to:\n\n```ts\nchannel: process.env.PLAYWRIGHT_CHANNEL ?? 'chromium',\n```\n\nREADME installation/verification commands include `npx playwright install chromium` before the first E2E command. Explain that installation is needed after the initial dependency setup or a Playwright version update. Give ordinary DEV, build-before-PROD and optional system-Chrome commands without any stage-local directory requirement.\n\n## Verify the default itself\n\nFor the final full-suite commands, the local runner continues setting the stage-local `PLAYWRIGHT_BROWSERS_PATH` only to locate the downloaded dependency. It must **remove any inherited `PLAYWRIGHT_CHANNEL` override**, rather than forcing `chromium`, so the repository's new fallback is exercised.\n\nRetain the bare `ORBIT_TEST_MODE` and cleared private fixture overrides. Record `channelOverride: null` and `expectedDefaultChannel: chromium` distinctly from the actual owned executable/version observations. No behavioral expectation, timeout, retry or skip changes.\n\nFreeze and review the exact config/README/runner changes and new source/helper hashes before full final DEV/PROD. Applicable type/unit/build checks remain required. A diagnostic pass does not itself approve this draft or complete full-suite verification.\n\n## Evidence limits\n\nReview the completed diagnostic reports before deciding. The original verified DEV browser was observed alive at7minutes22seconds, and long individual cases of52.9,52.8 and72seconds passed. Initial system-Chrome failures remain recorded. A known original browser's force-quit path was observed, but its initiating caller remains unidentified. Matched-browser stability supports a reproducible automation target; it does not identify the original caller or establish a browser-vendor defect.\n\nDelete the downloaded stage browser and all other reproducible temporary outputs only after final verification, consensus and Git preservation. A later checkout uses the normal Playwright installation command.\n\nMain decision: `BROWSER_DEFAULT_DESIGN_APPROVED`. This is a default-configuration design decision and acceptance of the bounded diagnostic evidence, not final verification approval. All three must agree on this exact document before changes are applied; exact changed files and execution helpers require implementation review before full suites.\n",
+      "documentSha256": "09166b57a6066de7918866cfacae1be6154d469c1c72ef56eb137d44953593f6"
+    }
+  },
+  "artifactRetentionNotice": "Paths under the temporary research/verification directories identify historical execution artifacts. Raw logs,fixture workspaces and reports will be removed after preservation; their hashes and extracted findings are retained here and in the immutable evidence. They are not promised to remain at those paths."
+}

@@ -13,6 +13,7 @@ import {
   observationBoards, observationResponses, observationSaved,
 } from '../fixtures/catalog-observations'
 import { createObservationServer, OBSERVATION_PRIVATE_ROOT } from '../fixtures/catalog-observations-server'
+import type { ObservationMode } from '../fixtures/catalog-observations-server'
 import { watchApiRequests } from './helpers/api-requests'
 import { readSaved, waitForSavedCommit } from './helpers/saved-store'
 
@@ -25,9 +26,27 @@ const total = (page: Page, name: string) => panel(page).locator('.observation-to
   .filter({ has: page.getByText(name, { exact: true }) }).locator('dd')
 const counts = (values: { key: string; count: number }[]) => Object.fromEntries(values.map(value => [value.key, value.count]))
 
+/**
+ * The private observation fixture follows the suite's requested mode. ORBIT_OBSERVATIONS_MODE
+ * alone may choose the mode only while no suite mode is set; a contradicting explicit value is
+ * an error rather than a silent development fallback. The fixture server then polls its own
+ * /api/health until it reports this mode (catalog-observations-server.ts start()) and
+ * verifyProductionBytes() compares the served build in production.
+ */
+function observationMode(name: string, value: string | undefined): ObservationMode | undefined {
+  if (value === undefined) return undefined
+  if (value === 'development' || value === 'production') return value
+  throw new Error(`Unknown ${name}: ${value}`)
+}
+function requestedObservationMode(): ObservationMode {
+  const explicit = observationMode('ORBIT_OBSERVATIONS_MODE', process.env.ORBIT_OBSERVATIONS_MODE)
+  const suite = observationMode('ORBIT_TEST_MODE', process.env.ORBIT_TEST_MODE)
+  if (explicit && suite && explicit !== suite) throw new Error(`ORBIT_OBSERVATIONS_MODE=${explicit} conflicts with ORBIT_TEST_MODE=${suite}`)
+  return explicit ?? suite ?? 'development'
+}
+
 async function fixture(info: TestInfo, options: Parameters<typeof createObservationServer>[2] = {}) {
-  const mode = process.env.ORBIT_OBSERVATIONS_MODE ?? 'development'
-  if (mode !== 'development' && mode !== 'production') throw new Error('Unknown observation test mode')
+  const mode = requestedObservationMode()
   return createObservationServer(path.join(OBSERVATION_PRIVATE_ROOT, 'runs', runId,
     `${info.testId.replaceAll(/[^a-zA-Z0-9-]/g, '-')}-${info.retry}`), mode, options)
 }

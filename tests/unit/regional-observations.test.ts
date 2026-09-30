@@ -27,7 +27,7 @@ function memory(initial: unknown) {
 
 describe('Middle East distribution and explicit old/new method shapes', () => {
   it('counts each posting once per region, keeps remote separate and does not move NZ/TW out of APAC', () => {
-    expect(OBSERVATION_METHOD).toBe('observations-2.cities-1.occupation-6.roles-1.qualifications-1.remote-3.employment-1.purpose-1')
+    expect(OBSERVATION_METHOD).toBe('observations-2.cities-1.occupation-7.roles-1.qualifications-1.remote-3.employment-1.purpose-1')
     const jobs = regionalObservationJobs()
     const stats = buildObservationStats(jobs, [REGIONAL_COMPANY], 7)
     expect(stats).toEqual(REGIONAL_CURRENT_STATS)

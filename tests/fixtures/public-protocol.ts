@@ -53,8 +53,11 @@ export function publicProtocolJob(id = 'london', overrides: Partial<PublicJob> =
       version: 1, roles: role === 'unknown' ? [] : [role],
       evidence: role === 'unknown' ? [] : [{ role, source: 'title', text: title }],
     },
+    // Current occupation version. Many callers override the title with a protocol
+    // label rather than an occupation; a current-version record keeps its authored
+    // category without re-evaluation, so this pin moves with each version bump.
     occupation: {
-      version: 6, category: 'engineering', departments: [],
+      version: 7, category: 'engineering', departments: [],
       evidence: [{ source: 'title', text: title }],
     },
     remoteCountries: [], remoteWorldwide: false, remoteScopeUnknown: false, remoteScopeVersion: 3,

@@ -76,7 +76,7 @@ describe('role classification from published labels', () => {
     }, company.id, SEARCH_TIME)
     expect(design(TEXTILE_DESIGN_BODY)).toBeNull()
     const computingDesign = design(SOFTWARE_DESIGN_BODY)
-    expect(computingDesign).toMatchObject({ occupation: { version: 6, category: 'engineering' } })
+    expect(computingDesign).toMatchObject({ occupation: { version: 7, category: 'engineering' } })
     expect(jobRoles(computingDesign!)).toEqual([])
     expect(jobRoles(posting('Marketing Engineer', ['Marketing']))).toEqual([])
   })

@@ -1,0 +1,1736 @@
+{
+  "schemaVersion": 1,
+  "stage": 71,
+  "recordedAt": "2026-09-30T06:23:39.841586+00:00",
+  "purpose": "Immutable final evidence for three independent explicit verification decisions. This file itself does not assert unanimous approval or cleanup completion.",
+  "sourceIdentity": {
+    "baseCommit": "ebf4cc7a8abf17f4c2e426518f22d7cf69d219ae",
+    "codeAndTestsDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+    "fileCount": 387,
+    "algorithm": "SHA256 of sorted path + NUL + file SHA256 + newline for Git-tracked/nonignored source,test,config,script,public-asset files; excludes docs and ignored execution artifacts.",
+    "productSource": {
+      "files": [
+        {
+          "path": "shared/job-occupation.ts",
+          "sha256": "5a5f555b1336c6d1702c4ce70b4d4201d82e1a10687f2677b6603ef1f08a5b2f"
+        },
+        {
+          "path": "shared/types.ts",
+          "sha256": "086a274118ca159ef9607dc7505bae034f4accd34266488cd871dc10404c2851"
+        },
+        {
+          "path": "shared/schemas.ts",
+          "sha256": "259c16da93b60fc4e8bb76c5acd6eeea10c21851ca4ba53b0e5e18af91e13023"
+        }
+      ],
+      "sourceDigest": "7f95238034dcb0ecc49f71275d3bafaf2b58b3f58c1f4739c1c013803e1afb20"
+    },
+    "codeDirectories": [
+      "public",
+      "scripts",
+      "server",
+      "shared",
+      "src",
+      "tests"
+    ],
+    "rootFiles": [
+      ".env.example",
+      "index.html",
+      "package-lock.json",
+      "package.json",
+      "playwright.config.ts",
+      "tsconfig.json",
+      "tsconfig.node.json",
+      "vite.config.ts",
+      "vitest.config.ts"
+    ],
+    "fileEnumerationCommand": "git ls-files --cached --others --exclude-standard -z"
+  },
+  "contract": {
+    "path": "docs/design/occupation-v7.md",
+    "revision": 4,
+    "sha256": "87f1ef6eb60f4ddcfe97c20b6862708915f4e54de6d26e8a0de847e036f98376"
+  },
+  "executionPlan": {
+    "planDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+    "files": [
+      {
+        "path": "run-validation.py",
+        "sha256": "5c7f6fd944c28f672b4b1fd7aed9911e894f8345e57a9ae634ec5ee0247d409d"
+      },
+      {
+        "path": "validation_control.py",
+        "sha256": "75a16b896a8218ecebe94cecb509a1076cf1e447ee6e542db47d80be5d0741a2"
+      },
+      {
+        "path": "run-claude-review.py",
+        "sha256": "83839ce5589e8d1ecbc37f47cc8befe0751aa3955475a99407c66c0a43b8dc9c"
+      },
+      {
+        "path": "stage_identity.py",
+        "sha256": "f8454c726b1d3680891bc233152c390b4491c7e2ee1b2a550161b838b1c2a3a1"
+      }
+    ],
+    "scope": "check,build,full DEV,full PROD; no channel override and no private fixture mode overrides",
+    "retention": "Temporary helper sources will be preserved in a local archival Git branch before removal."
+  },
+  "finalRequiredRuns": [
+    {
+      "invocationId": "20260930T051350618199Z-7d1c5d20",
+      "kind": "check",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T05:13:50.763748+00:00",
+      "endedAt": "2026-09-30T05:14:01.313739+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": null,
+      "stateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+      "executionPlanDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "unitResult": {
+        "filesPassed": 79,
+        "testsPassed": 2641
+      }
+    },
+    {
+      "invocationId": "20260930T051407484486Z-fccc36e9",
+      "kind": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T05:14:07.618211+00:00",
+      "endedAt": "2026-09-30T05:14:10.208600+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": null,
+      "stateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+      "executionPlanDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null
+    },
+    {
+      "invocationId": "20260930T051421259737Z-3c9e0bbe",
+      "kind": "e2e-development",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "--reporter=list,json"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T05:14:21.392184+00:00",
+      "endedAt": "2026-09-30T05:49:53.429680+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": "development",
+      "stateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+      "executionPlanDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "playwright": {
+        "startTime": "2026-09-30T05:14:21.968Z",
+        "duration": 2130372.292,
+        "expected": 489,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "globalErrorCount": 0,
+      "reportSha256": "93ef87d9069ec31d77cbf8b31a46ea358975fd60509d2fca3b887f958450fc9d",
+      "resultAttempts": 489,
+      "retryAttempts": 0
+    },
+    {
+      "invocationId": "20260930T055013227105Z-a4e037b7",
+      "kind": "e2e-production",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "--reporter=list,json"
+      ],
+      "testPaths": [],
+      "startedAt": "2026-09-30T05:50:13.363746+00:00",
+      "endedAt": "2026-09-30T06:19:19.428547+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": true,
+      "mode": "production",
+      "stateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+      "executionPlanDigest": "3263c6ef312c415955edee25767cdf820d2f9eea9e4254fff63b00437c6a817c",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "runnerError": null,
+      "ownedProcessesRemaining": 0,
+      "playwright": {
+        "startTime": "2026-09-30T05:50:14.007Z",
+        "duration": 1744669.767,
+        "expected": 489,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "globalErrorCount": 0,
+      "reportSha256": "75e7a242b9e90526f8e7a6616fd980212272d8482948a392d0bed9987b81d180",
+      "resultAttempts": 489,
+      "retryAttempts": 0
+    }
+  ],
+  "terminalControlCorroboration": [
+    {
+      "invocationId": "20260930T051350618199Z-7d1c5d20",
+      "receiptSha256": "e5e8b660637bffa0d1f817ab7a75100d0ccd66c8dd58474aef53d5f734bc830b",
+      "controllerStatus": "complete",
+      "runnerExitCode": 0,
+      "receiptMatchesInvocation": true,
+      "mainMatchingIdentityVerified": true
+    },
+    {
+      "invocationId": "20260930T051407484486Z-fccc36e9",
+      "receiptSha256": "f8d9597567681e0600b124a3cfaa36cc6b3ba48a45cfc6540d836cfc5077f812",
+      "controllerStatus": "complete",
+      "runnerExitCode": 0,
+      "receiptMatchesInvocation": true,
+      "mainMatchingIdentityVerified": true
+    },
+    {
+      "invocationId": "20260930T051421259737Z-3c9e0bbe",
+      "receiptSha256": "392f39a03cb83edd39d90983cae50d63b7a543cd080ae2a961010389078875b7",
+      "controllerStatus": "complete",
+      "runnerExitCode": 0,
+      "receiptMatchesInvocation": true,
+      "mainMatchingIdentityVerified": true
+    },
+    {
+      "invocationId": "20260930T055013227105Z-a4e037b7",
+      "receiptSha256": "d77e054e1f70b8a31b31822f606af9dd90a2394050b314941fede68a248280ce",
+      "controllerStatus": "complete",
+      "runnerExitCode": 0,
+      "receiptMatchesInvocation": true,
+      "mainMatchingIdentityVerified": true
+    }
+  ],
+  "initialFailedRun": {
+    "invocationId": "20260930T034809515385Z-12674b37",
+    "kind": "e2e-development",
+    "command": [
+      "npm",
+      "run",
+      "test:e2e",
+      "--",
+      "--reporter=list,json"
+    ],
+    "testPaths": [],
+    "startedAt": "2026-09-30T03:48:09.650344+00:00",
+    "endedAt": "2026-09-30T04:20:57.360056+00:00",
+    "status": "failed-or-interrupted",
+    "exitCode": 1,
+    "interrupted": false,
+    "fullSuite": true,
+    "mode": "development",
+    "stateDigest": "fef74242df9c9bfb89b38ed4af7e43fbcb478892d9fc5a422c472505f6544319",
+    "executionPlanDigest": "07435180112abe6bb137f3963f2a270f127b17e1d15534b2c29458c3ec89ca7a",
+    "sourceAndTestsUnchanged": true,
+    "contractUnchanged": true,
+    "ownedProcessesRemaining": 0,
+    "runnerError": null,
+    "playwright": {
+      "startTime": "2026-09-30T03:48:10.256Z",
+      "duration": 1966393.778,
+      "expected": 428,
+      "skipped": 0,
+      "unexpected": 61,
+      "flaky": 0
+    },
+    "globalErrorCount": 0,
+    "reportSha256": "cbe0ee15c806221dacacb553add19b8b0c43627b7004220691ece28094925271",
+    "resultAttempts": 489,
+    "retryAttempts": 0
+  },
+  "initialFailureAssessment": {
+    "initialFullDev": {
+      "passed": 428,
+      "failed": 61,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "lifecycleTextFailures": 57,
+    "assertionOnlyFailuresInitiallyUnresolved": 3,
+    "knownNewTestActionOmission": 1,
+    "overAttributionCorrected": "A blanket attribution of all60non-omission failures to environment was withdrawn; three failures had timing evidence only.",
+    "systemLogEvidence": "One owned Chrome had a loginwindow/libquit force-quit path about32seconds after the first observed startup message; initiating caller not identified.",
+    "diagnosticComparison": {
+      "originalFailureCasesRetested": 16,
+      "thoseNowPassing": 16,
+      "originalFailuresOutsideDiagnostic": 45
+    },
+    "limits": "Targeted passes do not replace the full suites or identify the original termination caller."
+  },
+  "targetedDiagnostics": [
+    {
+      "invocationId": "20260930T044914754949Z-02625923",
+      "kind": "e2e-development-targeted",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "tests/e2e/occupation-v7.spec.ts",
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/bulk-inventory.spec.ts",
+        "tests/e2e/source-expansion.spec.ts",
+        "tests/e2e/job-languages.spec.ts",
+        "tests/e2e/posting-presence.spec.ts",
+        "tests/e2e/search-recovery-scope.spec.ts",
+        "--reporter=list,json"
+      ],
+      "testPaths": [
+        "tests/e2e/occupation-v7.spec.ts",
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/bulk-inventory.spec.ts",
+        "tests/e2e/source-expansion.spec.ts",
+        "tests/e2e/job-languages.spec.ts",
+        "tests/e2e/posting-presence.spec.ts",
+        "tests/e2e/search-recovery-scope.spec.ts"
+      ],
+      "startedAt": "2026-09-30T04:49:14.886658+00:00",
+      "endedAt": "2026-09-30T04:58:08.595549+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": false,
+      "mode": "development",
+      "stateDigest": "df178b443b39964563176fb9b236e1d68b0ed3c4a681aa78723eb34978a464fb",
+      "executionPlanDigest": "e7b6505b6031c5f3895469a778b24311e74fde56bcd5c5d56437af84bc3c1375",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "playwright": {
+        "startTime": "2026-09-30T04:49:15.472Z",
+        "duration": 532858.745,
+        "expected": 64,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "globalErrorCount": 0,
+      "reportSha256": "791862472d0a1dcd5d0ada6f3c0af4d59601c4745c1f32c0f190f51404e49922",
+      "resultAttempts": 64,
+      "retryAttempts": 0
+    },
+    {
+      "invocationId": "20260930T045835717606Z-8797b72d",
+      "kind": "e2e-production-targeted",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/occupation-v7.spec.ts",
+        "--reporter=list,json"
+      ],
+      "testPaths": [
+        "tests/e2e/catalog-observations.spec.ts",
+        "tests/e2e/occupation-v7.spec.ts"
+      ],
+      "startedAt": "2026-09-30T04:58:35.851158+00:00",
+      "endedAt": "2026-09-30T04:59:31.298300+00:00",
+      "status": "complete",
+      "exitCode": 0,
+      "interrupted": false,
+      "fullSuite": false,
+      "mode": "production",
+      "stateDigest": "df178b443b39964563176fb9b236e1d68b0ed3c4a681aa78723eb34978a464fb",
+      "executionPlanDigest": "e7b6505b6031c5f3895469a778b24311e74fde56bcd5c5d56437af84bc3c1375",
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "ownedProcessesRemaining": 0,
+      "runnerError": null,
+      "playwright": {
+        "startTime": "2026-09-30T04:58:36.445Z",
+        "duration": 54594.978,
+        "expected": 13,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "globalErrorCount": 0,
+      "reportSha256": "bae627a4f798879005e2d152fc57722c519a5ea1cca0a97d3344edd1ad497846",
+      "resultAttempts": 13,
+      "retryAttempts": 0
+    }
+  ],
+  "finalCaseIdentityCorroboration": {
+    "checkedAt": "2026-09-30T06:21:27.578954+00:00",
+    "purpose": "Main integration corroboration of Fable final execution report, after independent execution and comparison completed.",
+    "matchingKey": "file + full suite/test title + project; never source line number",
+    "reports": {
+      "initial": {
+        "invocationId": "20260930T034809515385Z-12674b37",
+        "sha256": "cbe0ee15c806221dacacb553add19b8b0c43627b7004220691ece28094925271"
+      },
+      "development": {
+        "invocationId": "20260930T051421259737Z-3c9e0bbe",
+        "sha256": "93ef87d9069ec31d77cbf8b31a46ea358975fd60509d2fca3b887f958450fc9d"
+      },
+      "production": {
+        "invocationId": "20260930T055013227105Z-a4e037b7",
+        "sha256": "75e7a242b9e90526f8e7a6616fd980212272d8482948a392d0bed9987b81d180"
+      }
+    },
+    "caseCounts": {
+      "initial": 489,
+      "development": 489,
+      "production": 489
+    },
+    "allCaseIdentitiesEqual": true,
+    "initialFailures": 61,
+    "finalDevelopmentPassed": 61,
+    "finalProductionPassed": 61,
+    "workerIndices": {
+      "initial": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60
+      ],
+      "development": [
+        0
+      ],
+      "production": [
+        0
+      ]
+    },
+    "cases": [
+      {
+        "file": "board-config.spec.ts",
+        "title": "board-config.spec.ts › configured real public boards at 320px › restart applies edited boards, reuses only matching cache and preserves changed or removed saved sources",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "bulk-inventory.spec.ts",
+        "title": "bulk-inventory.spec.ts › greenhouse bulk inventory integrity at 320px › an inconsistent bulk feed retains the old snapshot and uncertain saved status through restart while another board updates, then unique and truly empty feeds recover",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "bulk-inventory.spec.ts",
+        "title": "bulk-inventory.spec.ts › ashby bulk inventory integrity at 320px › an inconsistent bulk feed retains the old snapshot and uncertain saved status through restart while another board updates, then unique and truly empty feeds recover",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "catalog-observations.spec.ts",
+        "title": "catalog-observations.spec.ts › observation history at 1440px › date and distributions stay local, body refresh adds the next day, and a later failure preserves complete totals",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "catalog-observations.spec.ts",
+        "title": "catalog-observations.spec.ts › observation history at 320px › a complete empty provider cohort displays literal zero without percentages or invented skill requirements",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "catalog-presentation.spec.ts",
+        "title": "catalog-presentation.spec.ts › explicit profile immediately uses a decoded pending catalog while a genuine 3D gesture remains held",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "catalog-revalidation.spec.ts",
+        "title": "catalog-revalidation.spec.ts › foreground public revalidation at 1440px › manual refresh owns its monitor, a lost monitor recovers on return, and saved navigation defeats an older response before public rejoin",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "catalog-source-selection.spec.ts",
+        "title": "catalog-source-selection.spec.ts › public startup and refresh at 1440px › profile memory opt-out retains only public mode and display settings through refresh failure and reload without restoring private search",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "catalog-validation.spec.ts",
+        "title": "catalog-validation.spec.ts › catalog response validation at 320px, flat › a malformed refresh preserves the current results, profile, search and saved record until an explicit retry",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "catalog-worker.spec.ts",
+        "title": "catalog-worker.spec.ts › malformed delta keeps the accepted revision and retries only on request without losing the latest query",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "company-pages.spec.ts",
+        "title": "company-pages.spec.ts › searches jobs outside the current page and resets to the beginning when the results change or return",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "dialog-focus.spec.ts",
+        "title": "dialog-focus.spec.ts › dialog focus after saved-result changes at 1440px › another tab removing the opener and its next neighbour restores Fable 19 on the still-valid current page",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "eligibility.spec.ts",
+        "title": "eligibility.spec.ts › country-specific sponsorship stays conditional through filtering, evidence, saving and CSV",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "flat-map.spec.ts",
+        "title": "flat-map.spec.ts › flat map at 320×960 › readable controls keep company counts and let nearby cities separate and open individually",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "globe-first-frame.spec.ts",
+        "title": "globe-first-frame.spec.ts › a saved European city renders on cold load, reload, view changes and responsive resizes without zoom",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "job-languages.spec.ts",
+        "title": "job-languages.spec.ts › spoken languages through real four-provider collection at 1440px › language aliases find unique city, remote and other-location employers while pool and preference evidence keep their meaning",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "job-languages.spec.ts",
+        "title": "job-languages.spec.ts › spoken languages through real four-provider collection at 320px › old saved language evidence enriches without a fake revision and survives AND search, cache restart, CSV and fresh JSON restore",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "job-occupation.spec.ts",
+        "title": "job-occupation.spec.ts › version 2 writing jobs leave search while saved notes, dates, posting status and exports survive at 320px",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "job-posting.spec.ts",
+        "title": "job-posting.spec.ts › posting purpose across real collection and saved context at 320px › an empty selected city offers explicit pool recovery while comparison, remote and unmapped results keep their own literal counts",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "job-work-time.spec.ts",
+        "title": "job-work-time.spec.ts › work-time evidence through real four-provider collection at 1440px › a real same-ID recollection changes current UTC to scoped GMT while saved original language, hours, note and status survive",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "journey.spec.ts",
+        "title": "journey.spec.ts › zooming separates city clusters, and context loss switches to a usable 2D map",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "lever-pagination.spec.ts",
+        "title": "lever-pagination.spec.ts › Lever inventory consistency at 1440px › an overlapping later page keeps the complete snapshot and saved status uncertain across cache restart while another board updates, then unique pages recover",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "lever-pagination.spec.ts",
+        "title": "lever-pagination.spec.ts › Lever inventory consistency at 320px › a first page with repeated nontechnical IDs is unavailable rather than a successful empty inventory, and unique multi-page retry recovers",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "map-focus.spec.ts",
+        "title": "map-focus.spec.ts › 2D keyboard focus at 320×844 › Tab and Shift+Tab reveal every city group after zooming and panning without selecting or changing scale",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "map-layout.spec.ts",
+        "title": "map-layout.spec.ts › globe map layout at 320×568 › regions and controls leave the cities reachable by touch and keyboard before and after filtering",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "mobile-navigation.spec.ts",
+        "title": "mobile-navigation.spec.ts › mobile navigation at 320×568 with 0px bottom inset › touch targets, keyboard pages, saved notes and filter reset remain usable without overlays",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "occupation-v7.spec.ts",
+        "title": "occupation-v7.spec.ts › v7 scope, Talent/Failure search, an Engineer query with the mobile filter, save and same-ID reclassifying refresh keep literal results at 1440px",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "occupation-v7.spec.ts",
+        "title": "occupation-v7.spec.ts › v7 scope, Talent/Failure search, an Engineer query with the mobile filter, save and same-ID reclassifying refresh keep literal results at 320px",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "posting-presence.spec.ts",
+        "title": "posting-presence.spec.ts › internal full-detail evidence remains unknown when a later summary reappears, including after restart",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "posting-presence.spec.ts",
+        "title": "posting-presence.spec.ts › presence-only saved flow at 1440px › content checks have their own cooldown and expire without renewing body comparisons during fresh presence checks",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "posting-presence.spec.ts",
+        "title": "posting-presence.spec.ts › presence-only saved flow at 320px › a complete 201-ID board checks presence without detail requests while notes, filters, export and reload preserve saved content",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "posting-presence.spec.ts",
+        "title": "posting-presence.spec.ts › presence-only saved flow at 320px › the thirteenth content-unknown result keeps its note, then full content shrinks the filter to twelve and clamps the page without truncating export",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "posting-status.spec.ts",
+        "title": "posting-status.spec.ts › explicit status checks compare public records locally, export separate states and preserve a retired neighbour only in recovery",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "profile-experience.spec.ts",
+        "title": "profile-experience.spec.ts › personal experience at 1440px › missing, fractional and zero years remain distinct through matching, saved notes and a new visit",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "public-company-expansion.spec.ts",
+        "title": "public-company-expansion.spec.ts › expanded default public companies at 1440px › the original twelve registrations collect synthetic public jobs through the130-source HTTP default and preserve query/filter context through saved exploration",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "public-company-expansion.spec.ts",
+        "title": "public-company-expansion.spec.ts › expanded default public companies at 320px › an old24-board cache still fetches the original twelve plus47 missing sources and preserves saved Notion through a saved-only restart and public rejoin",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "public-company-survey.spec.ts",
+        "title": "public-company-survey.spec.ts › independent historical47 survey in130 defaults at 1440px › an old36 cache retains the missing47-board contract plus ten integrations, then list and full checks preserve saved facts through restart",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "public-company-survey.spec.ts",
+        "title": "public-company-survey.spec.ts › independent historical47 survey in130 defaults at 1440px › public coverage uses63 then64 opening denominators and excludes the complete old36 cohort from comparisons",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "public-company-survey.spec.ts",
+        "title": "public-company-survey.spec.ts › independent historical47 survey in130 defaults at 320px › an old36 cache retains the missing47-board contract plus ten integrations, then list and full checks preserve saved facts through restart",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "public-company-survey.spec.ts",
+        "title": "public-company-survey.spec.ts › independent historical47 survey in130 defaults at 320px › public coverage uses63 then64 opening denominators and excludes the complete old36 cohort from comparisons",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "public-coverage.spec.ts",
+        "title": "public-coverage.spec.ts › unconfigured public coverage at 1440px › an old22-board cache adds only missing sources and preserves raw saved identities while actions and CSV use the verified job route",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "public-only.spec.ts",
+        "title": "public-only.spec.ts › legacy greenhouse selection becomes public without losing filters, comparison, or a real new-page revisit",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "regional-coverage.spec.ts",
+        "title": "regional-coverage.spec.ts › regional coverage at 1440px › Taipei/Hsinchu and Pacific Northwest clusters expose individual cities with usable keyboard and touch targets",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "regional-coverage.spec.ts",
+        "title": "regional-coverage.spec.ts › regional coverage at 320px › the native Worker preserves a European other workplace, query recovery and saved source during a same-ID regional update",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "remote-description.spec.ts",
+        "title": "remote-description.spec.ts › body-derived remote country context at 1440px › a UK-only body narrows a Global/AMER listing to Europe without losing the original posting evidence",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "resume-import.spec.ts",
+        "title": "resume-import.spec.ts › latest resume input at 320px › explicit cancel keeps accepted text, restores keyboard focus and allows the exact same Korean PDF to be selected again",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "saved-backup.spec.ts",
+        "title": "saved-backup.spec.ts › requires a new comparison when another tab changes the previewed note",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "saved-pages.spec.ts",
+        "title": "saved-pages.spec.ts › saved collection pages at 320px › retains page and original title focus through detail close, committed note edits and application edits",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "saved-storage.spec.ts",
+        "title": "saved-storage.spec.ts › notifies another tab about notes, application status and removal without replacing unrelated fields",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "search-ranking-order.spec.ts",
+        "title": "search-ranking-order.spec.ts › search ordering after selective discovery at 1440px › locale-equivalent companies and job IDs keep their source order after late discovery and a cold revisit",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "search-recovery-scope.spec.ts",
+        "title": "search-recovery-scope.spec.ts › recovery follows the visible scope at 320px › same-ID location refreshes restore and remove unmapped guidance without hiding other available scopes",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "source-expansion.spec.ts",
+        "title": "source-expansion.spec.ts › truncated daily lists cannot close saved careers jobs, and Technology-scope removal stays distinct from closure after restart",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "source-expansion.spec.ts",
+        "title": "source-expansion.spec.ts › two expansion cohorts at 1440px › literal new companies survive region/role search, saved exploration, import and an owned public-only restart",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "source-expansion.spec.ts",
+        "title": "source-expansion.spec.ts › two expansion cohorts at 320px › literal new companies survive region/role search, saved exploration, import and an owned public-only restart",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "source-integrations.spec.ts",
+        "title": "source-integrations.spec.ts › independent source integrations at 1440px › old83 cache adds only ten boards and a daily list never renews saved body evidence before a due body check and restart",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "source-integrations.spec.ts",
+        "title": "source-integrations.spec.ts › independent source integrations at 320px › old83 cache adds only ten boards and a daily list never renews saved body evidence before a due body check and restart",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "source-public-lifecycle.spec.ts",
+        "title": "source-public-lifecycle.spec.ts › public source collection lifecycle at 1440px › saved navigation cancels the monitor, public return rejoins one Booking collection, and saved-only restart sends no catalog request",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "workplace-countries.spec.ts",
+        "title": "workplace-countries.spec.ts › confirmed workplace countries at 1440px › Europe, Asia, Americas and world use literal country sources while keeping mapped, remote and employer totals disjoint",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "workplace-countries.spec.ts",
+        "title": "workplace-countries.spec.ts › confirmed workplace countries at 1440px › a same-ID structured country change moves current regional results while saved source, note and status stay intact",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "workplace-countries.spec.ts",
+        "title": "workplace-countries.spec.ts › confirmed workplace countries at 320px › a literal legacy saved label gains justified country search without a false change and retains the warm cache across restart",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      },
+      {
+        "file": "workplace.spec.ts",
+        "title": "workplace.spec.ts › current workplace evidence survives map, conflict search, legacy saves and exports at 320px",
+        "project": "",
+        "initialStatus": "unexpected",
+        "finalDevelopmentStatus": "expected",
+        "finalProductionStatus": "expected"
+      }
+    ],
+    "limit": "Passing reruns do not identify the original force-quit caller or prove a browser vendor defect."
+  },
+  "realDataAudit": {
+    "generatedAt": "2026-09-30T03:04:53.661Z",
+    "retained": {
+      "rows": 6819,
+      "previouslyExplorable": 6819,
+      "nowExplorable": 6802,
+      "reclassifiedOther": 17,
+      "byCause": {
+        "primary recruiting position": 2,
+        "physical failure-analysis duties": 6,
+        "physical electronics position": 3,
+        "physical supplier quality": 6
+      },
+      "byCompany": {
+        "openai": {
+          "before": 326,
+          "after": 325,
+          "removed": 1
+        },
+        "spacex": {
+          "before": 813,
+          "after": 809,
+          "removed": 4
+        },
+        "zoox": {
+          "before": 110,
+          "after": 108,
+          "removed": 2
+        },
+        "halter": {
+          "before": 33,
+          "after": 23,
+          "removed": 10
+        }
+      }
+    },
+    "raw": {
+      "rows": 512,
+      "previouslyIncluded": 64,
+      "nowIncluded": 55,
+      "removed": 10,
+      "added": 1,
+      "addedCause": "primary firmware internship"
+    },
+    "manualNegativeControls": 17,
+    "positiveControlCount": 3,
+    "originalInputsUnchanged": true,
+    "upgradedFieldsOutsideOccupationUnchanged": true,
+    "cacheRead": {
+      "boards": 130,
+      "included": 6802,
+      "exactExpectedIds": true,
+      "inventoryAndSourceClocksUnchanged": true,
+      "originalObservationMethodsUnchanged": true
+    },
+    "networkRequests": 0,
+    "limits": [
+      "Historical archived inputs, not live posting validity or current company hiring counts.",
+      "All changed retained rows and named controls were reviewed; not a manual review of every unchanged job.",
+      "A retained cache cannot estimate population false-negative rates; raw coverage is limited to six regional sources.",
+      "Schema/cache consistency checks do not replace independent literal unit and E2E tests."
+    ]
+  },
+  "runtimeBrowserObservations": [
+    {
+      "observedAt": "2026-09-30T05:15:41.696542+00:00",
+      "mode": "development",
+      "invocationId": "20260930T051421259737Z-3c9e0bbe",
+      "bundleVersion": "153.0.8010.12",
+      "bundleIdentifier": "com.google.chrome.for.testing",
+      "ownedRuntimeProcessObserved": true,
+      "channelOverride": null
+    },
+    {
+      "observedAt": "2026-09-30T05:50:50.828128+00:00",
+      "mode": "production",
+      "invocationId": "20260930T055013227105Z-a4e037b7",
+      "bundleVersion": "153.0.8010.12",
+      "bundleIdentifier": "com.google.chrome.for.testing",
+      "ownedRuntimeProcessObserved": true,
+      "channelOverride": null
+    }
+  ],
+  "fixtureModeEvidence": {
+    "development": {
+      "processRecords": [
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-16-19-308Z-1042/7927de23b60edb23cae0-1e6030536dd0e4fff250-0/processes.json",
+          "sha256": "10165aa40656ee9d975515181340d5e5c0900d3eb76f4ce5e9ab4cc796f7c082",
+          "mode": "development",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-16-19-308Z-1042/7927de23b60edb23cae0-219ef7f2221b27e950bc-0/processes.json",
+          "sha256": "cf00721134ba058c5b7d29da0734515a4fab619290cdc9bc56dcbbb653f677ae",
+          "mode": "development",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-16-19-308Z-1042/7927de23b60edb23cae0-332752b82fc7e66f9250-0/processes.json",
+          "sha256": "67b635a33db11da05853e6f98a54754f9e72543cf64f21af3ad71138cc501eb5",
+          "mode": "development",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-16-19-308Z-1042/7927de23b60edb23cae0-4c5701e903f107e078b4-0/processes.json",
+          "sha256": "14251150c3b45fc5f81e72204097afb72597536ed876fe0b2905ffc0f86732e1",
+          "mode": "development",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-16-19-308Z-1042/7927de23b60edb23cae0-5d553f7b60e019b765c7-0/processes.json",
+          "sha256": "a1d222e605574eb0155af9cbb6287c84290db05e77f7b5df5ee5c4f71b851e0f",
+          "mode": "development",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-16-19-308Z-1042/7927de23b60edb23cae0-a06fcf8df1a663e64e8c-0/processes.json",
+          "sha256": "a0210d7a76a7019e5aae99acf493759ae7611fd8dae777eed885a187a3b278db",
+          "mode": "development",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-16-19-308Z-1042/7927de23b60edb23cae0-dab43cef3ecfb445e845-0/processes.json",
+          "sha256": "83ff57f02102a856bf7ffc3e12281379f2821e39a569dbcb8b8474782789eda0",
+          "mode": "development",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-16-19-308Z-1042/7927de23b60edb23cae0-eded187cb9351c61fcec-0/processes.json",
+          "sha256": "dd84afa957d484b992851c9320ea43b7e4d8f83ff2c9b0bf9e34bf8a45fe58f9",
+          "mode": "development",
+          "runs": 2,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-16-19-308Z-1042/7927de23b60edb23cae0-f444657ac5c91821c8b7-0/processes.json",
+          "sha256": "de53213d476991b9da24eb6de11c98350c65fab695ba0f0ea5e3c612f748fe2b",
+          "mode": "development",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        }
+      ],
+      "servedBuildRecords": []
+    },
+    "production": {
+      "processRecords": [
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-1e6030536dd0e4fff250-0/processes.json",
+          "sha256": "7fe803f4420173e1a96eacf5dc6b82d46332b1389ece1d264c1b01a1cc72ee95",
+          "mode": "production",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-219ef7f2221b27e950bc-0/processes.json",
+          "sha256": "281d8d4a958d9eb9d4ff701d6350fbff1fe078593105a7ae7420f63e84201106",
+          "mode": "production",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-332752b82fc7e66f9250-0/processes.json",
+          "sha256": "fa04a2ef7f9ea9471b7d3b06f03b7a533c47e8a61182d8354e611acd808533e2",
+          "mode": "production",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-4c5701e903f107e078b4-0/processes.json",
+          "sha256": "90f818d26b8375f6da06fc97ff5d09c88bbed6b749aa0b5530a66e3c291aaf6e",
+          "mode": "production",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-5d553f7b60e019b765c7-0/processes.json",
+          "sha256": "5af2c333d24da0ed7dfce64598cfa642761395d1ba997e7d9f26e18dbbe42e0e",
+          "mode": "production",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-a06fcf8df1a663e64e8c-0/processes.json",
+          "sha256": "86d1ceacee8285a937e297f712914c7ce7bd907ba335eec69b83a69a54cc65d5",
+          "mode": "production",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-dab43cef3ecfb445e845-0/processes.json",
+          "sha256": "0b437482ccc640b073c70d85e46a911712aa4e263cd39a1b68db98f03d7d24af",
+          "mode": "production",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-eded187cb9351c61fcec-0/processes.json",
+          "sha256": "6a171401c629fe5dd6ade78a1fea9d4041312fe4aa65baa8ea9efe9be74cbc8f",
+          "mode": "production",
+          "runs": 2,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-f444657ac5c91821c8b7-0/processes.json",
+          "sha256": "57f5b124a673f58cfcac02669fdf3bfa37f445b2004111cb61c48d2bff00ea89",
+          "mode": "production",
+          "runs": 1,
+          "allExpectedModeCommands": true,
+          "allClosed": true
+        }
+      ],
+      "servedBuildRecords": [
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-1e6030536dd0e4fff250-0/served-build.json",
+          "sha256": "f08e65d3a767190979e54ab5a8ee4f7f2446f916c1bd770c8f809008c889f5a8",
+          "assets": 4
+        },
+        {
+          "file": ".local/research/60/independent/runs/2026-09-30T05-51-54-320Z-50528/7927de23b60edb23cae0-332752b82fc7e66f9250-0/served-build.json",
+          "sha256": "f08e65d3a767190979e54ab5a8ee4f7f2446f916c1bd770c8f809008c889f5a8",
+          "assets": 4
+        }
+      ]
+    }
+  },
+  "afterExecutionIntegrity": {
+    "checkedAt": "2026-09-30T06:20:05.631759+00:00",
+    "sourceFileCount": 387,
+    "sourceStateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+    "contractSha256": "87f1ef6eb60f4ddcfe97c20b6862708915f4e54de6d26e8a0de847e036f98376",
+    "helperChecks": [
+      {
+        "file": "run-validation.py",
+        "sha256": "5c7f6fd944c28f672b4b1fd7aed9911e894f8345e57a9ae634ec5ee0247d409d",
+        "matchesApproved": true
+      },
+      {
+        "file": "validation_control.py",
+        "sha256": "75a16b896a8218ecebe94cecb509a1076cf1e447ee6e542db47d80be5d0741a2",
+        "matchesApproved": true
+      },
+      {
+        "file": "run-claude-review.py",
+        "sha256": "83839ce5589e8d1ecbc37f47cc8befe0751aa3955475a99407c66c0a43b8dc9c",
+        "matchesApproved": true
+      },
+      {
+        "file": "stage_identity.py",
+        "sha256": "f8454c726b1d3680891bc233152c390b4491c7e2ee1b2a550161b838b1c2a3a1",
+        "matchesApproved": true
+      }
+    ],
+    "protectedInputs": [
+      {
+        "path": ".local/preserved-2026-09-28/historical-inputs.zip",
+        "bytes": 247075859,
+        "sha256": "b7114d8f6bce0ea43236ba54601eeccbfab7593493f936ad1842291a475dd85a",
+        "unchanged": true
+      },
+      {
+        "path": ".local/observations-v1/public-board-cache-v5.json",
+        "bytes": 41945,
+        "sha256": "9e2bff5ff6617698dcf032ef4f77d454bc346bff07dd0d03fa5c8977493dbaab",
+        "unchanged": true
+      }
+    ],
+    "knownPorts": {
+      "8787": {
+        "listening": false,
+        "exitCode": 1
+      },
+      "5173": {
+        "listening": false,
+        "exitCode": 1
+      }
+    }
+  },
+  "ownedProcessCheck": {
+    "checkedAt": "2026-09-30T06:22:47.880138+00:00",
+    "scopedTestProcessesRemaining": [],
+    "fixtureProcessRecordsChecked": 149,
+    "matchingFixtureProcessesRemaining": [],
+    "profileCount": 12,
+    "profilesStillExist": 3,
+    "limit": "Read-only pre-cleanup check; exact live-user/ownership checks will repeat immediately before any deletion."
+  },
+  "independentExecution": {
+    "requestedModel": "claude-fable-5-1",
+    "requestedEffort": "max",
+    "observedModelIds": [
+      "claude-fable-5-1"
+    ],
+    "startedAt": "2026-09-30T05:13:20.479863+00:00",
+    "endedAt": "2026-09-30T06:20:00.658456+00:00",
+    "exitCode": 0,
+    "reportSha256": "3b547b2c0b892f718cddfec32543cd50774eee447544b3e7ad4438efbb68f22d",
+    "resultIsFinalApproval": false,
+    "caseComparison": "Fable explicitly reported all61initial failures passing in full DEV and both full suites passing489cases. Main then corroborated all489stable identities and all61prior failures passing in both DEV and PROD from the original reports."
+  },
+  "finalDocumentation": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "0fae39e9229c09bc0420616a9e7f2d09cc6cc22151d35f8ebb818a9962956a4f"
+    },
+    {
+      "path": "docs/continuous-improvement.md",
+      "sha256": "870136af96aff0f6044a6f20264e9302a26dc34398620034ec75879d94bc3758"
+    },
+    {
+      "path": "docs/design/occupation-v7.md",
+      "sha256": "87f1ef6eb60f4ddcfe97c20b6862708915f4e54de6d26e8a0de847e036f98376"
+    },
+    {
+      "path": "README.md",
+      "sha256": "3123e08efed1eb28043ea74ffd0d258cc338dbaef74b12485ff2b7308b58bc0e"
+    },
+    {
+      "path": "docs/occupation-v7-audit.md",
+      "sha256": "c106252db428eed5fc5e5ac54c39b85b3ba3a11d685598238849d68170db3130"
+    },
+    {
+      "path": "docs/improvements.md",
+      "sha256": "c4d61638e8abc979ca125a05ff0f81303415e0a252ed05fca97a045cbae958c8"
+    }
+  ],
+  "cleanupDesign": {
+    "sha256": "65191b7f5dcd7e79bba0ea998dd0a130a22e8908312859a0daba52ba40c47436",
+    "canonicalSerialization": "UTF-8 JSON,2-space indentation,preserved property order,non-ASCII unescaped,one terminal newline",
+    "content": {
+      "recordedAt": "2026-09-30T03:09:52.240809+00:00",
+      "status": "revised proposal after independent retention findings; no deletions performed",
+      "prerequisites": [
+        "Final all-three verification decision on the same code/test identity and completed required checks.",
+        "Commit related product/tests and public conclusions/validation/consensus first.",
+        "Finish Claude run, close Astra, and verify/stop only owned test processes."
+      ],
+      "protect": [
+        ".local/preserved-2026-09-28/",
+        ".local/observations-v1/",
+        "root node_modules dependencies",
+        "tracked source/test/docs/assets",
+        "user browser saved notes and application state",
+        ".local/preserved-2026-09-30/ (new unique manual judgments, reference responses and dated receipts; create and verify archive before removing originals)"
+      ],
+      "candidateGeneratedRoots": [
+        ".local/research/71-occupation-scope/",
+        ".local/verification/71-occupation-v7/",
+        ".local/playwright/",
+        "fixture workspaces created by this stage under .local/research/",
+        "dist/",
+        "dist-server/",
+        "public/pdf/",
+        "node_modules/.vite/",
+        "node_modules/.vite-temp/"
+      ],
+      "guards": [
+        "Inspect actual post-test directory inventory; classify unexpected files before removal.",
+        "Ensure no candidate contains Git-tracked files and no registered worktree is removed as an ordinary directory.",
+        "Do not follow workspace symlinks into root dependencies or external user data.",
+        "Validate protected ZIP/observation hashes from committed docs/local-data-retention.md before and after.",
+        "Record directory usage and filesystem free space separately, with actual timestamps."
+      ],
+      "finalRecord": "Write actual results into a public cleanup record after deletion, then commit that documentation; never label a planned cleanup complete.",
+      "updatedAt": "2026-09-30T05:32:03.371901+00:00",
+      "sourceArchivePlan": {
+        "status": "planned, not created",
+        "branch": "archive/cleanup-2026-09-30/stage-71-verification-tools",
+        "scope": "Locally authored audit/orchestration sources and the exact initial-execution source snapshot; useful accepted and rejected drafts are labelled.",
+        "inventory": "source-archive-inventory-final.json",
+        "push": false,
+        "exclude": [
+          "actual job input bodies",
+          "individual audit rows",
+          "browser/model/system logs",
+          "screenshots/traces/profiles",
+          "downloaded browsers and dependency copies"
+        ],
+        "reason": "Keep unique reusable source and reconstructable failure setup in Git before deleting temporary copies. Public main keeps final product/tests, aggregate findings and validation/consensus.",
+        "inventorySha256": "60f966ab883c0f98ea3c4f7e030061aa540f6b9dca6ecc817b52489ac76983cc",
+        "readme": "source-archive-README.md",
+        "readmeSha256": "c473fdeaa19114785bddefa91e5f94713373546b1689a2deaedf26f0c89d8fb1",
+        "identityVerification": "source-reconstruction-check.json",
+        "requirements": [
+          "Preserve all21inventoried source/snapshot files plus README/manifest on the local branch.",
+          "Verify every archived Git blob against its original bytes and SHA256 before deleting source copies."
+        ]
+      },
+      "ownedSystemTemporaryProfiles": {
+        "source": "initial-dev-owned-profile-check.json",
+        "status": "9exact owned paths recorded;3still exist after first failed DEV",
+        "action": "After final evidence/Git preservation, remove only exact recorded task-owned profiles. Check ALL live process command lines for the exact profile path, including reparented users; if any live user or uncertain ownership remains, do not delete. No generic system-temp glob."
+      },
+      "additionalObservedGeneratedRoots": [
+        ".local/e2e-default/",
+        ".local/research/59/",
+        ".local/research/60/",
+        ".local/research/64-expansion/"
+      ],
+      "revision": 2,
+      "newIrreplaceableInputPreservation": {
+        "plan": "stage-71-private-input-plan.json",
+        "sha256": "ae8692da764e849c46123a412c8c60880d7f22136553f4a7f0d7264bae1b3628",
+        "reviewRequired": true,
+        "verification": "Close and reopen ZIP, verify every blob size/CRC/SHA256 and external protected archive references; no originals deleted before verification."
+      },
+      "preExistingReproducibleReports": {
+        "paths": [
+          "playwright-report/",
+          "test-results/"
+        ],
+        "classification": "Older generated report/last-run metadata, no authored source; inspect complete filenames first, preserve aggregate and limitations in public cleanup record.",
+        "summary": "legacy-report-retention.json"
+      }
+    }
+  },
+  "privateInputPreservationDesign": {
+    "sha256": "ae8692da764e849c46123a412c8c60880d7f22136553f4a7f0d7264bae1b3628",
+    "canonicalSerialization": "UTF-8 JSON,2-space indentation,preserved property order,non-ASCII unescaped,one terminal newline",
+    "content": {
+      "recordedAt": "2026-09-30T05:31:14.359122+00:00",
+      "status": "proposed; no new archive created and no originals deleted",
+      "newProtectedRoot": ".local/preserved-2026-09-30/",
+      "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+      "existingArchiveSha256": "b7114d8f6bce0ea43236ba54601eeccbfab7593493f936ad1842291a475dd85a",
+      "entries": [
+        {
+          "originalPath": ".local/research/71-occupation-scope/inputs/main-manual-review.json",
+          "bytes": 5483,
+          "sha256": "5e2ff60e8a2ad0fb8da6a76c189bc43e9d601f1a4d30516c6a1f5b84a80a1b25",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/5e2ff60e8a2ad0fb8da6a76c189bc43e9d601f1a4d30516c6a1f5b84a80a1b25"
+          },
+          "reason": "Authored manual expected classification record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/inputs/recovery.json",
+          "bytes": 2051,
+          "sha256": "c2085717a0fb6bc3f2c27e23822485a7007189bbd2752de5516cdfe6139a668b",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/c2085717a0fb6bc3f2c27e23822485a7007189bbd2752de5516cdfe6139a668b"
+          },
+          "reason": "Historical input path and hash mapping needed to reproduce the audit"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/electronics.html",
+          "bytes": 213466,
+          "sha256": "204cef38773b8ca6dd78c175dec76f616e5c063a0c1cae97e96557504e87192f",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/204cef38773b8ca6dd78c175dec76f616e5c063a0c1cae97e96557504e87192f"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/electronics.json",
+          "bytes": 431,
+          "sha256": "cc4feda4a3c2a3a7c7159bb9170288fa701a0138c43341257951d3a3c0ea0534",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/cc4feda4a3c2a3a7c7159bb9170288fa701a0138c43341257951d3a3c0ea0534"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/human-resources.html",
+          "bytes": 233903,
+          "sha256": "1cf732820fc7d485cf036e0cc9dfc8a56204b86881fafcfdfa2ec3c5ace375db",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/1cf732820fc7d485cf036e0cc9dfc8a56204b86881fafcfdfa2ec3c5ace375db"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/human-resources.json",
+          "bytes": 424,
+          "sha256": "597204cf9ce42a03d94189d3a866962bc74ba48c4399285b36f762542cfe0895",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/597204cf9ce42a03d94189d3a866962bc74ba48c4399285b36f762542cfe0895"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/industrial-engineering.html",
+          "bytes": 224648,
+          "sha256": "b7e22b771c91ba5d6b41d0d163840cacbf20033da0cd568e0c966e7e4adbedca",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/b7e22b771c91ba5d6b41d0d163840cacbf20033da0cd568e0c966e7e4adbedca"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/industrial-engineering.json",
+          "bytes": 424,
+          "sha256": "daadcea79e6f9232d23aad65c4a528141e213307b88b7ff8535d1bd5152a2a48",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/daadcea79e6f9232d23aad65c4a528141e213307b88b7ff8535d1bd5152a2a48"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/software-development.html",
+          "bytes": 261766,
+          "sha256": "4b323fdd8a671efd44190d3fe60e4388f04446183b436f39b1d6666befd199cc",
+          "storage": {
+            "archive": ".local/preserved-2026-09-28/historical-inputs.zip",
+            "blob": "blobs/4b323fdd8a671efd44190d3fe60e4388f04446183b436f39b1d6666befd199cc"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/software-development.json",
+          "bytes": 421,
+          "sha256": "16a57229fabbaf9dfd6f69450310d6e5da0c30b2a9d2de27a137a9fdf3fa4f70",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/16a57229fabbaf9dfd6f69450310d6e5da0c30b2a9d2de27a137a9fdf3fa4f70"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        }
+      ],
+      "newBlobCount": 9,
+      "newBlobBytes": 681251,
+      "generatedOutputsToDelete": [
+        "baseline-v*-*.json and impact rows regenerated by preserved audit sources with historical v6/finalv7 source",
+        "focused-candidates.json and role-evidence.json contain selected/extracted original fields, no distinct final manual expected classification; original bodies and final manual judgments are retained",
+        "v7-impact-first.json is an intermediate derived classification comparison"
+      ]
+    }
+  },
+  "localSourcePreservationInventory": {
+    "sha256": "60f966ab883c0f98ea3c4f7e030061aa540f6b9dca6ecc817b52489ac76983cc",
+    "canonicalSerialization": "UTF-8 JSON,2-space indentation,preserved property order,non-ASCII unescaped,one terminal newline",
+    "content": {
+      "recordedAt": "2026-09-30T05:24:41.290711+00:00",
+      "status": "prepared for local Git preservation; no archive commit or deletion yet",
+      "branch": "archive/cleanup-2026-09-30/stage-71-verification-tools",
+      "push": false,
+      "entries": [
+        {
+          "path": ".local/research/71-occupation-scope/audit-baseline.mts",
+          "bytes": 5910,
+          "sha256": "1cb46dcee7d58f6dc2ee035658a1e42fff918a2aa15854244b5be7f0c47ccd43",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/report-impact.mts",
+          "bytes": 7413,
+          "sha256": "af3257dcc670f9f543ad90087e811f1f09e7cf16b9a4e32daecabbfa691a34ec",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/implementation-05.proposed.ts",
+          "bytes": 28060,
+          "sha256": "b06ce449a51a36d3f05eebec5d998d88b2e7235c496056863d5b64d028081b70",
+          "category": "superseded draft"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/implementation-07.proposed.ts",
+          "bytes": 29002,
+          "sha256": "2258bd3e9b3b069c7e1745b175434d6b771616c768c0804d6e80515d8bcdd870",
+          "category": "superseded draft"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/run-validation.py",
+          "bytes": 11154,
+          "sha256": "5c7f6fd944c28f672b4b1fd7aed9911e894f8345e57a9ae634ec5ee0247d409d",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/validation_control.py",
+          "bytes": 9995,
+          "sha256": "75a16b896a8218ecebe94cecb509a1076cf1e447ee6e542db47d80be5d0741a2",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/run-claude-review.py",
+          "bytes": 4771,
+          "sha256": "83839ce5589e8d1ecbc37f47cc8befe0751aa3955475a99407c66c0a43b8dc9c",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/stage_identity.py",
+          "bytes": 1372,
+          "sha256": "f8454c726b1d3680891bc233152c390b4491c7e2ee1b2a550161b838b1c2a3a1",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/run-claude-review.py",
+          "bytes": 4771,
+          "sha256": "83839ce5589e8d1ecbc37f47cc8befe0751aa3955475a99407c66c0a43b8dc9c",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/run-validation.py",
+          "bytes": 9441,
+          "sha256": "75754968ddf83d99e825499d1e4b030b5f6115a585ccf0cbf288487c25997da3",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/stage_identity.py",
+          "bytes": 1372,
+          "sha256": "f8454c726b1d3680891bc233152c390b4491c7e2ee1b2a550161b838b1c2a3a1",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/validation_control.py",
+          "bytes": 9995,
+          "sha256": "75a16b896a8218ecebe94cecb509a1076cf1e447ee6e542db47d80be5d0741a2",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/README.md",
+          "bytes": 84952,
+          "sha256": "5a4a14501b5c2593c791db020a39e4bad8ef0f609745b65881b61b1e2e28721b",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/manifest.json",
+          "bytes": 1789,
+          "sha256": "0ae3ddf69b3c794112dbe3a82a68c0c24301e5623e567c0faf16b9005897a023",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/playwright.config.ts",
+          "bytes": 1831,
+          "sha256": "008fd2db640c31afc41d6d63fc518f8bc96b66dd5887e7f4f107ef67ef2b86a4",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/tests/e2e/catalog-observations.spec.ts",
+          "bytes": 27482,
+          "sha256": "9f75e46c7d0e51bc73e014e9345c219fa178e5895a7ba2dd9783fa8ff8e017c1",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/tests/e2e/occupation-v7.spec.ts",
+          "bytes": 22103,
+          "sha256": "f517331f95d06e4811b8d9df210f2cdca03351287f8dc8d2fefd5889930da15f",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/.local/research/71-occupation-scope/collaboration/run-validation.py",
+          "bytes": 10949,
+          "sha256": "efb991cb3669781a5462dd31be86208c3f8f18be66d78ab1b5174a01a6b703e0",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/README.md",
+          "bytes": 84952,
+          "sha256": "5a4a14501b5c2593c791db020a39e4bad8ef0f609745b65881b61b1e2e28721b",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/manifest.json",
+          "bytes": 851,
+          "sha256": "4932792aab2f877c3fc4aa748c4c197d96808f275b3734471f40916c0d83b25a",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/playwright.config.ts",
+          "bytes": 1831,
+          "sha256": "008fd2db640c31afc41d6d63fc518f8bc96b66dd5887e7f4f107ef67ef2b86a4",
+          "category": "earlier executed snapshot"
+        }
+      ],
+      "exclusions": [
+        "raw job input or individual audit rows",
+        "browser, model and system logs",
+        "screenshots, traces and browser profiles",
+        "downloaded browser binaries, build caches and dependencies"
+      ]
+    }
+  },
+  "sourceArchiveReadme": {
+    "sha256": "c473fdeaa19114785bddefa91e5f94713373546b1689a2deaedf26f0c89d8fb1",
+    "localSourceArchiveOnly": true
+  },
+  "sourceReconstructionChecks": {
+    "checkedAt": "2026-09-30T05:32:03.371901+00:00",
+    "method": "Overlay archived file identities on the387-file final source/test manifest; no tests executed or working source changed.",
+    "checks": [
+      {
+        "snapshot": "pre-diagnostic-source",
+        "expectedStateDigest": "fef74242df9c9bfb89b38ed4af7e43fbcb478892d9fc5a422c472505f6544319",
+        "reconstructedStateDigest": "fef74242df9c9bfb89b38ed4af7e43fbcb478892d9fc5a422c472505f6544319",
+        "matches": true
+      },
+      {
+        "snapshot": "pre-default-source",
+        "expectedStateDigest": "df178b443b39964563176fb9b236e1d68b0ed3c4a681aa78723eb34978a464fb",
+        "reconstructedStateDigest": "df178b443b39964563176fb9b236e1d68b0ed3c4a681aa78723eb34978a464fb",
+        "matches": true
+      }
+    ]
+  },
+  "legacyReportRetention": {
+    "recordedAt": "2026-09-30T05:32:03.371901+00:00",
+    "status": "aggregate preserved for final cleanup record; originals not deleted",
+    "paths": [
+      "playwright-report/index.html",
+      "test-results/.last-run.json"
+    ],
+    "reportSha256": "5841152a485b9c0749afe38c84e2b1cd693d270385bc6f2fd71bd72212a4b31b",
+    "lastRunSha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "startedAt": "2026-09-19T19:54:06.277000+00:00",
+    "durationMs": 296034.589,
+    "stats": {
+      "total": 116,
+      "expected": 116,
+      "unexpected": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "ok": true
+    },
+    "globalErrors": 0,
+    "limit": "Pre-existing old report, source identity not established; not current stage verification. Authored source is not present in these two generated files."
+  },
+  "limitations": [
+    "The agreed scope is a bounded classification heuristic, not general natural-language understanding.",
+    "Frozen archived data does not establish current posting validity, current hiring counts or population error rates.",
+    "Older saved records can use only retained body/evidence.",
+    "Unanimous review is a stage decision, not a guarantee of no defects.",
+    "Original system-Chrome force-quit caller unidentified; passing reruns do not establish a browser vendor defect.",
+    "Requested max effort is recorded; backend effective effort is not independently exposed.",
+    "Cleanup plans preserve prerequisite order; actual archive creation,Git preservation,live-process guards and deletion still need to be performed after the required unanimous decisions."
+  ]
+}

@@ -1,0 +1,420 @@
+{
+  "schemaVersion": 1,
+  "stage": 71,
+  "revision": 3,
+  "recordedAt": "2026-09-30T06:34:06.626652+00:00",
+  "purpose": "Cleanup design revision after Fable found three omitted helper snapshots; approval decisions recorded separately. No product or test change.",
+  "productSourceStateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+  "approvedProductEvidence": {
+    "path": "docs/validation/occupation-v7-final-evidence-2026-09-30.json",
+    "sha256": "ebb2455684d214dbb899f23f0760fcd3cabcac58d1bafb7550100499f92e3b4d"
+  },
+  "cleanupPlan": {
+    "sha256": "9ff2e87e3f46f6b854ed09df3105fa8e499eed8b00859308989fdb625e4c21ee",
+    "content": {
+      "recordedAt": "2026-09-30T03:09:52.240809+00:00",
+      "status": "revision3 proposal; no archives created and no deletions performed",
+      "prerequisites": [
+        "Final all-three verification decision on the same code/test identity and completed required checks.",
+        "Commit related product/tests and public conclusions/validation/consensus first.",
+        "Finish Claude run, close Astra, and verify/stop only owned test processes."
+      ],
+      "protect": [
+        ".local/preserved-2026-09-28/",
+        ".local/observations-v1/",
+        "root node_modules dependencies",
+        "tracked source/test/docs/assets",
+        "user browser saved notes and application state",
+        ".local/preserved-2026-09-30/ (new unique manual judgments, reference responses and dated receipts; create and verify archive before removing originals)"
+      ],
+      "candidateGeneratedRoots": [
+        ".local/research/71-occupation-scope/",
+        ".local/verification/71-occupation-v7/",
+        ".local/playwright/",
+        "fixture workspaces created by this stage under .local/research/",
+        "dist/",
+        "dist-server/",
+        "public/pdf/",
+        "node_modules/.vite/",
+        "node_modules/.vite-temp/"
+      ],
+      "guards": [
+        "Inspect actual post-test directory inventory; classify unexpected files before removal.",
+        "Ensure no candidate contains Git-tracked files and no registered worktree is removed as an ordinary directory.",
+        "Do not follow workspace symlinks into root dependencies or external user data.",
+        "Validate protected ZIP/observation hashes from committed docs/local-data-retention.md before and after.",
+        "Record directory usage and filesystem free space separately, with actual timestamps."
+      ],
+      "finalRecord": "Write actual results into a public cleanup record after deletion, then commit that documentation; never label a planned cleanup complete.",
+      "updatedAt": "2026-09-30T06:34:06.626652+00:00",
+      "sourceArchivePlan": {
+        "status": "planned, not created",
+        "branch": "archive/cleanup-2026-09-30/stage-71-verification-tools",
+        "scope": "Locally authored audit/orchestration sources and the exact initial-execution source snapshot; useful accepted and rejected drafts are labelled.",
+        "inventory": "source-archive-inventory-final.json",
+        "push": false,
+        "exclude": [
+          "actual job input bodies",
+          "individual audit rows",
+          "browser/model/system logs",
+          "screenshots/traces/profiles",
+          "downloaded browsers and dependency copies"
+        ],
+        "reason": "Keep unique reusable source and reconstructable failure setup in Git before deleting temporary copies. Public main keeps final product/tests, aggregate findings and validation/consensus.",
+        "inventorySha256": "4d889a18c6b9874ceb567b78c469e9e4fcee43dd0967a9e3155822c3a20943c6",
+        "readme": "source-archive-README.md",
+        "readmeSha256": "409ee1a8e4609a31de58591d9f4a3a3375e9959afa5dbdcaaca7cc8d03d72d2a",
+        "identityVerification": "source-reconstruction-check.json",
+        "requirements": [
+          "Preserve all24inventoried source/snapshot files plus README/manifest on the local branch.",
+          "Verify every archived Git blob against its original bytes and SHA256 before deleting source copies."
+        ]
+      },
+      "ownedSystemTemporaryProfiles": {
+        "source": "initial-dev-owned-profile-check.json",
+        "status": "9exact owned paths recorded;3still exist after first failed DEV",
+        "action": "After final evidence/Git preservation, remove only exact recorded task-owned profiles. Check ALL live process command lines for the exact profile path, including reparented users; if any live user or uncertain ownership remains, do not delete. No generic system-temp glob."
+      },
+      "additionalObservedGeneratedRoots": [
+        ".local/e2e-default/",
+        ".local/research/59/",
+        ".local/research/60/",
+        ".local/research/64-expansion/"
+      ],
+      "revision": 3,
+      "newIrreplaceableInputPreservation": {
+        "plan": "stage-71-private-input-plan.json",
+        "sha256": "ae8692da764e849c46123a412c8c60880d7f22136553f4a7f0d7264bae1b3628",
+        "reviewRequired": true,
+        "verification": "Close and reopen ZIP, verify every blob size/CRC/SHA256 and external protected archive references; no originals deleted before verification."
+      },
+      "preExistingReproducibleReports": {
+        "paths": [
+          "playwright-report/",
+          "test-results/"
+        ],
+        "classification": "Older generated report/last-run metadata, no authored source; inspect complete filenames first, preserve aggregate and limitations in public cleanup record.",
+        "summary": "legacy-report-retention.json"
+      },
+      "revisionReason": "Fable found three distinct plan01 helper snapshots omitted from revision2. Added allthree as superseded sources; authored-code scan finds no unlisted code files.",
+      "previousRevision": {
+        "revision": 2,
+        "sha256": "65191b7f5dcd7e79bba0ea998dd0a130a22e8908312859a0daba52ba40c47436",
+        "publicEvidence": "docs/validation/occupation-v7-final-evidence-2026-09-30.json",
+        "location": "cleanupDesign.content"
+      },
+      "designDecisionRetention": {
+        "record": "docs/validation/occupation-v7-2026-09-30.json",
+        "diagnosticDesignSha256": "32fe398ff8788e46b66d27f44937a7af8c2e81e142afd9242e18f1156f334c09",
+        "browserDefaultDesignSha256": "09166b57a6066de7918866cfacae1be6154d469c1c72ef56eb137d44953593f6",
+        "contentAndParticipantsPreserved": true
+      }
+    }
+  },
+  "privateInputPlan": {
+    "sha256": "ae8692da764e849c46123a412c8c60880d7f22136553f4a7f0d7264bae1b3628",
+    "content": {
+      "recordedAt": "2026-09-30T05:31:14.359122+00:00",
+      "status": "proposed; no new archive created and no originals deleted",
+      "newProtectedRoot": ".local/preserved-2026-09-30/",
+      "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+      "existingArchiveSha256": "b7114d8f6bce0ea43236ba54601eeccbfab7593493f936ad1842291a475dd85a",
+      "entries": [
+        {
+          "originalPath": ".local/research/71-occupation-scope/inputs/main-manual-review.json",
+          "bytes": 5483,
+          "sha256": "5e2ff60e8a2ad0fb8da6a76c189bc43e9d601f1a4d30516c6a1f5b84a80a1b25",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/5e2ff60e8a2ad0fb8da6a76c189bc43e9d601f1a4d30516c6a1f5b84a80a1b25"
+          },
+          "reason": "Authored manual expected classification record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/inputs/recovery.json",
+          "bytes": 2051,
+          "sha256": "c2085717a0fb6bc3f2c27e23822485a7007189bbd2752de5516cdfe6139a668b",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/c2085717a0fb6bc3f2c27e23822485a7007189bbd2752de5516cdfe6139a668b"
+          },
+          "reason": "Historical input path and hash mapping needed to reproduce the audit"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/electronics.html",
+          "bytes": 213466,
+          "sha256": "204cef38773b8ca6dd78c175dec76f616e5c063a0c1cae97e96557504e87192f",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/204cef38773b8ca6dd78c175dec76f616e5c063a0c1cae97e96557504e87192f"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/electronics.json",
+          "bytes": 431,
+          "sha256": "cc4feda4a3c2a3a7c7159bb9170288fa701a0138c43341257951d3a3c0ea0534",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/cc4feda4a3c2a3a7c7159bb9170288fa701a0138c43341257951d3a3c0ea0534"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/human-resources.html",
+          "bytes": 233903,
+          "sha256": "1cf732820fc7d485cf036e0cc9dfc8a56204b86881fafcfdfa2ec3c5ace375db",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/1cf732820fc7d485cf036e0cc9dfc8a56204b86881fafcfdfa2ec3c5ace375db"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/human-resources.json",
+          "bytes": 424,
+          "sha256": "597204cf9ce42a03d94189d3a866962bc74ba48c4399285b36f762542cfe0895",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/597204cf9ce42a03d94189d3a866962bc74ba48c4399285b36f762542cfe0895"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/industrial-engineering.html",
+          "bytes": 224648,
+          "sha256": "b7e22b771c91ba5d6b41d0d163840cacbf20033da0cd568e0c966e7e4adbedca",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/b7e22b771c91ba5d6b41d0d163840cacbf20033da0cd568e0c966e7e4adbedca"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/industrial-engineering.json",
+          "bytes": 424,
+          "sha256": "daadcea79e6f9232d23aad65c4a528141e213307b88b7ff8535d1bd5152a2a48",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/daadcea79e6f9232d23aad65c4a528141e213307b88b7ff8535d1bd5152a2a48"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/software-development.html",
+          "bytes": 261766,
+          "sha256": "4b323fdd8a671efd44190d3fe60e4388f04446183b436f39b1d6666befd199cc",
+          "storage": {
+            "archive": ".local/preserved-2026-09-28/historical-inputs.zip",
+            "blob": "blobs/4b323fdd8a671efd44190d3fe60e4388f04446183b436f39b1d6666befd199cc"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        },
+        {
+          "originalPath": ".local/research/71-occupation-scope/references/software-development.json",
+          "bytes": 421,
+          "sha256": "16a57229fabbaf9dfd6f69450310d6e5da0c30b2a9d2de27a137a9fdf3fa4f70",
+          "storage": {
+            "archive": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+            "blob": "blobs/16a57229fabbaf9dfd6f69450310d6e5da0c30b2a9d2de27a137a9fdf3fa4f70"
+          },
+          "reason": "Dated external reference response or fetch receipt; a future fetch is not the same historical record"
+        }
+      ],
+      "newBlobCount": 9,
+      "newBlobBytes": 681251,
+      "generatedOutputsToDelete": [
+        "baseline-v*-*.json and impact rows regenerated by preserved audit sources with historical v6/finalv7 source",
+        "focused-candidates.json and role-evidence.json contain selected/extracted original fields, no distinct final manual expected classification; original bodies and final manual judgments are retained",
+        "v7-impact-first.json is an intermediate derived classification comparison"
+      ]
+    }
+  },
+  "sourceInventory": {
+    "sha256": "4d889a18c6b9874ceb567b78c469e9e4fcee43dd0967a9e3155822c3a20943c6",
+    "content": {
+      "recordedAt": "2026-09-30T06:33:08.112245+00:00",
+      "status": "prepared for local Git preservation; no archive commit or deletion yet",
+      "branch": "archive/cleanup-2026-09-30/stage-71-verification-tools",
+      "push": false,
+      "entries": [
+        {
+          "path": ".local/research/71-occupation-scope/audit-baseline.mts",
+          "bytes": 5910,
+          "sha256": "1cb46dcee7d58f6dc2ee035658a1e42fff918a2aa15854244b5be7f0c47ccd43",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/report-impact.mts",
+          "bytes": 7413,
+          "sha256": "af3257dcc670f9f543ad90087e811f1f09e7cf16b9a4e32daecabbfa691a34ec",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/implementation-05.proposed.ts",
+          "bytes": 28060,
+          "sha256": "b06ce449a51a36d3f05eebec5d998d88b2e7235c496056863d5b64d028081b70",
+          "category": "superseded draft"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/implementation-07.proposed.ts",
+          "bytes": 29002,
+          "sha256": "2258bd3e9b3b069c7e1745b175434d6b771616c768c0804d6e80515d8bcdd870",
+          "category": "superseded draft"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/run-validation.py",
+          "bytes": 11154,
+          "sha256": "5c7f6fd944c28f672b4b1fd7aed9911e894f8345e57a9ae634ec5ee0247d409d",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/validation_control.py",
+          "bytes": 9995,
+          "sha256": "75a16b896a8218ecebe94cecb509a1076cf1e447ee6e542db47d80be5d0741a2",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/run-claude-review.py",
+          "bytes": 4771,
+          "sha256": "83839ce5589e8d1ecbc37f47cc8befe0751aa3955475a99407c66c0a43b8dc9c",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/stage_identity.py",
+          "bytes": 1372,
+          "sha256": "f8454c726b1d3680891bc233152c390b4491c7e2ee1b2a550161b838b1c2a3a1",
+          "category": "reusable audit or execution source"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/run-claude-review.py",
+          "bytes": 4771,
+          "sha256": "83839ce5589e8d1ecbc37f47cc8befe0751aa3955475a99407c66c0a43b8dc9c",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/run-validation.py",
+          "bytes": 9441,
+          "sha256": "75754968ddf83d99e825499d1e4b030b5f6115a585ccf0cbf288487c25997da3",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/stage_identity.py",
+          "bytes": 1372,
+          "sha256": "f8454c726b1d3680891bc233152c390b4491c7e2ee1b2a550161b838b1c2a3a1",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/.local/research/71-occupation-scope/collaboration/validation_control.py",
+          "bytes": 9995,
+          "sha256": "75a16b896a8218ecebe94cecb509a1076cf1e447ee6e542db47d80be5d0741a2",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/README.md",
+          "bytes": 84952,
+          "sha256": "5a4a14501b5c2593c791db020a39e4bad8ef0f609745b65881b61b1e2e28721b",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/manifest.json",
+          "bytes": 1789,
+          "sha256": "0ae3ddf69b3c794112dbe3a82a68c0c24301e5623e567c0faf16b9005897a023",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/playwright.config.ts",
+          "bytes": 1831,
+          "sha256": "008fd2db640c31afc41d6d63fc518f8bc96b66dd5887e7f4f107ef67ef2b86a4",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/tests/e2e/catalog-observations.spec.ts",
+          "bytes": 27482,
+          "sha256": "9f75e46c7d0e51bc73e014e9345c219fa178e5895a7ba2dd9783fa8ff8e017c1",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-diagnostic-source/tests/e2e/occupation-v7.spec.ts",
+          "bytes": 22103,
+          "sha256": "f517331f95d06e4811b8d9df210f2cdca03351287f8dc8d2fefd5889930da15f",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/.local/research/71-occupation-scope/collaboration/run-validation.py",
+          "bytes": 10949,
+          "sha256": "efb991cb3669781a5462dd31be86208c3f8f18be66d78ab1b5174a01a6b703e0",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/README.md",
+          "bytes": 84952,
+          "sha256": "5a4a14501b5c2593c791db020a39e4bad8ef0f609745b65881b61b1e2e28721b",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/manifest.json",
+          "bytes": 851,
+          "sha256": "4932792aab2f877c3fc4aa748c4c197d96808f275b3734471f40916c0d83b25a",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/pre-default-source/playwright.config.ts",
+          "bytes": 1831,
+          "sha256": "008fd2db640c31afc41d6d63fc518f8bc96b66dd5887e7f4f107ef67ef2b86a4",
+          "category": "earlier executed snapshot"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/execution-plan-01-sources/run-claude-review.py",
+          "bytes": 4722,
+          "sha256": "26c53e2dbebf3dc5f52ecef2583b66e39f22c22aed0cfaaeb861660cf7db4aa0",
+          "category": "superseded plan01 helper source snapshot; not final verification tooling"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/execution-plan-01-sources/run-validation.py",
+          "bytes": 6454,
+          "sha256": "8920e896328306ada1f67029c88759047deadbdd2a8a78fc890dcd1e53cd1c60",
+          "category": "superseded plan01 helper source snapshot; not final verification tooling"
+        },
+        {
+          "path": ".local/research/71-occupation-scope/collaboration/execution-plan-01-sources/validation_control.py",
+          "bytes": 6415,
+          "sha256": "b2c40b6f2ff68f2389a3ca5eca39486baee9a635e5e5961e789b0d393bee81b6",
+          "category": "superseded plan01 helper source snapshot; not final verification tooling"
+        }
+      ],
+      "exclusions": [
+        "raw job input or individual audit rows",
+        "browser, model and system logs",
+        "screenshots, traces and browser profiles",
+        "downloaded browser binaries, build caches and dependencies"
+      ],
+      "revision": 3,
+      "reasonForRevision": "Fable independently found three distinct plan01 helper snapshots omitted from the previous21-file inventory; preserve them as superseded drafts.",
+      "authoredCodeScan": {
+        "files": 20,
+        "uninventoried": []
+      }
+    }
+  },
+  "sourceArchiveReadme": {
+    "sha256": "409ee1a8e4609a31de58591d9f4a3a3375e9959afa5dbdcaaca7cc8d03d72d2a",
+    "content": "# Stage 71 local source archive\n\nThis branch preserves locally authored audit and verification source before the\ntemporary workspace is removed. It is a local archive, not an additional product\nrelease, and must not be pushed to the public remote.\n\nThe parent commit contains the final reviewed product, public synthetic tests and\naggregate validation findings. The archive adds the paths listed in its manifest\nwithout changing that product. Each archived source is compared byte for byte\nagainst its Git blob before cleanup.\n\n## What the source means\n\n- `audit-baseline.mts` and `report-impact.mts` read the retained historical data.\n  They are offline audit tools, not a live crawler or a population accuracy study.\n- The four final Python helpers coordinate independently reviewed commands and\n  bind them to source, contract and execution-plan identities. They contain\n  machine-specific workspace assumptions and require fresh review gates before\n  any new run. An old approval is not authorization for changed input or source.\n- `execution-plan-01-sources/` contains three distinct superseded helper snapshots:\n  the runner, controller and Claude review launcher from the earlier plan. These\n  omit checks subsequently added to the accepted helpers. They are preserved as\n  earlier drafts, not as the tooling that completed the final verification, and\n  must not be used to claim the final test results.\n- `implementation-05.proposed.ts` and `implementation-07.proposed.ts` are\n  superseded drafts, not the accepted final implementation. Their preservation\n  does not imply that they passed final checks.\n- `pre-diagnostic-source/` stores the exact earlier files used in the first full\n  development E2E run, which finished with 428 passes and 61 failures. Its manifest\n  identifies that earlier state. Other source is available from the parent\n  product commit.\n- `pre-default-source/` stores configuration, README and runner source from the\n  later targeted diagnostic. That diagnostic passed 64 development and 13\n  production cases; it was not a full-suite pass.\n\n## Reconstructing a past setup\n\nUse `git show <archive-branch>:<path>` to inspect or restore a selected blob into a\nseparate workspace. The manifest gives the original path, size and SHA-256. Do\nnot overwrite a current checkout or treat the archive as an executable package.\n\nFor the initial failed setup, start from the parent product commit and overlay\nthe paths named by `pre-diagnostic-source/manifest.json`. For the targeted\ndiagnostic setup, overlay the paths named by `pre-default-source/manifest.json`.\nKeep each setup's runner and browser configuration together. The original\nexternal browser termination caller was not identified, so restoring source\ndoes not guarantee reproduction of that environmental event.\n\nInstall dependencies from the parent's lockfile. Browser binaries, caches and\nfixture workspaces can be regenerated. Historical job inputs remain in the\nprotected 2026-09-28 ZIP described by `docs/local-data-retention.md`. The additional\n2026-09-30 archive retains `inputs/main-manual-review.json`, `inputs/recovery.json`,\nthree new reference HTML responses and four dated fetch receipts. The fourth HTML\nresponse is byte-identical to a blob in the older ZIP and is referenced there.\nBoth archives and their manifests are required; private inputs are not stored on\nthis branch.\n\nRestore the inputs listed by `inputs/recovery.json` from the older ZIP into the\naudit script's `inputs/` directory, using that mapping's destination filenames.\nVerify every restored size and SHA-256. Restore the authored manual-review JSON\nfrom the newer ZIP. Restore the regional board snapshot separately only when\nrepeating the earlier regional-ID cross-check.\n\nRegenerate v6 intermediate files by running the preserved `audit-baseline.mts`\nwith the product source at `ebf4cc7a8abf17f4c2e426518f22d7cf69d219ae` in an isolated\ncheckout, with dependencies from its lockfile. The script is located at\n`.local/research/71-occupation-scope/audit-baseline.mts`, and is run from the\nproject root with `node --import tsx` followed by that path. It writes\n`baseline-v6-summary.json` beside the script and `baseline-v6-retained.json` /\n`baseline-v6-raw.json` under `inputs/`.\n\nUse a separate checkout of the final product commit to run the same script and\nproduce the corresponding v7 files. Copy the three v6 intermediates to the\nequivalent paths in this v7 audit workspace, keeping the v7 summary and both v7\ninputs. Run `report-impact.mts` there with `node --import tsx`. It needs both\nversions, the retained cache and the authored manual-review JSON; it verifies the\nv7 product identity before reporting. Generated timestamps will differ, so this\nprocedure reproduces classifications and aggregate checks, not byte-identical\nexecution reports. It makes no provider requests.\n\nRaw job bodies, individual audit output rows, model streams, system logs,\nscreenshots, traces, profiles and downloaded dependencies are deliberately absent.\nPublic conclusions, test outcomes, corrections, limits and unanimous decisions\nare recorded with the parent product on `main`.\n"
+  },
+  "previousSourceArchiveReadme": {
+    "sha256": "c473fdeaa19114785bddefa91e5f94713373546b1689a2deaedf26f0c89d8fb1",
+    "content": "# Stage 71 local source archive\n\nThis branch preserves locally authored audit and verification source before the\ntemporary workspace is removed. It is a local archive, not an additional product\nrelease, and must not be pushed to the public remote.\n\nThe parent commit contains the final reviewed product, public synthetic tests and\naggregate validation findings. The archive adds the paths listed in its manifest\nwithout changing that product. Each archived source is compared byte for byte\nagainst its Git blob before cleanup.\n\n## What the source means\n\n- `audit-baseline.mts` and `report-impact.mts` read the retained historical data.\n  They are offline audit tools, not a live crawler or a population accuracy study.\n- The four final Python helpers coordinate independently reviewed commands and\n  bind them to source, contract and execution-plan identities. They contain\n  machine-specific workspace assumptions and require fresh review gates before\n  any new run. An old approval is not authorization for changed input or source.\n- `implementation-05.proposed.ts` and `implementation-07.proposed.ts` are\n  superseded drafts, not the accepted final implementation. Their preservation\n  does not imply that they passed final checks.\n- `pre-diagnostic-source/` stores the exact earlier files used in the first full\n  development E2E run, which finished with 428 passes and 61 failures. Its manifest\n  identifies that earlier state. Other source is available from the parent\n  product commit.\n- `pre-default-source/` stores configuration, README and runner source from the\n  later targeted diagnostic. That diagnostic passed 64 development and 13\n  production cases; it was not a full-suite pass.\n\n## Reconstructing a past setup\n\nUse `git show <archive-branch>:<path>` to inspect or restore a selected blob into a\nseparate workspace. The manifest gives the original path, size and SHA-256. Do\nnot overwrite a current checkout or treat the archive as an executable package.\n\nFor the initial failed setup, start from the parent product commit and overlay\nthe paths named by `pre-diagnostic-source/manifest.json`. For the targeted\ndiagnostic setup, overlay the paths named by `pre-default-source/manifest.json`.\nKeep each setup's runner and browser configuration together. The original\nexternal browser termination caller was not identified, so restoring source\ndoes not guarantee reproduction of that environmental event.\n\nInstall dependencies from the parent's lockfile. Browser binaries, caches and\nfixture workspaces can be regenerated. Historical job inputs remain in the\nprotected 2026-09-28 ZIP described by `docs/local-data-retention.md`. The additional\n2026-09-30 archive retains `inputs/main-manual-review.json`, `inputs/recovery.json`,\nthree new reference HTML responses and four dated fetch receipts. The fourth HTML\nresponse is byte-identical to a blob in the older ZIP and is referenced there.\nBoth archives and their manifests are required; private inputs are not stored on\nthis branch.\n\nRestore the inputs listed by `inputs/recovery.json` from the older ZIP into the\naudit script's `inputs/` directory, using that mapping's destination filenames.\nVerify every restored size and SHA-256. Restore the authored manual-review JSON\nfrom the newer ZIP. Restore the regional board snapshot separately only when\nrepeating the earlier regional-ID cross-check.\n\nRegenerate v6 intermediate files by running the preserved `audit-baseline.mts`\nwith the product source at `ebf4cc7a8abf17f4c2e426518f22d7cf69d219ae` in an isolated\ncheckout, with dependencies from its lockfile. The script is located at\n`.local/research/71-occupation-scope/audit-baseline.mts`, and is run from the\nproject root with `node --import tsx` followed by that path. It writes\n`baseline-v6-summary.json` beside the script and `baseline-v6-retained.json` /\n`baseline-v6-raw.json` under `inputs/`.\n\nUse a separate checkout of the final product commit to run the same script and\nproduce the corresponding v7 files. Copy the three v6 intermediates to the\nequivalent paths in this v7 audit workspace, keeping the v7 summary and both v7\ninputs. Run `report-impact.mts` there with `node --import tsx`. It needs both\nversions, the retained cache and the authored manual-review JSON; it verifies the\nv7 product identity before reporting. Generated timestamps will differ, so this\nprocedure reproduces classifications and aggregate checks, not byte-identical\nexecution reports. It makes no provider requests.\n\nRaw job bodies, individual audit output rows, model streams, system logs,\nscreenshots, traces, profiles and downloaded dependencies are deliberately absent.\nPublic conclusions, test outcomes, corrections, limits and unanimous decisions\nare recorded with the parent product on `main`.\n"
+  },
+  "changes": [
+    "Preserve3distinct plan01 helper snapshots as superseded drafts; inventory increases21to24.",
+    "Preserve dated diagnostic and browser-default design documents, hashes and all-three decisions in the public validation record.",
+    "Explicitly state temporary artifact references become historical paths after cleanup; hashes and extracted findings survive."
+  ],
+  "unchanged": [
+    "Product/source/tests and completed verification identity.",
+    "Private-input preservation plan:9newunique blobs and1external duplicate reference.",
+    "Archive-before-deletion and no-live-user profile guards.",
+    "Original historical input ZIP and observation-history protections."
+  ],
+  "reviewStatus": "pending_revised_design_decisions"
+}

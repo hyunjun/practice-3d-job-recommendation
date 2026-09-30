@@ -1,7 +1,5 @@
-import { existsSync } from 'node:fs'
 import { defineConfig } from '@playwright/test'
 
-const hasSystemChrome = process.platform === 'darwin' && existsSync('/Applications/Google Chrome.app')
 const mode = process.env.ORBIT_TEST_MODE ?? 'development'
 if (mode !== 'development' && mode !== 'production')
   throw new Error('ORBIT_TEST_MODE must be development or production.')
@@ -25,7 +23,7 @@ export default defineConfig({
   use: {
     baseURL,
     browserName: 'chromium',
-    channel: process.env.PLAYWRIGHT_CHANNEL ?? (hasSystemChrome ? 'chrome' : undefined),
+    channel: process.env.PLAYWRIGHT_CHANNEL ?? 'chromium',
     viewport: { width: 1440, height: 960 },
     reducedMotion: 'reduce',
     trace: 'retain-on-failure',

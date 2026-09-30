@@ -121,7 +121,11 @@ describe('regional migration through real persistence entry points', () => {
       expect(first.unreadableIds).toEqual([])
       expect(first.records).toHaveLength(2)
       const dubai = first.records.find(record => record.job.id === 'greenhouse-regional-cedar-dubai')!
-      expect(dubai).toEqual({ ...original[0], job: { ...original[0].job, cityIds: ['dubai'], cityCoverageVersion: 1 } })
+      // The stored v6 assessment is re-read as v7 with the same title-only evidence and empty departments.
+      expect(dubai).toEqual({
+        ...original[0],
+        job: { ...original[0].job, cityIds: ['dubai'], cityCoverageVersion: 1, occupation: { ...original[0].job.occupation, version: 7 } },
+      })
       const held = first.records.find(record => record.job.id === 'greenhouse-regional-cedar-held-conflict')!
       expect(held.job.cityIds).toEqual([])
       expect(held.job.locationResolution).toEqual(original[1].job.locationResolution)
