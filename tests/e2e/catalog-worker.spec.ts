@@ -12,6 +12,7 @@ import {
 } from './helpers/catalog-worker'
 import { readSaved, readSavedJson, waitForSavedCommit } from './helpers/saved-store'
 import { installCatalogWorkerControl } from './helpers/catalog-worker-control'
+import { expectCancelledInitialCatalogRequest, installCatalogFetchObserver } from './helpers/catalog-fetch-observer'
 
 const firstMonitor = '/api/catalog/progress?id=00000000-0000-4000-8000-000000000067&after=1'
 const finalMonitor = '/api/catalog/progress?id=00000000-0000-4000-8000-000000000067&after=2'
@@ -585,8 +586,12 @@ test.describe('dedicated worker delivery and recovery', () => {
 
   test('worker startup failure is explicit and retryable without invented results or synchronous collection fallback', async ({ page, catalogWorker }) => {
     const worker = await installCatalogWorkerControl(page, { unavailable: true })
+    // Stage73: a Worker that cannot be constructed leaves the received response unusable, so
+    // the app cancels it after headers. Prove that cancellation directly rather than expecting
+    // the healthy finished-request lifecycle; every later visible, saved and retry check is unchanged.
+    const fetches = await installCatalogFetchObserver(page)
     await catalogWorker.open({ filters: { query: 'Beacon London', role: 'backend' }, saved: catalogWorkerSaved() })
-    const initial = await expectInitialCatalogRequest(page, catalogWorker.traffic)
+    const initial = await expectCancelledInitialCatalogRequest(page, catalogWorker.traffic, fetches)
     await expect(page.locator('.catalog-placeholder')).toContainText('공고 처리 연결이 끊겼어요.')
     await expect(page.locator('.company-card, .search-recovery, .city-row')).toHaveCount(0)
     await expect(page.getByRole('button', { name: '다시 조회', exact: true })).toBeEnabled()

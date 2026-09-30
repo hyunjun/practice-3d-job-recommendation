@@ -8,6 +8,7 @@ import type { CatalogProgress } from '../../shared/catalog-progress'
 import { CatalogRequestError, requestCatalogStream } from '../lib/catalog-request'
 import { CatalogWorkerClient } from '../lib/catalog-worker-client'
 import { CatalogPresentationQueue } from '../lib/catalog-presentation'
+import { createRetainedProjection, projectionBoundary } from '../lib/catalog-retained-projection'
 import type { CatalogProjection } from '../lib/catalog-worker-types'
 import { useDeadlineClock } from './useDeadlineClock'
 
@@ -32,8 +33,11 @@ function initialProjection(): CatalogProjection {
 }
 
 export function useCatalog(notify: (message: string, tone?: 'error') => void, automatic: boolean, input: Input) {
-  const [published, setPublished] = useState(() => ({ value: initialProjection(), key: '' }))
+  const [published, setPublished] = useState(() => ({ value: initialProjection(), key: '', matchingKey: '' }))
   const publishedRef = useRef(published.value)
+  const [retaining, setRetaining] = useState(false)
+  const retainingRef = useRef(false)
+  const [workerError, setWorkerError] = useState(false)
   const [loading, setLoading] = useState(automatic)
   const [progress, setProgress] = useState<CatalogProgress | null>(null)
   const [error, setError] = useState('')
@@ -42,13 +46,14 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
   const [presentation] = useState(() => new CatalogPresentationQueue())
   const times = useMemo(() => [...deadlines, ...input.extraDeadlines], [deadlines, input.extraDeadlines])
   const freshnessNow = useDeadlineClock(times)
-  const boundary = deadlines.reduce((latest, time) => time <= freshnessNow ? Math.max(latest, time) : latest, 0)
+  const boundary = projectionBoundary(deadlines, freshnessNow)
+  const matchingKey = useMemo(() => JSON.stringify([input.profile, input.filters]), [input.profile, input.filters])
   const intentKey = useMemo(() => JSON.stringify([input.profile, input.filters, input.scope, input.recover, boundary]),
     [input.profile, input.filters, input.scope, input.recover, boundary])
   const previousIntentRef = useRef(intentKey)
   const key = useMemo(() => JSON.stringify([intentKey, loading]), [intentKey, loading])
-  const inputRef = useRef({ ...input, key })
-  inputRef.current = { ...input, key }
+  const inputRef = useRef({ ...input, key, matchingKey })
+  inputRef.current = { ...input, key, matchingKey }
   const mounted = useRef(true)
   const clientRef = useRef<CatalogWorkerClient | null>(null)
   const publishedClientRef = useRef<CatalogWorkerClient | null>(null)
@@ -67,30 +72,44 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
 
   const reportWorkerFailure = useCallback((cause: CatalogRequestError) => {
     if (!mounted.current) return
+    retainingRef.current = true
+    setRetaining(true)
+    setWorkerError(true)
+    wantedRef.current++
     requestRef.current?.abort()
     requestRef.current = null
     presentation.cancel()
+    clientRef.current?.dispose()
     collectingRef.current = false
     failedRequestRef.current = true
+    progressByRevision.current.clear()
+    setProgress(null)
     setLoading(false)
     setError(cause.message)
-    setErrorRetryAt(undefined)
+    // A previous HTTP failure of the current reload may still impose a wait.
+    // Only starting a new reload clears that known deadline.
     notify(cause.message, 'error')
   }, [notify, presentation])
 
   const ensureClient = useCallback(() => {
     if (!clientRef.current || clientRef.current.failed) {
       clientRef.current?.dispose()
-      clientRef.current = new CatalogWorkerClient(reportWorkerFailure)
+      clientRef.current = null
       revisionRef.current = 0
       progressByRevision.current.clear()
+      try {
+        clientRef.current = new CatalogWorkerClient(reportWorkerFailure)
+      } catch (cause) {
+        if (cause instanceof CatalogRequestError && cause.code === 'CATALOG_WORKER_FAILED') reportWorkerFailure(cause)
+        throw cause
+      }
     }
     return clientRef.current
   }, [reportWorkerFailure])
 
   /** Coalesce input intents while one worker query is running; never publish an older intent. */
   const project = useCallback((): Promise<void> => {
-    if (!projectTaskRef.current && publishedClientRef.current === clientRef.current
+    if (!retainingRef.current && !projectTaskRef.current && publishedClientRef.current === clientRef.current
       && publishedRef.current.revision === revisionRef.current && publishedKeyRef.current === inputRef.current.key) {
       return Promise.resolve()
     }
@@ -102,11 +121,12 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
         const revision = revisionRef.current
         const wanted = wantedRef.current
         const current = inputRef.current
+        const projectedAt = Date.now()
         let value: CatalogProjection
         try {
           value = await client.project(revision, {
             profile: current.profile, filters: current.filters, scope: current.scope,
-            recover: current.recover, collecting: collectingRef.current, now: Date.now(),
+            recover: current.recover, collecting: collectingRef.current, now: projectedAt,
           })
         } catch (cause) {
           if (!mounted.current) return
@@ -114,15 +134,24 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
           // A newer decode may overtake a deferred presentation. Its receipt will
           // enqueue the replacement; the skipped intermediate snapshot is not an error.
           if (cause instanceof CatalogRequestError && cause.code === 'CATALOG_SUPERSEDED') return
+          if (cause instanceof CatalogRequestError && cause.code === 'CATALOG_WORKER_FAILED') {
+            reportWorkerFailure(cause)
+            return
+          }
           throw cause
         }
         if (!mounted.current) return
         if (client !== clientRef.current || revision !== revisionRef.current || wanted !== wantedRef.current
           || current.key !== inputRef.current.key) continue
+        // A replacement has its own deadlines, which may not exist in the old
+        // displayed view. Do not end retention with a reply that aged in transit.
+        if (projectionBoundary(value.deadlines, projectedAt) !== projectionBoundary(value.deadlines, Date.now())) continue
         publishedRef.current = value
         publishedClientRef.current = client
         publishedKeyRef.current = current.key
-        setPublished({ value, key: current.key })
+        setPublished({ value, key: current.key, matchingKey: current.matchingKey })
+        retainingRef.current = false
+        setRetaining(false)
         const collection = progressByRevision.current.get(revision)
         setProgress(collection?.stream === streamRef.current ? collection.progress : null)
         setDeadlines(previous => previous.length === value.deadlines.length
@@ -138,7 +167,7 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
     })
     projectTaskRef.current = task
     return task
-  }, [])
+  }, [reportWorkerFailure])
 
   const reload = useCallback(async ({ refresh = false, announce = true }: { refresh?: boolean; announce?: boolean } = {}) => {
     requestRef.current?.abort()
@@ -151,6 +180,7 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
     collectingRef.current = true
     lastAttemptRef.current = Date.now()
     setError('')
+    setWorkerError(false)
     setErrorRetryAt(undefined)
     setProgress(null)
     setLoading(true)
@@ -200,6 +230,10 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
         cause = presentationError ?? cause
         failedRequestRef.current = true
         if (cause instanceof CatalogRequestError) {
+          if (cause.code === 'CATALOG_WORKER_FAILED') {
+            reportWorkerFailure(cause)
+            return
+          }
           retryAtRef.current = cause.retryAt
           setErrorRetryAt(cause.retryAt)
           if (cause.code === 'CATALOG_EXPIRED') {
@@ -207,7 +241,12 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
             revisionRef.current = 0
             wantedRef.current++
             publishedRef.current = expired
-            setPublished({ value: expired, key: inputRef.current.key })
+            publishedClientRef.current = null
+            publishedKeyRef.current = ''
+            progressByRevision.current.clear()
+            setProgress(null)
+            setDeadlines([])
+            setPublished({ value: expired, key: inputRef.current.key, matchingKey: inputRef.current.matchingKey })
           }
         }
         const message = cause instanceof Error ? cause.message : '공고를 불러오지 못했어요.'
@@ -221,7 +260,7 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
         setLoading(false)
       }
     }
-  }, [ensureClient, notify, presentation, project])
+  }, [ensureClient, notify, presentation, project, reportWorkerFailure])
 
   useEffect(() => {
     mounted.current = true
@@ -275,8 +314,9 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
       lastAttemptRef.current = null
       failedRequestRef.current = true
       collectingRef.current = false
-      // A reply being processed when exploration closes cannot replace the last displayed view.
-      revisionRef.current = publishedRef.current.revision
+      // Revision numbers are local to a worker. A cancelled replacement must
+      // not reuse the old anchor's number against its new owner.
+      revisionRef.current = publishedClientRef.current === clientRef.current ? publishedRef.current.revision : 0
       wantedRef.current++
       setLoading(false)
     }
@@ -296,19 +336,30 @@ export function useCatalog(notify: (message: string, tone?: 'error') => void, au
   }, [revalidate])
 
   const preview = useCallback(async (draft: Filters): Promise<number> => {
+    if (retainingRef.current) throw new Error('공고 연결을 다시 확인한 뒤 조건을 적용해 주세요.')
     const revision = published.value.revision
     if (!revision) return 0
     const client = clientRef.current
-    if (!client || client.failed) throw new Error('공고 연결을 다시 확인한 뒤 조건을 적용해 주세요.')
+    if (!client || client.failed || client !== publishedClientRef.current) throw new Error('공고 연결을 다시 확인한 뒤 조건을 적용해 주세요.')
     return client.preview(revision, input.profile, draft, Date.now())
-  }, [published.value.catalog, error, input.profile, boundary])
+  }, [published.value.catalog, error, input.profile, boundary, retaining])
 
   const setMapInteracting = useCallback((active: boolean) => presentation.setInteracting(active), [presentation])
+  const retain = useMemo(() => createRetainedProjection(published.value), [published.value])
+  // The deadline clock drives timers and foreground updates. A failure itself
+  // must also age immediately, even if a throttled timer has not fired yet.
+  const displayNow = retaining ? Date.now() : freshnessNow
+  const value = retaining ? retain(displayNow) : published.value
+  const recommendationsUnavailable = retaining && Boolean(value.catalog.fetchedAt) && matchingKey !== published.matchingKey
+  const recommendations = useMemo(() => recommendationsUnavailable ? {
+    matches: [], cities: [], remote: [], unmapped: [], globeCities: [], companyCount: 0, recovery: null,
+  } : null, [recommendationsUnavailable])
 
   return {
-    ...published.value, loading, progress, error, reload, preview, freshnessNow, setMapInteracting,
-    searching: Boolean(published.value.catalog.fetchedAt) && published.key !== key,
-    ready: Boolean(published.value.catalog.fetchedAt),
-    retryAt: errorRetryAt ?? (error && progress && !progress.done ? undefined : published.value.catalog.refreshAfter),
+    ...value, ...recommendations, loading, progress, error, reload, preview, freshnessNow: displayNow, setMapInteracting,
+    retaining, recommendationsUnavailable,
+    searching: retaining ? loading : Boolean(value.catalog.fetchedAt) && published.key !== key,
+    ready: Boolean(value.catalog.fetchedAt),
+    retryAt: errorRetryAt ?? (workerError || error && progress && !progress.done ? undefined : value.catalog.refreshAfter),
   }
 }

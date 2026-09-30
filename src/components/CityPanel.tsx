@@ -36,10 +36,11 @@ interface Props {
   onData: () => void
   onFilters: () => void
   emptyState: ReactNode
+  unavailableState?: ReactNode
 }
 
 export function CityPanel(props: Props) {
-  const { catalog, results, remote, unmapped, remoteEligibleOnly, selectedId, tab, sort, status, emptyState, profile, compareIds, savedIds, saveReady, onSort, onTab, onSelect, onHover, onCompare, onOpenJob, onSave, onProfile, onData, onFilters } = props
+  const { catalog, results, remote, unmapped, remoteEligibleOnly, selectedId, tab, sort, status, emptyState, unavailableState, profile, compareIds, savedIds, saveReady, onSort, onTab, onSelect, onHover, onCompare, onOpenJob, onSave, onProfile, onData, onFilters } = props
   const sorted = useMemo(() => [...results].sort((a, b) => sort === 'match' ? b.averageScore - a.averageScore : sort === 'salary' ? (medianSalary(b.matches) ?? -1) - (medianSalary(a.matches) ?? -1) : b.companyCount - a.companyCount || b.averageScore - a.averageScore), [results, sort])
   const selectedResult = results.find(result => result.city.id === selectedId)
   const selectedCity = selectedId ? CITY_BY_ID.get(selectedId) : null
@@ -49,13 +50,13 @@ export function CityPanel(props: Props) {
 
   return <aside className="results-panel" aria-label="도시와 회사 탐색 결과" tabIndex={-1}>
     <div className="results-tabs">
-      <button className={tab === 'cities' ? 'active' : ''} aria-pressed={tab === 'cities'} onClick={() => onTab('cities')}><MapPin size={15} />도시 탐색<span>{catalog.fetchedAt ? results.length : '—'}</span></button>
-      <button className={tab === 'remote' ? 'active' : ''} aria-pressed={tab === 'remote'} onClick={() => onTab('remote')}><Globe2 size={15} />원격 기회<span>{catalog.fetchedAt ? remoteCompanies.length : '—'}</span></button>
-      <button className={tab === 'unmapped' ? 'active' : ''} aria-pressed={tab === 'unmapped'} onClick={() => onTab('unmapped')}><MapPinOff size={15} />기타 근무지<span>{catalog.fetchedAt ? unmappedCompanies.length : '—'}</span></button>
+      <button className={tab === 'cities' ? 'active' : ''} aria-pressed={tab === 'cities'} onClick={() => onTab('cities')}><MapPin size={15} />도시 탐색<span>{catalog.fetchedAt && !unavailableState ? results.length : '—'}</span></button>
+      <button className={tab === 'remote' ? 'active' : ''} aria-pressed={tab === 'remote'} onClick={() => onTab('remote')}><Globe2 size={15} />원격 기회<span>{catalog.fetchedAt && !unavailableState ? remoteCompanies.length : '—'}</span></button>
+      <button className={tab === 'unmapped' ? 'active' : ''} aria-pressed={tab === 'unmapped'} onClick={() => onTab('unmapped')}><MapPinOff size={15} />기타 근무지<span>{catalog.fetchedAt && !unavailableState ? unmappedCompanies.length : '—'}</span></button>
     </div>
     <div className="results-scroll">
       {status}
-      {catalog.fetchedAt && (tab === 'cities' ? selectedCity ? <>
+      {unavailableState || catalog.fetchedAt && (tab === 'cities' ? selectedCity ? <>
         <div className="city-detail-hero">
           <CityImage city={selectedCity} />
           <div className="city-hero-shade" />

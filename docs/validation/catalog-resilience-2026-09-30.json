@@ -1,0 +1,962 @@
+{
+  "version": 1,
+  "stage": 73,
+  "recordedAt": "2026-09-30T14:43:25.564382+00:00",
+  "change": "Keep displayed recommendations honest about freshness and applied intent after a catalog Worker failure.",
+  "status": "All3 final verification approved on the immutable final evidence; stage commit/push and verified cleanup next.",
+  "baselineCommit": "2c86417c68687980b132426ae7b5c7d2fafa57ed",
+  "contract": {
+    "path": "docs/design/catalog-resilience.md",
+    "sha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9"
+  },
+  "participants": {
+    "main": {
+      "role": "product implementation, integration, documentation, preservation and cleanup"
+    },
+    "astra": {
+      "role": "independent design, code and evidence review",
+      "model": "global.openai.gpt-6-astra",
+      "reasoningRequested": "max"
+    },
+    "fable": {
+      "role": "independent test authorship and execution",
+      "modelRequested": "claude-fable-5-1",
+      "modelReported": "claude-fable-5-1",
+      "effortRequested": "max",
+      "effortLimit": "Effective backend effort is not independently exposed by CLI receipts."
+    }
+  },
+  "designGate": {
+    "decision": "DESIGN_APPROVED",
+    "allThreeExplicitlyApproved": true,
+    "sha256": "3d4a6f8a931c3976447c049f9a4bf236418554e01d908acf5bb546797b88564d"
+  },
+  "implementationGate": {
+    "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+    "sourceStateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+    "fileCount": 402,
+    "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+    "main": "IMPLEMENTATION_REVIEW_APPROVED",
+    "astra": "IMPLEMENTATION_REVIEW_APPROVED",
+    "fable": "IMPLEMENTATION_REVIEW_APPROVED",
+    "allThreeExplicitlyApproved": true,
+    "gateSha256": "9605a5c4a008868af37abb955102bc7cd4e601d5587e3bd36a0e73c72e2073fa",
+    "hashReviewLimit": "Fable independently computed source/contract and read full plan. Main and Astra independently computed the matching plan hash."
+  },
+  "verificationGate": {
+    "decision": "VERIFICATION_APPROVED",
+    "actualResults": {
+      "unitCases": 2704,
+      "unitFiles": 82,
+      "e2eCasesPerMode": 81,
+      "e2eSelectedFiles": 9,
+      "skipped": 0,
+      "flaky": 0,
+      "retryAttempts": 0,
+      "sameDevelopmentProductionCases": true,
+      "sameReviewedBuild": true,
+      "original14FilesUnchanged": true,
+      "noSleepOrDarkWakeDuringFinalProduction": true
+    },
+    "allThreeExplicitlyApproved": true,
+    "gateSha256": "b0d53cb78529d975f6efc2c1ca253c44346e39f60cae14f8547ea99617fece92",
+    "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+    "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+    "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+    "finalEvidenceSha256": "f6bcf046c6d155da0f04b353da88e71e589663fb6c8006c9d1bd5100a595133c",
+    "participants": {
+      "main": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+        "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+        "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+        "finalEvidenceSha256": "f6bcf046c6d155da0f04b353da88e71e589663fb6c8006c9d1bd5100a595133c",
+        "evidence": "main-final-verification-approval.json",
+        "evidenceSha256": "e9b5545ceab07f75cc64297f8663493c01d6329bc65a36a9c1c5c285316f2913"
+      },
+      "astra": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+        "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+        "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+        "finalEvidenceSha256": "f6bcf046c6d155da0f04b353da88e71e589663fb6c8006c9d1bd5100a595133c",
+        "evidence": "astra-final-verification-approval.md",
+        "evidenceSha256": "53fbb110d01f58ea2ce7363b6230bdbe217cdd5024aece92595b9c1a460b1040"
+      },
+      "fable": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+        "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+        "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+        "finalEvidenceSha256": "f6bcf046c6d155da0f04b353da88e71e589663fb6c8006c9d1bd5100a595133c",
+        "evidence": "fable-final-verification-approval.json",
+        "evidenceSha256": "9907a078c680a907ba9a6dfcd7a154b9c21e22acb5bfe13ea0f5f475a6b38fe3"
+      }
+    },
+    "unresolvedBlockers": [],
+    "hashReviewLimit": "Fable independently computed source/contract and read the full evidence artifact and plan; Main and Astra independently computed artifact and plan hashes."
+  },
+  "discussion": [
+    {
+      "issue": "Cancelling replacement projection on Saved navigation can reuse a different Worker's colliding revision number.",
+      "foundBy": "astra",
+      "main": "agreed and fixed by checking the published Worker owner before restoring its revision",
+      "astra": "fix statically verified",
+      "fable": "explicit agreement on owner fix; regression authored in test-authoring02",
+      "testExecution": "new Saved-navigation regression passed in the initial DEV command; complete command failed in a separate startup-constructor case"
+    },
+    {
+      "issue": "Pre-execution test review found paused presentation timers, possible request timeout during long clock jump, and an eventual-only own-deadline oracle.",
+      "foundBy": [
+        "main",
+        "astra"
+      ],
+      "resolution": "Fable resumes/controls paused presentation clocks, releases obsolete/corrective replies separately, strengthens actual gesture gating, and adds pending-board/partial-compare cases; Astra rereview approved. The fetch timeout uses native AbortSignal.timeout, distinct from mocked page timers; no timeout failure was observed."
+    },
+    {
+      "issue": "The test fixture accepted source sample although its public job factory excludes it.",
+      "foundBy": "main",
+      "resolution": "Fable narrowed the public override type before compilation; no compiler failure was observed."
+    },
+    {
+      "issue": "First Fable authoring report described an early App/CityPanel state and counted E2E definitions rather than expanded width cases.",
+      "resolution": "Original report retained; final plan must describe current source and actual expanded case counts. Not product test failures."
+    },
+    {
+      "issue": "The existing startup-constructor test expected one finished initial HTTP request, but received none after the Worker failure aborted the response.",
+      "observed": "Initial DEV:80passed/1failed,0skips/retries; exact request records:StrictMode abort(statusnull), then response abort(status202), both publicGET/noBody/net::ERR_ABORTED. Retry assertions were not reached.",
+      "mainClassification": "Existing healthy-response oracle conflicts with the new constructor-failure cancellation lifecycle. Keep generic healthy helper strict and discuss a constructor-specific explicit transport oracle; no product fix or test edit made yet.",
+      "astra": "Independently confirms cancellation is meaningful for an unread body; supports a constructor-specific positive signal oracle.",
+      "fable": "Initially recommended removing the abort; withdrew after distinguishing headers from completed body. Proposed padding or direct observation; approved the observation alternative.",
+      "decision": "CORRECTION_APPROVED",
+      "resolution": "Keep product abort and shared healthy helper. Correct only startup scenario with same-attempt abort-after-headers/bodyUnused proof, bounded exact public requests, narrowly valid terminal orderings and unchanged recovery/privacy assertions.",
+      "remaining": "Final DEV81passed including complete corrected startup retry; PROD and final verification agreement pending.",
+      "claimLimits": "No buffer-bound, baseline resource leak, GC lifetime, transfer savings or immediate server-side cancellation was measured. Observer instrumentation has a scheduling footprint."
+    },
+    {
+      "issue": "PROD has two global30s test timeouts with actual durations397147ms and208726ms.",
+      "mainEvidence": "The revalidation case overlaps22:37:50–22:44:20KST Maintenance Sleep(390s); startup case overlaps22:45:45–22:49:14KST Maintenance Sleep(209s). Startup click trace spans207448.76ms, after positive cancellation and successful manualHTTP200 recovery.",
+      "classification": "Main,Astra andFable agree on host-sleep interruption; preserve both failed tests and the failed command.",
+      "proposedResolution": "Keep source,tests,assertions,timeouts,plan and build unchanged. After all3 approval, rerun all81PROD cases while an owned temporary sleep-prevention process is active.",
+      "powerSettings": "Task-scoped caffeinate-i-s-t3600; no persistent or display/user-activity setting changes; stop explicitly before cleanup.",
+      "evidenceSha256": "feb663bf886b61b1e7ca9027530ce0742e415fe2dddd68e8eaa7c7360c00d95a",
+      "decision": "ENVIRONMENT_REVALIDATION_APPROVED",
+      "independentTraceFinding": "Astra: revalidation accessibility frame.evaluate(axeRunPartial) waited388026.332ms across390s host sleep; final accessibility/focus/privacy assertions were not completed before the global timeout.",
+      "revalidation": "FullPROD81passed on unchanged source/plan/build/assertions; no Sleep orDarkWake during the run. Both timed-out tests completed in this new run; earlier failures remain failures."
+    }
+  ],
+  "validationRuns": [
+    {
+      "runId": "20260930T124251236586Z-c9b38686",
+      "kind": "check",
+      "status": "complete",
+      "startedAt": "2026-09-30T12:42:51.279680+00:00",
+      "endedAt": "2026-09-30T12:43:04.987532+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "check",
+        "--",
+        "--reporter=json",
+        "--outputFile=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T124251236586Z-c9b38686/vitest.json"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T124251236586Z-c9b38686/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "c45a32af66e394c6d5a702de5eb3669220430cf545ea72d33af689dbef193b10",
+      "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+      "executionPlanSha256": "f5995e3ac4d7f3a05fa8207a257be7ee08f151760f58dec151397294beb6360c",
+      "implementationGateSha256": "ccbb28269ac8b15f3fb042d39f86749c1d7fc405f07f50e046c57efbdfe15a31",
+      "fileCount": 401,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2485,
+        "sha256": "0b82d3c9c24f5fe32e9c42e0ee508146bd2ef787d9f9b6a67d21954c7cf08f34"
+      },
+      "cleanup": {
+        "registeredSpawns": 92,
+        "observedOwnedProcesses": 91,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 90,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 368,
+        "sha256": "d6eaa4c3a71ba6ccaac83afb745ad0dc9dd44897f8a6ce7d46f1d9b9427b0db0"
+      },
+      "unit": {
+        "success": true,
+        "numTotalTests": 2704,
+        "numPassedTests": 2704,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "fileCount": 82,
+        "assertionCount": 2704,
+        "nonPassed": [],
+        "report": {
+          "bytes": 1153603,
+          "sha256": "cd04027810527f0a82295d560636d31519ebc0619ef225ed7dfe6e489858d762"
+        }
+      }
+    },
+    {
+      "runId": "20260930T124324918502Z-e4a5ab3d",
+      "kind": "build",
+      "status": "complete",
+      "startedAt": "2026-09-30T12:43:24.969736+00:00",
+      "endedAt": "2026-09-30T12:43:28.507909+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T124324918502Z-e4a5ab3d/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "c45a32af66e394c6d5a702de5eb3669220430cf545ea72d33af689dbef193b10",
+      "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+      "executionPlanSha256": "f5995e3ac4d7f3a05fa8207a257be7ee08f151760f58dec151397294beb6360c",
+      "implementationGateSha256": "ccbb28269ac8b15f3fb042d39f86749c1d7fc405f07f50e046c57efbdfe15a31",
+      "fileCount": 401,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2303,
+        "sha256": "871542380ebc157df48621d799bfadb029914ce9cbd2a54a8c21686614db5dbe"
+      },
+      "cleanup": {
+        "registeredSpawns": 3,
+        "observedOwnedProcesses": 5,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 5,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 12129,
+        "sha256": "eeb551b2821648193596e9f2be455c37bf6945870adcd886fc1114498910ac98"
+      },
+      "build": {
+        "artifactDigest": "43ec97314ce8a06f1d0eb68719b8837b04c27cb87c1514d5abdec7217bd93f7c",
+        "fileCount": 559,
+        "manifest": {
+          "bytes": 97048,
+          "sha256": "af503b2bef907f3159c58b009c565de91fded2f01563cf3a9495954f579895a3"
+        }
+      }
+    },
+    {
+      "runId": "20260930T124445570547Z-d55f1545",
+      "kind": "e2e-development",
+      "status": "failed-or-invalid",
+      "startedAt": "2026-09-30T12:44:45.609611+00:00",
+      "endedAt": "2026-09-30T12:49:44.414863+00:00",
+      "exitCode": 1,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/catalog-retention.spec.ts",
+        "tests/e2e/catalog-retention-gesture.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/catalog-presentation.spec.ts",
+        "tests/e2e/catalog-age.spec.ts",
+        "tests/e2e/catalog-revalidation.spec.ts",
+        "tests/e2e/catalog-validation.spec.ts",
+        "tests/e2e/catalog-progress.spec.ts",
+        "tests/e2e/search-recovery.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T124445570547Z-d55f1545/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "development",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/runtime/playwright-browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T124445570547Z-d55f1545/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T124445570547Z-d55f1545/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "c45a32af66e394c6d5a702de5eb3669220430cf545ea72d33af689dbef193b10",
+      "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+      "executionPlanSha256": "f5995e3ac4d7f3a05fa8207a257be7ee08f151760f58dec151397294beb6360c",
+      "implementationGateSha256": "ccbb28269ac8b15f3fb042d39f86749c1d7fc405f07f50e046c57efbdfe15a31",
+      "fileCount": 401,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 3479,
+        "sha256": "c80b026ec35a2c68343f17dafaba358711a1ba7b08966f82ca22f2bbe511525c"
+      },
+      "cleanup": {
+        "registeredSpawns": 6,
+        "observedOwnedProcesses": 239,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 5,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 210496,
+        "sha256": "66abc8a01364d84dd4cb8b9037e3358d05b9e692064da3e59c8b9e25ac8ed865"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T12:44:46.452Z",
+          "duration": 296351.80600000004,
+          "expected": 80,
+          "skipped": 0,
+          "unexpected": 1,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 81,
+        "files": [
+          "catalog-age.spec.ts",
+          "catalog-presentation.spec.ts",
+          "catalog-progress.spec.ts",
+          "catalog-retention-gesture.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-revalidation.spec.ts",
+          "catalog-validation.spec.ts",
+          "catalog-worker.spec.ts",
+          "search-recovery.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [
+          {
+            "file": "catalog-worker.spec.ts",
+            "title": "worker startup failure is explicit and retryable without invented results or synchronous collection fallback",
+            "expectedStatus": "passed",
+            "status": "failed",
+            "retry": 0
+          }
+        ],
+        "report": {
+          "bytes": 690945,
+          "sha256": "7dba2bde2a72b52becaa0526e693fca3d37ae0815b944f950caea9b60c706601"
+        }
+      }
+    },
+    {
+      "runId": "20260930T131300417467Z-67d6a8bf",
+      "kind": "check",
+      "status": "complete",
+      "startedAt": "2026-09-30T13:13:00.456638+00:00",
+      "endedAt": "2026-09-30T13:13:32.036412+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "check",
+        "--",
+        "--reporter=json",
+        "--outputFile=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T131300417467Z-67d6a8bf/vitest.json"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T131300417467Z-67d6a8bf/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+      "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+      "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+      "implementationGateSha256": "9605a5c4a008868af37abb955102bc7cd4e601d5587e3bd36a0e73c72e2073fa",
+      "fileCount": 402,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2485,
+        "sha256": "2fac1923ee2e342034edbd12e6c7a4e94ac964c2c424552f5e88dd708d8fe305"
+      },
+      "cleanup": {
+        "registeredSpawns": 92,
+        "observedOwnedProcesses": 92,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 90,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 368,
+        "sha256": "10bd201d784bb54ed56f3805ca997f38156513ffbb00631c46bc30ce0ed8885a"
+      },
+      "unit": {
+        "success": true,
+        "numTotalTests": 2704,
+        "numPassedTests": 2704,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "fileCount": 82,
+        "assertionCount": 2704,
+        "nonPassed": [],
+        "report": {
+          "bytes": 1152944,
+          "sha256": "ba03c5c0f4ed3c246b21e1063797a091b83609b01c487418f5264b4f15f0ffd2"
+        }
+      }
+    },
+    {
+      "runId": "20260930T131345354868Z-e98181b3",
+      "kind": "build",
+      "status": "complete",
+      "startedAt": "2026-09-30T13:13:45.512497+00:00",
+      "endedAt": "2026-09-30T13:13:57.323705+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "environment": {
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T131345354868Z-e98181b3/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+      "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+      "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+      "implementationGateSha256": "9605a5c4a008868af37abb955102bc7cd4e601d5587e3bd36a0e73c72e2073fa",
+      "fileCount": 402,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 2303,
+        "sha256": "a6650eda9d2a12e4acbbb05f0694f3ce1668b55247420e58b2ff370136d23b76"
+      },
+      "cleanup": {
+        "registeredSpawns": 3,
+        "observedOwnedProcesses": 6,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 5,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 12129,
+        "sha256": "888e08744e334eac9f097715ddeb00f4d1d29836448c1c52c7b9e01e028d2910"
+      },
+      "build": {
+        "artifactDigest": "43ec97314ce8a06f1d0eb68719b8837b04c27cb87c1514d5abdec7217bd93f7c",
+        "fileCount": 559,
+        "manifest": {
+          "bytes": 97048,
+          "sha256": "af503b2bef907f3159c58b009c565de91fded2f01563cf3a9495954f579895a3"
+        }
+      }
+    },
+    {
+      "runId": "20260930T131409029204Z-9c15c50a",
+      "kind": "e2e-development",
+      "status": "complete",
+      "startedAt": "2026-09-30T13:14:09.166026+00:00",
+      "endedAt": "2026-09-30T13:30:52.659546+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/catalog-retention.spec.ts",
+        "tests/e2e/catalog-retention-gesture.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/catalog-presentation.spec.ts",
+        "tests/e2e/catalog-age.spec.ts",
+        "tests/e2e/catalog-revalidation.spec.ts",
+        "tests/e2e/catalog-validation.spec.ts",
+        "tests/e2e/catalog-progress.spec.ts",
+        "tests/e2e/search-recovery.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T131409029204Z-9c15c50a/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "development",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/runtime/playwright-browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T131409029204Z-9c15c50a/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T131409029204Z-9c15c50a/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+      "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+      "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+      "implementationGateSha256": "9605a5c4a008868af37abb955102bc7cd4e601d5587e3bd36a0e73c72e2073fa",
+      "fileCount": 402,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": null,
+      "receipt": {
+        "bytes": 3470,
+        "sha256": "3b321880d9bf1aad2a6a80dc2b7d03ebdc1dc47829198503bd30c50f9a4c2ee4"
+      },
+      "cleanup": {
+        "registeredSpawns": 4,
+        "observedOwnedProcesses": 274,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 4,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 203830,
+        "sha256": "7b7d77455d84294ad0089c8ae0ff3c324030ff98cf285a518a9c4b59cba59f04"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T13:14:12.191Z",
+          "duration": 998598.75,
+          "expected": 81,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 81,
+        "files": [
+          "catalog-age.spec.ts",
+          "catalog-presentation.spec.ts",
+          "catalog-progress.spec.ts",
+          "catalog-retention-gesture.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-revalidation.spec.ts",
+          "catalog-validation.spec.ts",
+          "catalog-worker.spec.ts",
+          "search-recovery.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 681729,
+          "sha256": "73cffb95ae96196cbbffc13474af0d8d9a7a3ac2832903af001a9e1f2579c4a5"
+        }
+      }
+    },
+    {
+      "runId": "20260930T133126803248Z-eb1870a0",
+      "kind": "e2e-production",
+      "status": "failed-or-invalid",
+      "startedAt": "2026-09-30T13:31:27.007120+00:00",
+      "endedAt": "2026-09-30T13:49:24.817109+00:00",
+      "exitCode": 1,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/catalog-retention.spec.ts",
+        "tests/e2e/catalog-retention-gesture.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/catalog-presentation.spec.ts",
+        "tests/e2e/catalog-age.spec.ts",
+        "tests/e2e/catalog-revalidation.spec.ts",
+        "tests/e2e/catalog-validation.spec.ts",
+        "tests/e2e/catalog-progress.spec.ts",
+        "tests/e2e/search-recovery.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T133126803248Z-eb1870a0/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "production",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/runtime/playwright-browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T133126803248Z-eb1870a0/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T133126803248Z-eb1870a0/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+      "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+      "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+      "implementationGateSha256": "9605a5c4a008868af37abb955102bc7cd4e601d5587e3bd36a0e73c72e2073fa",
+      "fileCount": 402,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": {
+        "proofSha256": "81f415f7383b4fd64905342bdb0b1fbec970375c89a63c28eff40f01ac8fd773",
+        "buildRunId": "20260930T131345354868Z-e98181b3",
+        "artifactDigest": "43ec97314ce8a06f1d0eb68719b8837b04c27cb87c1514d5abdec7217bd93f7c"
+      },
+      "receipt": {
+        "bytes": 3707,
+        "sha256": "51f84f24d4939d1ecbd927c97ff8546369b823f6dbcd77f17324cca0d28ae9e5"
+      },
+      "cleanup": {
+        "registeredSpawns": 8,
+        "observedOwnedProcesses": 286,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 6,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 209456,
+        "sha256": "0c862416484583db4586600d98d4bd7a98d90de5e11515291cc2c1f27aa8a335"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T13:31:31.908Z",
+          "duration": 1072284.454,
+          "expected": 79,
+          "skipped": 0,
+          "unexpected": 2,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 81,
+        "files": [
+          "catalog-age.spec.ts",
+          "catalog-presentation.spec.ts",
+          "catalog-progress.spec.ts",
+          "catalog-retention-gesture.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-revalidation.spec.ts",
+          "catalog-validation.spec.ts",
+          "catalog-worker.spec.ts",
+          "search-recovery.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [
+          {
+            "file": "catalog-revalidation.spec.ts",
+            "title": "one-minute cooldown and catalog refreshAfter gate bursts while an active ordinary request is neither aborted nor duplicated",
+            "expectedStatus": "passed",
+            "status": "timedOut",
+            "retry": 0
+          },
+          {
+            "file": "catalog-worker.spec.ts",
+            "title": "worker startup failure is explicit and retryable without invented results or synchronous collection fallback",
+            "expectedStatus": "passed",
+            "status": "timedOut",
+            "retry": 0
+          }
+        ],
+        "report": {
+          "bytes": 642515,
+          "sha256": "486ccae6a502b0bc24e69cdbeef0fe73931ee1cb1d35f4c8c7d5d6e6eb06c831"
+        }
+      }
+    },
+    {
+      "runId": "20260930T142849392293Z-4d015a27",
+      "kind": "e2e-production",
+      "status": "complete",
+      "startedAt": "2026-09-30T14:28:49.430844+00:00",
+      "endedAt": "2026-09-30T14:31:32.438576+00:00",
+      "exitCode": 0,
+      "runnerError": null,
+      "interrupted": false,
+      "timedOut": false,
+      "command": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/catalog-retention.spec.ts",
+        "tests/e2e/catalog-retention-gesture.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/catalog-presentation.spec.ts",
+        "tests/e2e/catalog-age.spec.ts",
+        "tests/e2e/catalog-revalidation.spec.ts",
+        "tests/e2e/catalog-validation.spec.ts",
+        "tests/e2e/catalog-progress.spec.ts",
+        "tests/e2e/search-recovery.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T142849392293Z-4d015a27/playwright-results"
+      ],
+      "environment": {
+        "ORBIT_TEST_MODE": "production",
+        "PLAYWRIGHT_BROWSERS_PATH": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/runtime/playwright-browsers",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T142849392293Z-4d015a27/playwright.json",
+        "DEBUG": "pw:browser",
+        "ORBIT_PROCESS_REGISTRY": "/Users/jun/programming/test-3d-job-recommendation/.local/research/73/verification/20260930T142849392293Z-4d015a27/processes.ndjson",
+        "NODE_OPTIONS": "--require=/Users/jun/programming/test-3d-job-recommendation/.local/research/73/collaboration/register-processes.cjs"
+      },
+      "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+      "contractSha256": "c086205a368fc0b8ae3c71ec591552cda172fe404b205c94379b67898ffbacf9",
+      "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+      "implementationGateSha256": "9605a5c4a008868af37abb955102bc7cd4e601d5587e3bd36a0e73c72e2073fa",
+      "fileCount": 402,
+      "sourceAndTestsUnchanged": true,
+      "contractUnchanged": true,
+      "executionControlsUnchanged": true,
+      "productionBuild": {
+        "proofSha256": "81f415f7383b4fd64905342bdb0b1fbec970375c89a63c28eff40f01ac8fd773",
+        "buildRunId": "20260930T131345354868Z-e98181b3",
+        "artifactDigest": "43ec97314ce8a06f1d0eb68719b8837b04c27cb87c1514d5abdec7217bd93f7c"
+      },
+      "receipt": {
+        "bytes": 3698,
+        "sha256": "c1492b9caf4e61915064924faa9b95992548c9939e1b03377c934ab406471175"
+      },
+      "cleanup": {
+        "registeredSpawns": 4,
+        "observedOwnedProcesses": 267,
+        "registryErrors": [],
+        "incompleteRegistryRecord": false,
+        "registryRequired": true,
+        "registryPresent": true,
+        "observerAcknowledgements": 4,
+        "signalledCount": 0,
+        "forcedCount": 0,
+        "remainingCount": 0
+      },
+      "commandLog": {
+        "bytes": 210700,
+        "sha256": "e7ea7689bd4701e771e637243430e824d2442ffc1ea7cda393f4af8e9f990992"
+      },
+      "e2e": {
+        "stats": {
+          "startTime": "2026-09-30T14:28:50.416Z",
+          "duration": 161523.17899999997,
+          "expected": 81,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 81,
+        "files": [
+          "catalog-age.spec.ts",
+          "catalog-presentation.spec.ts",
+          "catalog-progress.spec.ts",
+          "catalog-retention-gesture.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-revalidation.spec.ts",
+          "catalog-validation.spec.ts",
+          "catalog-worker.spec.ts",
+          "search-recovery.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 650081,
+          "sha256": "11ce015cd5a08100e2315da8d81e25bbf5c813a667432992b59fab7881d39eef"
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "No measured frequency for operating-system Worker crashes; browser tests control genuine Worker errors.",
+    "Retained derivation assumes job-local selection and scores, independent of catalog-relative statistics.",
+    "Retained results derive from the fixed accepted projection; they cannot restore data already absent from it.",
+    "Automatic foreground scheduling remains unchanged; a daily-only source configuration may need manual retry for prompt Worker recovery.",
+    "Unanimous approval is a phase decision, not a guarantee of a defect-free product.",
+    "Constructor failure is injected by the test wrapper; foreground/online/visibility are dispatched events. OS termination, out-of-memory and bfcache restoration are not reproduced.",
+    "The existing unit test covers the150s Worker stall guard; this stage does not exercise that timeout in a browser.",
+    "Daily-source/legacy timestamp cases are unit-only. Compare values and cross-worker preview generation are checked at1440px; changed-intent preview/selection and staged expiry/saved state also run at320px.",
+    "The startup-constructor observer preserves the native fetch promise/Response and proves same-attempt cancellation, with an instrumentation footprint. Only finished/no-error or failed/ERR_ABORTED terminal orderings are accepted; neither implies measured server-resource savings."
+  ],
+  "cleanup": {
+    "status": "pending after all3 approval and stage commit/push",
+    "preview8787": "off",
+    "prepared": "Stage-local archive and cleanup plans prepared; nothing removed while verification is pending."
+  },
+  "nextCandidate": "Server Gap1: catalog board error/retry/success-time provenance when a presence failure defers content collection; no broad re-audit planned.",
+  "testsAuthored": {
+    "unitExpandedCases": 16,
+    "e2eExpandedCases": 17,
+    "e2eSelectedFiles": 9,
+    "executed": true,
+    "correctedExistingE2ECase": "catalog-worker startup-constructor failure: passive fetch observer and dedicated cancellation oracle; healthy helper unchanged"
+  },
+  "implementationGateHistory": [
+    {
+      "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+      "sourceStateDigest": "c45a32af66e394c6d5a702de5eb3669220430cf545ea72d33af689dbef193b10",
+      "fileCount": 401,
+      "executionPlanSha256": "f5995e3ac4d7f3a05fa8207a257be7ee08f151760f58dec151397294beb6360c",
+      "main": "IMPLEMENTATION_REVIEW_APPROVED",
+      "astra": "IMPLEMENTATION_REVIEW_APPROVED",
+      "fable": "IMPLEMENTATION_REVIEW_APPROVED",
+      "allThreeExplicitlyApproved": true,
+      "gateSha256": "ccbb28269ac8b15f3fb042d39f86749c1d7fc405f07f50e046c57efbdfe15a31",
+      "hashReviewLimit": "Fable independently verified source/contract and read the exact plan; Main and Astra independently computed the matching plan hash."
+    }
+  ],
+  "correctionGate": {
+    "decision": "CORRECTION_APPROVED",
+    "allThreeExplicitlyApproved": true,
+    "proposalSha256": "978ebe83032f046a75cb6432f5417be217ae0ec042f2b3507dc972593ce71b23",
+    "gateSha256": "4b1ac5b24b7e7e0bfa28e576693eabe09073f0e8507fa1ed42f96e830fa72c33",
+    "participants": {
+      "main": {
+        "decision": "CORRECTION_APPROVED",
+        "proposalSha256": "978ebe83032f046a75cb6432f5417be217ae0ec042f2b3507dc972593ce71b23",
+        "evidence": "main-correction-approval.json",
+        "evidenceSha256": "f766947901dce8fec4fa6995366390740989c17bad8bfd5e70845545343b1716"
+      },
+      "astra": {
+        "decision": "CORRECTION_APPROVED",
+        "proposalSha256": "978ebe83032f046a75cb6432f5417be217ae0ec042f2b3507dc972593ce71b23",
+        "evidence": "astra-correction-approval.md",
+        "evidenceSha256": "89d2d7599a45fb1b59c444ba4f6cb2c4998f5ec1691e7e21134f16717e695452"
+      },
+      "fable": {
+        "decision": "CORRECTION_APPROVED",
+        "proposalSha256": "978ebe83032f046a75cb6432f5417be217ae0ec042f2b3507dc972593ce71b23",
+        "evidence": "correction-approval-01.review.md",
+        "evidenceSha256": "3a4932da0bf2c4620fc427f24b45488b39324b6461017d5f776eacac38d71ba3"
+      }
+    },
+    "hashReviewLimit": "Fable read full proposal; Main and Astra independently computed its matching hash."
+  },
+  "environmentRevalidationGate": {
+    "decision": "ENVIRONMENT_REVALIDATION_APPROVED",
+    "allThreeExplicitlyApproved": true,
+    "proposalSha256": "caf9de349c882911918fbdb6d03e56adcf91f4a7f68c8753ed3ae5e456a2807a",
+    "gateSha256": "96f96dd91a6ec85d69a5e65ded4eb060ca988a98c57d8adccd7a28ab969379a3",
+    "participants": {
+      "main": {
+        "decision": "ENVIRONMENT_REVALIDATION_APPROVED",
+        "proposalSha256": "caf9de349c882911918fbdb6d03e56adcf91f4a7f68c8753ed3ae5e456a2807a",
+        "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+        "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+        "evidence": "main-environment-approval.json",
+        "evidenceSha256": "a379cda88914e169d9a5191f043c53b3b0ef6acaefd46cf208f459198851fb4c"
+      },
+      "astra": {
+        "decision": "ENVIRONMENT_REVALIDATION_APPROVED",
+        "proposalSha256": "caf9de349c882911918fbdb6d03e56adcf91f4a7f68c8753ed3ae5e456a2807a",
+        "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+        "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+        "evidence": "astra-environment-approval-01.md",
+        "evidenceSha256": "f00ad2d0dd0a4b108b343f296d7e38887d2bec273f391af633b5647856d8fd64"
+      },
+      "fable": {
+        "decision": "ENVIRONMENT_REVALIDATION_APPROVED",
+        "proposalSha256": "caf9de349c882911918fbdb6d03e56adcf91f4a7f68c8753ed3ae5e456a2807a",
+        "stateDigest": "b9bbe96e205e98052fb0bf811194039de5118a5f19bf373085f255c88c7b338d",
+        "executionPlanSha256": "49751b02e210178ef4771de3cff8ef47f8c4a9b6d6c3347d18e9aa776a4d1025",
+        "evidence": "environment-approval-01.review.md",
+        "evidenceSha256": "0405096ef005186c652c454b61e4b944f910ae0fd98957fffbbff7fa501cd83e"
+      }
+    },
+    "conditions": {
+      "ownedSameProcessAndBothAssertions": true,
+      "atLeast30MinutesRemainingAtLaunch": true,
+      "noSleepFromPowerAssertionStartToLaunch": true,
+      "beforeEvidence": ".local/research/73/main/power-before-final-prod.json",
+      "beforeEvidenceSha256": "4ae204e9b230e82c4aec676001df622e56093dd3dcb9622a91281395030357b8",
+      "afterRunPowerWindowRequired": true
+    }
+  },
+  "selectedFinalRuns": {
+    "check": "20260930T131300417467Z-67d6a8bf",
+    "build": "20260930T131345354868Z-e98181b3",
+    "e2e-development": "20260930T131409029204Z-9c15c50a",
+    "e2e-production": "20260930T142849392293Z-4d015a27"
+  },
+  "proceduralDenials": [
+    {
+      "phase": "test-execution-02",
+      "attempt": "Ad hoc Python decoding of a report attachment",
+      "result": "Denied by the CLI tool allowlist before execution; the reports remained readable and Main independently decoded the attachment."
+    },
+    {
+      "phase": "test-execution-03",
+      "attempt": "Prefixing the start command with an actor environment variable",
+      "result": "Denied before a run was created. The exact approved command inherited the correct actor and created one PROD run."
+    }
+  ],
+  "finalReviewerNotes": [
+    {
+      "reviewer": "fable",
+      "blocking": false,
+      "topic": "Receipt hash identity",
+      "resolution": "In the immutable final artifact, independentExecutor.receiptSha256 identifies collaboration/test-execution-03.process.json (the Claude CLI completion receipt). Each runs[].receipt.sha256 identifies verification/<runId>/receipt.json (the validation runner receipt). These are different objects and are expected to have different hashes."
+    },
+    {
+      "reviewer": "fable",
+      "blocking": false,
+      "topic": "Additional historical power event",
+      "resolution": "The failed production run also overlapped a20-second sleep from2026-09-30T22:45:05 to22:45:25+09:00 inside a passing case. It is in the preserved filtered power evidence. The immutable artifact lists the two long intervals associated with timed-out cases; the entire earlier command remains failed. No historical passing case is used to replace final-run coverage."
+    },
+    {
+      "reviewer": "fable",
+      "blocking": false,
+      "topic": "Future host sleep control",
+      "resolution": "Added the scoped power assertion, ownership/expiry, pre/post event check and explicit termination procedure to docs/continuous-improvement.md. No persistent power setting was changed."
+    }
+  ],
+  "finalEvidence": {
+    "path": "docs/validation/catalog-resilience-final-evidence-2026-09-30.json",
+    "sha256": "f6bcf046c6d155da0f04b353da88e71e589663fb6c8006c9d1bd5100a595133c",
+    "immutable": true,
+    "meaning": "All3-reviewed snapshot before cleanup; raw artifacts are removed only after preservation and separately recorded cleanup."
+  }
+}

@@ -11,7 +11,7 @@ import { workTimeCaution } from './job-work-time'
 import { upgradeJobRemoteScope } from './job-remote'
 import { upgradeJob } from './job-upgrade'
 import type { SearchEntry, SearchIndex } from './job-search'
-import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
+import type { Catalog, City, CityResult, Filters, Job, MatchedJob, Profile, Salary } from './types'
 
 export function toUsd(salary: Salary): { min: number; max: number } {
   return { min: salary.min * USD_RATES[salary.currency], max: salary.max * USD_RATES[salary.currency] }
@@ -145,6 +145,18 @@ export function createSearchRanker(index: SearchIndex, profile: Profile): (filte
   }
 }
 
+export function summarizeCityMatches(city: City, matches: MatchedJob[]): CityResult {
+  return {
+    city, matches,
+    companyCount: new Set(matches.map(match => match.company.id)).size,
+    averageScore: matches.length ? matches.reduce((sum, match) => sum + match.score, 0) / matches.length : 0,
+  }
+}
+
+export function compareCityResults(a: CityResult, b: CityResult): number {
+  return b.companyCount - a.companyCount || b.averageScore - a.averageScore || a.city.en.localeCompare(b.city.en)
+}
+
 export function groupCities(catalog: Catalog, matches: MatchedJob[], filters: Filters): CityResult[] {
   const byCity = new Map<string, MatchedJob[]>()
   for (const match of matches) {
@@ -159,12 +171,8 @@ export function groupCities(catalog: Catalog, matches: MatchedJob[], filters: Fi
     if (filters.region !== 'all' && city.region !== filters.region) return []
     const cityMatches = byCity.get(city.id) ?? []
     if (!cityMatches.length) return []
-    return [{
-      city, matches: cityMatches,
-      companyCount: new Set(cityMatches.map(match => match.company.id)).size,
-      averageScore: cityMatches.reduce((sum, match) => sum + match.score, 0) / cityMatches.length,
-    }]
-  }).sort((a, b) => b.companyCount - a.companyCount || b.averageScore - a.averageScore || a.city.en.localeCompare(b.city.en))
+    return [summarizeCityMatches(city, cityMatches)]
+  }).sort(compareCityResults)
 }
 
 export function groupCompanies(matches: MatchedJob[]): { company: MatchedJob['company']; matches: MatchedJob[] }[] {
