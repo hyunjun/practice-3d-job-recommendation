@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "stage": 71,
   "recordedAt": "2026-09-30T06:50:26.028195+00:00",
-  "status": "preservation_verified_before_cleanup",
+  "status": "cleanup_complete",
   "productCommit": "650885b45506ed6030116e391a1df17eddc75ea9",
   "sourceStateDigest": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
   "productVerification": {
@@ -239,7 +239,8 @@
         "gitMode": "100644",
         "gitBlob": "e32ef7146397fde5bbb42124b1e119a76ebb3500"
       }
-    ]
+    ],
+    "restoreReadmeCommand": "git show archive/cleanup-2026-09-30/stage-71-verification-tools:.local/research/71-occupation-scope/collaboration/source-archive-README.md"
   },
   "newPrivateInputArchive": {
     "verifiedAt": "2026-09-30T06:45:50.140400+00:00",
@@ -261,7 +262,8 @@
       }
     ],
     "originalSourcesUnchanged": true,
-    "originalsDeleted": false
+    "originalsDeletedAtArchiveVerification": false,
+    "sourceCopiesDeletedAfterVerification": true
   },
   "protectedBefore": {
     "checkedAt": "2026-09-30T06:50:26.028195+00:00",
@@ -328,7 +330,7 @@
   ],
   "legacyReport": {
     "recordedAt": "2026-09-30T05:32:03.371901+00:00",
-    "status": "aggregate preserved for final cleanup record; originals not deleted",
+    "status": "historical aggregate preserved; generated original report files removed after Git preservation",
     "paths": [
       "playwright-report/index.html",
       "test-results/.last-run.json"
@@ -467,16 +469,132 @@
   ],
   "profilePathBinding": "Each basename was verified against the exact owned launch/error path and the current OS temporary directory. Recheck all live processes and existing profile open files immediately before deletion.",
   "beforeMeasurement": {
-    "measuredAt": "2026-09-30T06:50:26.028195+00:00",
-    "localKiB": 7867216,
-    "filesystemAvailableKiB": 27015788,
-    "scope": "Directory allocation and filesystem availability are separate measurements."
+    "measuredAt": "2026-09-30T06:54:38.695833+00:00",
+    "localKiB": 7867220,
+    "filesystemAvailableKiB": 27140072,
+    "scope": "Directory allocation and filesystem availability measured separately immediately before removal."
   },
-  "afterCleanup": null,
+  "afterCleanup": {
+    "startedAt": "2026-09-30T06:54:38.695833+00:00",
+    "status": "complete",
+    "removedRoots": [
+      ".local/research",
+      ".local/verification",
+      ".local/playwright",
+      ".local/e2e-default",
+      "dist",
+      "dist-server",
+      "public/pdf",
+      "node_modules/.vite",
+      "node_modules/.vite-temp",
+      "playwright-report",
+      "test-results"
+    ],
+    "alreadyAbsentRoots": [],
+    "removedSystemProfiles": [
+      {
+        "basename": "playwright_chromiumdev_profile-1f5LtE",
+        "beforeKiB": 840
+      },
+      {
+        "basename": "playwright_chromiumdev_profile-Ou9fYQ",
+        "beforeKiB": 0
+      },
+      {
+        "basename": "playwright_chromiumdev_profile-rkfkC7",
+        "beforeKiB": 100
+      }
+    ],
+    "alreadyAbsentSystemProfiles": [
+      "playwright_chromiumdev_profile-U9Vi4B",
+      "playwright_chromiumdev_profile-WqP84l",
+      "playwright_chromiumdev_profile-dU6L1Z",
+      "playwright_chromiumdev_profile-h7okD1",
+      "playwright_chromiumdev_profile-ruX1Np",
+      "playwright_chromiumdev_profile-vWpeZI",
+      "playwright_chromiumdev_profile-jnnnQY",
+      "playwright_chromiumdev_profile-8Y5D5V",
+      "playwright_chromiumdev_profile-bjETEp"
+    ],
+    "preRemovalArchiveAndGitReverification": true,
+    "preRemovalProtectedFileCount": 10,
+    "preRemovalOwnedProcessesRemaining": 0,
+    "preRemovalProfileLiveUsers": 0,
+    "endedAt": "2026-09-30T06:54:48.994269+00:00",
+    "protectedFilesAfter": [
+      {
+        "path": ".local/preserved-2026-09-28/historical-inputs.zip",
+        "bytes": 247075859,
+        "sha256": "b7114d8f6bce0ea43236ba54601eeccbfab7593493f936ad1842291a475dd85a"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/manifest.json",
+        "bytes": 1063467,
+        "sha256": "431aea357cf79fb7a64bf7725182ebce7f34f3e0811f164992b6a443fa767514"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/measurement-context.json",
+        "bytes": 1812,
+        "sha256": "2ea40e36f2db7463359563c550b3c05bff79107a099a1ea82de8a8da14a9ffd8"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/supplements.json",
+        "bytes": 265,
+        "sha256": "6a5b0903a2724203fbed0fb8051903cd21639d562a2cc642809dbf94c22d829d"
+      },
+      {
+        "path": ".local/preserved-2026-09-28/verification.json",
+        "bytes": 440,
+        "sha256": "e7220fa27d755609e1c4a32fc69e0577fd1f7ad49217031fc295b93971ee9397"
+      },
+      {
+        "path": ".local/observations-v1/public-board-cache-v5.json",
+        "bytes": 41945,
+        "sha256": "9e2bff5ff6617698dcf032ef4f77d454bc346bff07dd0d03fa5c8977493dbaab"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/README.md",
+        "bytes": 914,
+        "sha256": "c6ac62ebef0890438e9c6851b47e62f37720cd8f1b0cf845adc1d1ddf48414af"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/manifest.json",
+        "bytes": 5744,
+        "sha256": "d78d32bbd528104a6969c611aec55788b540cff412b834f4451f121bca4a8c31"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/stage-71-inputs.zip",
+        "bytes": 86921,
+        "sha256": "c0bacbfe16fa47d527af05b1b64cbc2987e6c0dfa768119ce33e41b8d9d6a739"
+      },
+      {
+        "path": ".local/preserved-2026-09-30/verification.json",
+        "bytes": 857,
+        "sha256": "9045d0d927a2f47f74cc9b4b6296738d06512c69e40f9fd013cf707231529bcb"
+      }
+    ],
+    "all10ProtectedFilesUnchanged": true,
+    "sourceStateDigestAfter": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+    "sourceFileCountAfter": 387,
+    "localFoldersRemaining": [
+      "observations-v1",
+      "preserved-2026-09-28",
+      "preserved-2026-09-30"
+    ],
+    "rootDependenciesRetained": true,
+    "worktreeCount": 1,
+    "archiveRefsUnchanged": true,
+    "gitConnectivityCheckPassed": true,
+    "preview8787Listening": false,
+    "test5173Listening": false,
+    "localKiBAfter": 242488,
+    "filesystemAvailableKiBAfter": 33446388
+  },
   "limits": [
-    "This record is committed before deletion; status is not cleanup complete.",
+    "The preservation checkpoint was committed before deletion. afterCleanup records subsequent actual removal; nested archive verification data describes its original pre-deletion timestamp.",
     "Plan01-era stage_identity bytes were not captured; preserved drafts are not an exact runnable reconstruction of plan01.",
     "Raw verification artifact paths are historical after cleanup; hashes,selected findings and approved source/decision records are retained.",
     "No new E2E is claimed for documentation/archival operations; final functional verification remains the same387-file source state."
-  ]
+  ],
+  "preservationCommit": "d24067295e8cd1390accf4c1c42401ace19fb7b1"
 }

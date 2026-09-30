@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "stage": 71,
-  "recordedAt": "2026-09-30T06:51:48.062601+00:00",
-  "status": "verified_and_preserved_cleanup_pending",
+  "recordedAt": "2026-09-30T06:57:21.945092+00:00",
+  "status": "complete",
   "change": "Occupation v7 primary-role/own-duty classification, preserved historical records, independent regression coverage, and managed Playwright browser default.",
   "contract": {
     "path": "docs/design/occupation-v7.md",
@@ -645,14 +645,14 @@
     "unanimousAt": "2026-09-30T06:45:07.053054+00:00"
   },
   "cleanup": {
-    "status": "git_and_unique_input_preservation_verified_cleanup_pending",
+    "status": "complete",
     "protectedPaths": [
       ".local/preserved-2026-09-28/",
       ".local/observations-v1/",
       ".local/preserved-2026-09-30/"
     ],
     "policy": "Delete reproducible task outputs and exact owned temporary browser profiles; preserve reusable source/findings/results in Git first and protect irreproducible archived inputs/history.",
-    "actualCleanupRecord": null,
+    "actualCleanupRecord": "docs/validation/local-cleanup-2026-09-30.json",
     "independentReviewCorrection": "Astra identified missing unique manual judgments, historical reference responses and fetch receipts. Revised design retains9newblobs681251bytes and references1duplicateHTML in the protected older archive; main and Astra approve design, Fable review pending.",
     "reviewCorrection": "Fable approved final product verification but found three omitted plan01 helper snapshots; cleanup design and source inventory revised separately before any deletion.",
     "design": {
@@ -714,7 +714,8 @@
         }
       ],
       "originalSourcesUnchanged": true,
-      "originalsDeleted": false
+      "originalsDeletedAtArchiveVerification": false,
+      "sourceCopiesDeletedAfterVerification": true
     },
     "sourceArchive": {
       "branch": "archive/cleanup-2026-09-30/stage-71-verification-tools",
@@ -726,7 +727,27 @@
       "pushed": false
     },
     "preservationRecord": "docs/validation/local-cleanup-2026-09-30.json",
-    "documentation": "docs/local-cleanup-2026-09-30.md"
+    "documentation": "docs/local-cleanup-2026-09-30.md",
+    "completedAt": "2026-09-30T06:54:48.994269+00:00",
+    "preservationCommit": "d24067295e8cd1390accf4c1c42401ace19fb7b1",
+    "removedGeneratedRootCount": 11,
+    "removedOwnedSystemProfileCount": 3,
+    "protectedFileCount": 10,
+    "allProtectedFilesUnchanged": true,
+    "sourceStateDigestAfter": "cbfd29e3815e6e37062b69e6b9772e970bec3195b484080aec7f4b393be83cf8",
+    "measurements": {
+      "before": {
+        "measuredAt": "2026-09-30T06:54:38.695833+00:00",
+        "localKiB": 7867220,
+        "filesystemAvailableKiB": 27140072,
+        "scope": "Directory allocation and filesystem availability measured separately immediately before removal."
+      },
+      "after": {
+        "localKiB": 242488,
+        "filesystemAvailableKiB": 33446388,
+        "measuredAt": "2026-09-30T06:54:48.994269+00:00"
+      }
+    }
   },
   "limits": [
     "The agreed scope is a bounded classification heuristic, not general natural-language understanding.",
@@ -802,5 +823,5 @@
       "documentSha256": "09166b57a6066de7918866cfacae1be6154d469c1c72ef56eb137d44953593f6"
     }
   },
-  "artifactRetentionNotice": "Paths under the temporary research/verification directories identify historical execution artifacts. Raw logs,fixture workspaces and reports will be removed after preservation; their hashes and extracted findings are retained here and in the immutable evidence. They are not promised to remain at those paths."
+  "artifactRetentionNotice": "Paths under temporary research/verification directories identify historical execution artifacts. Raw logs,fixture workspaces,reports and temporary source copies were removed after Git/ZIP preservation. Their hashes,selected findings and approved source/decision records remain; raw artifacts no longer exist at those paths."
 }
