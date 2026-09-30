@@ -266,10 +266,27 @@
     "Reproducible raw logs, screenshots, traces, build outputs, browser downloads and temporary working files are removed only after conclusions, relevant hashes and reusable tools are preserved. Irreproducible original inputs and observation history remain ignored local data."
   ],
   "preservationAndCleanup": {
-    "status": "pending-follow-up-record",
+    "status": "complete",
+    "completedAt": "2026-09-30T23:01:09.603747+00:00",
+    "productCommit": "8ad2d119e48910cb03358c9d7b5bef454fbb5686",
+    "productPushedTo": "origin/main",
     "localOnlyToolArchiveRef": "archive/cleanup-2026-10-01/stage-76-verification-tools",
-    "plannedCleanupReport": "docs/validation/compensation-number-format-cleanup-2026-10-01.json",
+    "localOnlyToolArchiveCommit": "1179a885b5d558036384044163656440527d8c4f",
+    "localOnlyToolArchiveFileCount": 283,
+    "archivePushed": false,
+    "cleanupReport": "docs/validation/compensation-number-format-cleanup-2026-10-01.json",
+    "cleanupReportSha256": "45d56d5edd811d904db718dbf7dfecb13b95edb9970de027e0dc212f2e2cdd88",
+    "localAllocatedKiB": {
+      "before": 2067484,
+      "after": 243112
+    },
+    "remainingLocalFileCount": 30,
+    "remainingLocalFileBytes": 248855448,
+    "protectedOriginalFileCount": 26,
+    "sourceAndTestsUnchanged": true,
+    "approvedFinalEvidenceUnchanged": true,
     "originalInputsAndObservationsRemainIgnoredLocalData": true,
-    "note": "Final verification approval precedes the scoped product commit and verified temporary cleanup. Later cleanup documentation records actual completion without modifying this approved evidence artifact."
+    "ownedProcessesStopped": true,
+    "note": "Completed follow-up metadata only. The separately approved final-evidence artifact remains byte-identical and records its pre-cleanup state. Product and tests did not change; E2E was not rerun for cleanup or documentation."
   }
 }
