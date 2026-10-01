@@ -1201,8 +1201,38 @@
     ]
   },
   "preservationAndCleanup": {
-    "status": "pending Git preservation and verified deletion",
+    "status": "completed",
+    "completedAt": "2026-10-01T03:30:00.693347+00:00",
+    "productCommit": "976963d206b64491f0570c0a52a8b3f28c04a065",
+    "productPushedToOriginMain": true,
+    "localToolArchive": {
+      "ref": "refs/heads/archive/cleanup-2026-10-01/stage-77-verification-tools",
+      "commit": "8beab719f03b34de97f310db23b09c7303df0aca",
+      "fileCount": 442,
+      "allGitBlobsMatchOriginalBytes": true,
+      "pushed": false
+    },
+    "cleanupReport": {
+      "path": "docs/validation/compensation-context-cleanup-2026-10-01.json",
+      "sha256": "c511acbcd6c1233afc66091d6b7107d1f10bdb3ea906b797732abbb8034697ce"
+    },
+    "localAllocatedKiB": {
+      "before": 1648868,
+      "after": 243192
+    },
+    "remainingLocalFiles": 34,
+    "remainingLocalFileBytes": 248924049,
+    "protectedOriginalFilesUnchanged": 30,
+    "sourceAndTestFilesUnchanged": 425,
+    "modelCallsTerminalWithoutResiduals": 21,
+    "validationRunsTerminalWithoutResiduals": 5,
+    "astraClosed": true,
+    "taskScopedPowerAssertionsStopped": 3,
+    "portsWithoutListeners": [
+      5173,
+      8787
+    ],
     "originalInputsAndObservationsRemainIgnoredLocalData": true,
-    "note": "No temporary artifact or process is claimed removed by this pre-cleanup record."
+    "note": "Final evidence remains byte-identical to the all3-approved artifact. Its raw log/report/image paths and cleanup-pending wording describe the earlier review snapshot. Temporary files were subsequently deleted after verified Git preservation; this documentation update changed no product/tests and did not rerun E2E."
   }
 }
