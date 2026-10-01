@@ -15195,8 +15195,33 @@
     "Each final still records one framed state with valid measured endpoints, not continuous layout visibility. Import captures follow an explicit return from the functionally asserted page2 to page1. Detail header/lower frames share the same record state while description expansion and scrolling change layout; href values come from actual assertions/state, not readable URL pixels."
   ],
   "preservationAndCleanup": {
-    "status": "pending Git preservation and verified deletion",
+    "status": "complete",
+    "completedAt": "2026-10-01T10:03:40.752966+00:00",
+    "productCommit": "54b52f7b39e5d4c61cf9241a92fbeb8af5d2bc45",
+    "publicProductCommitPushed": true,
+    "localToolArchive": {
+      "verifiedAt": "2026-10-01T10:00:34.160245+00:00",
+      "localOnlyRef": "refs/heads/archive/cleanup-2026-10-01/stage-78-verification-tools",
+      "commit": "968c780f3880fb592cbd6268e44cf9cdeb1cfefa",
+      "baseProductCommit": "54b52f7b39e5d4c61cf9241a92fbeb8af5d2bc45",
+      "fileCount": 432,
+      "allGitBlobsMatchOriginalBytes": true,
+      "manifestSha256": "66ffb5996bab44bb1f0e5f038caee1be496b8defb6c5cc10cfcd34a18ebfba5f",
+      "pushed": false
+    },
+    "cleanupReport": {
+      "path": "docs/validation/saved-lifecycle-cleanup-2026-10-01.json",
+      "sha256": "0fe046efded5e9fa804ef6901db41a85a39085f57c03c9e0f1c51fe01067a202"
+    },
+    "remainingLocalFiles": 38,
+    "existingProtectedFilesUnchanged": 34,
+    "sourceAndTestsUnchanged": true,
     "originalInputsAndObservationsRemainIgnoredLocalData": true,
-    "note": "No temporary artifact or process is claimed removed by this pre-cleanup record."
+    "preCleanupStatus": {
+      "status": "pending Git preservation and verified deletion",
+      "originalInputsAndObservationsRemainIgnoredLocalData": true,
+      "note": "No temporary artifact or process is claimed removed by this pre-cleanup record."
+    },
+    "note": "Follow-up state after actual preservation and cleanup. The final evidence and participant approval bytes remain unchanged; their pending cleanup states describe the earlier review time."
   }
 }
