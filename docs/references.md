@@ -780,3 +780,12 @@ Himalayas는 전체 회사 커리어 목록을 대신하지 않는 원격 공고
 - [Greenhouse Job Board API](https://docs.greenhouse.io/job-board.html)의 금액·통화는 구조화된 필드이지만, 문서의 `pay_input_ranges` 예시에는 지급 기간 필드가 없습니다. 기간과 구성은 각 항목의 `title`·`blurb`에서 확인하고, 과거 원문이 잘린 경우 확인되지 않는 속성은 미확인으로 유지합니다.
 
 앞의 세 문서는 2026-09-30 UTC에 조회하고 응답·URL·시각·해시를 무시되는 `.local/preserved-2026-10-01-stage-77/`에 압축 보존했습니다. Greenhouse 문서는 76단계에 보존한 응답을 다시 읽었습니다. [금액 문맥 설계](design/compensation-context.md)에 금액의 소속, 단위의 우선순위, 기존 자료의 근거 보존과 검증 범위를 기록했습니다.
+
+## 저장 화면 복귀와 탭 간 알림 — 2026-10-01
+
+- [HTML Standard: Broadcasting to other browsing contexts](https://html.spec.whatwg.org/multipage/web-messaging.html#broadcasting-to-other-browsing-contexts)는 BroadcastChannel 수신 대상을 메시지 수신 자격이 있는 객체로 제한하며, Window의 Document에는 fully active 조건을 둡니다. 이 알림을 놓치지 않는 영구 변경 기록으로 간주하지 않습니다. 일반 배경 탭의 알림이 항상 유실된다는 뜻도 아닙니다.
+- [MDN visibilitychange](https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilitychange_event)는 탭·창·앱 이동 때의 문서 가시성 변화를 설명합니다. 저장 기록을 다시 확인할 때 실제 visibility를 검사하고, 숨겨졌다는 이벤트 자체로 읽기를 추가하지 않는 기준입니다.
+- [MDN pageshow](https://developer.mozilla.org/en-US/docs/Web/API/Window/pageshow_event)는 최초 탐색·뒤로/앞으로·정지된 모바일 페이지 복귀뿐 아니라 배경 탭·사전 렌더링도 포함합니다. `pageshow`만으로 화면이 보인다고 판단하지 않으며, 직접 발생시킨 이벤트와 실제 `persisted` 복원 증거를 구분합니다.
+- [MDN Window focus](https://developer.mozilla.org/en-US/docs/Web/API/Window/focus_event)는 창으로 초점이 돌아오는 신호와 버블링하지 않는 특성을 설명합니다. 개별 입력 요소의 초점 이동과 구분합니다.
+
+네 문서의 당시 HTTP 응답과 조회 기록을 `.local/preserved-2026-10-01-stage-78/`에 압축 보존했습니다. [저장 기록 복귀 설계](design/saved-lifecycle.md)에 알림 누락 후 갱신, 초안 보존, 변경 없는 읽기와 실제 변경의 구분, 열려 있는 상세·가져오기 화면의 일치 조건을 기록합니다. 이 문서 조회는 실제 채용공고의 수집·유효성 검사 결과가 아닙니다.

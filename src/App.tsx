@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, ArrowUpRight, Bookmark, BriefcaseBusiness, Check, ChevronDown, CircleHelp, Compass, Database, GitCompareArrows, Globe2, Maximize, Minus, Moon, MousePointer2, Plus, RotateCcw, Search, SlidersHorizontal, Sparkles, Sun, X } from 'lucide-react'
 import { CITY_BY_ID } from '../shared/cities'
 import { catalogNeedsAttention } from '../shared/catalog-health'
@@ -34,6 +34,7 @@ const Globe = lazy(() => import('./components/Globe').then(module => ({ default:
 const FlatMap = lazy(() => import('./components/FlatMap').then(module => ({ default: module.FlatMap })))
 
 type View = 'explore' | 'saved' | 'compare'
+type OpenJob = MatchedJob & { origin: 'saved' | 'catalog' }
 type Notice = { message: string; action?: { label: string; run: () => void }; tone?: 'error' }
 const REGION_VIEWS: Record<Region, [number, number, number]> = {
   all: [29, -39, 3.4], americas: [36, -98, 2.65], europe: [48, 7, 2.15],
@@ -54,7 +55,7 @@ export default function App() {
   const [profile, setProfile] = useState<Profile>(initial.profile)
   const [rememberProfile, setRememberProfile] = useState(true)
   const [filters, setFilters] = useState<Filters>(initial.exploration.filters)
-  const savedStorage = useSavedJobs()
+  const savedStorage = useSavedJobs(view === 'saved')
   const saved = savedStorage.records
   const postingStatus = usePostingStatus(saved)
   const [compareIds, setCompareIds] = useState<string[]>(loadCompare)
@@ -65,16 +66,31 @@ export default function App() {
   const [light, setLight] = useState(initial.exploration.light)
   const [citySort, setCitySort] = useState<ExplorationState['citySort']>(initial.exploration.citySort)
   const [modal, setModal] = useState<'profile' | 'filters' | 'data' | 'saved-data' | null>(null)
-  const [openJob, setOpenJob] = useState<MatchedJob | null>(null)
+  const [openJob, setOpenJob] = useState<OpenJob | null>(null)
+  const committedDetail = useRef<{ open: OpenJob; match: MatchedJob } | null>(null)
   const jobFocusFallback = useRef<(() => HTMLElement | null) | undefined>(undefined)
-  const showJob = useCallback((match: MatchedJob, fallbackFocus?: () => HTMLElement | null) => {
+  const showJob = useCallback((match: MatchedJob, fallbackFocus?: () => HTMLElement | null, origin: OpenJob['origin'] = 'catalog') => {
     jobFocusFallback.current = fallbackFocus
-    setOpenJob(match)
+    setOpenJob({ ...match, origin })
   }, [])
+  const showSavedJob = useCallback((match: MatchedJob, fallbackFocus?: () => HTMLElement | null) => {
+    showJob(match, fallbackFocus, 'saved')
+  }, [showJob])
   const closeJob = useCallback(() => {
     jobFocusFallback.current = undefined
     setOpenJob(null)
   }, [])
+  const savedOpenJob = saved.find(item => item.job.id === openJob?.job.id)
+  const displayedJob = useMemo(() => {
+    if (!openJob || openJob.origin === 'catalog') return openJob
+    const current = savedOpenJob ?? (committedDetail.current?.open === openJob ? committedDetail.current.match : openJob)
+    return { ...openJob, job: current.job, company: current.company }
+  }, [openJob, savedOpenJob])
+  useLayoutEffect(() => {
+    // Only a committed presentation can become the fallback after removal.
+    // A render that was superseded must not replace what the user last saw.
+    committedDetail.current = openJob && displayedJob ? { open: openJob, match: displayedJob } : null
+  }, [openJob, displayedJob])
   const [notice, setNotice] = useState<Notice | null>(null)
   const explorationStorageWarned = useRef(false)
   const mapRef = useRef<GlobeHandle>(null)
@@ -88,8 +104,8 @@ export default function App() {
     : selectedId && CITY_BY_ID.has(selectedId) ? { kind: 'city', cityId: selectedId } : { kind: 'cities' }, [panelTab, selectedId])
   const extraDeadlines = useMemo(() => [
     ...saved.flatMap(item => item.job.source === 'sample' ? [] : snapshotDeadlines(item.job.fetchedAt, item.job.source)),
-    ...(openJob && openJob.job.source !== 'sample' ? snapshotDeadlines(openJob.job.fetchedAt, openJob.job.source) : []),
-  ], [saved, openJob])
+    ...(displayedJob && displayedJob.job.source !== 'sample' ? snapshotDeadlines(displayedJob.job.fetchedAt, displayedJob.job.source) : []),
+  ], [saved, displayedJob])
   const {
     catalog, expired: catalogExpired, loading, progress, error: dataError, reload, retryAt,
     matches, cities, globeCities, remote, unmapped, companyCount, recovery: preparedRecovery,
@@ -101,7 +117,6 @@ export default function App() {
   const showSavedData = () => { closeJob(); setModal('saved-data') }
 
   const savedIds = useMemo(() => new Set(saved.map(item => item.job.id)), [saved])
-  const savedOpenJob = saved.find(item => item.job.id === openJob?.job.id)
   const recovery = retaining || loading || searching ? null : preparedRecovery
 
   useEffect(() => {
@@ -312,13 +327,13 @@ export default function App() {
         </div>
         <div ref={panelRef} className="panel-container" aria-busy={searching && !dataError}><CityPanel catalog={catalog} results={cities} remote={remote} unmapped={unmapped} remoteEligibleOnly={filters.remoteEligibleOnly} selectedId={selectedId} tab={panelTab} sort={citySort} profile={profile} compareIds={compareIds} savedIds={savedIds} saveReady={savedStorage.ready} onSort={setCitySort} onTab={setPanelTab} onSelect={selectCity} onHover={setHoveredId} onCompare={toggleCompare} onOpenJob={showJob} onSave={toggleSave} onProfile={() => setModal('profile')} onData={showData} onFilters={() => setModal('filters')} status={catalogStatus} unavailableState={unavailableState} emptyState={<SearchRecovery analysis={recovery} filters={filters} scope={searchScope} onApply={applyRecovery} onNavigate={navigateRecovery} onFilters={() => setModal('filters')} onProfile={() => setModal('profile')} onData={showData} />} /></div>
       </main>
-    </> : view === 'saved' ? <SavedView saved={saved} storage={savedStorage} showStorageStatus={!openJob && modal !== 'saved-data'} onManage={showSavedData} profile={profile} postingStatus={postingStatus} onOpen={showJob} onRemove={toggleSave} onExplore={() => navigate('explore')} /> : !catalogReady || recommendationsUnavailable ? <main id="main-content" className="collection-page" tabIndex={-1}>{catalogStatus}{unavailableState}</main> : <CompareView catalog={catalog} results={cities} postingType={filters.postingType} compareIds={compareIds} status={catalogStatus} onToggle={toggleCompare} onAuto={() => setCompareIds(cities.slice(0, 3).map(result => result.city.id))} onSelect={id => { navigate('explore'); selectCity(id) }} onExplore={() => navigate('explore')} />}
+    </> : view === 'saved' ? <SavedView saved={saved} storage={savedStorage} showStorageStatus={!openJob && modal !== 'saved-data'} onManage={showSavedData} profile={profile} postingStatus={postingStatus} onOpen={showSavedJob} onRemove={toggleSave} onExplore={() => navigate('explore')} /> : !catalogReady || recommendationsUnavailable ? <main id="main-content" className="collection-page" tabIndex={-1}>{catalogStatus}{unavailableState}</main> : <CompareView catalog={catalog} results={cities} postingType={filters.postingType} compareIds={compareIds} status={catalogStatus} onToggle={toggleCompare} onAuto={() => setCompareIds(cities.slice(0, 3).map(result => result.city.id))} onSelect={id => { navigate('explore'); selectCity(id) }} onExplore={() => navigate('explore')} />}
     <footer className="app-footer"><span><OrbitLogo small />A WORLD OF POSSIBILITIES.</span><span>PUBLIC JOB BOARDS<span className="footer-dot">·</span>LOCAL FIRST<button onClick={() => setModal('data')}><Database size={11} />데이터와 추천 방식</button></span></footer>
     {modal === 'profile' && <ProfileDialog profile={profile} filters={filters} remember={rememberProfile} onApply={applyProfile} onDelete={() => { deleteProfile(); setProfile(SAMPLE_PROFILE); setRememberProfile(true); setFilters({ ...DEFAULT_FILTERS }); setPanelTab('cities'); setSelectedId(null); setModal(null); notify('저장된 프로필을 삭제하고 샘플로 돌아왔어요.') }} onClose={() => setModal(null)} />}
     {modal === 'saved-data' && <SavedDataDialog storage={savedStorage} onClose={() => setModal(null)} />}
     {modal === 'filters' && <FiltersDialog filters={filters} preview={preview} onApply={updateFilters} onClose={() => setModal(null)} />}
     {modal === 'data' && <DataDialog catalog={catalog} expired={catalogExpired} loading={loading} progress={progress} error={dataError} retryAt={retryAt} onRefresh={retryCatalog} onClose={() => setModal(null)} />}
-    {openJob && <JobDialog storage={savedStorage} onManageSaved={showSavedData} match={{ ...openJob, ...matchJob(openJob.job, profile) }} saved={savedOpenJob} postingObservation={savedOpenJob ? postingStatus.observations.get(savedOpenJob.job.id) : undefined} onToggleSave={() => toggleSave(openJob)} onUpdateSaved={update => { changeSaved({ kind: 'update', id: openJob.job.id, patch: update }) }} onClose={closeJob} fallbackFocus={jobFocusFallback.current} />}
+    {displayedJob && <JobDialog storage={savedStorage} onManageSaved={showSavedData} match={{ ...displayedJob, ...matchJob(displayedJob.job, profile) }} saved={savedOpenJob} postingObservation={savedOpenJob ? postingStatus.observations.get(savedOpenJob.job.id) : undefined} onToggleSave={() => toggleSave(displayedJob)} onUpdateSaved={update => { changeSaved({ kind: 'update', id: displayedJob.job.id, patch: update }) }} onClose={closeJob} fallbackFocus={jobFocusFallback.current} />}
     {notice && <Toast message={notice.message} action={notice.action} tone={notice.tone} onDismiss={closeNotice} />}
   </div></FreshnessTimeContext.Provider>
 }

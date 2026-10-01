@@ -19,16 +19,43 @@ export interface SavedState {
 interface Pending {
   operation: SavedOperation
   draft?: SavedJob
+  recreate?: boolean
 }
 export type SavedChangeResult = { accepted: true } | { accepted: false; reason: 'loading' | 'limit' | 'unreadable' | 'missing' | 'busy' }
 export type SavedBulkResult = { ok: true; refreshFailed?: boolean } | { ok: false; error: SavedStorageErrorCode }
+export type SavedRefreshResult =
+  | { status: 'refreshed'; snapshot: SavedState }
+  | { status: 'deferred' }
+  | { status: 'failed'; error: SavedStorageErrorCode }
+  | { status: 'stopped' }
+interface RefreshWaiter {
+  request: number
+  resolve: (result: SavedRefreshResult) => void
+}
 
-function reuseJobSnapshot(record: SavedJob, previous?: SavedJob): SavedJob {
-  // IndexedDB decodes fresh objects even for a note-only update. Retain an
-  // identical, validated JSON snapshot so job-keyed comparisons remain ready.
-  // A matching posting ID alone must never keep an older job's content.
-  if (!previous || record.job === previous.job || JSON.stringify(record.job) !== JSON.stringify(previous.job)) return record
-  return { ...record, job: previous.job }
+function reuseRecord(record: SavedJob, previous?: SavedJob): SavedJob {
+  if (!previous || record === previous) return record
+  // Only validated active records are compared. Opaque recovery originals are
+  // never serialized or normalized to make an unchanged read look cheaper.
+  const job = record.job === previous.job || JSON.stringify(record.job) === JSON.stringify(previous.job) ? previous.job : record.job
+  const company = record.company === previous.company || JSON.stringify(record.company) === JSON.stringify(previous.company) ? previous.company : record.company
+  if (job === previous.job && company === previous.company && record.note === previous.note
+    && record.status === previous.status && record.savedAt === previous.savedAt) return previous
+  return job === record.job && company === record.company ? record : { ...record, job, company }
+}
+
+function reuseRecords(records: SavedJob[], previous: SavedJob[]): SavedJob[] {
+  if (records === previous) return previous
+  const byId = new Map(previous.map(record => [record.job.id, record]))
+  const next = records.map(record => reuseRecord(record, byId.get(record.job.id)))
+  return next.length === previous.length && next.every((record, index) => record === previous[index]) ? previous : next
+}
+
+function reuseRecovery(records: SavedRecovery[], previous: SavedRecovery[]): SavedRecovery[] {
+  return records.length === previous.length && records.every((record, index) => {
+    const before = previous[index]
+    return record.kind === before.kind && record.count === before.count && Object.is(record.original, before.original)
+  }) ? previous : records
 }
 
 /** The visible draft is separate from the last committed database state. */
@@ -41,11 +68,14 @@ export class SavedController {
   private listeners = new Set<() => void>()
   private store: SavedStore | null = null
   private epoch = 0
+  private live = false
+  private initializing = false
   private running = false
   private active: Pending | null = null
   private refreshing = false
-  private refreshRequested = false
-  private recreateMissing = false
+  private requested = 0
+  private covered = 0
+  private refreshWaiters = new Set<RefreshWaiter>()
   private exclusive = false
   private ready = false
   private error: SavedStorageErrorCode | null = null
@@ -70,31 +100,33 @@ export class SavedController {
     }, this.base)
   }
 
-  private publish() {
-    this.snapshot = {
-      records: this.records(), phase: this.phase, ready: this.ready,
+  private publish(): SavedState {
+    const previous = this.snapshot
+    const unreadableIds = previous.unreadableIds.length === this.unreadableIds.size
+      && previous.unreadableIds.every(id => this.unreadableIds.has(id)) ? previous.unreadableIds : [...this.unreadableIds]
+    const next: SavedState = {
+      records: reuseRecords(this.records(), previous.records), phase: this.phase, ready: this.ready,
       error: this.error, pending: this.pending.length, recovery: this.recovery,
-      occupied: this.base.length + this.unreadableCount, unreadableIds: [...this.unreadableIds], busy: this.exclusive,
+      occupied: this.base.length + this.unreadableCount, unreadableIds, busy: this.exclusive,
     }
+    if ((Object.keys(next) as (keyof SavedState)[]).every(key => next[key] === previous[key])) return previous
+    this.snapshot = next
     this.listeners.forEach(listener => listener())
+    return next
   }
 
   private accept(snapshot: SavedStoreSnapshot) {
-    const previous = new Map(this.base.map(record => [record.job.id, record]))
-    this.base = snapshot.records.filter(record => !isSampleSavedRecord(record)).map(record => reuseJobSnapshot(record, previous.get(record.job.id)))
-    this.recovery = snapshot.recovery
+    this.base = reuseRecords(snapshot.records.filter(record => !isSampleSavedRecord(record)), this.base)
+    this.recovery = reuseRecovery(snapshot.recovery, this.recovery)
     this.unreadableIds = new Set(snapshot.unreadableIds)
     this.unreadableCount = snapshot.occupied - snapshot.records.length
   }
 
   async start() {
-    const epoch = ++this.epoch
-    this.store?.close()
-    this.store = null
-    this.running = false
-    this.active = null
-    this.refreshing = false
-    this.exclusive = false
+    this.stop()
+    const epoch = this.epoch
+    this.live = true
+    this.initializing = true
     this.error = null
     this.phase = this.ready && this.pending.length ? 'saving' : 'loading'
     this.publish()
@@ -102,27 +134,40 @@ export class SavedController {
     try {
       opened = await this.open()
       if (epoch !== this.epoch) { opened.close(); return }
-      const snapshot = await opened.read()
-      if (epoch !== this.epoch) { opened.close(); return }
+      // Own the connection before its first read, so stop can close it even if
+      // that native read never finishes. Late results belong to this epoch only.
       this.store = opened
+      const covered = this.requested
+      const snapshot = await opened.read()
+      if (epoch !== this.epoch) return
       this.accept(snapshot)
+      this.covered = covered
+      this.initializing = false
       this.ready = true
       this.phase = this.pending.length ? 'saving' : 'ready'
       this.publish()
-      void this.flush()
+      if (epoch === this.epoch) this.drain()
     } catch (error) {
-      opened?.close()
       if (epoch !== this.epoch) return
+      opened?.close()
+      this.store = null
+      this.initializing = false
       this.fail(error)
     }
   }
 
   stop() {
     this.epoch++
+    this.live = false
+    this.initializing = false
+    this.finishRefreshes({ status: 'stopped' })
     this.store?.close()
     this.store = null
     this.running = false
     this.active = null
+    this.refreshing = false
+    this.requested = 0
+    this.covered = 0
     this.exclusive = false
   }
 
@@ -146,47 +191,59 @@ export class SavedController {
       last.operation = { ...last.operation, patch: { ...last.operation.patch, ...operation.patch } }
       last.draft = draft
     } else this.pending.push({ operation, draft })
+    this.finishRefreshes({ status: 'deferred' })
     this.phase = this.error ? 'error' : 'saving'
     this.publish()
-    if (!this.error) void this.flush()
+    this.drain()
     return { accepted: true }
   }
 
   private fail(error: unknown) {
     this.error = error instanceof SavedStorageError ? error.code : 'write'
     this.phase = 'error'
+    this.finishRefreshes({ status: 'failed', error: this.error })
     this.publish()
   }
 
+  private drain() {
+    if (!this.live || this.initializing || !this.store || this.error || this.running || this.refreshing || this.exclusive) return
+    if (this.pending.length) void this.flush()
+    else if (this.requested > this.covered) void this.readRefresh()
+  }
+
   private async flush() {
-    if (this.running || this.refreshing || this.exclusive || !this.store || this.error || !this.pending.length) return
+    if (!this.live || this.initializing || this.running || this.refreshing || this.exclusive || !this.store || this.error || !this.pending.length) return
     const epoch = this.epoch
+    const store = this.store
     this.running = true
     try {
-      while (this.pending.length && this.store && !this.error) {
+      while (epoch === this.epoch && this.pending.length && !this.error) {
         const current = this.pending[0]
         this.active = current
-        const committed = await this.store.apply(current.operation, this.recreateMissing ? current.draft : undefined)
+        // A deliberate retry permits this retained entry's next attempt only.
+        // Failure, reconnect, and later edits cannot inherit that permission.
+        const recreate = current.recreate ? current.draft : undefined
+        current.recreate = false
+        const committed = await store.apply(current.operation, recreate)
         if (epoch !== this.epoch) return
         const id = current.operation.kind === 'add' ? current.operation.record.job.id : current.operation.id
         if (committed) {
           this.base = this.base.some(item => item.job.id === id)
-            ? this.base.map(item => item.job.id === id ? reuseJobSnapshot(committed.record, item) : item) : [committed.record, ...this.base]
+            ? this.base.map(item => item.job.id === id ? reuseRecord(committed.record, item) : item) : [committed.record, ...this.base]
         } else this.base = this.base.filter(item => item.job.id !== id)
         this.pending.shift()
         this.active = null
         this.phase = this.pending.length ? 'saving' : 'ready'
         this.publish()
-        this.onCommit?.()
+        if (epoch === this.epoch) this.onCommit?.()
       }
-      this.recreateMissing = false
     } catch (error) {
       if (epoch === this.epoch) this.fail(error)
     } finally {
       if (epoch === this.epoch) {
         this.running = false
         this.active = null
-        if (!this.pending.length && this.refreshRequested && !this.error) void this.refresh()
+        this.drain()
       }
     }
   }
@@ -208,7 +265,7 @@ export class SavedController {
       ...retained.filter(entry => entry.operation.kind === 'remove'),
       ...retained.filter(entry => entry.operation.kind !== 'remove'),
     ]
-    this.recreateMissing = true
+    this.pending.forEach(entry => { entry.recreate = entry.operation.kind === 'update' })
     await this.start()
   }
 
@@ -221,7 +278,7 @@ export class SavedController {
   }
 
   private async bulk(action: (store: SavedStore) => Promise<void>): Promise<SavedBulkResult> {
-    if (!this.store || !this.ready || this.pending.length || this.error || this.running || this.refreshing || this.exclusive) return { ok: false, error: 'busy' }
+    if (!this.live || this.initializing || !this.store || !this.ready || this.pending.length || this.error || this.running || this.refreshing || this.exclusive) return { ok: false, error: 'busy' }
     const store = this.store
     const epoch = this.epoch
     this.exclusive = true
@@ -231,11 +288,14 @@ export class SavedController {
     try {
       await action(store)
       committed = true
+      if (epoch !== this.epoch) return { ok: true, refreshFailed: true }
       this.onCommit?.()
       if (epoch !== this.epoch) return { ok: true, refreshFailed: true }
+      const covered = this.requested
       const snapshot = await store.read()
       if (epoch !== this.epoch) return { ok: true, refreshFailed: true }
       this.accept(snapshot)
+      this.covered = covered
       this.phase = 'ready'
       return { ok: true }
     } catch (error) {
@@ -251,31 +311,61 @@ export class SavedController {
       if (epoch === this.epoch) {
         this.exclusive = false
         this.publish()
-        if (this.refreshRequested && !this.error) void this.refresh()
+        if (epoch === this.epoch) this.drain()
       }
     }
   }
 
-  /** Cross-tab refresh never replaces an uncommitted local draft. */
-  async refresh() {
-    this.refreshRequested = true
-    if (!this.store || this.running || this.refreshing || this.exclusive || this.pending.length || this.error) return
+  /** Hints carry no idle waiter; later signals are never discarded by a cooldown. */
+  requestRefresh(): void {
+    if (!this.live) return
+    this.requested++
+    this.drain()
+  }
+
+  /** A comparison completes from a read covering its request, not global idle. */
+  refresh(): Promise<SavedRefreshResult> {
+    if (!this.live) return Promise.resolve({ status: 'stopped' })
+    const request = ++this.requested
+    if (this.error) return Promise.resolve({ status: 'failed', error: this.error })
+    if (this.initializing || !this.store || this.running || this.exclusive || this.pending.length) return Promise.resolve({ status: 'deferred' })
+    return new Promise(resolve => {
+      this.refreshWaiters.add({ request, resolve })
+      this.drain()
+    })
+  }
+
+  private finishRefreshes(result: SavedRefreshResult, covered = Infinity) {
+    for (const waiter of this.refreshWaiters) {
+      if (waiter.request > covered) continue
+      this.refreshWaiters.delete(waiter)
+      waiter.resolve(result)
+    }
+  }
+
+  /** Accept a database baseline beneath any input made while it was reading. */
+  private async readRefresh() {
+    if (!this.store) return
     const epoch = this.epoch
     const store = this.store
+    const covered = this.requested
     this.refreshing = true
-    this.refreshRequested = false
     try {
       const snapshot = await store.read()
       if (epoch !== this.epoch) return
       this.accept(snapshot)
-      this.publish()
+      this.covered = covered
+      this.phase = this.pending.length ? 'saving' : 'ready'
+      const accepted = this.publish()
+      if (epoch !== this.epoch) return
+      if (this.pending.length) this.finishRefreshes({ status: 'deferred' })
+      else this.finishRefreshes({ status: 'refreshed', snapshot: accepted }, covered)
     } catch (error) {
       if (epoch === this.epoch) this.fail(error)
     } finally {
       if (epoch === this.epoch) {
         this.refreshing = false
-        if (this.pending.length && !this.error) void this.flush()
-        else if (this.refreshRequested && !this.error) void this.refresh()
+        this.drain()
       }
     }
   }

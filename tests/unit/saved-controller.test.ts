@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { IDBFactory } from 'fake-indexeddb'
 import { PUBLIC_PROTOCOL_COMPANIES, publicProtocolJob } from '../fixtures/public-protocol'
+import { LEGACY_ENTRY } from '../fixtures/legacy-saved-contract'
 import type { SavedJob } from '../../shared/types'
 import { SavedController } from '../../src/lib/saved-controller'
 import { openSavedStore, SavedStorageError } from '../../src/lib/saved-store'
@@ -267,5 +269,263 @@ describe('saved drafts and committed records', () => {
     failRead = false
     await controller.retry()
     expect(controller.getSnapshot()).toMatchObject({ phase: 'ready', records: [item('file')] })
+  })
+})
+
+/** Each gated read captures its database snapshot first and then waits, so only a later read can observe a commit made after that capture. */
+function gatedReads(store: SavedStore, count: number, skip = 0) {
+  const gates = Array.from({ length: count }, () => deferred<void>())
+  const waiting = [...gates]
+  let reads = 0
+  const wrapper: SavedStore = {
+    ...store,
+    read: async () => {
+      const index = reads++
+      const snapshot = await store.read()
+      if (index >= skip) {
+        const gate = waiting.shift()
+        if (gate) await gate.promise
+      }
+      return snapshot
+    },
+  }
+  return { wrapper, gates, reads: () => reads }
+}
+async function rawPut(entry: unknown) {
+  await new Promise<void>((resolve, reject) => {
+    const opening = factory.open('controller-test')
+    opening.onerror = () => reject(opening.error)
+    opening.onsuccess = () => {
+      const db = opening.result
+      const tx = db.transaction('records', 'readwrite')
+      tx.objectStore('records').put(entry)
+      tx.oncomplete = () => { db.close(); resolve() }
+      tx.onabort = () => { db.close(); reject(tx.error) }
+    }
+  })
+}
+
+describe('return hints, startup coverage, identity reuse and finite retry permission', () => {
+  it('performs exactly one read for a start without hints', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item() })
+    const { wrapper, reads } = gatedReads(store, 0)
+    const controller = create(async () => wrapper)
+    await controller.start()
+    await ready(controller)
+    expect(controller.getSnapshot().records).toEqual([item()])
+    expect(reads()).toBe(1)
+  })
+
+  it('drains a hint that arrives after the initial read captured its snapshot, even with no pending writes', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item() })
+    const { wrapper, gates, reads } = gatedReads(store, 1)
+    const controller = create(async () => wrapper)
+    const starting = controller.start()
+    await vi.waitFor(() => expect(reads()).toBe(1))
+    await store.apply({ kind: 'update', id: 'one', patch: { note: 'Committed after the snapshot' } })
+    controller.requestRefresh()
+    gates[0].resolve()
+    await starting
+    await vi.waitFor(() => expect(controller.getSnapshot().records[0].note).toBe('Committed after the snapshot'))
+    expect(controller.getSnapshot()).toMatchObject({ phase: 'ready', pending: 0, error: null })
+    expect(reads()).toBe(2)
+  })
+
+  it('does not drop a hint that arrives while a return read is already in flight', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item() })
+    const { wrapper, gates, reads } = gatedReads(store, 1, 1)
+    const controller = create(async () => wrapper)
+    await controller.start()
+    await ready(controller)
+    controller.requestRefresh()
+    await vi.waitFor(() => expect(reads()).toBe(2))
+    await store.apply({ kind: 'update', id: 'one', patch: { note: 'Newer note' } })
+    controller.requestRefresh()
+    gates[0].resolve()
+    await vi.waitFor(() => expect(controller.getSnapshot().records[0].note).toBe('Newer note'))
+    expect(reads()).toBe(3)
+    expect(controller.getSnapshot()).toMatchObject({ phase: 'ready', pending: 0 })
+  })
+
+  it('closes a connection whose first read is still pending when stopped, and the stopped lifetime publishes nothing', async () => {
+    const writer = await open()
+    await writer.apply({ kind: 'add', record: item() })
+    // Every lifetime opens its own connection. The first one's close is observed but still performs the real close;
+    // its gated read has already captured its snapshot, so the late completion needs no transaction.
+    const gate = deferred<void>()
+    const closes: Mock<() => void>[] = []
+    let reads = 0
+    const controller = create(async () => {
+      const connection = await open()
+      const close = vi.fn(() => connection.close())
+      closes.push(close)
+      return {
+        ...connection,
+        close,
+        read: async () => {
+          const index = reads++
+          const snapshot = await connection.read()
+          if (index === 0) await gate.promise
+          return snapshot
+        },
+      }
+    })
+    const listener = vi.fn()
+    controller.subscribe(listener)
+    const starting = controller.start()
+    await vi.waitFor(() => expect(reads).toBe(1))
+    listener.mockClear()
+    controller.stop()
+    await Promise.resolve()
+    expect(closes).toHaveLength(1)
+    expect(closes[0]).toHaveBeenCalledTimes(1)
+    gate.resolve()
+    await starting
+    await new Promise(resolve => setTimeout(resolve, 20))
+    expect(listener).not.toHaveBeenCalled()
+    expect(controller.getSnapshot()).toMatchObject({ ready: false, records: [] })
+    await controller.start()
+    await ready(controller)
+    expect(closes).toHaveLength(2)
+    expect(closes[0]).toHaveBeenCalledTimes(1)
+    expect(closes[1]).not.toHaveBeenCalled()
+    expect(controller.getSnapshot().records).toEqual([item()])
+    expect(reads).toBe(2)
+  })
+
+  it('grants no recreation permission from an empty-queue reconnect: a later edit of an externally removed record reports missing until its own explicit retry', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item() })
+    let failRead = false
+    const controller = create(async () => {
+      const connection = await open()
+      return { ...connection, read: () => failRead ? Promise.reject(new SavedStorageError('unavailable')) : connection.read() }
+    })
+    await controller.start()
+    await ready(controller)
+    failRead = true
+    expect(await controller.refresh()).toEqual({ status: 'failed', error: 'unavailable' })
+    expect(controller.getSnapshot()).toMatchObject({ phase: 'error', ready: true, pending: 0, error: 'unavailable' })
+    expect(controller.getSnapshot().records).toEqual([item()])
+    failRead = false
+    await controller.retry()
+    await ready(controller)
+    await store.apply({ kind: 'remove', id: 'one' })
+    expect(controller.change({ kind: 'update', id: 'one', patch: { note: 'Edited after reconnect' } })).toEqual({ accepted: true })
+    await vi.waitFor(() => expect(controller.getSnapshot().error).toBe('missing'))
+    expect((await store.read()).records).toEqual([])
+    expect(controller.getSnapshot().records[0].note).toBe('Edited after reconnect')
+    await controller.retry()
+    await ready(controller)
+    expect((await store.read()).records[0]).toMatchObject({ note: 'Edited after reconnect', savedAt: item().savedAt })
+  })
+
+  it('consumes recreation permission with the retried attempt: a later edit after another external removal reports missing again', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item() })
+    const controller = create()
+    await controller.start()
+    await ready(controller)
+    await store.apply({ kind: 'remove', id: 'one' })
+    controller.change({ kind: 'update', id: 'one', patch: { note: 'First draft' } })
+    await vi.waitFor(() => expect(controller.getSnapshot().error).toBe('missing'))
+    await controller.retry()
+    await ready(controller)
+    expect((await store.read()).records[0]).toMatchObject({ note: 'First draft', savedAt: item().savedAt })
+    await store.apply({ kind: 'remove', id: 'one' })
+    controller.change({ kind: 'update', id: 'one', patch: { note: 'Second draft' } })
+    await vi.waitFor(() => expect(controller.getSnapshot().error).toBe('missing'))
+    expect((await store.read()).records).toEqual([])
+    expect(controller.getSnapshot().records[0].note).toBe('Second draft')
+    await controller.retry()
+    await ready(controller)
+    expect((await store.read()).records[0]).toMatchObject({ note: 'Second draft', savedAt: item().savedAt })
+  })
+
+  it('keeps typing coalesced into the retried entry but grants nothing to a new operation on another record', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item() })
+    await store.apply({ kind: 'add', record: item('two', 'Second note') })
+    const controller = create()
+    await controller.start()
+    await ready(controller)
+    await store.apply({ kind: 'remove', id: 'one' })
+    controller.change({ kind: 'update', id: 'one', patch: { note: 'Draft one' } })
+    await vi.waitFor(() => expect(controller.getSnapshot().error).toBe('missing'))
+    controller.change({ kind: 'update', id: 'one', patch: { note: 'Draft one, more typing' } })
+    expect(controller.getSnapshot()).toMatchObject({ pending: 1, error: 'missing' })
+    expect(controller.getSnapshot().records.find(record => record.job.id === 'one')?.note).toBe('Draft one, more typing')
+    await controller.retry()
+    await ready(controller)
+    expect((await store.read()).records.find(record => record.job.id === 'one')).toMatchObject({ note: 'Draft one, more typing', savedAt: item().savedAt })
+    expect((await store.read()).records.find(record => record.job.id === 'two')).toMatchObject({ note: 'Second note' })
+    await store.apply({ kind: 'remove', id: 'two' })
+    controller.change({ kind: 'update', id: 'two', patch: { note: 'Draft two' } })
+    await vi.waitFor(() => expect(controller.getSnapshot().error).toBe('missing'))
+    expect((await store.read()).records.map(record => record.job.id)).toEqual(['one'])
+    expect(controller.getSnapshot().records.find(record => record.job.id === 'two')?.note).toBe('Draft two')
+  })
+
+  it('reuses the whole snapshot for an unchanged collection with empty recovery and keeps unchanged record and job identity when one field changes', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item('one', 'Original note') })
+    await store.apply({ kind: 'add', record: item('two', 'Second note') })
+    const controller = create()
+    await controller.start()
+    await ready(controller)
+    const before = controller.getSnapshot()
+    expect(before.records.map(record => record.job.id)).toEqual(['two', 'one'])
+    const listener = vi.fn()
+    controller.subscribe(listener)
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const result = await controller.refresh()
+      expect(result.status).toBe('refreshed')
+      if (result.status === 'refreshed') expect(result.snapshot).toBe(before)
+    }
+    expect(listener).not.toHaveBeenCalled()
+    expect(controller.getSnapshot()).toBe(before)
+    await store.apply({ kind: 'update', id: 'two', patch: { status: 'applied' } })
+    await controller.refresh()
+    expect(listener).toHaveBeenCalledTimes(1)
+    const current = controller.getSnapshot()
+    expect(current.records.map(record => record.job.id)).toEqual(['two', 'one'])
+    expect(current.records[0]).toMatchObject({ status: 'applied', note: 'Second note', savedAt: item().savedAt })
+    expect(current.records[0].job).toBe(before.records[0].job)
+    expect(current.records[1]).toBe(before.records[1])
+    expect(current.records).not.toBe(before.records)
+  })
+
+  it('keeps the active records array across reads with an opaque retired-samples archive and surfaces a real archive change', async () => {
+    const store = await open()
+    await store.apply({ kind: 'add', record: item() })
+    await rawPut(LEGACY_ENTRY)
+    const controller = create()
+    await controller.start()
+    await ready(controller)
+    const before = controller.getSnapshot()
+    expect(before.records).toEqual([item()])
+    expect(before.occupied).toBe(1)
+    expect(before.recovery).toEqual([{ kind: 'retired-samples', count: 1, original: [LEGACY_ENTRY] }])
+    const listener = vi.fn()
+    controller.subscribe(listener)
+    await controller.refresh()
+    await controller.refresh()
+    const after = controller.getSnapshot()
+    expect(after.records).toBe(before.records)
+    expect(after.recovery).toEqual(before.recovery)
+    expect(after.occupied).toBe(1)
+    const rewritten = { ...LEGACY_ENTRY, record: { ...LEGACY_ENTRY.record, note: 'OLD_TAB_NEW_NOTE' } }
+    await rawPut(rewritten)
+    listener.mockClear()
+    await controller.refresh()
+    const changed = controller.getSnapshot()
+    expect(changed.records).toBe(before.records)
+    expect(changed.recovery).toMatchObject([{ kind: 'retired-samples', count: 2 }])
+    expect(changed.recovery[0].original).toEqual(expect.arrayContaining([LEGACY_ENTRY, rewritten]))
+    expect(listener).toHaveBeenCalled()
+    expect(changed).not.toBe(after)
   })
 })

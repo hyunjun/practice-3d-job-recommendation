@@ -68,7 +68,10 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
   const feedback = useRef<HTMLDivElement>(null)
   useEffect(() => { if (error || message) feedback.current?.scrollIntoView({ block: 'nearest' }) }, [error, message])
   const canWrite = storage.ready && storage.phase === 'ready' && !storage.pending && !storage.busy
-  const stale = Boolean(review && (review.invalidated || review.base.records !== storage.records))
+  const unreadableIds = useMemo(() => new Set(storage.unreadableIds), [storage.unreadableIds])
+  const stale = Boolean(review && (review.invalidated || review.base.records !== storage.records
+    || review.base.occupied !== storage.occupied || review.base.unreadableIds.length !== unreadableIds.size
+    || review.base.unreadableIds.some(id => !unreadableIds.has(id))))
   const current = useMemo(() => new Map(review?.base.records.map(record => [record.job.id, record]) ?? []), [review?.base])
   const rows = useMemo(() => review?.parsed.groups.map(group => {
     const record = group.variants[review.variants.get(group.id) ?? 0]
@@ -110,13 +113,13 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
   const refreshReview = async () => {
     if (!review || reading || storage.busy) return
     const ticket = ++request.current
-    setReading(true); setError(null)
-    const snapshot = await storage.refresh()
+    setReading(true); setError(null); setMessage(null)
+    const result = await storage.refresh()
     if (ticket !== request.current) return
-    if (snapshot.phase === 'ready' && !snapshot.pending) {
-      setReview(makeReview(review.name, review.parsed, snapshot)); setPage(0); setFilter('all')
+    if (result.status === 'refreshed') {
+      setReview(makeReview(review.name, review.parsed, result.snapshot)); setPage(0); setFilter('all')
       setMessage('현재 기록으로 다시 비교했어요. 기존 기록을 바꾸는 선택은 초기화했어요.')
-    } else setError(OPERATION_ERRORS.busy)
+    } else setError(OPERATION_ERRORS[result.status === 'failed' ? result.error : result.status === 'stopped' ? 'unavailable' : 'busy'])
     setReading(false)
   }
   const apply = async () => {
@@ -179,7 +182,7 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
             <div className="saved-import-tools">
               <label>파일 공고 보기<select value={filter} disabled={storage.busy} onChange={event => { setFilter(event.target.value); setPage(0) }}><option value="all">전체</option><option value="new">새 공고</option><option value="different">현재와 다른 공고</option><option value="blocked">기존 원본 확인 필요</option><option value="selected">선택한 공고</option></select></label>
               <button className="text-button" disabled={storage.busy} onClick={() => setReview({ ...review, selected: new Set() })}>선택 비우기</button>
-              <button className="text-button" disabled={storage.busy || reading || !canWrite} onClick={() => void refreshReview()}><RefreshCw size={13} />현재 기록으로 다시 비교</button>
+              <button className="text-button" disabled={storage.busy || reading || !storage.ready} onClick={() => void refreshReview()}><RefreshCw size={13} />현재 기록으로 다시 비교</button>
             </div>
             <p className="saved-import-selection" role="status">선택 {chosen.length}개 · 새 공고 {additions}개 추가 · 기존 {replacements}개 변경 · 저장 후 {resultingCount}/500개{overLimit && ' · 한도를 넘었어요. 선택을 줄여 주세요.'}</p>
             <div className="saved-import-list">{filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE).map(row => <article className={`saved-import-row ${row.state}`} key={row.group.id}>
