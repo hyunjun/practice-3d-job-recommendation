@@ -772,3 +772,11 @@ Himalayas는 전체 회사 커리어 목록을 대신하지 않는 원격 공고
 - 과거 수집본의 공백·점 표기와 잘못된 쉼표 사례를 조사했습니다. 현재 공고가 계속 유효한지 새로 조회한 결과는 아닙니다. [설계와 지원 범위](design/compensation-number-format.md)에 모호성·범위 경계·기존 자료 업그레이드·독립 검증 조건을 기록했습니다.
 
 당시 참고 문서 응답은 무시되는 `.local/preserved-2026-10-01-stage-76/`에 압축 보존합니다. 실제 공고 원본은 기존 `.local/preserved-2026-09-28/historical-inputs.zip`을 재사용하며 공개 테스트에 본문을 복사하지 않습니다.
+
+## 기본급·별도 보상과 지급 단위 — 2026-10-01
+
+- [Google JobPosting](https://developers.google.com/search/docs/appearance/structured-data/job-posting)은 고용주가 제공한 실제 기본급과 `HOUR`·`DAY`·`WEEK`·`MONTH`·`YEAR` 단위를 구분합니다. [Schema.org baseSalary](https://schema.org/baseSalary)도 직무·근로자의 기본급을 뜻합니다. 급여 검토 주기나 근무지로 금액의 지급 단위를 추정하지 않는 기준에 참고했습니다.
+- [ACAS Bonuses](https://www.acas.org.uk/bonuses)는 보너스를 기본 임금에 추가되는 지급으로 설명합니다. 별도 보너스 금액과 기본급, 보너스를 포함한다고 명시한 총보상을 구분합니다. 이 자료로 개별 회사의 계약 조건을 추정하지 않습니다.
+- [Greenhouse Job Board API](https://docs.greenhouse.io/job-board.html)의 금액·통화는 구조화된 필드이지만, 문서의 `pay_input_ranges` 예시에는 지급 기간 필드가 없습니다. 기간과 구성은 각 항목의 `title`·`blurb`에서 확인하고, 과거 원문이 잘린 경우 확인되지 않는 속성은 미확인으로 유지합니다.
+
+앞의 세 문서는 2026-09-30 UTC에 조회하고 응답·URL·시각·해시를 무시되는 `.local/preserved-2026-10-01-stage-77/`에 압축 보존했습니다. Greenhouse 문서는 76단계에 보존한 응답을 다시 읽었습니다. [금액 문맥 설계](design/compensation-context.md)에 금액의 소속, 단위의 우선순위, 기존 자료의 근거 보존과 검증 범위를 기록했습니다.

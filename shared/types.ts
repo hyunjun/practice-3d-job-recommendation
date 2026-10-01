@@ -11,7 +11,7 @@ export type JobProvider = typeof PUBLIC_PROVIDERS[number]
 export type JobSource = 'sample' | JobProvider
 export type Source = 'sample' | 'public'
 export type Employment = 'fulltime' | 'parttime' | 'permanent' | 'contract' | 'intern' | 'temporary' | 'unknown'
-export const COMPENSATION_VERSION = 3 as const
+export const COMPENSATION_VERSION = 4 as const
 export const QUALIFICATIONS_VERSION = 1 as const
 export const ELIGIBILITY_VERSION = 2 as const
 export const ROLE_CLASSIFICATION_VERSION = 1 as const
@@ -77,7 +77,7 @@ export interface CompensationRange {
   max: number
   currency: string | null
   period: 'year' | 'month' | 'week' | 'day' | 'hour' | 'unknown'
-  basis?: 'base' | 'total' | 'unknown'
+  basis?: 'base' | 'total' | 'other' | 'unknown'
   scope?: string
   evidence?: FactEvidence
 }
@@ -221,7 +221,7 @@ export interface Job {
   compensationRanges?: CompensationRange[]
   compensationNote?: string
   compensationEvidence?: FactEvidence[]
-  compensationVersion?: 1 | 2 | typeof COMPENSATION_VERSION
+  compensationVersion?: 1 | 2 | 3 | typeof COMPENSATION_VERSION
   visa: Visa
   eligibility?: JobEligibility
   remoteCountries: string[]

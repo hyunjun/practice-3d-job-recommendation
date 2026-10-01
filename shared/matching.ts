@@ -43,7 +43,7 @@ export function formatJobSalary(job: Job): string {
 export function formatCompensation(range: NonNullable<Job['compensationRanges']>[number]): string {
   const amount = (value: number) => value.toLocaleString('ko-KR', { maximumFractionDigits: 2 })
   const period = { year: '년', month: '월', week: '주', day: '일', hour: '시간', unknown: '기간 미확인' }[range.period]
-  const basis = range.basis === 'total' ? ' · 총보상' : range.basis === 'unknown' ? ' · 구성 미확인' : ''
+  const basis = range.basis === 'total' ? ' · 총보상' : range.basis === 'other' ? ' · 기본급 외 보상' : range.basis === 'unknown' ? ' · 구성 미확인' : ''
   return `${range.currency ?? '통화 미확인'} ${amount(range.min)}–${amount(range.max)} / ${period}${basis}`
 }
 

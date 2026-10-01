@@ -91,7 +91,10 @@ test('core qualifications rank ahead of optional overlaps and their evidence sur
 test('a language alternative does not report the other language as a missing requirement', async ({ page }) => {
   await restore(page)
   await page.getByLabel('도시, 회사 또는 포지션 검색').fill('language choice fixture')
-  await page.locator('.mini-job-title').click()
+  // The previously published results stay clickable while the worker computes the new
+  // query, so only the button carrying the literal requested title is clicked.
+  await page.locator('.mini-job-title', { hasText: 'Backend Engineer — language choice fixture' }).click()
+  await expect(page.getByRole('dialog')).toContainText('Backend Engineer — language choice fixture')
   await expect(page.locator('.match-section.caution')).not.toContainText('Rust')
   await page.locator('.qualification-group.required .qualification-evidence > summary').click()
   await expect(page.locator('.qualification-relation')).toHaveText('이 중 하나 · Python / Rust')
@@ -123,7 +126,9 @@ test.describe('mobile qualifications', () => {
   test('qualification groups and original experience evidence fit a narrow screen', async ({ page }) => {
     await restore(page)
     await page.getByLabel('도시, 회사 또는 포지션 검색').fill('priority core fixture')
-    await page.locator('.mini-job-title').click()
+    // Same race as above: target the literal requested title, not any visible result.
+    await page.locator('.mini-job-title', { hasText: 'Backend Engineer — priority core fixture' }).click()
+    await expect(page.getByRole('dialog')).toContainText('Backend Engineer — priority core fixture')
     await page.locator('.job-qualifications').scrollIntoViewIfNeeded()
     await page.locator('.qualification-group.required .qualification-evidence > summary').click()
     await page.locator('.experience-rule > summary').last().click()

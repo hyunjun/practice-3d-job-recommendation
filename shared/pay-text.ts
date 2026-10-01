@@ -1,12 +1,11 @@
-import { normalizeCompensation } from './compensation'
+import { normalizeCompensation, NO_COMPARABLE_PAY } from './compensation'
+import { amountOwner, amountPeriod, contextBasis, OTHER_COMPONENT, PAY_SUBJECT, payClauses, structuredPayContext } from './pay-context'
 import { PAY_CURRENCY_CODES as CODES, payNumberMentions as mentions } from './pay-numbers'
 import type { PayNumberMention as Mention } from './pay-numbers'
 import type { CompensationInput, SalaryData } from './compensation'
 import type { CompensationRange, FactEvidence } from './types'
 
-const PAY = /\b(?:salary|salaries|compensation|remuneration|base (?:pay|range)|pay (?:range|rate|band)|hourly (?:pay|rate)|on[- ]target earnings|OTE)\b/i
-const NON_BASE = /^[\s,:;]*(?:(?:plus|and|with|an?|annual|yearly|monthly|target|discretionary|additional|cash|sign[- ]on|signing)\s+)*(?:equity|stock|bonus|stipend|allowance|budget|reimbursement)\b/i
-const TOTAL = /\b(?:total (?:annual |cash |target )?(?:compensation|pay|remuneration)|on[- ]target earnings|OTE)\b/i
+const PAY = PAY_SUBJECT
 const GEO_NAME = String.raw`United States|U\.?S\.?A?\.?|United Kingdom|U\.?K\.?|Canada|Canadian|Europe|European|EMEA|APAC|Americas?|Portugal|Germany|France|Ireland|Australia|Singapore|Japan|Korea|India|California|Colorado|Washington|New York|San Francisco|Seattle|NYC|London|Berlin|Toronto|Vancouver|Lisbon|Dublin`
 const GEO = new RegExp(String.raw`\b(?:${GEO_NAME})\b`, 'i')
 const GEO_LABEL = new RegExp(String.raw`^(?:${GEO_NAME})(?:\s*(?:,|/|&|and)\s*(?:${GEO_NAME}))*(?:\s*\((?:${CODES})\))?$`, 'i')
@@ -14,33 +13,18 @@ const ONE_SIDED = /\b(?:up to|from|starting (?:at|from)|at least|minimum of|maxi
 const MAX_TEXT = 100000
 
 export function payPeriod(text: string): CompensationRange['period'] {
-  const monetary = new RegExp(`[$€£¥₩]\\s*\\d|\\b(?:${CODES})\\s*\\d|\\d[\\d, .]*\\b(?:${CODES})\\b`, 'i')
-  const relevant = text.split(/\n|(?<=[.!?])\s+/).filter(clause => {
-    if (NON_BASE.test(clause)) return false
-    if (PAY.test(clause) || /\b(?:paid|pays|payable|payment)\b/i.test(clause)) return true
-    return monetary.test(clause) && !/\b(?:equity|stock|bonus|stipend|allowance|budget|revenue|funding|raised)\b/i.test(clause)
-  }).join('\n').replace(/\b(?:annual|yearly|monthly|weekly|daily|hourly)\s+(?:bonus|equity|stock|leave|holiday|allowance|budget)\b/gi, '')
-  const periods: [CompensationRange['period'], RegExp][] = [
-    ['year', /\b(?:annual(?:ized|ly)?|yearly|per (?:year|annum)|a year|each year)\b|\/(?:year|yr)\b|\bp\.a\.(?:\s|$)/i],
-    ['month', /\b(?:monthly|per month|a month|each month)\b|\/(?:month|mo)\b/i],
-    ['week', /\b(?:weekly|per week|a week|each week)\b|\/(?:week|wk)\b/i],
-    ['day', /\b(?:daily|per day|a day|each day)\b|\/day\b/i],
-    ['hour', /\b(?:hourly|per hour|an hour|each hour)\b|\/(?:hour|hr|h)\b/i],
-  ]
-  const found = periods.filter(([, pattern]) => pattern.test(relevant))
-  return found.length === 1 ? found[0][0] : 'unknown'
+  return structuredPayContext('', text).period
 }
 
 export function payBasis(text: string): NonNullable<CompensationRange['basis']> {
-  if (TOTAL.test(text) || /\b(?:salary|base pay)\b[^.\n]{0,80}\bincludes? (?:both |any |a )?(?:bonus|bonuses|equity|commission)/i.test(text)) return 'total'
-  return /\b(?:salary|salaries|base (?:pay|range)|hourly (?:pay|rate)|pay rate)\b/i.test(text) ? 'base' : 'unknown'
+  return contextBasis(text)
 }
 
 /** Only a specific eligibility phrase or geographic pay heading creates a restriction. */
 export function payScope(text: string): string | undefined {
-  const clauses = text.split(/\n|(?<=[.!?])\s+/).map(line => line.trim()).filter(Boolean)
-  const explicit = clauses.find(line =>
-    /\bfor\b[^.\n]{1,120}\bbased (?:hires|employees|candidates|positions|roles)\b/i.test(line)
+  const clauses = text.split(/\r\n?|\n|(?<=[.!?])\s+/).map(line => line.trim()).filter(Boolean)
+  const explicit = payClauses(text).map(clause => clause.text.trim()).find(line =>
+    /\bfor\b[^;\n]{1,120}\bbased (?:hires|employees|candidates|positions|roles)\b/i.test(line)
     || (GEO.test(line) && /\b(?:only|residents of|based in|based candidates|based employees|based hires)\b/i.test(line) && PAY.test(line)),
   )
   if (explicit) return explicit.slice(0, 500)
@@ -64,26 +48,38 @@ function currencyOf(markers: string[], localText: string): string | null {
   return candidates[0]
 }
 
-function contextOf(text: string, mention: Mention, previous?: Mention) {
-  const lineStart = text.lastIndexOf('\n', mention.index) + 1
-  const nextLine = text.indexOf('\n', mention.end)
-  const lineEnd = nextLine < 0 ? text.length : nextLine
-  // Keep a bonus or equity sentence from being mistaken for the salary sentence next to it.
-  const boundaries = [...text.slice(lineStart, lineEnd).matchAll(/[.!?;]\s+(?=[A-Z])/g)].map(match => lineStart + match.index + match[0].length)
-  const start = boundaries.filter(index => index <= mention.index).at(-1) ?? lineStart
-  const end = boundaries.find(index => index > mention.end) ?? lineEnd
+function contextOf(text: string, mention: Mention, clauseSpan: { start: number; end: number }, previous?: Mention, next?: Mention) {
+  const lineStart = Math.max(text.lastIndexOf('\n', mention.index), text.lastIndexOf('\r', mention.index)) + 1
+  const nextLine = text.slice(mention.end).search(/[\r\n]/)
+  const lineEnd = nextLine < 0 ? text.length : mention.end + nextLine
+  const start = Math.max(lineStart, clauseSpan.start)
+  const end = Math.min(lineEnd, clauseSpan.end)
   const clause = text.slice(start, end).trim().slice(0, 1600)
-  const before = text.slice(start, mention.index).trim()
-  const segmentBefore = previous && previous.end >= start ? text.slice(previous.end, mention.index).trim() : before
-  const preceding = text.slice(Math.max(0, lineStart - 2200), lineStart).split('\n').map(line => line.trim()).filter(Boolean).slice(-3)
+  const before = text.slice(Math.max(start, mention.index - 1600), mention.index)
+  const segmentBefore = previous && previous.end >= start ? text.slice(previous.end, mention.index).slice(-1600) : before
+  const after = text.slice(mention.end, Math.min(end, next && next.index < end ? next.index : end, mention.end + 1600))
+  const preceding = text.slice(Math.max(0, lineStart - 2200), lineStart).split(/\r\n?|\n/).map(line => line.trim()).filter(Boolean).slice(-3)
   const last = preceding.at(-1) ?? ''
-  const bare = !before || /^(?:USD|EUR|GBP|CAD|SGD|AUD|CHF)\s*:?$/i.test(before)
-  const inherited = bare && (PAY.test(last) || NON_BASE.test(last)) ? last : ''
-  // A heading can establish the unit for the immediately following pay description.
-  const heading = preceding.filter(line => line.length < 100 && PAY.test(line) && !/[\d$€£]/.test(line)).at(-1) ?? ''
+  const bare = !before.trim() || new RegExp(`^(?:${CODES})\\s*:?\\s*$`, 'i').test(before.trim())
+  const inherited = bare && (PAY.test(last) || OTHER_COMPONENT.test(last)) ? last : ''
+  // Immediate headings only. A benefit paragraph must not disappear from the
+  // evidence while an older salary heading crosses it.
+  const heading = last.length < 160 && PAY.test(last) && !mentions(last).length && !OTHER_COMPONENT.test(last) ? last : ''
   const context = [inherited || heading, clause].filter(Boolean).join('\n')
-  const evidence = [inherited ? preceding.slice(-2).join('\n') : heading, clause].filter(Boolean).join('\n').slice(0, 2000)
-  return { lineStart, clause, before, segmentBefore, bare, inherited, heading, context, evidence }
+  // Keep the existing geographic eligibility policy separate from the new
+  // amount-owner boundaries. A whole line could lend another range its scope.
+  const scopeStart = Math.max(lineStart, mention.index - 1600)
+  const scopeEnd = Math.min(lineEnd, mention.end + 1600)
+  const scopeBoundaries = [...text.slice(scopeStart, scopeEnd).matchAll(/[.!?;]\s+(?=[A-Z])/g)]
+    .map(match => scopeStart + match.index + match[0].length)
+  const scopeClauseStart = scopeBoundaries.filter(index => index <= mention.index).at(-1) ?? scopeStart
+  const scopeClauseEnd = scopeBoundaries.find(index => index > mention.end) ?? scopeEnd
+  const scopeContext = [inherited || heading, text.slice(scopeClauseStart, scopeClauseEnd).trim().slice(0, 1600)].filter(Boolean).join('\n')
+  const evidence = context.slice(0, 2000)
+  const sameBandTail = next && next.index < end
+    && new RegExp(`^\\s*(?:[-–—]|to|through)\\s*(?:${CODES})?\\s*$`, 'i').test(after)
+    ? text.slice(mention.end, Math.min(end, next.end + 180)) : ''
+  return { lineStart, clause, before, segmentBefore, after, sameBandTail, bare, inherited, heading, context, scopeContext, evidence }
 }
 
 function geographicLabel(prefix: string): string | undefined {
@@ -101,62 +97,106 @@ function sectionHeading(line: string): boolean {
 }
 
 /** A country row may inherit pay context, but never a currency from another row. */
-function geographicPayContext(text: string, lineStart: number): { text: string; period: CompensationRange['period'] } | undefined {
-  const lines = text.slice(Math.max(0, lineStart - 5000), lineStart).split('\n').map(line => line.trim()).filter(Boolean).slice(-20)
+function geographicPayContext(text: string, lineStart: number): { text: string; evidence: string } | undefined {
+  const lines = text.slice(Math.max(0, lineStart - 5000), lineStart).split(/\r\n?|\n/).map(line => line.trim()).filter(Boolean).slice(-20)
   const context: string[] = []
+  const evidence: string[] = []
   let otherParagraphs = 0
   for (const line of lines.reverse()) {
     const firstAmount = mentions(line)[0]
     if (firstAmount && geographicLabel(line.slice(0, firstAmount.index))) continue
-    if (NON_BASE.test(line)) break
+    if (OTHER_COMPONENT.test(line) && !PAY.test(line)) break
     const heading = sectionHeading(line)
     if (heading && !PAY.test(line)) break
     if (PAY.test(line)) {
       context.unshift(line)
+      evidence.unshift(line)
       if (heading) break
     } else if (/[$€£¥₩]|\b(?:equity|stocks?|bonus(?:es)?|stipends?|allowances?|budgets?|reimbursements?|funding|valuation|revenue|donations?|benefits?)\b/i.test(line) || ++otherParagraphs > 2) break
+    else evidence.unshift(line)
   }
   if (!context.length) return undefined
-  // Compensation reviews and annual benefits do not establish a salary period.
-  const periodContext = context.filter(line =>
-    !/\b(?:salary|salaries|pay|compensation)\s+(?:reviews?|discussions?|growth|adjustments?|increases?)\b/i.test(line)
-    && (/\b(?:annual(?:ized)?|yearly|monthly|weekly|daily|hourly)\s+(?:(?:base|total|cash)\s+){0,2}(?:salary|salaries|pay|compensation|remuneration|rate)\b/i.test(line)
-      || /\b(?:salary|salaries|pay|compensation|remuneration)\s+(?:(?:is|are|will be)\s+)?(?:paid|payable)\s+(?:annually|yearly|monthly|weekly|daily|hourly|per (?:year|month|week|day|hour))\b/i.test(line)),
-  )
-  return { text: context.join('\n'), period: payPeriod(periodContext.join('\n')) }
+  return { text: context.join('\n'), evidence: evidence.slice(evidence.indexOf(context[0])).join('\n') }
 }
 
-export function textCompensationInputs(input: string): CompensationInput[] {
+export interface RejectedPay {
+  mention: Mention
+  kind: 'other' | 'change'
+  apparentPay: boolean
+  evidence: FactEvidence
+}
+
+export interface TextCompensationAnalysis {
+  inputs: CompensationInput[]
+  rejected: RejectedPay[]
+}
+
+/** Actual salary candidates and positively rejected components are separate facts. */
+export function analyzeTextCompensation(input: string): TextCompensationAnalysis {
   const text = input.slice(0, MAX_TEXT)
   const found = mentions(text)
+  const clauses = payClauses(text)
   const inputs: CompensationInput[] = []
+  const rejected: RejectedPay[] = []
+  let clauseIndex = 0
+  let previousOwner: { clause: number; text: string; salary: boolean } | undefined
   for (const [index, mention] of found.slice(0, 100).entries()) {
-    const details = contextOf(text, mention, found[index - 1])
+    while (clauseIndex < clauses.length - 1 && clauses[clauseIndex].end <= mention.index) clauseIndex++
+    const details = contextOf(text, mention, clauses[clauseIndex] ?? { start: 0, end: text.length }, found[index - 1], found[index + 1])
+    if (/\(\s*accomplished:\s*~?\s*$/i.test(details.segmentBefore)) continue
     const geography = geographicLabel(details.before)
     const regional = geography ? geographicPayContext(text, details.lineStart) : undefined
-    const labelText = regional ? geography! : details.bare ? details.inherited : details.segmentBefore || details.before
-    if (NON_BASE.test(labelText) || (!PAY.test(details.before) && !(details.bare && PAY.test(details.inherited)) && !regional)) continue
-    const after = text.slice(mention.end, mention.end + 180).split(/[.!?;,\n]/)[0]
-    const basisText = `${regional?.text || (PAY.test(labelText) ? labelText : details.inherited || details.before)}\n${after}`
-    const period = payPeriod(details.clause)
-    const interval = period !== 'unknown' ? period : regional?.period ?? payPeriod(details.inherited || details.heading)
-    const evidence: FactEvidence = { source: 'description', text: regional ? `${regional.text}\n${details.clause}`.slice(-2000) : details.evidence }
+    const labelText = regional ? geography! : details.bare ? details.inherited : details.segmentBefore.trim() || details.before.trim()
+    const continuation = previousOwner?.clause === clauseIndex && previousOwner.salary
+      && (new RegExp(`^[\\s,]*(?:(?:and|or|to|through)|[-–—])\\s*(?:${CODES})?\\s*$`, 'i').test(details.segmentBefore)
+        || /^\s+in (?:our |the )?(?:lowest|highest) geographic market to\s*$/i.test(details.segmentBefore))
+      ? previousOwner.text : ''
+    const heading = continuation || regional?.text || details.inherited || details.heading
+    const owner = amountOwner(details.segmentBefore, mention.raw, details.after, heading)
+    previousOwner = { clause: clauseIndex, text: owner.text + (continuation ? `\n${continuation}` : ''), salary: !['other', 'change', 'irrelevant'].includes(owner.owner) }
+    const evidence: FactEvidence = { source: 'description', text: regional ? `${regional.evidence}\n${details.clause}`.slice(-2000) : details.evidence }
+    if (owner.owner === 'other' || owner.owner === 'change') {
+      rejected.push({ mention, kind: owner.owner, apparentPay: owner.apparentPay || PAY.test(details.before), evidence })
+      continue
+    }
+    if (owner.owner === 'irrelevant') continue
+    const basis = owner.owner
+    const unitContext = details.sameBandTail ? `${owner.text}\n${details.sameBandTail}` : owner.text
+    const interval = owner.ambiguous || basis === 'unknown' && /\b(?:reviews?|discussions?|growth)\b/i.test(labelText)
+      ? 'unknown' : amountPeriod(unitContext, heading)
     // A one-sided offer is not an exact salary. Keep the quote without inventing the other bound.
     const partial = mention.single && ONE_SIDED.test(details.before)
-    const scope = regional ? geography : payScope(details.context)
+    const scope = regional ? geography : payScope(details.scopeContext)
+    const currencyContext = regional && /\(accomplished:\s*~?/i.test(details.clause) && !OTHER_COMPONENT.test(details.clause)
+      ? details.clause : [owner.text, heading].filter(Boolean).join('\n')
     inputs.push({
       label: labelText.replace(/[:\s]+$/, '').slice(0, 180) || '공고의 보상 범위',
       min: partial ? null : mention.min, max: mention.max,
-      currency: currencyOf(mention.markers, details.clause || details.inherited),
-      interval, basis: payBasis(basisText), ...(scope ? { scope } : {}), evidence,
+      currency: currencyOf(mention.markers, currencyContext),
+      interval, basis, ...(scope ? { scope } : {}), evidence,
     })
   }
   if ((found.length > 100 || input.length > MAX_TEXT) && inputs.length) inputs.push({
     evidence: { source: 'description', text: inputs[0].evidence!.text },
   })
-  return inputs
+  return { inputs, rejected }
+}
+
+export function textCompensationInputs(input: string): CompensationInput[] {
+  return analyzeTextCompensation(input).inputs
+}
+
+export function rejectedPayEvidence(analysis: TextCompensationAnalysis): FactEvidence[] {
+  return [...new Map(analysis.rejected.filter(item => item.apparentPay).map(item => [item.evidence.text, item.evidence])).values()].slice(0, 20)
+}
+
+export function compensationFromAnalysis(analysis: TextCompensationAnalysis): SalaryData {
+  const pay = normalizeCompensation(analysis.inputs)
+  if (analysis.inputs.length) return pay
+  const evidence = rejectedPayEvidence(analysis)
+  return evidence.length ? { salary: null, compensationEvidence: evidence, compensationNote: NO_COMPARABLE_PAY } : pay
 }
 
 export function parseTextCompensation(text: string): SalaryData {
-  return normalizeCompensation(textCompensationInputs(text))
+  return compensationFromAnalysis(analyzeTextCompensation(text))
 }

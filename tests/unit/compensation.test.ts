@@ -262,13 +262,47 @@ describe('rechecking existing compensation without losing saved context', () => 
   })
 
   it.each(['greenhouse', 'ashby', 'lever', 'smartrecruiters'] as const)('keeps %s structured disclosures ahead of different or missing prose', source => {
+    // A provider payload with structured ranges never parsed its prose, so the intended old record
+    // carries only the board pay fields: the prose-derived pay fields are removed before the board
+    // result and the old version are attached. Full payload equality is retained for every provider.
+    const { salary: _salary, compensationRanges: _ranges, compensationNote: _note, compensationEvidence: _evidence, ...nonPay } = posting(geographicPayText)
     const old: Job = {
-      ...posting(geographicPayText), source, compensationVersion: 1,
+      ...nonPay, source, compensationVersion: 1,
       ...greenhouseCompensation('', [{ title: 'Annual base salary', min_cents: 9000000, max_cents: 12000000, currency_type: 'GBP' }]),
     }
     expect(upgradeJobCompensation(old)).toEqual({ ...old, compensationVersion: COMPENSATION_VERSION })
     const invalid: Job = { ...old, salary: null, compensationRanges: undefined, compensationNote: 'Provider did not return both bounds.', compensationEvidence: [{ source: 'board', text: 'Annual base salary · GBP · upper bound unavailable' }] }
     expect(upgradeJobCompensation(invalid)).toEqual({ ...invalid, compensationVersion: COMPENSATION_VERSION })
+  })
+
+  it('removes only an obsolete prose variants note from an old Greenhouse board record under both preserve settings', () => {
+    // Execution-correction-resolution-01, F2: the historical composite kept the prose-derived variants
+    // note beside one comparable board range because the board result has no note key. Only that
+    // obsolete note and the version may change; amounts, provenance and nonpay fields stay exact.
+    const old: Job = {
+      ...posting(geographicPayText), source: 'greenhouse', compensationVersion: 1,
+      ...greenhouseCompensation('', [{ title: 'Annual base salary', min_cents: 9000000, max_cents: 12000000, currency_type: 'GBP' }]),
+    }
+    expect(old.compensationNote).toBe('지역·경력 등에 따라 보상 구간이 달라요. 각 조건을 확인할 수 있도록 나눠 표시하며 하나의 연봉으로 비교하지 않습니다.')
+    expect(old.salary).toEqual({ min: 90000, max: 120000, currency: 'GBP' })
+    const snapshot = JSON.stringify(old)
+    for (const preserve of [true, false]) {
+      const updated = upgradeJobCompensation(old, preserve)
+      expect(updated).toEqual({ ...old, compensationVersion: COMPENSATION_VERSION, compensationNote: undefined })
+      expect(updated.compensationNote).toBeUndefined()
+      expect(updated.compensationVersion).toBe(COMPENSATION_VERSION)
+      expect(updated.salary).toEqual({ min: 90000, max: 120000, currency: 'GBP' })
+      expect(updated.compensationRanges).toEqual([{
+        label: 'Annual base salary', min: 90000, max: 120000, currency: 'GBP', period: 'year', basis: 'base',
+        evidence: { source: 'board', text: 'Annual base salary' },
+      }])
+      expect(updated.compensationEvidence).toBeUndefined()
+      expect(updated).toMatchObject({
+        id: old.id, companyId: old.companyId, title: old.title, description: old.description, url: old.url,
+        cityIds: old.cityIds, fetchedAt: timestamp, source: 'greenhouse',
+      })
+    }
+    expect(JSON.stringify(old)).toBe(snapshot)
   })
 
   it('preserves a quoted pay statement omitted by the stored body length limit without extending the description or its date', () => {

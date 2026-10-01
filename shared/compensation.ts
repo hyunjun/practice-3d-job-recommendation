@@ -14,6 +14,11 @@ export interface CompensationInput {
 
 export type SalaryData = Pick<Job, 'salary' | 'compensationRanges' | 'compensationNote' | 'compensationEvidence'>
 
+export const NO_COMPARABLE_PAY = '보상 설명은 있지만 비교할 수 있는 급여 범위를 확인하지 못했어요. 원문 근거를 확인해 주세요.'
+export const INCOMPLETE_SALARY = '일부 보상 구간의 금액을 확인할 수 없어요. 확인된 구간과 원문을 표시하며 연봉 비교에는 사용하지 않습니다.'
+export const OTHER_PAY = '기본급 외 보상 항목입니다. 기본 연봉 비교에는 사용하지 않습니다.'
+export const INCOMPLETE_OTHER_PAY = '기본급 외 보상 일부의 금액을 확인할 수 없어요. 기본 급여와 해당 원문 근거를 함께 표시합니다.'
+
 export function periodOf(interval?: string | null): CompensationRange['period'] {
   const value = interval?.trim().toLowerCase().replaceAll('_', '-')
   const periods: [CompensationRange['period'], RegExp][] = [
@@ -47,18 +52,22 @@ export function normalizeCompensation(inputs: CompensationInput[]): SalaryData {
   const evidenceData = evidence.length ? { compensationEvidence: evidence } : {}
   if (!distinct.length) return {
     salary: null, ...evidenceData,
-    ...(inputs.length ? { compensationNote: '보상 설명은 있지만 비교할 수 있는 급여 범위를 확인하지 못했어요. 원문 근거를 확인해 주세요.' } : {}),
+    ...(inputs.length ? { compensationNote: NO_COMPARABLE_PAY } : {}),
   }
-  const variants = new Set(distinct.map(({ min, max, currency, period, basis }) => `${min}|${max}|${currency}|${period}|${basis}`))
-  const first = distinct[0]
-  const complete = ranges.length === inputs.length
-  const scoped = distinct.some(range => range.scope)
-  const allBase = distinct.every(range => range.basis === 'base')
-  const knownCurrency = distinct.every(range => range.currency)
-  const comparable = complete && variants.size === 1 && !scoped && allBase
+  // Other components remain visible, but only actual salary disclosures take
+  // part in the base-salary completeness/variant checks. Overflow is unresolved.
+  const candidates = distinct.filter(range => range.basis !== 'other')
+  const variants = new Set(candidates.map(({ min, max, currency, period, basis }) => `${min}|${max}|${currency}|${period}|${basis}`))
+  const first = candidates[0]
+  const complete = inputs.length <= 100 && !invalid.some(input => input.basis !== 'other')
+  const scoped = candidates.some(range => range.scope)
+  const allBase = candidates.every(range => range.basis === 'base')
+  const knownCurrency = candidates.every(range => range.currency)
+  const comparable = !!first && complete && variants.size === 1 && !scoped && allBase
     && first.period === 'year' && first.currency !== null && Object.hasOwn(USD_RATES, first.currency)
   let note = ''
-  if (!complete) note = '일부 보상 구간의 금액을 확인할 수 없어요. 확인된 구간과 원문을 표시하며 연봉 비교에는 사용하지 않습니다.'
+  if (!complete) note = INCOMPLETE_SALARY
+  else if (!first) note = OTHER_PAY
   else if (variants.size > 1) note = '지역·경력 등에 따라 보상 구간이 달라요. 각 조건을 확인할 수 있도록 나눠 표시하며 하나의 연봉으로 비교하지 않습니다.'
   else if (scoped) note = '특정 지역에 적용되는 보상입니다. 모든 근무지나 지원자에게 같은 금액이 적용된다고 가정하지 않고 연봉 비교에서 제외합니다.'
   else if (!allBase) note = '총보상이거나 기본 급여 여부가 확인되지 않은 금액입니다. 기본 연봉과 합쳐 비교하지 않습니다.'
@@ -67,6 +76,7 @@ export function normalizeCompensation(inputs: CompensationInput[]): SalaryData {
     ? '지급 기간이 확인되지 않은 금액입니다. 연봉으로 가정하지 않으며 원문 근거를 함께 표시합니다.'
     : '연간 급여로 명시되지 않은 보상입니다. 근무 시간과 지급 기간을 가정해 연봉으로 환산하지 않습니다.'
   else if (!comparable) note = '이 통화는 현재 연봉 비교에서 지원하지 않아요. 공고에 기재된 통화와 금액을 표시합니다.'
+  else if (invalid.length) note = INCOMPLETE_OTHER_PAY
   return {
     salary: comparable ? { min: first.min, max: first.max, currency: first.currency as Salary['currency'] } : null,
     compensationRanges: distinct, ...evidenceData,

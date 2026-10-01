@@ -1,0 +1,1208 @@
+{
+  "version": 1,
+  "stage": 77,
+  "recordedAt": "2026-10-01T03:23:31.426091+00:00",
+  "title": "Compensation ownership, period precedence and provenance-preserving version4 interpretation",
+  "baselineCommit": "a345ffa3527c4cee6d026cc3a58aaa058215c5fa",
+  "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+  "sourceFileCount": 425,
+  "contractPath": "docs/design/compensation-context.md",
+  "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+  "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+  "finalEvidence": {
+    "path": "docs/validation/compensation-context-final-evidence-2026-10-01.json",
+    "sha256": "0b5722a05dc3e427d84d0f62f0da10c0aae229bba91a29514dd8c85455ddcd3e"
+  },
+  "designApproval": {
+    "all3Approved": true,
+    "gateSha256": "94911fe0e0192f5797d25364d925d5e623839d050cba6737d4d9263f927a72bf",
+    "participants": {
+      "main": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+        "reviewPath": "collaboration/main-design-review-02.json",
+        "reviewSha256": "dc679de21aec0c3620685cc9af16509daeb47dc656b9dcb19aa3d96328fbef94",
+        "unresolvedBlockers": []
+      },
+      "astra": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+        "reviewPath": "collaboration/astra-design-review-02.json",
+        "reviewSha256": "7b6606da273931271d71964b718abc30da1d8adf51f31b790b9e619b62e7233c",
+        "unresolvedBlockers": []
+      },
+      "fable": {
+        "decision": "DESIGN_APPROVED",
+        "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+        "reviewPath": "collaboration/design-review-02.review.md",
+        "reviewSha256": "7588ebc8d9507978e598efd6ccf53a059b96e4e2e9e0720a1e63bf114f2ceb20",
+        "unresolvedBlockers": []
+      }
+    }
+  },
+  "implementationApproval": {
+    "revision": "04",
+    "all3Approved": true,
+    "gateSha256": "c99c010db72f6a4e25ce18f9d7bf48811f72dc270ce202b11496c0387e62982b",
+    "participants": {
+      "main": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "reviewPath": "collaboration/main-implementation-review-04.json",
+        "reviewSha256": "61a01f3ca8e3594f98845ea252d667f9c5a88ed4bb39eb69877519f524c10ee6",
+        "unresolvedBlockers": []
+      },
+      "astra": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "reviewPath": "collaboration/astra-implementation-review-04.json",
+        "reviewSha256": "c2a21e37be32a11d698e20f2921f68c3113f82adfbd29f74f9cb43380f097528",
+        "unresolvedBlockers": []
+      },
+      "fable": {
+        "decision": "IMPLEMENTATION_REVIEW_APPROVED",
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "reviewPath": "collaboration/implementation-review-04.review.md",
+        "reviewSha256": "01d7dc35a200410a1f90b1adb474899181db94b05bdded7a2485764fabb8cf00",
+        "unresolvedBlockers": []
+      }
+    }
+  },
+  "finalVerificationGate": {
+    "stage": 77,
+    "phase": "final-verification",
+    "recordedAt": "2026-10-01T03:23:22.436648+00:00",
+    "revision": "01",
+    "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+    "fileCount": 425,
+    "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+    "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+    "sourceManifestSha256": "2e2cbd4607f5deeb41df77699de9bf93407242b9dc0f2790a7e310429ddc6930",
+    "implementationGateSha256": "c99c010db72f6a4e25ce18f9d7bf48811f72dc270ce202b11496c0387e62982b",
+    "finalEvidencePath": "docs/validation/compensation-context-final-evidence-2026-10-01.json",
+    "finalEvidenceSha256": "0b5722a05dc3e427d84d0f62f0da10c0aae229bba91a29514dd8c85455ddcd3e",
+    "participants": {
+      "main": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "finalEvidenceSha256": "0b5722a05dc3e427d84d0f62f0da10c0aae229bba91a29514dd8c85455ddcd3e",
+        "reviewPath": "collaboration/main-final-review-01.json",
+        "reviewSha256": "f76a6577a51f0e211198c4ef878dfcaf5c11bb9475a1511e7481e3f85d7cb087",
+        "visualEvidenceReviewed": [
+          {
+            "mode": "development",
+            "name": "desktop-structured-base-and-other.png",
+            "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-bonus-5f9c7--filter-and-the-city-median/desktop-structured-base-and-other.png",
+            "sha256": "6a0739da11c50ce1232bea0b26b7ed9a4399448ac415112b9583175249f39265",
+            "viewport": {
+              "width": 1440,
+              "height": 960
+            },
+            "bytes": 168434,
+            "reviewed": true,
+            "reviewer": "main",
+            "reviewMethod": "Viewed the actual PNG with functions.view_image.",
+            "observations": "1440x960: Annual base salary shows USD100,000–120,000 /year and the headline $100–120k. Separate Signing bonus row shows USD25,000–25,000 /periodunknown · 기본급 외 보상. Both expanded board source blocks are legible; twelve monthly installments remain in the base source without changing its annual unit. The bonus source contains a separate competitive annual-base sentence, yet its row remains other/periodunknown. Full compensation panel is visible above the fixed save/apply footer with no overlap."
+          },
+          {
+            "mode": "development",
+            "name": "mobile-rejected-compensation.png",
+            "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-rejected-compensation.png",
+            "sha256": "97612400f9fbf1d5738341dd520d6ff7fd466cd3f04d5fd7f4e89e58cf4ddce3",
+            "viewport": {
+              "width": 320,
+              "height": 780
+            },
+            "bytes": 47675,
+            "reviewed": true,
+            "reviewer": "main",
+            "reviewMethod": "Viewed the actual PNG with functions.view_image.",
+            "observations": "320x780: 보상 확인 필요 and the no-comparable-range explanation are visible. Expanded source reads Annual base salary is competitive, plus a signing bonus of USD25,000. No numeric salary range is displayed. Text wraps inside the card and the save/apply buttons remain visible; no horizontal clipping or overlap of compensation evidence."
+          },
+          {
+            "mode": "development",
+            "name": "mobile-corrected-base.png",
+            "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-corrected-base.png",
+            "sha256": "17e2e2c936a729b7204d79fcf0aa325d4334ce5d36d3686556f5fd2eed8c63da",
+            "viewport": {
+              "width": 320,
+              "height": 780
+            },
+            "bytes": 48490,
+            "reviewed": true,
+            "reviewer": "main",
+            "reviewMethod": "Viewed the actual PNG with functions.view_image.",
+            "observations": "320x780: €90–110k headline, USDapproximation, Annual base salary label and EUR90,000–110,000 /year row are legible. Expanded quote retains Annual base salary: EUR90,000–110,000, reviewed monthly. The monthly review wording does not change the displayed annual unit. Quote wraps cleanly; fixed footer does not obscure compensation or source text."
+          },
+          {
+            "mode": "production",
+            "name": "desktop-structured-base-and-other.png",
+            "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-bonus-5f9c7--filter-and-the-city-median/desktop-structured-base-and-other.png",
+            "sha256": "6a0739da11c50ce1232bea0b26b7ed9a4399448ac415112b9583175249f39265",
+            "viewport": {
+              "width": 1440,
+              "height": 960
+            },
+            "bytes": 168434,
+            "reviewed": true,
+            "reviewer": "main",
+            "reviewMethod": "Viewed this actual production PNG with functions.view_image, separately from development.",
+            "observations": "1440x960 production screenshot: Annual base salary is USD100,000–120,000 /year; headline $100–120k. Expanded board quote retains Paid in twelve monthly installments. Signing bonus is separately labelled USD25,000–25,000 /periodunknown · 기본급 외 보상, with its own source and the separate competitive annual-base sentence. Both full source blocks and rows are readable; fixed save/apply footer is below the compensation panel."
+          },
+          {
+            "mode": "production",
+            "name": "mobile-rejected-compensation.png",
+            "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-rejected-compensation.png",
+            "sha256": "97612400f9fbf1d5738341dd520d6ff7fd466cd3f04d5fd7f4e89e58cf4ddce3",
+            "viewport": {
+              "width": 320,
+              "height": 780
+            },
+            "bytes": 47675,
+            "reviewed": true,
+            "reviewer": "main",
+            "reviewMethod": "Viewed this actual production PNG with functions.view_image, separately from development.",
+            "observations": "320x780 production screenshot: 보상 확인 필요 and the no-comparable-salary explanation are visible, with no numeric base row. Whole expanded quote reads Annual base salary is competitive, plus a signing bonus of USD25,000. Korean text and quote wrap inside the panel. Save/apply controls remain visible without covering source evidence or horizontal clipping."
+          },
+          {
+            "mode": "production",
+            "name": "mobile-corrected-base.png",
+            "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-corrected-base.png",
+            "sha256": "17e2e2c936a729b7204d79fcf0aa325d4334ce5d36d3686556f5fd2eed8c63da",
+            "viewport": {
+              "width": 320,
+              "height": 780
+            },
+            "bytes": 48490,
+            "reviewed": true,
+            "reviewer": "main",
+            "reviewMethod": "Viewed this actual production PNG with functions.view_image, separately from development.",
+            "observations": "320x780 production screenshot: €90–110k summary and marked approximateUSDannual conversion are separate from the EUR90,000–110,000 /year base row. The full source retains Annual base salary: EUR90,000–110,000, reviewed monthly. Amount and annual unit are legible; source wraps across two lines. Stickyfooter is below the compensation panel and doesnotobscure the quote."
+          }
+        ],
+        "reportingCorrectionAgreement": {
+          "id": "RPT1",
+          "decision": "AGREE",
+          "reason": "Original failedcandidate02 tree and exact originalreceipt/report remain; fiveactualstage77runs areonefailedplusfourpassed. Correct empty/four-total-tree wording, preserveuneditedpeerreport andfailurehistory. No test/source/expectation/rerun change."
+        },
+        "unresolvedBlockers": []
+      },
+      "astra": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "finalEvidenceSha256": "0b5722a05dc3e427d84d0f62f0da10c0aae229bba91a29514dd8c85455ddcd3e",
+        "reviewPath": "collaboration/astra-final-review-01.json",
+        "reviewSha256": "53091994a6bd3a0d5f822daa8e4193e7a21c134c0453c4f072b43ed0a6d5cb3e",
+        "visualEvidenceReviewed": [
+          {
+            "mode": "development",
+            "name": "desktop-structured-base-and-other.png",
+            "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-bonus-5f9c7--filter-and-the-city-median/desktop-structured-base-and-other.png",
+            "sha256": "6a0739da11c50ce1232bea0b26b7ed9a4399448ac415112b9583175249f39265",
+            "viewport": {
+              "width": 1440,
+              "height": 960
+            },
+            "reviewed": true,
+            "observations": "My direct view shows $100–120k in the summary and Annual base salary USD 100,000–120,000 / 년. Its expanded source retains the twelve monthly installments wording without changing the annual unit. A separate Signing bonus row shows USD 25,000–25,000 / 기간 미확인 · 기본급 외 보상, with its own expanded quote and separate competitive annual-base sentence. Both complete source blocks are readable above the footer."
+          },
+          {
+            "mode": "development",
+            "name": "mobile-rejected-compensation.png",
+            "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-rejected-compensation.png",
+            "sha256": "97612400f9fbf1d5738341dd520d6ff7fd466cd3f04d5fd7f4e89e58cf4ddce3",
+            "viewport": {
+              "width": 320,
+              "height": 780
+            },
+            "reviewed": true,
+            "observations": "My direct view shows 보상 확인 필요 and the no-comparable-range explanation, with no numeric salary row. The complete expanded quote retains Annual base salary is competitive, plus a signing bonus of USD 25,000. The explanation and quote wrap inside the 320px panel; bottom controls do not cover them."
+          },
+          {
+            "mode": "development",
+            "name": "mobile-corrected-base.png",
+            "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-corrected-base.png",
+            "sha256": "17e2e2c936a729b7204d79fcf0aa325d4334ce5d36d3686556f5fd2eed8c63da",
+            "viewport": {
+              "width": 320,
+              "height": 780
+            },
+            "reviewed": true,
+            "observations": "My direct view shows €90–110k, a separately marked approximate USD annual conversion, and one Annual base salary row for EUR 90,000–110,000 / 년. The complete source retains reviewed monthly while the displayed unit stays annual. Amount, label and wrapped quote are readable at 320px without visible clipping or footer obstruction."
+          },
+          {
+            "mode": "production",
+            "name": "desktop-structured-base-and-other.png",
+            "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-bonus-5f9c7--filter-and-the-city-median/desktop-structured-base-and-other.png",
+            "sha256": "6a0739da11c50ce1232bea0b26b7ed9a4399448ac415112b9583175249f39265",
+            "viewport": {
+              "width": 1440,
+              "height": 960
+            },
+            "reviewed": true,
+            "observations": "I separately viewed this actual production path. The annual base USD 100,000–120,000 and its installments source remain separate from the USD 25,000 signing bonus with unknown period and other-component label. The bonus quote's generic annual-base sentence does not change its row. Both source blocks are complete and unobstructed. Actual file bytes also match the DEV counterpart."
+          },
+          {
+            "mode": "production",
+            "name": "mobile-rejected-compensation.png",
+            "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-rejected-compensation.png",
+            "sha256": "97612400f9fbf1d5738341dd520d6ff7fd466cd3f04d5fd7f4e89e58cf4ddce3",
+            "viewport": {
+              "width": 320,
+              "height": 780
+            },
+            "reviewed": true,
+            "observations": "I separately viewed this actual production path. 보상 확인 필요 and the explanation appear without a numeric salary range. The full quote containing the USD 25,000 signing bonus is visible and wraps inside the narrow panel. The bottom controls do not obscure the evidence; no horizontal clipping is visible. Bytes match the DEV counterpart."
+          },
+          {
+            "mode": "production",
+            "name": "mobile-corrected-base.png",
+            "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-corrected-base.png",
+            "sha256": "17e2e2c936a729b7204d79fcf0aa325d4334ce5d36d3686556f5fd2eed8c63da",
+            "viewport": {
+              "width": 320,
+              "height": 780
+            },
+            "reviewed": true,
+            "observations": "I separately viewed this actual production path. The €90–110k summary, approximate USD conversion and EUR 90,000–110,000 annual base row remain legible. The expanded original quote includes reviewed monthly and wraps across two lines while the salary unit remains annual. The footer sits below the compensation panel. Bytes match the DEV counterpart."
+          }
+        ],
+        "reportingCorrectionAgreement": {
+          "id": "RPT1",
+          "decision": "AGREE",
+          "reason": "The actual verification directory contains five run trees: candidate02's failed check and four successful candidate04 execution02 runs. I independently parsed all five receipts and both unit reports, and verified the old receipt b293d6d999b6db48643715e2d37fcdc315044def0b7f57d9dad17548584c1158 and failed Vitest report 0c2f036c5de686d3e01d1d906e16b46075f0d2191f4e07df3a8da365570a2746 remain byte-identical. Fable's original execution report still contains the inaccurate 'empty' and four-total-tree wording; it is preserved unchanged at a2dbb615fb8211740d6905220dc0c9d954497a6a4417064349e1165a9c251c3e. The immutable final artifact explicitly corrects the inventory and retains the failed run as failed. This documentation correction changes no product, test expectation, command or actual result and needs no test rerun."
+        },
+        "unresolvedBlockers": []
+      },
+      "fable": {
+        "decision": "VERIFICATION_APPROVED",
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "contractSha256": "aee82398ad6a18ea6c18c8d6bac7ccc23e09a72daca039aaa7e1b5f3eaae6989",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "finalEvidenceSha256": "0b5722a05dc3e427d84d0f62f0da10c0aae229bba91a29514dd8c85455ddcd3e",
+        "reviewPath": "collaboration/final-review-01.review.md",
+        "reviewSha256": "61900e6bac011474340fd2c1a8f1217e10fc7f28e27f544dcc568b1751344db1",
+        "visualEvidenceReviewed": [
+          {
+            "mode": "development",
+            "name": "desktop-structured-base-and-other.png",
+            "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-bonus-5f9c7--filter-and-the-city-median/desktop-structured-base-and-other.png",
+            "sha256": "6a0739da11c50ce1232bea0b26b7ed9a4399448ac415112b9583175249f39265",
+            "viewport": "1440x960",
+            "reviewed": true,
+            "reviewMethod": "Directly viewed by me with the Read tool during execution-02; the SHA256 recomputed now with the approved helper equals the hash at viewing time and the file sits in the completed selected development run, so the observations are reused.",
+            "observations": "Job dialog shows '세전 연봉 $100–120k' and '비자 지원 확인 필요'. The '공고의 보상 조건' block reads '2개 구간' with the default note. Row 1 label 'Annual base salary' with 'USD 100,000–120,000 / 년' and its opened board quote 'Annual base salary / Paid in twelve monthly installments.' Row 2 label 'Signing bonus' with 'USD 25,000–25,000 / 기간 미확인 · 기본급 외 보상' and its opened quote 'Signing bonus / We also offer a competitive annual base salary.' All labels, rows and quotes are fully in frame; no horizontal clipping; the footer buttons sit below the block without covering it."
+          },
+          {
+            "mode": "development",
+            "name": "mobile-rejected-compensation.png",
+            "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-rejected-compensation.png",
+            "sha256": "97612400f9fbf1d5738341dd520d6ff7fd466cd3f04d5fd7f4e89e58cf4ddce3",
+            "viewport": "320x780",
+            "reviewed": true,
+            "reviewMethod": "Directly viewed by me during execution-02; hash recomputed now and run binding unchanged, observations reused.",
+            "observations": "'보상 정보 보상 확인 필요' and '비자 지원 확인 필요' are visible. The open compensation block shows only the explanation '보상 설명은 있지만 비교할 수 있는 급여 범위를 확인하지 못했어요. 원문 근거를 확인해 주세요.' and the opened quote 'Annual base salary is competitive, plus a signing bonus of USD 25,000.' No numeric range row exists, so no false salary is shown. Text wraps within 320px with no horizontal cut-off and the bottom controls do not overlap the compensation content."
+          },
+          {
+            "mode": "development",
+            "name": "mobile-corrected-base.png",
+            "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-corrected-base.png",
+            "sha256": "17e2e2c936a729b7204d79fcf0aa325d4334ce5d36d3686556f5fd2eed8c63da",
+            "viewport": "320x780",
+            "reviewed": true,
+            "reviewMethod": "Directly viewed by me during execution-02; hash recomputed now and run binding unchanged, observations reused.",
+            "observations": "Key facts show '세전 연봉 €90–110k' with '약 $99–121k USD / 년'. The block reads '1개 구간', label 'Annual base salary', full row 'EUR 90,000–110,000 / 년' and the opened quote 'Annual base salary: EUR 90,000–110,000, reviewed monthly.' The annual unit is kept despite the monthly review wording; amount, unit and evidence are readable, nothing is clipped, and the fixed controls sit below the block."
+          },
+          {
+            "mode": "production",
+            "name": "desktop-structured-base-and-other.png",
+            "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-bonus-5f9c7--filter-and-the-city-median/desktop-structured-base-and-other.png",
+            "sha256": "6a0739da11c50ce1232bea0b26b7ed9a4399448ac415112b9583175249f39265",
+            "viewport": "1440x960",
+            "reviewed": true,
+            "reviewMethod": "Directly viewed by me as its own file during execution-02; hash recomputed now and bound to the completed selected production run; observations reused. Its bytes equal the development capture, consistent with deterministic synthetic fixtures and the fixed test clock.",
+            "observations": "Identical rendering to the development desktop capture: '$100–120k' headline, '2개 구간', default note, 'Annual base salary' with 'USD 100,000–120,000 / 년' and the installments quote, 'Signing bonus' with 'USD 25,000–25,000 / 기간 미확인 · 기본급 외 보상' and its quote; all in frame and unobstructed."
+          },
+          {
+            "mode": "production",
+            "name": "mobile-rejected-compensation.png",
+            "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-rejected-compensation.png",
+            "sha256": "97612400f9fbf1d5738341dd520d6ff7fd466cd3f04d5fd7f4e89e58cf4ddce3",
+            "viewport": "320x780",
+            "reviewed": true,
+            "reviewMethod": "Directly viewed by me as its own file during execution-02; hash recomputed now and bound to the production run; observations reused.",
+            "observations": "'보상 확인 필요', the no-comparable-range explanation and the opened quote 'Annual base salary is competitive, plus a signing bonus of USD 25,000.' are visible; no numeric row; no horizontal clipping; controls do not obscure the block."
+          },
+          {
+            "mode": "production",
+            "name": "mobile-corrected-base.png",
+            "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-corrected-base.png",
+            "sha256": "17e2e2c936a729b7204d79fcf0aa325d4334ce5d36d3686556f5fd2eed8c63da",
+            "viewport": "320x780",
+            "reviewed": true,
+            "reviewMethod": "Directly viewed by me as its own file during execution-02; hash recomputed now and bound to the production run; observations reused.",
+            "observations": "'€90–110k' with '약 $99–121k USD / 년', the 'Annual base salary' row 'EUR 90,000–110,000 / 년' and the opened quote 'Annual base salary: EUR 90,000–110,000, reviewed monthly.' are fully readable with no clipping and no obscured controls."
+          }
+        ],
+        "reportingCorrectionAgreement": {
+          "id": "RPT1",
+          "decision": "AGREE",
+          "reason": "Independently checked now: the verification directory holds five receipt.json files (20261001T014231763820Z-5fa21b41 plus my four execution-02 runs), and the prior failed-check tree is byte-identical to my execution-01 record (receipt b293d6d999b6db48643715e2d37fcdc315044def0b7f57d9dad17548584c1158, vitest 0c2f036c5de686d3e01d1d906e16b46075f0d2191f4e07df3a8da365570a2746, command.log 6a222d21…). My execution-02 report's 'verificationDirectoryBeforeStart: empty' and 'four run trees' wording was wrong: it came from a Glob of the directory's top level that lists files only, which returned nothing because the only entries were run subdirectories. Correct inventory: five stage-77 formal run trees, one preserved execution-01 failure (3265/3267, two failed assertions) plus four execution-02 passes. My original report stays unedited; this is a reporting correction, not a rerun or relaxed expectation. I also acknowledge that Vitest numTotalTestSuites 356 is a nested-suite count and the actual unit file count is 92; my report labeled 356 as suites, not files."
+        },
+        "unresolvedBlockers": []
+      }
+    },
+    "unresolvedBlockers": [],
+    "fableCallReceiptSha256": "ece09fcabe2770b9868036998b4400dfaddde5fb44f8246305ce5c18f100be1d",
+    "meaning": "All3 approve the recorded final verification. Git preservation and verified temporary cleanup must still finish before stage completion."
+  },
+  "validation": {
+    "typecheck": "passed as part of the final-source npm run check command",
+    "unit": {
+      "success": true,
+      "numTotalTests": 3286,
+      "numPassedTests": 3286,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "fileCount": 92,
+      "assertionCount": 3286,
+      "nonPassed": [],
+      "report": {
+        "bytes": 1435982,
+        "sha256": "f650d6c85afc5cafc57de03292f1ac8d9353404ff28ab7d49faba6e8d8ad891f"
+      }
+    },
+    "build": {
+      "status": "passed",
+      "runId": "20261001T024738760100Z-101ea4fd"
+    },
+    "e2e": {
+      "development": {
+        "stats": {
+          "startTime": "2026-10-01T02:47:59.466Z",
+          "duration": 681541.992,
+          "expected": 201,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 201,
+        "files": [
+          "board-status-provenance.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-worker.spec.ts",
+          "catalog.spec.ts",
+          "compensation-context.spec.ts",
+          "compensation-number-format.spec.ts",
+          "compensation.spec.ts",
+          "job-languages.spec.ts",
+          "job-upgrade.spec.ts",
+          "job-work-time.spec.ts",
+          "journey.spec.ts",
+          "persistence.spec.ts",
+          "providers.spec.ts",
+          "public-only.spec.ts",
+          "qualifications.spec.ts",
+          "regional-coverage.spec.ts",
+          "resume-import.spec.ts",
+          "retired-samples.spec.ts",
+          "saved-backup.spec.ts",
+          "saved-pages.spec.ts",
+          "saved-storage.spec.ts",
+          "workplace-countries.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 9480600,
+          "sha256": "b11200dc9dd917cd5115be40452b94a82bd24d6452379f0e69bdc27524d97fc5"
+        }
+      },
+      "production": {
+        "stats": {
+          "startTime": "2026-10-01T03:00:10.103Z",
+          "duration": 457653.293,
+          "expected": 201,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "errors": [],
+        "caseCount": 201,
+        "files": [
+          "board-status-provenance.spec.ts",
+          "catalog-retention.spec.ts",
+          "catalog-worker.spec.ts",
+          "catalog.spec.ts",
+          "compensation-context.spec.ts",
+          "compensation-number-format.spec.ts",
+          "compensation.spec.ts",
+          "job-languages.spec.ts",
+          "job-upgrade.spec.ts",
+          "job-work-time.spec.ts",
+          "journey.spec.ts",
+          "persistence.spec.ts",
+          "providers.spec.ts",
+          "public-only.spec.ts",
+          "qualifications.spec.ts",
+          "regional-coverage.spec.ts",
+          "resume-import.spec.ts",
+          "retired-samples.spec.ts",
+          "saved-backup.spec.ts",
+          "saved-pages.spec.ts",
+          "saved-storage.spec.ts",
+          "workplace-countries.spec.ts"
+        ],
+        "retryAttempts": 0,
+        "nonPassedResults": [],
+        "report": {
+          "bytes": 9413484,
+          "sha256": "a35d3ef76ae01346bbde79c83cda333fc83920bf6390577f5b8fff9bf3dbb0ec"
+        }
+      }
+    },
+    "selectedRuns": {
+      "check": "20261001T024649797201Z-e87ce9ea",
+      "build": "20261001T024738760100Z-101ea4fd",
+      "e2e-development": "20261001T024758395651Z-dc1568cb",
+      "e2e-production": "20261001T030009088207Z-7c7b58ee"
+    },
+    "crossModeCases": {
+      "equal": true,
+      "countPerMode": 201,
+      "files": [
+        "board-status-provenance.spec.ts",
+        "catalog-retention.spec.ts",
+        "catalog-worker.spec.ts",
+        "catalog.spec.ts",
+        "compensation-context.spec.ts",
+        "compensation-number-format.spec.ts",
+        "compensation.spec.ts",
+        "job-languages.spec.ts",
+        "job-upgrade.spec.ts",
+        "job-work-time.spec.ts",
+        "journey.spec.ts",
+        "persistence.spec.ts",
+        "providers.spec.ts",
+        "public-only.spec.ts",
+        "qualifications.spec.ts",
+        "regional-coverage.spec.ts",
+        "resume-import.spec.ts",
+        "retired-samples.spec.ts",
+        "saved-backup.spec.ts",
+        "saved-pages.spec.ts",
+        "saved-storage.spec.ts",
+        "workplace-countries.spec.ts"
+      ]
+    },
+    "visualReview": {
+      "status": "reviewed",
+      "reviewer": "main",
+      "method": "All six actual PNGs directly viewed via functions.view_image, separately for bothmodes, with actualPNGbytes/dimensions/hash. The modes happen to produce matching corresponding bytes; both actualpaths were viewed. Final evidence must also bind these to completedselectedruns.",
+      "entries": [
+        {
+          "mode": "development",
+          "name": "desktop-structured-base-and-other.png",
+          "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-bonus-5f9c7--filter-and-the-city-median/desktop-structured-base-and-other.png",
+          "sha256": "6a0739da11c50ce1232bea0b26b7ed9a4399448ac415112b9583175249f39265",
+          "viewport": {
+            "width": 1440,
+            "height": 960
+          },
+          "bytes": 168434,
+          "reviewed": true,
+          "reviewer": "main",
+          "reviewMethod": "Viewed the actual PNG with functions.view_image.",
+          "observations": "1440x960: Annual base salary shows USD100,000–120,000 /year and the headline $100–120k. Separate Signing bonus row shows USD25,000–25,000 /periodunknown · 기본급 외 보상. Both expanded board source blocks are legible; twelve monthly installments remain in the base source without changing its annual unit. The bonus source contains a separate competitive annual-base sentence, yet its row remains other/periodunknown. Full compensation panel is visible above the fixed save/apply footer with no overlap."
+        },
+        {
+          "mode": "development",
+          "name": "mobile-rejected-compensation.png",
+          "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-rejected-compensation.png",
+          "sha256": "97612400f9fbf1d5738341dd520d6ff7fd466cd3f04d5fd7f4e89e58cf4ddce3",
+          "viewport": {
+            "width": 320,
+            "height": 780
+          },
+          "bytes": 47675,
+          "reviewed": true,
+          "reviewer": "main",
+          "reviewMethod": "Viewed the actual PNG with functions.view_image.",
+          "observations": "320x780: 보상 확인 필요 and the no-comparable-range explanation are visible. Expanded source reads Annual base salary is competitive, plus a signing bonus of USD25,000. No numeric salary range is displayed. Text wraps inside the card and the save/apply buttons remain visible; no horizontal clipping or overlap of compensation evidence."
+        },
+        {
+          "mode": "development",
+          "name": "mobile-corrected-base.png",
+          "path": ".local/research/77/verification/20261001T024758395651Z-dc1568cb/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-corrected-base.png",
+          "sha256": "17e2e2c936a729b7204d79fcf0aa325d4334ce5d36d3686556f5fd2eed8c63da",
+          "viewport": {
+            "width": 320,
+            "height": 780
+          },
+          "bytes": 48490,
+          "reviewed": true,
+          "reviewer": "main",
+          "reviewMethod": "Viewed the actual PNG with functions.view_image.",
+          "observations": "320x780: €90–110k headline, USDapproximation, Annual base salary label and EUR90,000–110,000 /year row are legible. Expanded quote retains Annual base salary: EUR90,000–110,000, reviewed monthly. The monthly review wording does not change the displayed annual unit. Quote wraps cleanly; fixed footer does not obscure compensation or source text."
+        },
+        {
+          "mode": "production",
+          "name": "desktop-structured-base-and-other.png",
+          "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-bonus-5f9c7--filter-and-the-city-median/desktop-structured-base-and-other.png",
+          "sha256": "6a0739da11c50ce1232bea0b26b7ed9a4399448ac415112b9583175249f39265",
+          "viewport": {
+            "width": 1440,
+            "height": 960
+          },
+          "bytes": 168434,
+          "reviewed": true,
+          "reviewer": "main",
+          "reviewMethod": "Viewed this actual production PNG with functions.view_image, separately from development.",
+          "observations": "1440x960 production screenshot: Annual base salary is USD100,000–120,000 /year; headline $100–120k. Expanded board quote retains Paid in twelve monthly installments. Signing bonus is separately labelled USD25,000–25,000 /periodunknown · 기본급 외 보상, with its own source and the separate competitive annual-base sentence. Both full source blocks and rows are readable; fixed save/apply footer is below the compensation panel."
+        },
+        {
+          "mode": "production",
+          "name": "mobile-rejected-compensation.png",
+          "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-rejected-compensation.png",
+          "sha256": "97612400f9fbf1d5738341dd520d6ff7fd466cd3f04d5fd7f4e89e58cf4ddce3",
+          "viewport": {
+            "width": 320,
+            "height": 780
+          },
+          "bytes": 47675,
+          "reviewed": true,
+          "reviewer": "main",
+          "reviewMethod": "Viewed this actual production PNG with functions.view_image, separately from development.",
+          "observations": "320x780 production screenshot: 보상 확인 필요 and the no-comparable-salary explanation are visible, with no numeric base row. Whole expanded quote reads Annual base salary is competitive, plus a signing bonus of USD25,000. Korean text and quote wrap inside the panel. Save/apply controls remain visible without covering source evidence or horizontal clipping."
+        },
+        {
+          "mode": "production",
+          "name": "mobile-corrected-base.png",
+          "path": ".local/research/77/verification/20261001T030009088207Z-7c7b58ee/playwright-results/compensation-context-mobil-d959a-ble-and-accessible-at-320px/mobile-corrected-base.png",
+          "sha256": "17e2e2c936a729b7204d79fcf0aa325d4334ce5d36d3686556f5fd2eed8c63da",
+          "viewport": {
+            "width": 320,
+            "height": 780
+          },
+          "bytes": 48490,
+          "reviewed": true,
+          "reviewer": "main",
+          "reviewMethod": "Viewed this actual production PNG with functions.view_image, separately from development.",
+          "observations": "320x780 production screenshot: €90–110k summary and marked approximateUSDannual conversion are separate from the EUR90,000–110,000 /year base row. The full source retains Annual base salary: EUR90,000–110,000, reviewed monthly. Amount and annual unit are legible; source wraps across two lines. Stickyfooter is below the compensation panel and doesnotobscure the quote."
+        }
+      ],
+      "limits": "Static captured compensation views only; no claim about offscreen layout or all-app accessibility."
+    },
+    "all3IndependentlyViewedRequiredScreenshots": true
+  },
+  "historicalDiagnostics": {
+    "scope": "Preserved historical inputs, not fresh collection or current posting validity.",
+    "independentReview": {
+      "reviewer": "GPT-6 Astra max",
+      "decision": "HISTORICAL_REVIEW_APPROVED",
+      "reportSha256": "fde20c0d68a90deb9a7e345c9e20dbbb656302c1ac611732f2f7c2d245d3badc",
+      "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+      "unresolvedBlockers": [],
+      "scope": "Independent acceptance of the historical semantic/provenance evidence on these exact candidate04 artifacts. This is not formal-test or final-stage approval, a fresh collection, or a claim of current posting validity.",
+      "limitations": [
+        "Acceptance is restricted to the captured historical data and reviewed change scope. It does not claim universal number-format, abbreviation, ownership or period coverage, or that every unchanged legacy interpretation is correct.",
+        "Incomplete/capped/mixed Greenhouse and fresh API-fallback policies also need their separately reviewed synthetic tests; these historical complete-quote contexts are not substitutes.",
+        "Canonical summary-only JSON files are absent. Counts were independently recomputed from the current full reports, rather than inherited from old archived summaries.",
+        "No product runtime, tests, build, server, browser or network was used for this final rebinding. Previously authorized bounded H1 observations are reused under their exact product hashes.",
+        "Current formal results, the six actual screenshots, final immutable artifact, all3 final verification, Git preservation and verified cleanup remain separate. This file gives no final-stage approval."
+      ]
+    },
+    "corpus": {
+      "jobs": 6819,
+      "beforeComparable": 1224,
+      "afterComparable": 1224,
+      "classificationCounts": {
+        "owned evidence boundary or duplicate correction": 179,
+        "original D.C. geographic eligibility restored": 3,
+        "owned Greenhouse period or composition correction": 226,
+        "new disclosure from an applicable heading": 524,
+        "currency explicitly supplied by the same salary heading": 1
+      },
+      "allSemanticChangesReviewed": true,
+      "nonPayFieldsUnchanged": true,
+      "structuredBoardJobs": 2436,
+      "structuredBoardJobsWithChanges": 226,
+      "newlyComparable": 0,
+      "noLongerComparable": 0,
+      "originalAndVersion3UpgradeContinuityMatches": true,
+      "reportSha256": "5173df6a9d4c74e804e7a6c3e277e3ea92bb441624c70eea919dee9bfdf8f1ff",
+      "classificationSha256": "255496c82bb58f6412d8d6f4f6d16682f6a733b31e098afb0ae7602548d6c836",
+      "wholeQuoteSourceReview": {
+        "quoteCount": 1185,
+        "allRetainedQuotesContiguousInOwnedOriginal": true,
+        "reportSha256": "f5ec83d07e71d1ac3f51b67437e1a59420ea727778b322418b1264c0ae1cb900",
+        "limits": [
+          "This verifies selected quote text against owned source, not every possible omitted fact outside that quote.",
+          "It supplements numeric, per-line and independent semantic/context inspection; it is not a formal product test or phase approval."
+        ]
+      },
+      "seniorityRestorationReview": {
+        "correctedRows": 32,
+        "onlyOriginalLabelsAndQuotesChanged": true,
+        "reportSha256": "64f744614a6a919d3ba6c3b0d437bdd4bbeaf9ebf99c00361c9f7c8c1263c259"
+      }
+    },
+    "providerPriority": {
+      "pages": 12,
+      "rawRows": 189,
+      "changedPayRows": 0,
+      "allMetadataAndWinnersUnchanged": true,
+      "reportSha256": "8029d899fcab4a6934e9145f630e8cf95bace2343244be8d23b5ad5d3e621467",
+      "comparisonSha256": "f79893120b1656e743f4606a28ecbc0b6f8b0f165669b55c6e19906cfd478387"
+    }
+  },
+  "failureHistory": {
+    "stage": 77,
+    "recordedAt": "2026-10-01T00:46:53.190387+00:00",
+    "preExecutionFindings": [
+      {
+        "title": "Design disagreements",
+        "observedProblem": "The first design retained open questions about money ownership, period precedence, old evidence attribution and mixed providers. R01 later exposed a fresh-public-quote eligibility inconsistency between design and first authored expectations.",
+        "resolution": "Exact outputs were shared; draft02 was unanimously approved. R01 separately received explicit all3 agreement on same-clause/applicable-heading evidence, no completed-adjacent-clause inheritance, and independent old-owned correction.",
+        "evidence": [
+          {
+            "path": "collaboration/design-gate.json",
+            "sha256": "94911fe0e0192f5797d25364d925d5e623839d050cba6737d4d9263f927a72bf"
+          },
+          {
+            "path": "collaboration/r01-resolution.json",
+            "sha256": "e2f25bd7ee11150a47b9ec16730c8ba9bf2b480a04552b933727139cdec3be97"
+          }
+        ]
+      },
+      {
+        "title": "Initial Main diagnostic defects",
+        "observedProblem": "Nonmonetary exclusions could drop the annual prefix; review cadence masking could remove the year from a resulting salary; same-band references could lose CAD.",
+        "resolution": "Preserve exclusions, separate review nouns from resulting-salary verbs, retain owned same-band currency.",
+        "evidence": [
+          {
+            "path": "main/candidate-diagnostic-01.json",
+            "sha256": "7341d73fcc92447088c8d03d9f0a7f633804884d8293a47d822e14fc3328fed4"
+          },
+          {
+            "path": "main/implementation-discussion-01.md",
+            "sha256": "964c5a49e7b7f4d6f635da3c46ed64d3d1e5527189cbda9d6132ddfda77f92e5"
+          }
+        ]
+      },
+      {
+        "title": "Historical corpus regressions",
+        "observedProblem": "Early candidates lost coordinated disclosures and compensation headings, confused OTE/base expansions and shared hourly units, or copied geography across sentences. A later broad structured inclusion predicate incorrectly demoted182 Anthropic comparable jobs; another version relabelled54 Scale rows through plural packages.",
+        "resolution": "Per-item source inspection caught these despite sometimes unchanged aggregate counts. Fix subject ownership, preserve bounded geography and shared context, and exclude separate/conditional packages. Preserve every candidate report.",
+        "evidence": [
+          {
+            "path": "main/implementation-discussion-01.md",
+            "sha256": "964c5a49e7b7f4d6f635da3c46ed64d3d1e5527189cbda9d6132ddfda77f92e5"
+          },
+          {
+            "path": "main/implementation-discussion-02.md",
+            "sha256": "2a070fe75529468127a73ff2481fad62f5a7f02fcbbe836eb1094d17d120aa12"
+          },
+          {
+            "path": "main/corpus-candidate04.json",
+            "sha256": "590dbce1474b0bdfe687726095b691414f09aa6373b4d8fb7ff010870d1831ba"
+          },
+          {
+            "path": "main/corpus-candidate06.json",
+            "sha256": "c787e854fd1844a4daf58c03aec56d0151ae5784466aa2bf8f9cdaf1a98957ea"
+          }
+        ]
+      },
+      {
+        "title": "Independent implementation blockers B01-B04 and M01",
+        "observedProblem": "Lost original incomplete-input cardinality could create a false comparable salary; a bonus could hide an actual malformed salary or recovery. Included/excluded component objects and qualified amounts could become salary while whole combined-salary predicates could be rejected. D.C. splitting lost geographic constraints; blanket note restoration retained obsolete variants.",
+        "resolution": "Keep exact legacy incomplete warning as unresolved; evaluate actual inputs before rejection; require directly attached raw component-value relation with bounded qualifiers; preserve complete combined salary. Protect D.C. and restore only the actual legacy incomplete note.",
+        "evidence": [
+          {
+            "path": "main/implementation-discussion-02.md",
+            "sha256": "2a070fe75529468127a73ff2481fad62f5a7f02fcbbe836eb1094d17d120aa12"
+          },
+          {
+            "path": "main/implementation-discussion-03.md",
+            "sha256": "1321bfe5e125ed4ccaec61b1cd0f000c6370bc1380dc4dd0683ef74e8b3da287"
+          },
+          {
+            "path": "main/implementation-discussion-04.md",
+            "sha256": "b9b59199acfcbcf947e9b527b61d564ad031c91ac2b1a93e9550aebb73ed230a"
+          },
+          {
+            "path": "collaboration/astra-implementation-discussion-04.md",
+            "sha256": "e0168eacdd0db7a51e2cc9137dec98ef589905ea569b24aa8b051608aade153d"
+          }
+        ]
+      },
+      {
+        "title": "Authored integration blockers B05-B07",
+        "observedProblem": "A500-character display label lost supported old attributes despite a complete owned native title. Unconditional same-range OTE stayed comparable base. Board-only incomplete notes from other providers were replaced by a generic note.",
+        "resolution": "Separate title attribution from completeness, recognize unconditional OTE while preserving conditional control, preserve exact positively established four-provider board-only payloads. Require independent correction review and paired provenance/cap tests.",
+        "evidence": [
+          {
+            "path": "main/implementation-discussion-05.md",
+            "sha256": "904cfba7804fbce7e1dc6d8c29df2135140de2c184a6744ef0cc4f9052b2c704"
+          },
+          {
+            "path": "collaboration/astra-implementation-discussion-05.md",
+            "sha256": "3c1d0b68448551cf8b8c5de420b54437811289cd612dd66252150b6834041531"
+          }
+        ],
+        "independentResolution": {
+          "status": "B05/B06/B07 resolved by Astra bounded re-observation on final product hashes; Main agrees; all3 frozen source/test/plan approval is still pending",
+          "path": "collaboration/astra-implementation-discussion-06.md",
+          "sha256": "c9a099128ce4d43b557500647b05a1b7fa7719b6712fe662eee4212a772afef3"
+        }
+      },
+      {
+        "title": "Audit-tool and invocation corrections",
+        "observedProblem": "Initial independent source-spelling checker omitted literal .00 spellings; initial Himalayas baseline priority classification used an incorrect winner heuristic. An Astra diagnostic loader and four wrong-shaped Greenhouse invocations failed. The first Fable identity command used an absolute path outside the exact allowlist. One intermediate prose subtotal said528 new disclosures instead of524.",
+        "resolution": "Correct the checker and baseline heuristic, preserve old outputs, rerun valid diagnostic invocations. Use the already-allowed exact relative identity command. Correct the arithmetic in Main discussion03. These are audit/invocation mistakes, not formal product-suite failures.",
+        "evidence": [
+          {
+            "path": "main/corpus-candidate07-source-review.json",
+            "sha256": "1f0137462ea53f1b6e7bc257e748c98f1ce8a0e0b8066dd8e549660be14381a0"
+          },
+          {
+            "path": "main/corpus-candidate07-source-review-v2.json",
+            "sha256": "89a4d457bfec5ec40299b96df87b70a6899a56b6297f87f8a5f02636dedcc290"
+          },
+          {
+            "path": "main/himalayas-baseline.json",
+            "sha256": "1477b12ab848e6408c14140c3c7914638a1faca7dca01e22565a99427b2b4936"
+          },
+          {
+            "path": "main/himalayas-baseline-v2.json",
+            "sha256": "8d5c964e0d2b7dfd6f9d46a4f5064f94b99e10ce3ab05672ee71239bd0edf2cd"
+          },
+          {
+            "path": "main/fable-identity-invocation-review.json",
+            "sha256": "bd7af9ceeae6cc44efceecc59fb35911a1aa9954874c6e062a7408e524f38bfb"
+          },
+          {
+            "path": "main/implementation-discussion-03.md",
+            "sha256": "1321bfe5e125ed4ccaec61b1cd0f000c6370bc1380dc4dd0683ef74e8b3da287"
+          },
+          {
+            "path": "collaboration/astra-implementation-discussion-04.md",
+            "sha256": "e0168eacdd0db7a51e2cc9137dec98ef589905ea569b24aa8b051608aade153d"
+          }
+        ],
+        "additionalDiagnosticLimitation": "Astra discussion06 records one preparatory metadata-read snippet syntax error (extra parenthesis); no product code ran in that failed snippet. Corrected read and successful bounded observations are preserved.",
+        "additionalLauncherWarning": "An inline Python parallel-audit launcher emitted a SyntaxWarning for compact literal spacing (0for); both requested diagnostics completed with exit0 and empty stderr. No product/source change or formal test execution was involved."
+      },
+      {
+        "title": "Implementation gate01 withheld for two E2E defects",
+        "observedProblem": "The CSV oracle expected an unrelated following bonus sentence outside retained salary evidence. Two qualifications post-search clicks could target prior worker results. Main initial source review missed these; Astra withheld approval before formal execution.",
+        "resolution": "All3 agreed the exact retained CSV clause and requested-title locator fixes. Fable applied them in author06; Main reviewed the exact edits and reversed them to prior hashes. Product data, user-state/qualification assertions, retries and timeouts preserved. Revised source/test/plan review pending; no formal failure occurred.",
+        "evidence": [
+          {
+            "path": "collaboration/astra-implementation-review-01.json",
+            "sha256": "f91b0eb7963efc9a34f5706d8f013330ab207e376709714206acd58546f6b35e"
+          },
+          {
+            "path": "main/implementation-discussion-06.md",
+            "sha256": "5d035ab8c25c22297d5bdca20be839478410d4ea6021e1c762f1b666e3a9af5e"
+          }
+        ]
+      },
+      {
+        "title": "Independent Fable gate01 found authored-case product and evidence mismatches",
+        "observedProblem": "Numbered monthly installments were treated as salary denomination; an earlier bonus consumed a later explicit annual-salary modifier. One new migration test omitted deliberate correcting evidence; existing quote-only Greenhouse tests required custom incomplete-note preservation.",
+        "resolution": "All3 agreed six corrections including nonempty-note guard. Main patched product IR1/IR2/IR4; Astra discussion08 re-observed all existing controls. Fable author06 applied IR3 and added literal paired guards; Main reviewed/reconstructed exact edits. Final6819corpus and189Himalayas audits unchanged semantically relative to prior candidate. Revised all3 implementation review pending.",
+        "evidence": [
+          {
+            "path": "collaboration/implementation-review-01.review.md",
+            "sha256": "1e5b89bd6388f329d8187bd4b3bd01f40b2e3813f53448454f622eb9f6e7f11a"
+          },
+          {
+            "path": "main/fable-review-cases-before.json",
+            "sha256": "8b3ddd304dcfcb48b49ca931f836f7a171ce78dcff202f523b0fcd54b7479d13"
+          },
+          {
+            "path": "main/implementation-discussion-07.md",
+            "sha256": "f49510b0b0a45b096ddd1edddd510445ddddf8c8a02cfd2d3ee94f49f9784817"
+          }
+        ],
+        "resolutionEvidence": [
+          {
+            "path": "collaboration/correction-resolution-02.json",
+            "sha256": "f93888a630e79230941b76ed390a35e1812b774b224cc5d1096ce51ba255dc86"
+          },
+          {
+            "path": "main/fable-review-cases-after.json",
+            "sha256": "9ec5d2ecd178839136934c115695af9cb8009b0fa1b5ef328f61e061da7596f0"
+          },
+          {
+            "path": "main/corpus-candidate10-continuity.json",
+            "sha256": "eeb9200111fed027270cbf34b8e789d142ca9edb56386347d5706ff7221a4d1f"
+          }
+        ],
+        "independentPostCorrectionReview": {
+          "path": "collaboration/astra-implementation-discussion-08.md",
+          "status": "IR1/IR2/IR4 resolved, IR3 retained quote behavior and all existing controls unchanged; no formal execution or final test identity approval"
+        }
+      },
+      {
+        "title": "Independent historical evidence review H1",
+        "observedProblem": "Thirty-two newly disclosed SpaceX pay rows omitted the Sr. role qualifier from label and retained quote. Numbers/period/unknown currency-basis and null comparable salary were unchanged. Sentence splitting treated the abbreviation dot as a sentence end. A synthetic inline annual salary containing Sr. was also dropped.",
+        "resolution": "All3 explicitly agreed bounded Sr. protection. Main product patch and terminal Fable author08 completed. Main and Astra bounded observations restore known32; final6819full-rowcomparison changes exactly32labels/quotes, allotherpay/nonpayunchanged. Wholequote source check1185quotes/933jobs has0unresolved. Frozen425-file candidate04 implementation review and complete formal sequence pending.",
+        "evidence": [
+          {
+            "path": "main/historical-h1-cases.json",
+            "sha256": "077c932faf811b30f7071f6f57d54e45fbe6d4c3994686b9f989831ebdcd3028"
+          },
+          {
+            "path": "collaboration/astra-implementation-review-03.json",
+            "sha256": "129f3d1715bbcf325f909f43b80bf9dee001c9110dd5b00ff332efa1060a6904"
+          },
+          {
+            "path": "main/seniority-evidence-before.json",
+            "sha256": "5f54e2421aee673f5bfe0fe840879e28c683bd2ab3cafc89a88b7be778655376"
+          },
+          {
+            "path": "collaboration/historical-correction-resolution-01.json",
+            "sha256": "730f116032d5f7604344508e8f20319502790d8f7719f835e94a1ad1722ec35b"
+          },
+          {
+            "path": "main/seniority-evidence-after.json",
+            "sha256": "a9225f2689f2069e34e866da60b249982a71555164645858be636434040d791d"
+          },
+          {
+            "path": "main/corpus-before-h1-quote-spans.json",
+            "sha256": "b11518dbfd7f1f21df4a087cfa3b4328ba9ee51cf0415a25282e40813c879c17"
+          },
+          {
+            "path": "main/h1-final-restoration-review.json",
+            "sha256": "64f744614a6a919d3ba6c3b0d437bdd4bbeaf9ebf99c00361c9f7c8c1263c259"
+          },
+          {
+            "path": "main/corpus-final-quote-spans.json",
+            "sha256": "f5ec83d07e71d1ac3f51b67437e1a59420ea727778b322418b1264c0ae1cb900"
+          },
+          {
+            "path": "independent/test-authoring-08.json",
+            "sha256": "ba04237d8787225a637388e290759b84773dee07bfe08ac015d42bff3e79d0dd"
+          },
+          {
+            "path": "collaboration/astra-historical-correction-01.json",
+            "sha256": "dc4c3400ffc30ed223983dc7594926a13776212c6902c06c178e3caf25876e00"
+          }
+        ],
+        "preservedCandidate": "main/implementation-candidate-03",
+        "formalExecutionOnCandidate03": false,
+        "auditStrengthening": "Original per-line source containment did not detect the missing qualifier. Added independent-of-product whole-quote contiguous owned-source comparison. On preserved candidate03 it checks1185quotes across933changedjobs and flags exactlythe32H1IDs; this intentional failing-data observation is not a formal test pass."
+      }
+    ],
+    "formalValidationRuns": [
+      {
+        "runId": "20261001T014231763820Z-5fa21b41",
+        "kind": "check",
+        "status": "failed-or-invalid",
+        "exitCode": 1,
+        "typecheck": "passed",
+        "counts": {
+          "numTotalTests": 3267,
+          "numPassedTests": 3265,
+          "numFailedTests": 2,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "success": false
+        },
+        "fileCount": 92,
+        "failedAssertions": [
+          {
+            "file": "tests/unit/compensation-context.test.ts",
+            "name": "exclusion objects, base labels that exclude bonuses, and affirmative inclusion affirmative inclusion or on-target earnings describing the same amount is total compensation: Annual on-target earnings (including base salary and commission): USD 100,000–120,000.",
+            "status": "failed"
+          },
+          {
+            "file": "tests/unit/compensation.test.ts",
+            "name": "rechecking existing compensation without losing saved context keeps greenhouse structured disclosures ahead of different or missing prose",
+            "status": "failed"
+          }
+        ],
+        "receiptSha256": "b293d6d999b6db48643715e2d37fcdc315044def0b7f57d9dad17548584c1158",
+        "reportSha256": "0c2f036c5de686d3e01d1d906e16b46075f0d2191f4e07df3a8da365570a2746",
+        "localFailureExtraction": {
+          "path": "main/execution-01-failures.json",
+          "sha256": "60c2daf3d33e256b07784749f458feafa83c04895f07c2f882cef895af55fe64"
+        },
+        "independentExecutorReview": {
+          "path": "collaboration/execution-01.review.md",
+          "sha256": "0ad0f878b04e1b742abb138f7b3ecbe9703025d058b6b119441eb6de8c498c0b"
+        },
+        "buildAndE2eExecuted": false,
+        "corrections": {
+          "F1": "Product: retain the owned annual OTE denomination across a nonmonetary inclusion parenthesis; original year/total expectation retained.",
+          "F2": "Test fixture: remove unrelated earlier prose pay fields before board data overlay; preserve full equality. Explicitly cover removal of an obsolete variants note from the contaminated legacy payload."
+        },
+        "resolution": {
+          "path": "collaboration/execution-correction-resolution-01.json",
+          "sha256": "f2a3cde06eadda69adf74802668723525e125a2a00097099b60135b55d15f830"
+        },
+        "all3AgreedCorrections": true,
+        "statusAfterCorrections": "F1/F2/H1 all3 agreed corrections and independent author07/08 were reviewed on finalcandidate04. The final separate check passed3286of3286; build and DEV201/PROD201 also passed. This original2failure run remains failed."
+      },
+      {
+        "runId": "20261001T024649797201Z-e87ce9ea",
+        "kind": "check",
+        "status": "complete",
+        "exitCode": 0,
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "receiptSha256": "97080ff9cf5f257365b85fd9b7202ada020daa4bde07bb29172db06608ea8784",
+        "reportSha256": "f650d6c85afc5cafc57de03292f1ac8d9353404ff28ab7d49faba6e8d8ad891f",
+        "counts": {
+          "success": true,
+          "numTotalTests": 3286,
+          "numPassedTests": 3286,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "fileCount": 92,
+          "assertionCount": 3286,
+          "nonPassed": [],
+          "report": {
+            "bytes": 1435982,
+            "sha256": "f650d6c85afc5cafc57de03292f1ac8d9353404ff28ab7d49faba6e8d8ad891f"
+          }
+        },
+        "ownedProcessesRemaining": 0
+      },
+      {
+        "runId": "20261001T024738760100Z-101ea4fd",
+        "kind": "build",
+        "status": "complete",
+        "exitCode": 0,
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "receiptSha256": "0f3ab24034bbded55c4b19fe0b27ae207c5a02b639973e553f0ad79a048045a1",
+        "reportSha256": null,
+        "counts": {},
+        "ownedProcessesRemaining": 0
+      },
+      {
+        "runId": "20261001T024758395651Z-dc1568cb",
+        "kind": "e2e-development",
+        "status": "complete",
+        "exitCode": 0,
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "receiptSha256": "2591055819c22884a52bbcde5954ea7d4df5da881f2fc0c082de253ebb68ed29",
+        "reportSha256": "b11200dc9dd917cd5115be40452b94a82bd24d6452379f0e69bdc27524d97fc5",
+        "counts": {
+          "stats": {
+            "startTime": "2026-10-01T02:47:59.466Z",
+            "duration": 681541.992,
+            "expected": 201,
+            "skipped": 0,
+            "unexpected": 0,
+            "flaky": 0
+          },
+          "errors": [],
+          "caseCount": 201,
+          "files": [
+            "board-status-provenance.spec.ts",
+            "catalog-retention.spec.ts",
+            "catalog-worker.spec.ts",
+            "catalog.spec.ts",
+            "compensation-context.spec.ts",
+            "compensation-number-format.spec.ts",
+            "compensation.spec.ts",
+            "job-languages.spec.ts",
+            "job-upgrade.spec.ts",
+            "job-work-time.spec.ts",
+            "journey.spec.ts",
+            "persistence.spec.ts",
+            "providers.spec.ts",
+            "public-only.spec.ts",
+            "qualifications.spec.ts",
+            "regional-coverage.spec.ts",
+            "resume-import.spec.ts",
+            "retired-samples.spec.ts",
+            "saved-backup.spec.ts",
+            "saved-pages.spec.ts",
+            "saved-storage.spec.ts",
+            "workplace-countries.spec.ts"
+          ],
+          "retryAttempts": 0,
+          "nonPassedResults": [],
+          "report": {
+            "bytes": 9480600,
+            "sha256": "b11200dc9dd917cd5115be40452b94a82bd24d6452379f0e69bdc27524d97fc5"
+          }
+        },
+        "ownedProcessesRemaining": 0
+      },
+      {
+        "runId": "20261001T030009088207Z-7c7b58ee",
+        "kind": "e2e-production",
+        "status": "complete",
+        "exitCode": 0,
+        "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+        "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+        "receiptSha256": "f9c57d57856e2ce18a6c2cafd86429d466b9f9c0552a2f8ce0700cc77d3e2362",
+        "reportSha256": "a35d3ef76ae01346bbde79c83cda333fc83920bf6390577f5b8fff9bf3dbb0ec",
+        "counts": {
+          "stats": {
+            "startTime": "2026-10-01T03:00:10.103Z",
+            "duration": 457653.293,
+            "expected": 201,
+            "skipped": 0,
+            "unexpected": 0,
+            "flaky": 0
+          },
+          "errors": [],
+          "caseCount": 201,
+          "files": [
+            "board-status-provenance.spec.ts",
+            "catalog-retention.spec.ts",
+            "catalog-worker.spec.ts",
+            "catalog.spec.ts",
+            "compensation-context.spec.ts",
+            "compensation-number-format.spec.ts",
+            "compensation.spec.ts",
+            "job-languages.spec.ts",
+            "job-upgrade.spec.ts",
+            "job-work-time.spec.ts",
+            "journey.spec.ts",
+            "persistence.spec.ts",
+            "providers.spec.ts",
+            "public-only.spec.ts",
+            "qualifications.spec.ts",
+            "regional-coverage.spec.ts",
+            "resume-import.spec.ts",
+            "retired-samples.spec.ts",
+            "saved-backup.spec.ts",
+            "saved-pages.spec.ts",
+            "saved-storage.spec.ts",
+            "workplace-countries.spec.ts"
+          ],
+          "retryAttempts": 0,
+          "nonPassedResults": [],
+          "report": {
+            "bytes": 9413484,
+            "sha256": "a35d3ef76ae01346bbde79c83cda333fc83920bf6390577f5b8fff9bf3dbb0ec"
+          }
+        },
+        "ownedProcessesRemaining": 0
+      }
+    ],
+    "formalValidationStatus": "Five actual stage77formalruns: originalfailedcheck followedbyfourcompletefinalcandidate04runs. Finalcheck3286/92files,build,DEV201/PROD201same22files,0skip/flaky/retry/errors. Fableexecution02terminalwith6actualimagereviews. Finalimmutableartifact/all3review,Gitpreservation andcleanupstillpending.",
+    "interpretation": "Read-only diagnostic runs, authoring success and all3 design approval are not formal test passes.",
+    "lastUpdatedAt": "2026-10-01T03:09:26.576396+00:00",
+    "implementationResolution": {
+      "recordedAt": "2026-10-01T02:46:06.197505+00:00",
+      "revision": "04",
+      "stateDigest": "288be6c89f98e8e450937d560c7d20345cecff40a1388efb3d4bf781fac662e8",
+      "executionPlanSha256": "b8d0e6a0b8b6d506e2e2ea440d944f6143380bdbd56a50635b20767479228797",
+      "all3ExplicitlyApproved": true,
+      "unresolvedBlockers": [],
+      "gatePath": "collaboration/implementation-gate.json",
+      "gateSha256": "c99c010db72f6a4e25ce18f9d7bf48811f72dc270ce202b11496c0387e62982b",
+      "note": "F1/F2 andH1 corrections plusfinalauthor08 source/tests/plan nowall3approved. Finalhistoricalartifactreview andactualformalresults/visuals remainseparate; firstfailedcheckpreserved."
+    },
+    "preservationInvocationCorrection": "Candidate03 copy initially assumed audit summary JSON files existed. The tools print summaries and write full reports; copy stopped after three files without altering source/canonical data. Existing copies were byte-checked and the actual complete artifact set preserved. No diagnostic or test rerun was needed.",
+    "diagnosticInvocationCorrections": [
+      {
+        "observed": "Initial inline final-row comparison stopped at an assertion before writing a report.",
+        "resolution": "Read-only explicit comparison of all6819IDs/rows found exactly32knownH1IDs,0missing/added/extra. A second data-only comparison verified literal Sr. restoration reproduces the full final pay for every32row and all6787otherrows match. No source/data/test changed; no product discrepancy established. The initial assertion cause was not independently reconstructed.",
+        "evidence": {
+          "path": "main/h1-final-restoration-review.json",
+          "sha256": "64f744614a6a919d3ba6c3b0d437bdd4bbeaf9ebf99c00361c9f7c8c1263c259"
+        }
+      },
+      {
+        "observed": "Main first invoked run-review.py with unsupported mode implementation-review; validation rejected arguments before launching the model.",
+        "resolution": "Used documented review mode with the same phase/prompt. Model review04 has its own actual receipt; rejected invocation is not a model result or formal test run."
+      }
+    ],
+    "implementationResolutionHistory": [
+      {
+        "recordedAt": "2026-10-01T01:41:40.225787+00:00",
+        "revision": "02",
+        "stateDigest": "ac175ee35d6dfb3e189a0234571b903292756bf3b59847a7f35d86e1c9673194",
+        "executionPlanSha256": "29430416b55ef030a4ac8dc1ed9c7dba8f01823f4eff43cd22cc84d746b6f91f",
+        "all3ExplicitlyApproved": true,
+        "unresolvedBlockers": [],
+        "gatePath": "collaboration/implementation-gate.json",
+        "gateSha256": "c6abd8c27fc1dea435dd888b23bb8c1777975a448f0864c63171b6e54853f21b",
+        "note": "Earlier pending/withheld wording records its phase at that time. All six withholding findings are resolved at this gate; formal execution has now been requested but no pass is implied.",
+        "archivedGatePath": "main/implementation-candidate-02/implementation-gate.json"
+      }
+    ],
+    "independentAuditCorrections": [
+      {
+        "title": "Independent final historical rebind diagnostic correction",
+        "observedProblem": "An Astra data-only checker indexed Himalayas projection by nullable normalized Job.id and collapsed172excludedrows, yielding one duplicate-ID flag and157comparison flags.",
+        "resolution": "Use189unique original(sourcePath,guid)keys, exactroworder/fullrowequality and everyprojectionrow. Correctedcheckerproduces0issues withallsource/artifacthashesunchanged. Originalflaggedoutputretained. Not a formal product/testfailure.",
+        "evidence": [
+          {
+            "path": "collaboration/astra-historical-rebind-04-observations.json",
+            "sha256": "b25f8de455d1a12227f576ac3e26b935eba041825d778a4e5c285ebb78abcb02"
+          },
+          {
+            "path": "collaboration/astra-historical-rebind-04-himalayas-correction.json",
+            "sha256": "c7f9a2e7330d54094a2eb257ee1cc3058f7fed445a008d4a8521e2e1c3dc2d5a"
+          },
+          {
+            "path": "collaboration/astra-historical-final-review-01.json",
+            "sha256": "fde20c0d68a90deb9a7e345c9e20dbbb656302c1ac611732f2f7c2d245d3badc"
+          }
+        ],
+        "phase": "During final historical data rebinding, overlapping independent execution02; not a formal product/test run."
+      }
+    ],
+    "executionReportingCorrections": {
+      "path": "main/independent-execution-report-review.json",
+      "sha256": "5974ab5773afa3d346932492023c8decb8feb593e64cfb408e522e622df5ac4e",
+      "details": [
+        {
+          "id": "RPT1",
+          "originalClaim": "empty",
+          "field": "gateVerification.verificationDirectoryBeforeStart",
+          "assessment": "The directory was not empty: the original candidate02 failed-check tree already existed and is still byte-identical. Actual stage77 verification has five run trees: one old failedcheck plus four new successfulruns. Fable correctly described earlier failure history elsewhere; its empty/four-total-tree statements are inaccurate inventory wording.",
+          "proposedResolution": "Preserve original Fable report unchanged, count five stage77runs in finalartifact, distinguish fourexecution02runs from oneexecution01failure, and have Fable/Astra explicitly acknowledge in finalreview. No source/test/report expectations or rerun changes.",
+          "oldFailedReceiptSha256": "b293d6d999b6db48643715e2d37fcdc315044def0b7f57d9dad17548584c1158",
+          "oldFailedVitestSha256": "0c2f036c5de686d3e01d1d906e16b46075f0d2191f4e07df3a8da365570a2746"
+        }
+      ],
+      "status": "Main correction based on original immutablefailedreceipt; Fable/Astra explicit agreement to be recorded in same-artifact finalreview."
+    }
+  },
+  "limits": {
+    "stage": 77,
+    "acceptedScope": [
+      "Bounded English salary-owner and period grammar, not universal natural-language understanding.",
+      "Same selected 22 E2E files in Chromium development and production; not the whole repository E2E suite or every accessibility state.",
+      "Synthetic regression data; historical audit uses preserved snapshots without fresh crawling or current posting-validity checks.",
+      "No runtime API-load or production-latency measurement in this compensation stage.",
+      "Irretrievable missing bounds, truncated clauses, lost historical input cardinality and discarded old API fallbacks are not reconstructed.",
+      "Historical Lever text-dependent basis in opaque structured board quotes is not fully re-derived; explicit provider intervals and provenance are retained.",
+      "Unverifiable saved scalars retain earlier-record treatment; catalog comparison excludes an unsupported fresh scalar.",
+      "Same-band legacy multiple monetary envelopes and unsupported number/period grammar remain governed by the unchanged whole-number parser.",
+      "All3 approval establishes agreement to proceed within the recorded scope; it is not a guarantee of no defects.",
+      "Exact Fable model identity and max effort request are recorded; the backend does not expose its effective effort."
+    ]
+  },
+  "preservationAndCleanup": {
+    "status": "pending Git preservation and verified deletion",
+    "originalInputsAndObservationsRemainIgnoredLocalData": true,
+    "note": "No temporary artifact or process is claimed removed by this pre-cleanup record."
+  }
+}

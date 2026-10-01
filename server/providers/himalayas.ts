@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { z } from 'zod'
 import type { Company, Job } from '../../shared/types'
 import { normalizeCompensation } from '../../shared/compensation'
-import { parseTextCompensation } from '../../shared/pay-text'
+import { analyzeTextCompensation, compensationFromAnalysis, rejectedPayEvidence } from '../../shared/pay-text'
 import { countryCode } from '../../shared/countries'
 import { BoardFetchError } from '../catalog-service'
 import { employmentFact, workModeFact } from '../job-facts'
@@ -117,8 +117,9 @@ export function normalizeHimalayasJob(raw: HimalayasJob, companyId: string, fetc
     ? [countryLabel || (remoteWorldwide ? 'Worldwide' : '거주 국가 미확인'), 'Remote',
       ...(raw.timezoneRestrictions.length ? ['시간대 조건 확인'] : [])].join(' · ').slice(0, 1800)
     : '근무지 미확인'
-  const bodyPay = parseTextCompensation(text)
-  const salary = bodyPay.compensationRanges?.length || bodyPay.compensationEvidence?.length || bodyPay.compensationNote
+  const bodyAnalysis = analyzeTextCompensation(text)
+  const bodyPay = compensationFromAnalysis(bodyAnalysis)
+  const salary = bodyAnalysis.inputs.length
     ? bodyPay
     : raw.minSalary != null || raw.maxSalary != null ? normalizeCompensation([{
       label: 'Himalayas 급여 정보', min: raw.minSalary, max: raw.maxSalary,
@@ -128,6 +129,10 @@ export function normalizeHimalayasJob(raw: HimalayasJob, companyId: string, fetc
         raw.salaryPeriod ?? '지급 기간 미확인', '기본급·총보상 구분 미확인',
       ].join(' · ') },
     }]) : bodyPay
+  if (!bodyAnalysis.inputs.length && salary !== bodyPay) {
+    const rejected = rejectedPayEvidence(bodyAnalysis)
+    if (rejected.length) salary.compensationEvidence = [...(salary.compensationEvidence ?? []), ...rejected].slice(0, 20)
+  }
   return normalizePosting({
     provider: 'himalayas', id: guidId(raw.guid), companyId, title: raw.title,
     // Keep the canonical source backlink even if applicationLink redirects elsewhere.

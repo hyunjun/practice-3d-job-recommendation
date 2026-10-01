@@ -242,14 +242,15 @@ describe('multipliers, shorthand inheritance and the exact safe ceiling', () => 
   })
 })
 
-describe('interpretation version 3 accepts earlier records and rejects unknown versions', () => {
+describe('interpretation version 4 accepts earlier records and rejects unknown versions', () => {
+  // Stage 77 moved the current version to 4; versions 1, 2 and 3 stay accepted and 5 is the future oracle.
   it('pins the current version and the accepted schema literals', () => {
-    expect(COMPENSATION_VERSION).toBe(3)
+    expect(COMPENSATION_VERSION).toBe(4)
     const job = fixture('spaceGrouped')
-    expect(job.compensationVersion).toBe(3)
-    for (const version of [1, 2, 3]) expect(JobSchema.safeParse({ ...job, compensationVersion: version }).success).toBe(true)
+    expect(job.compensationVersion).toBe(4)
+    for (const version of [1, 2, 3, 4]) expect(JobSchema.safeParse({ ...job, compensationVersion: version }).success).toBe(true)
     expect(JobSchema.safeParse({ ...job, compensationVersion: undefined }).success).toBe(true)
-    for (const version of [0, 4, 99]) expect(JobSchema.safeParse({ ...job, compensationVersion: version }).success).toBe(false)
+    for (const version of [0, 5, 99]) expect(JobSchema.safeParse({ ...job, compensationVersion: version }).success).toBe(false)
   })
 
   it('decodes saved records from every accepted version, upgrades recoverable ones and drops an unknown future version', () => {
@@ -260,7 +261,7 @@ describe('interpretation version 3 accepts earlier records and rejects unknown v
       record({ ...base, salary: null, compensationVersion: 1 }, 'greenhouse-fixture-quill-ledger-v1'),
       record({ ...base, ...NUMBER_FORMAT_LEGACY_PAY.spaceGrouped, compensationVersion: 2 }, 'greenhouse-fixture-quill-ledger-v2'),
       record(current, 'greenhouse-fixture-quill-ledger-v3'),
-      record({ ...current, compensationVersion: 4 as unknown as Job['compensationVersion'] }, 'greenhouse-fixture-quill-ledger-v4'),
+      record({ ...current, compensationVersion: 5 as unknown as Job['compensationVersion'] }, 'greenhouse-fixture-quill-ledger-v5'),
     ]))
     expect(decoded.omitted).toBe(1)
     expect(decoded.reason).toBe('records')
