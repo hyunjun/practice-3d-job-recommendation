@@ -18,7 +18,7 @@ const ERROR_HELP: Record<SavedStorageErrorCode, string> = {
   busy: '진행 중인 저장이 끝난 뒤 다시 시도해 주세요.',
 }
 
-export function SavedStorageNotice({ storage, issuesOnly = false, onManage }: { storage: SavedJobsController; issuesOnly?: boolean; onManage?: () => void }) {
+export function SavedStorageNotice({ storage, issuesOnly = false, onManage, onRetry }: { storage: SavedJobsController; issuesOnly?: boolean; onManage?: () => void; onRetry?: (button: HTMLButtonElement) => void }) {
   const [downloadError, setDownloadError] = useState(false)
   const { phase, ready, pending, recovery, records, error, retry } = storage
   if (issuesOnly && phase !== 'error' && !recovery.length) return null
@@ -39,7 +39,7 @@ export function SavedStorageNotice({ storage, issuesOnly = false, onManage }: { 
       {failed ? <CircleAlert size={16} /> : busy ? <span className="spinner-wrap" aria-hidden="true"><span className="spinner" /></span> : <CheckCircle2 size={15} />}
       <div><p>{title}</p>{failed && <small>{error && ERROR_HELP[error]}{pending > 0 ? ' 마지막 입력은 이 탭에 남아 있어요. 저장 완료 전에는 탭을 닫지 마세요.' : ready ? ' 마지막으로 읽은 기록을 표시하고 있어요.' : ' 기존 기록을 확인하기 전까지 새 저장은 잠시 멈춰요.'}</small>}</div>
     </div>
-    {failed && <div className="saved-storage-actions"><button className="button secondary" onClick={retry}><RefreshCw size={14} />{pending ? '저장 다시 시도' : '저장소 다시 연결'}</button>{pending > 0 && records.length > 0 && <button className="text-button" onClick={() => exportSavedCsv(records)}><Download size={14} />현재 내용 CSV로 보관</button>}{onManage && ready && <button className="text-button" onClick={onManage}>JSON 백업·복원</button>}</div>}
+    {failed && <div className="saved-storage-actions"><button className="button secondary" onClick={event => onRetry ? onRetry(event.currentTarget) : retry()}><RefreshCw size={14} />{pending ? '저장 다시 시도' : '저장소 다시 연결'}</button>{pending > 0 && records.length > 0 && <button className="text-button" onClick={() => exportSavedCsv(records)}><Download size={14} />현재 내용 CSV로 보관</button>}{onManage && ready && <button className="text-button" onClick={onManage}>JSON 백업·복원</button>}</div>}
     {recovery.length > 0 && <details className="saved-recovery">
       <summary>따로 보관한 원본이 있어요</summary>
       {recovery.some(source => source.kind === 'retired-samples') && <p>이전 가상 공고의 메모·지원 상태·원본을 따로 보관했어요. 실제 공고 목록에서는 제외했으며, 보관한 기록은 파일로 내려받을 수 있어요.</p>}

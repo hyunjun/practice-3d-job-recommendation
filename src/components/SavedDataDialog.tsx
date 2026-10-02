@@ -149,7 +149,7 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
   }
   const movePage = (next: number) => { setPage(next); section.current?.scrollIntoView({ block: 'start' }) }
 
-  return <Dialog title="기록 백업과 복원" eyebrow="YOUR RECORDS, WITH YOU" className="saved-data-dialog" onClose={() => { if (!storage.busy) { request.current++; onClose() } }}>
+  return <Dialog title="기록 백업과 복원" eyebrow="YOUR RECORDS, WITH YOU" className="saved-data-dialog" ownsStorageNotice onClose={() => { if (!storage.busy) { request.current++; onClose() } }}>
     <div className="dialog-body saved-data-body">
       <section className="saved-backup-export" aria-labelledby="saved-export-title">
         <div><h3 id="saved-export-title"><FileJson size={18} />현재 기록을 파일로 보관</h3><p>목록의 공고·메모·지원 상태·저장일 {storage.ready ? `${storage.records.length}개` : ''}를 JSON 파일로 내려받아요. 다른 브라우저의 ORBIT에서도 가져올 수 있어요.</p>

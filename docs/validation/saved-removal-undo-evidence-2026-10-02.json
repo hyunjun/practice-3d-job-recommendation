@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "stage": 80,
+  "feature": "Saved-job removal Undo preserving the original record",
+  "verifiedCandidate": {
+    "stateDigest": "25e86676d50585815efb7b33c9de68efa6400c7246c9a2fae56b607440fcc186",
+    "sourceFiles": 450,
+    "D2Sha256": "7df892a2304f52b39f687de109caf9cf69f5d0ec1a834177a83e893a2b30415f",
+    "executionPlanSha256": "3a112532d77561d2c6545658344b6375288fc1370ea9fde0b97a59227bdbf5f7",
+    "implementationGateSha256": "927f976bf938c1d0da2c9bf4254835e3e9c28999a97ecf09ca4c213e11f624f0"
+  },
+  "commands": [
+    {
+      "kind": "check",
+      "runId": "20261002T095055576861Z-4545fa65",
+      "startedAt": "2026-10-02T09:50:55.622595+00:00",
+      "endedAt": "2026-10-02T09:51:24.846405+00:00",
+      "exitCode": 0,
+      "receiptSha256": "8fc8e48ceae721b17b99935cfb6ff1c22b41cda0aec72feab288bae19bb1b606",
+      "ordinaryLogSha256": "517b8c4a7f0f0e43f3f36cfd828e93118d30f7c85e6c3fe9360dbaead3b3860e",
+      "remainingOwnedProcesses": [],
+      "processRegistryErrors": [],
+      "unitFiles": 100,
+      "testsPassed": 3403
+    },
+    {
+      "kind": "build",
+      "runId": "20261002T095223238366Z-87a20507",
+      "startedAt": "2026-10-02T09:52:23.277068+00:00",
+      "endedAt": "2026-10-02T09:52:26.579555+00:00",
+      "exitCode": 0,
+      "receiptSha256": "299b8130b75c3e85bc583075d001db42bc0a1ce7b8064b0f2c598ecd775942ea",
+      "ordinaryLogSha256": "cf5474f0c4459abdea38b868e5c895b3062cbe8017f9b7371bc8cfaa92287583",
+      "remainingOwnedProcesses": [],
+      "processRegistryErrors": [],
+      "artifactFiles": 559,
+      "artifactDigest": "6430e20b1e2de16432ec0f9e312e5e38ab27748c957e43d2dbe6f6b7fe6abba7"
+    },
+    {
+      "kind": "development",
+      "runId": "20261002T095328259892Z-b8b094d5",
+      "startedAt": "2026-10-02T09:53:28.301213+00:00",
+      "endedAt": "2026-10-02T10:01:25.847027+00:00",
+      "exitCode": 0,
+      "receiptSha256": "4492b9944424c2bcaab5d44d75c66b4806828460cca85454365e6b25f00d59b9",
+      "ordinaryLogSha256": "faff264dd5b93be57c5e8bd97619fe6583ae084a0b1f4c5cc3f422e4be894576",
+      "remainingOwnedProcesses": [],
+      "processRegistryErrors": [],
+      "reportSha256": "35f70e8e27552cf8f1dc0f6538cb1ec59462ff557b04904df6aa98cfc1cff7bc",
+      "stats": {
+        "startTime": "2026-10-02T09:53:29.103Z",
+        "duration": 476275.267,
+        "expected": 221,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "workers": 1,
+      "retries": 0,
+      "specFiles": 18
+    },
+    {
+      "kind": "production",
+      "runId": "20261002T105636717617Z-1aa6a9bb",
+      "startedAt": "2026-10-02T10:56:36.755500+00:00",
+      "endedAt": "2026-10-02T11:31:58.574067+00:00",
+      "exitCode": 0,
+      "receiptSha256": "9ec397ad5de059fc5e1ab39ab3aa77a0dadb990564b5e3b2ad02e0f974b1f493",
+      "ordinaryLogSha256": "480bb687e76e416e2e1b6535897e279a600641a69df63193610dcedbc3b8d4b2",
+      "remainingOwnedProcesses": [],
+      "processRegistryErrors": [],
+      "reportSha256": "5951de05e57534d922c985352e1a494a72a06035fe59686665a134b3991c5042",
+      "stats": {
+        "startTime": "2026-10-02T10:56:38.418Z",
+        "duration": 2118963.3850000002,
+        "expected": 619,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "workers": 1,
+      "retries": 0,
+      "specFiles": 83
+    }
+  ],
+  "independentEvidenceReviews": [
+    {
+      "participant": "Main",
+      "reportedDecision": "PRODUCTION_EVIDENCE_APPROVED",
+      "reportSha256": "a0eaee338bff6b572d812cd20e25c6fb370022f51d992d69076b96cc9253c70c",
+      "requiredProductIssues": []
+    },
+    {
+      "participant": "Astra",
+      "reportedDecision": "PRODUCTION_EVIDENCE_REVIEW_APPROVED",
+      "reportSha256": "9bd1a7ac11e56fe1529d90318577886c37aa03d8a49bc4aa6e97dded768edce9",
+      "requiredProductIssues": []
+    },
+    {
+      "participant": "Fable",
+      "reportedDecision": "PRODUCTION_EVIDENCE_APPROVED",
+      "reportSha256": "9b473754e7aab7652560ae30763d23d2755b699b4052755534e9c60ee6cbe9e9",
+      "requiredProductIssues": []
+    }
+  ],
+  "modelProvenance": {
+    "requested": {
+      "Astra": {
+        "model": "global.openai.gpt-6-astra",
+        "effort": "max"
+      },
+      "Fable": {
+        "model": "claude-fable-5-1",
+        "effort": "max"
+      }
+    },
+    "observedFableResponseModel": "claude-fable-5-1",
+    "astraServingConfigurationIndependentlyAttested": false,
+    "actualInternalEffortIndependentlyAttested": false
+  },
+  "productionAttachments": {
+    "total": 747,
+    "json": 580,
+    "png": 167,
+    "perReviewerNewUniqueImagesActuallyViewed": 97,
+    "perReviewerOwnPriorDevExactByteReuse": 51,
+    "currentDuplicatesOfActuallyViewedImages": 19,
+    "recoveryDiagnosticCases": 46,
+    "nonApiResourceAudits": 366,
+    "unexpectedScopedDiagnosticOrResourceFailures": 0,
+    "lifecycleGeometryFiles": 9,
+    "framedTargetObservations": 123,
+    "nativeHistoryClassification": "reload",
+    "bfCacheSuccessObserved": false
+  },
+  "literalRestoration": "Full pre-removal job/company/note/status/savedAt records compared using test literals and native IndexedDB reads. Public fixtures are synthetic. Optimistic UI is not durable-write proof.",
+  "productionNativeMessages": {
+    "CVDisplayLink": 7152,
+    "taskPolicy": 1009,
+    "ProduceSkia": 53,
+    "ProduceOverlay": 7,
+    "InvalidMailbox": 7,
+    "GCM_DEPRECATED_ENDPOINT": 2,
+    "GCM_QUOTA_EXCEEDED": 1,
+    "IPH": 3
+  },
+  "executionHistory": "Baseline4 failing regressions, failed typecheck with4 diagnostics and prior DEV208passed/8failed remain separate from this corrected candidate. No skip/retry/expectation reduction used to make the final run pass.",
+  "reviewCitationClarifications": "Committed original attachments are0693/0711;0692/0710 are control snapshots. Execution invocation began10:31:37UTC; test command began10:56:36UTC after the same invocation resumed. DEV has2QUOTA_EXCEEDED GCM lines; quota is not a new production-only category.",
+  "limits": [
+    "Chromium with synthetic fixtures and controlled errors/timers; not real-provider correctness, all browsers, all assistive technologies or all interleavings.",
+    "Individual framing, screenshots/crops and DOM/native assertions have separate scopes; no uniform page instrumentation for all619 cases.",
+    "Normal logs retain native diagnostics and warnings; temporal context does not prove causation or universal harmlessness.",
+    "Native history returned by reload, not observed BFCache restoration.",
+    "Power evidence consists of before/after assertions plus one-second-resolution sleep-event logs, not continuous monitoring.",
+    "Initial pre-ready admission is unit-covered; actual busy-import rejection is E2E-covered."
+  ],
+  "futureObservations": [
+    "Investigate real keyboard focus entering a scrolled note field above a sticky footer; held-error harness setup alone does not prove a new regression.",
+    "Reduce transient informational overlap between catalog success notices and low summary/card content; no focused-control occlusion was observed."
+  ],
+  "retention": "Full normal reports, source/evidence snapshots and public review decisions are preserved in a local-only Git archive before owned temporary cleanup; private model reasoning is excluded. Irreplaceable fetched originals and historical observations remain ignored locally. Actual archive/deletion results are recorded separately."
+}

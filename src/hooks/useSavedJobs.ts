@@ -5,6 +5,7 @@ import { openSavedStore } from '../lib/saved-store'
 import type { SavedOperation } from '../../shared/saved-jobs'
 import type { SavedImportPlan } from '../../shared/saved-backup'
 import type { SavedRecovery } from '../lib/saved-store'
+import type { SavedJob } from '../../shared/types'
 
 export function useSavedJobs(inSavedView = false) {
   const [controller] = useState(() => new SavedController(() => openSavedStore()))
@@ -45,6 +46,8 @@ export function useSavedJobs(inSavedView = false) {
     importRecords: (plan: SavedImportPlan) => controller.importRecords(plan),
     discardRecovery: (target: SavedRecovery) => controller.discardRecovery(target),
     refresh: () => controller.refresh(),
+    getSnapshot: controller.getSnapshot,
+    addTracked: (record: SavedJob) => controller.addTracked(record),
   }
 }
 

@@ -137,7 +137,7 @@ test('can remove an unwanted record and finish retrying even while record writes
   })
   await page.getByLabel('이 기회에 대한 나의 메모').fill('Unwanted failed edit')
   await expect(page.getByRole('alert')).toContainText('아직 저장하지 못한 변경이 있어요.')
-  await page.getByRole('button', { name: '목록에서 제거', exact: true }).click()
+  await page.getByRole('button', { name: '저장 목록에서 제거', exact: true }).click()
   await page.getByRole('button', { name: '저장 다시 시도', exact: true }).click()
   await waitForSavedCommit(page)
   expect(await readSaved(page)).toEqual([])
@@ -161,7 +161,7 @@ test('notifies another tab about notes, application status and removal without r
     await other.getByRole('button', { name: '지원 완료로 표시', exact: true }).click()
     await expect(page.getByRole('button', { name: '지원 완료로 표시됨', exact: true })).toBeVisible()
     expect((await readSaved(page))[0]).toMatchObject({ note: 'Shared local note', status: 'applied' })
-    await other.getByRole('button', { name: '저장됨', exact: true }).click()
+    await other.getByRole('button', { name: '저장 목록에서 제거', exact: true }).click()
     await expect(page.getByLabel('이 기회에 대한 나의 메모')).toHaveCount(0)
     expect(await readSaved(page)).toEqual([])
   } finally { await other.close() }

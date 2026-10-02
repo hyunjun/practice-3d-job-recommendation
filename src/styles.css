@@ -412,7 +412,8 @@ select option { background: #1e271c; color: var(--text); }
 .dialog-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 25px 26px 21px; gap: 16px; border-bottom: 1px solid #415533; }
 .dialog-header .eyebrow { color: #abc394; font-size: 7px; letter-spacing: 1.5px; margin-bottom: 10px; }
 .dialog-header h2 { font-size: 21px; letter-spacing: -.7px; font-weight: 500; line-height: 1.45; }
-.dialog-close { margin-top: -4px; margin-right: -7px; }
+.dialog-header > div { min-width: 0; overflow-wrap: anywhere; }
+.dialog-close { margin-top: -4px; margin-right: -7px; flex-shrink: 0; }
 .dialog-body { padding: 24px 26px; }
 .dialog-intro { font-size: 12px; color: #acbf9c; line-height: 1.8; margin-bottom: 26px; }
 .dialog-footer { position: sticky; bottom: 0; z-index: 3; padding: 18px 26px; border-top: 1px solid #4a6037; background: #1f2c1bea; backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: space-between; gap: 14px; }
@@ -633,6 +634,8 @@ select option { background: #1e271c; color: var(--text); }
 .source-line { display: flex; align-items: flex-start; gap: 6px; color: #90a876; font-size: 8px; line-height: 1.8; margin-top: 15px; }
 .source-line svg { margin-top: 2px; }
 .job-footer .primary { min-width: 175px; }
+.job-footer > button { white-space: normal; min-width: 0; height: auto; min-height: 40px; padding-block: 8px; line-height: 1.5; }
+.job-footer > button > svg { flex-shrink: 0; }
 .data-dialog { width: min(720px, calc(100vw - 40px)); }
 .data-source-overview { display: flex; align-items: flex-start; gap: 14px; padding: 20px; border: 1px solid #789854; border-radius: 8px; background: #3b542773; color: #d3e4c1; }
 .data-source-overview > svg { flex-shrink: 0; color: #b9dc94; margin-top: 2px; }
@@ -768,6 +771,27 @@ select option { background: #1e271c; color: var(--text); }
 .board-error { color: #d0b786; }
 .board-pending { color: #b1d4df; }
 .collection-page { flex: 1; padding: 47px 5.5vw 30px; max-width: 1550px; width: 100%; align-self: center; }
+.saved-feedback-host:empty { display: none; }
+.saved-feedback-host { min-width: 0; display: flow-root; }
+.dialog-feedback-host { margin: 20px 26px 0; }
+.dialog-feedback-host:empty { margin: 0; }
+.results-scroll > .saved-feedback-host { margin-inline: 25px; }
+.saved-removal-notice { margin: 0 0 20px; padding: 16px; border: 1px solid #71934f; border-radius: 9px; background: #25351e; color: #dceacb; font-size: 12px; line-height: 1.8; overflow-wrap: anywhere; }
+.saved-removal-notice > header { display: flex; align-items: center; gap: 9px; color: #d2efae; }
+.saved-removal-notice h3 { font-size: 13px; font-weight: 600; }
+.saved-removal-scope { margin: 7px 0 14px; color: #b9ccaa; font-size: 11px; }
+.saved-removal-record { min-width: 0; border-top: 1px solid #516a3d; padding-top: 12px; }
+.saved-removal-record + .saved-removal-record { margin-top: 14px; }
+.saved-removal-kind { font-size: 10px; font-weight: 600; color: #bce991; }
+.saved-removal-record h4 { margin: 3px 0; font-size: 13px; font-weight: 550; line-height: 1.65; }
+.saved-removal-meta { color: #b9cca9; font-size: 11px; }
+.saved-removal-note { margin-top: 9px; padding-left: 10px; border-left: 2px solid #7b985a; color: #c1d3b0; font-size: 11px; white-space: pre-wrap; }
+.saved-removal-message { margin-top: 9px; color: #deebce; }
+.saved-removal-message:empty { display: none; }
+.saved-removal-wait { margin-top: 9px; color: #c3d3b4; font-size: 11px; }
+.saved-removal-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; }
+.saved-removal-actions > button { min-height: 44px; height: auto; padding-block: 8px; font-size: 11px; white-space: normal; text-align: left; line-height: 1.7; scroll-margin-block: 20px 100px; }
+.saved-removal-actions svg { flex-shrink: 0; }
 .saved-storage-notice { margin: 0 0 20px; padding: 13px 15px; border: 1px solid #415637; border-radius: 8px; background: #22301d; font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
 .saved-storage-summary { display: flex; align-items: flex-start; gap: 9px; }
 .saved-storage-summary > svg, .saved-storage-summary > .spinner-wrap { flex-shrink: 0; margin-top: 3px; color: var(--accent); }
@@ -956,7 +980,7 @@ select option { background: #1e271c; color: var(--text); }
 .saved-status.applied > span { background: #bfe99a; }
 .saved-card footer > span:nth-child(2) { color: #819d69; font-size: 7px; }
 .saved-card footer > button { margin-left: auto; font-size: 9px; }
-.collection-page > .empty-state { padding: 100px 24px; }
+.collection-page > .empty-state, .saved-results-area > .empty-state { padding: 100px 24px; }
 .collection-footnote { font-size: 9px; color: #8ca771; text-align: center; margin: 33px 0 10px; line-height: 1.9; }
 .comparison-source-note { display: flex; align-items: center; gap: 8px; margin: -6px 0 24px; font-size: 9px; color: #aac195; line-height: 1.8; }
 .comparison-scroll { overflow-x: auto; border: 1px solid #4e6a36; border-radius: 8px; }
@@ -1280,6 +1304,10 @@ select option { background: #1e271c; color: var(--text); }
   .dialog-close { width: 44px; height: 44px; }
   .dialog-footer > .button { min-height: 44px; }
   .dialog-header { padding: 21px 20px 18px; gap: 9px; }
+  .dialog-feedback-host { margin: 16px 20px 0; }
+  .dialog-feedback-host:empty { margin: 0; }
+  .saved-removal-notice { padding: 13px; }
+  .results-scroll > .saved-feedback-host { margin-inline: 18px; }
   .dialog-header h2 { font-size: 19px; line-height: 1.5; }
   .dialog-header .eyebrow { font-size: 6px; letter-spacing: 1.2px; }
   .dialog-body { padding: 21px 20px; }
@@ -1347,7 +1375,7 @@ select option { background: #1e271c; color: var(--text); }
   .saved-location, .saved-card-match { font-size: 10px; }
   .saved-card-tags > span:not(.sample-label) { font-size: 10px; }
   .saved-card footer > span:nth-child(2) { font-size: 8px; }
-  .collection-page > .empty-state { padding: 65px 10px; }
+  .collection-page > .empty-state, .saved-results-area > .empty-state { padding: 65px 10px; }
   .comparison-source-note { font-size: 9px; align-items: flex-start; gap: 8px; }
   .comparison-source-note .source-status-dot { margin-top: 6px; }
   .comparison-table { grid-template-columns: 157px repeat(var(--city-columns), 195px); min-width: 742px; }

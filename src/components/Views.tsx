@@ -22,10 +22,11 @@ import { languageSearchText } from '../../shared/job-languages'
 import { workTimeSearchText } from '../../shared/job-work-time'
 import { normalizeSearchText, searchWords } from '../../shared/search-text'
 import { JobSourceCredit } from './JobSourceCredit'
+import { SavedFeedbackSlot } from './DialogFeedback'
 
 const SAVED_PAGE_SIZE = 12
 
-export function SavedView({ saved, storage, showStorageStatus, onManage, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; storage: SavedJobsController; showStorageStatus: boolean; onManage: () => void; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob, fallbackFocus?: () => HTMLElement | null) => void; onRemove: (match: MatchedJob) => void; onExplore: () => void }) {
+export function SavedView({ saved, storage, showStorageStatus, onManage, profile, postingStatus, onOpen, onRemove, onExplore }: { saved: SavedJob[]; storage: SavedJobsController; showStorageStatus: boolean; onManage: () => void; profile: Profile; postingStatus: PostingStatusController; onOpen: (match: MatchedJob, fallbackFocus?: () => HTMLElement | null) => void; onRemove: (match: MatchedJob) => boolean; onExplore: () => void }) {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [postingFilter, setPostingFilter] = useState('all')
@@ -38,6 +39,7 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
   const resultsHeight = useRef(160)
   const summary = useRef<HTMLParagraphElement>(null)
   const focusAfterPage = useRef(false)
+  const focusAfterRemoval = useRef<HTMLButtonElement | null>(null)
   const previousPage = useRef(0)
   const wasComparing = useRef(false)
   const listId = useId()
@@ -79,14 +81,20 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
     const comparisonFinished = wasComparing.current && !awaitingComparison
     wasComparing.current = awaitingComparison
     if (awaitingComparison) return
-    if (resultsArea.current) resultsHeight.current = resultsArea.current.getBoundingClientRect().height
+    if (resultsArea.current) {
+      const feedback = resultsArea.current.querySelector<HTMLElement>(':scope > .saved-feedback-host')
+      resultsHeight.current = Math.max(160, resultsArea.current.getBoundingClientRect().height - (feedback?.getBoundingClientRect().height ?? 0))
+    }
     const lostFocusOnClamp = (previousPage.current !== page || comparisonFinished) && document.activeElement === document.body
+    const removedControl = focusAfterRemoval.current
+    const lostFocusOnRemoval = removedControl && !removedControl.isConnected && document.activeElement === document.body
+    if (removedControl && (!removedControl.isConnected || document.activeElement !== removedControl)) focusAfterRemoval.current = null
     previousPage.current = page
-    if (!focusAfterPage.current && !lostFocusOnClamp) return
+    if (document.querySelector('dialog[open]') || (!focusAfterPage.current && !lostFocusOnClamp && !lostFocusOnRemoval)) return
     focusAfterPage.current = false
-    const target = firstTitle.current ?? summary.current
+    const target = firstTitle.current ?? (lostFocusOnRemoval ? search.current ?? emptyExplore.current : null) ?? summary.current
     target?.focus({ preventScroll: true })
-    const reveal = list.current ?? summary.current
+    const reveal = lostFocusOnRemoval ? target : list.current ?? summary.current
     reveal?.scrollIntoView({ block: 'start', behavior: 'instant' })
   }, [page, visibleIds, awaitingComparison])
   const changePage = (next: number) => {
@@ -132,10 +140,17 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
     </section>}
     {storage.ready && <div className="collection-toolbar"><div className="collection-tabs">{[['all', '전체', saved.length], ['saved', '검토 중', saved.filter(item => item.status === 'saved').length], ['applied', '지원 완료', saved.filter(item => item.status === 'applied').length]].map(([value, label, count]) => <button key={value} className={status === value ? 'active' : ''} onClick={() => setStatus(String(value))}>{label}<span>{count}</span></button>)}</div><label className="collection-search"><Search size={16} /><input ref={search} aria-label="저장한 기회 검색" title="회사·직무·언어·시간대·협업 시간·메모 검색" placeholder="회사·직무·언어·시간대·메모" value={query} onChange={event => setQuery(event.target.value)} /></label></div>}
     {storage.ready && <p ref={summary} className="saved-results-summary" role="status" aria-atomic="true" tabIndex={-1}>{awaitingComparison ? '저장한 공고 내용을 비교하고 있어요.' : `${matches.length}개 기회${matches.length > 0 ? ` 중 ${start + 1}–${start + visible.length}개 표시` : ''}`}</p>}
-    {storage.ready && (awaitingComparison ? <div className="saved-comparison-pending" style={{ minHeight: resultsHeight.current }} aria-busy="true"><Spinner label="저장 내용 비교 중" /></div> : matches.length ? <div ref={resultsArea}>{pages > 1 && pagination('top')}<div id={listId} ref={list} className="saved-grid">{visible.map((item, index) => {
+    <div ref={resultsArea} className="saved-results-area">
+    {storage.ready && !awaitingComparison && matches.length > 0 && pages > 1 && pagination('top')}
+    <SavedFeedbackSlot />
+    {storage.ready && (awaitingComparison ? <div className="saved-comparison-pending" style={{ minHeight: resultsHeight.current }} aria-busy="true"><Spinner label="저장 내용 비교 중" /></div> : matches.length ? <><div id={listId} ref={list} className="saved-grid">{visible.map((item, index) => {
       const match = { job: item.job, company: item.company, ...matchJob(item.job, profile) }
       return <article className="saved-card" key={item.job.id}>
-        <header><CompanyLogo company={item.company} /><div><h2>{item.company.name}</h2><span>{item.company.industry}</span></div><button className="icon-button" aria-label={`${item.company.name} 저장 취소`} onClick={() => onRemove(match)}><BookmarkCheck size={18} /></button></header>
+        <header><CompanyLogo company={item.company} /><div><h2>{item.company.name}</h2><span>{item.company.industry}</span></div><button className="icon-button" aria-label={`${item.company.name} 저장 취소`} onClick={event => {
+          const control = event.currentTarget
+          const focused = document.activeElement === control
+          if (onRemove(match) && focused) focusAfterRemoval.current = control
+        }}><BookmarkCheck size={18} /></button></header>
         <button ref={index === 0 ? firstTitle : undefined} className="saved-title" data-saved-job-id={item.job.id} onClick={() => openSaved(match)}>{item.job.title}<ArrowUpRight size={17} /></button>
         <p className="saved-role">{jobRoleLabel(item.job)}</p>
         <JobSourceCredit job={item.job} />
@@ -151,12 +166,13 @@ export function SavedView({ saved, storage, showStorageStatus, onManage, profile
         {item.note && <p className="saved-note-preview">{item.note}</p>}
         <footer><span className={`saved-status ${item.status === 'applied' ? 'applied' : ''}`}><span />{item.status === 'applied' ? '지원 완료' : '검토 중'}</span><span>{new Date(item.savedAt).toLocaleDateString('ko-KR')} 저장</span><button className="text-button" onClick={() => openSaved(match)}>자세히<ArrowRight size={13} /></button></footer>
       </article>
-    })}</div>{pages > 1 && pagination('bottom')}</div> : <EmptyState icon={<Bookmark size={31} />} title={saved.length ? '검색에 맞는 저장한 기회가 없어요' : '다음 챕터의 첫 기회를 저장해 보세요'} text={saved.length ? '다른 검색어나 상태를 선택해 보세요.' : '도시에서 관심 있는 회사를 발견하면 북마크를 눌러주세요. 공고와 메모를 이곳에서 이어서 볼 수 있어요.'}><button ref={saved.length ? undefined : emptyExplore} className="button primary" onClick={onExplore}>기회 탐색하기<ArrowRight size={16} /></button></EmptyState>)}
+    })}</div>{pages > 1 && pagination('bottom')}</> : <EmptyState icon={<Bookmark size={31} />} title={saved.length ? '검색에 맞는 저장한 기회가 없어요' : '다음 챕터의 첫 기회를 저장해 보세요'} text={saved.length ? '다른 검색어나 상태를 선택해 보세요.' : '도시에서 관심 있는 회사를 발견하면 북마크를 눌러주세요. 공고와 메모를 이곳에서 이어서 볼 수 있어요.'}><button ref={saved.length ? undefined : emptyExplore} className="button primary" onClick={onExplore}>기회 탐색하기<ArrowRight size={16} /></button></EmptyState>)}
+    </div>
     <p className="collection-footnote">저장한 공고와 메모는 이 브라우저에 보관돼요. 공개 공고의 채용 상태는 원문에서 다시 확인해 주세요.</p>
   </main>
 }
 
-export function CompareView({ catalog, results, postingType, compareIds, status, onToggle, onAuto, onSelect, onExplore }: { catalog: Catalog; results: CityResult[]; postingType: Filters['postingType']; compareIds: string[]; status?: React.ReactNode; onToggle: (id: string) => void; onAuto: () => void; onSelect: (id: string) => void; onExplore: () => void }) {
+export function CompareView({ catalog, results, postingType, compareIds, available: ready = true, unavailableState, status, onToggle, onAuto, onSelect, onExplore }: { catalog: Catalog; results: CityResult[]; postingType: Filters['postingType']; compareIds: string[]; available?: boolean; unavailableState?: React.ReactNode; status?: React.ReactNode; onToggle: (id: string) => void; onAuto: () => void; onSelect: (id: string) => void; onExplore: () => void }) {
   const selected = compareIds.flatMap(id => {
     const city = CITY_BY_ID.get(id)
     return city ? [{ city, result: results.find(result => result.city.id === id) }] : []
@@ -180,10 +196,11 @@ export function CompareView({ catalog, results, postingType, compareIds, status,
     { label: '만나볼 회사', note: '기술·경력 일치 기준 정렬', render: (result?: CityResult) => <div className="compare-companies">{result ? groupCompanies(result.matches).slice(0, 3).map(group => <span key={group.company.id}><CompanyLogo company={group.company} small />{group.company.name}</span>) : <small>추천 회사 없음</small>}</div> },
   ]
   return <main id="main-content" className="collection-page compare-page" tabIndex={-1}>
-    <div className="page-heading"><div><p className="eyebrow">DIFFERENT CITIES. YOUR POSSIBILITIES.</p><h1>어느 도시에서 시작할까요<span className="accent-dot">?</span></h1><p>최대 3개 도시를 나란히 놓고, 중요한 조건을 비교해 보세요.</p></div><button className="button secondary" onClick={onAuto} disabled={!results.length}><GitCompareArrows size={16} />회사 많은 3개 도시</button></div>
-    <div className="comparison-source-note"><span className={`source-status-dot ${catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>조회한 공개 채용공고의 비교 · 생활비와 세금은 반영하지 않습니다.{postingType !== 'opening' && ` · 모집 유형: ${POSTING_TYPE_LABELS[postingType]}`}</span></div>
+    {ready && <div className="page-heading"><div><p className="eyebrow">DIFFERENT CITIES. YOUR POSSIBILITIES.</p><h1>어느 도시에서 시작할까요<span className="accent-dot">?</span></h1><p>최대 3개 도시를 나란히 놓고, 중요한 조건을 비교해 보세요.</p></div><button className="button secondary" onClick={onAuto} disabled={!results.length}><GitCompareArrows size={16} />회사 많은 3개 도시</button></div>}
+    {ready && <div className="comparison-source-note"><span className={`source-status-dot ${catalogNeedsAttention(catalog) ? 'attention' : ''}`} /><span>조회한 공개 채용공고의 비교 · 생활비와 세금은 반영하지 않습니다.{postingType !== 'opening' && ` · 모집 유형: ${POSTING_TYPE_LABELS[postingType]}`}</span></div>}
     {status}
-    {selected.length > 0 ? <div className="comparison-scroll"><div className="comparison-table" role="table" aria-label="도시별 채용 조건 비교" style={{ '--city-columns': 3 } as React.CSSProperties}>
+    <SavedFeedbackSlot />
+    {!ready ? unavailableState : selected.length > 0 ? <div className="comparison-scroll"><div className="comparison-table" role="table" aria-label="도시별 채용 조건 비교" style={{ '--city-columns': 3 } as React.CSSProperties}>
       <div className="comparison-row" role="row">
       <div className="comparison-corner" role="columnheader"><GitCompareArrows size={21} /><strong>나의 다음 도시</strong><span>현재 프로필과 필터 기준</span></div>
       {[0, 1, 2].map(index => {
@@ -194,7 +211,7 @@ export function CompareView({ catalog, results, postingType, compareIds, status,
       {metricRows.map(row => <ComparisonRow key={row.label} label={row.label} note={row.note}>{[0, 1, 2].map(index => <div className="comparison-value" role="cell" key={index}>{selected[index] ? row.render(selected[index].result) : <span className="empty-dash">—</span>}</div>)}</ComparisonRow>)}
       <div className="comparison-row" role="row"><div className="comparison-row-label" role="rowheader"><span>다음 기회로</span></div>{[0, 1, 2].map(index => <div className="comparison-value" role="cell" key={`action-${index}`}>{selected[index] && <button className="button secondary" onClick={() => onSelect(selected[index].city.id)}>회사 살펴보기<ArrowRight size={14} /></button>}</div>)}</div>
     </div></div> : <div className="compare-empty"><div className="compare-empty-cards">{results.slice(0, 3).map(result => <button key={result.city.id} onClick={() => onToggle(result.city.id)}><CityImage city={result.city} /><span><strong>{result.city.name}</strong><small>{result.companyCount}개 추천 회사</small></span><Plus size={19} /></button>)}</div><EmptyState icon={<GitCompareArrows size={30} />} title="궁금한 도시를 비교에 추가해 보세요" text="도시 목록의 + 버튼을 누르거나, 위 도시 중 하나를 선택하세요."><button className="button primary" onClick={onExplore}>도시 탐색하기<ArrowRight size={16} /></button></EmptyState></div>}
-    {compareIds.length > 0 && <div className="compare-bottom"><p>공고 수가 많다고 더 적합한 도시는 아니에요. 지원 조건과 실제 근무 환경을 함께 살펴보세요.</p><button className="text-button muted" onClick={() => compareIds.forEach(onToggle)}><Trash2 size={13} />비교 비우기</button></div>}
+    {ready && compareIds.length > 0 && <div className="compare-bottom"><p>공고 수가 많다고 더 적합한 도시는 아니에요. 지원 조건과 실제 근무 환경을 함께 살펴보세요.</p><button className="text-button muted" onClick={() => compareIds.forEach(onToggle)}><Trash2 size={13} />비교 비우기</button></div>}
   </main>
 }
 

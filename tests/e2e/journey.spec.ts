@@ -369,6 +369,6 @@ test.describe('mobile', () => {
     const bounds = await page.getByRole('dialog').boundingBox()
     expect(bounds!.width).toBeLessThanOrEqual(390)
     await page.getByRole('button', { name: '기회 저장', exact: true }).click()
-    await expect(page.getByRole('button', { name: '저장됨', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '저장 목록에서 제거', exact: true })).toBeVisible()
   })
 })

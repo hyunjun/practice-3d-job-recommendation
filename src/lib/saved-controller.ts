@@ -1,7 +1,8 @@
-import { applySavedOperation, isSampleSavedRecord, MAX_SAVED_JOBS } from '../../shared/saved-jobs'
+import { applySavedOperation, isSampleSavedRecord, MAX_SAVED_JOBS, SavedJobSchema } from '../../shared/saved-jobs'
 import type { SavedOperation } from '../../shared/saved-jobs'
 import type { SavedJob } from '../../shared/types'
 import type { SavedImportPlan } from '../../shared/saved-backup'
+import { sameNormalizedSavedRecord } from '../../shared/saved-backup'
 import { SavedStorageError } from './saved-store'
 import type { SavedRecovery, SavedStorageErrorCode, SavedStore, SavedStoreSnapshot } from './saved-store'
 
@@ -20,8 +21,15 @@ interface Pending {
   operation: SavedOperation
   draft?: SavedJob
   recreate?: boolean
+  settle?: (outcome: SavedAddOutcome) => void
 }
 export type SavedChangeResult = { accepted: true } | { accepted: false; reason: 'loading' | 'limit' | 'unreadable' | 'missing' | 'busy' }
+export type SavedAddOutcome =
+  | { status: 'noop' | 'superseded' }
+  | { status: 'settled' | 'conflict'; record: SavedJob }
+export type SavedTrackedAddResult =
+  | { accepted: true; completion: Promise<SavedAddOutcome> }
+  | Extract<SavedChangeResult, { accepted: false }>
 export type SavedBulkResult = { ok: true; refreshFailed?: boolean } | { ok: false; error: SavedStorageErrorCode }
 export type SavedRefreshResult =
   | { status: 'refreshed'; snapshot: SavedState }
@@ -172,6 +180,26 @@ export class SavedController {
   }
 
   change(operation: SavedOperation): SavedChangeResult {
+    return this.enqueue(operation)
+  }
+
+  /** Admission is not durability. Only the queued operation can settle its receipt. */
+  addTracked(record: SavedJob): SavedTrackedAddResult {
+    let settle!: (outcome: SavedAddOutcome) => void
+    const completion = new Promise<SavedAddOutcome>(resolve => { settle = resolve })
+    const result = this.enqueue({ kind: 'add', record }, settle)
+    return result.accepted ? { accepted: true, completion } : result
+  }
+
+  private finishTracked(entry: Pending, outcome: SavedAddOutcome) {
+    const settle = entry.settle
+    entry.settle = undefined
+    // This is a native Promise resolver, never a UI callback. Consumers run in
+    // a later microtask, outside the storage transaction's error handling.
+    settle?.(outcome)
+  }
+
+  private enqueue(operation: SavedOperation, settle?: Pending['settle']): SavedChangeResult {
     if (operation.kind === 'add' && isSampleSavedRecord(operation.record)) return { accepted: false, reason: 'unreadable' }
     if (!this.ready) return { accepted: false, reason: 'loading' }
     if (this.exclusive) return { accepted: false, reason: 'busy' }
@@ -179,21 +207,28 @@ export class SavedController {
     if (this.unreadableIds.has(id)) return { accepted: false, reason: 'unreadable' }
     const current = this.snapshot.records.find(item => item.job.id === id)
     if (operation.kind === 'add') {
-      if (current) return { accepted: true }
+      if (current) { settle?.({ status: 'noop' }); return { accepted: true } }
       if (this.snapshot.records.length + this.unreadableCount >= MAX_SAVED_JOBS) return { accepted: false, reason: 'limit' }
     }
     if (operation.kind === 'update' && !current) return { accepted: false, reason: 'missing' }
     if (operation.kind === 'remove' && !current) return { accepted: true }
+    // Include a just-published active add: a subscriber may deliberately remove
+    // it before this flush has delivered its receipt.
+    const superseded = operation.kind === 'remove'
+      ? [...new Set([...this.pending, ...(this.active ? [this.active] : [])])]
+        .filter(entry => entry.operation.kind === 'add' && entry.operation.record.job.id === id)
+      : []
     const draft = operation.kind === 'update' && current ? { ...current, ...operation.patch } : undefined
     const last = this.pending.at(-1)
     // Preserve an in-flight operation, but collapse queued keystrokes for one record.
     if (operation.kind === 'update' && last && last !== this.active && last.operation.kind === 'update' && last.operation.id === id) {
       last.operation = { ...last.operation, patch: { ...last.operation.patch, ...operation.patch } }
       last.draft = draft
-    } else this.pending.push({ operation, draft })
+    } else this.pending.push({ operation, draft, settle })
     this.finishRefreshes({ status: 'deferred' })
     this.phase = this.error ? 'error' : 'saving'
     this.publish()
+    superseded.forEach(entry => this.finishTracked(entry, { status: 'superseded' }))
     this.drain()
     return { accepted: true }
   }
@@ -227,14 +262,27 @@ export class SavedController {
         const committed = await store.apply(current.operation, recreate)
         if (epoch !== this.epoch) return
         const id = current.operation.kind === 'add' ? current.operation.record.job.id : current.operation.id
+        let outcome: SavedAddOutcome | undefined
+        if (current.operation.kind === 'add') {
+          const parsed = SavedJobSchema.safeParse(committed?.record)
+          if (!committed || committed.id !== id || !Number.isSafeInteger(committed.order) || committed.order < 0
+            || !parsed.success || parsed.data.job.id !== id) {
+            throw new SavedStorageError('write')
+          }
+          if (current.settle) outcome = {
+            status: sameNormalizedSavedRecord(current.operation.record, parsed.data) ? 'settled' : 'conflict',
+            record: parsed.data,
+          }
+        }
         if (committed) {
           this.base = this.base.some(item => item.job.id === id)
             ? this.base.map(item => item.job.id === id ? reuseRecord(committed.record, item) : item) : [committed.record, ...this.base]
         } else this.base = this.base.filter(item => item.job.id !== id)
         this.pending.shift()
-        this.active = null
         this.phase = this.pending.length ? 'saving' : 'ready'
         this.publish()
+        if (outcome) this.finishTracked(current, outcome)
+        this.active = null
         if (epoch === this.epoch) this.onCommit?.()
       }
     } catch (error) {
@@ -254,10 +302,11 @@ export class SavedController {
     // Delete first so a full database can accept the remaining saves.
     const removed = new Set<string>()
     const retained: Pending[] = []
+    const superseded: Pending[] = []
     for (let index = this.pending.length - 1; index >= 0; index--) {
       const entry = this.pending[index]
       const id = entry.operation.kind === 'add' ? entry.operation.record.job.id : entry.operation.id
-      if (removed.has(id)) continue
+      if (removed.has(id)) { superseded.push(entry); continue }
       retained.unshift(entry)
       if (entry.operation.kind === 'remove') removed.add(id)
     }
@@ -266,7 +315,9 @@ export class SavedController {
       ...retained.filter(entry => entry.operation.kind !== 'remove'),
     ]
     this.pending.forEach(entry => { entry.recreate = entry.operation.kind === 'update' })
-    await this.start()
+    const reconnect = this.start()
+    superseded.forEach(entry => this.finishTracked(entry, { status: 'superseded' }))
+    await reconnect
   }
 
   importRecords(plan: SavedImportPlan): Promise<SavedBulkResult> {

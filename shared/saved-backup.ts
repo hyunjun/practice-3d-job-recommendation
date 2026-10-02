@@ -43,6 +43,23 @@ export function sameSavedRecord(first: SavedJob, second: SavedJob): boolean {
   return savedDifferences(first, second).length === 0
 }
 
+function orderedSavedValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(orderedSavedValue)
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
+      .map(([key, item]) => [key, orderedSavedValue(item)]))
+  }
+  return value
+}
+
+/** Compare validated copies without changing the removal snapshot or import rules. */
+export function sameNormalizedSavedRecord(first: SavedJob, second: SavedJob): boolean {
+  const left = SavedJobSchema.safeParse(first)
+  const right = SavedJobSchema.safeParse(second)
+  return left.success && right.success
+    && JSON.stringify(orderedSavedValue(left.data)) === JSON.stringify(orderedSavedValue(right.data))
+}
+
 /** Includes the visible draft; reading a backup does not send it to a server. */
 export function createSavedBackup(records: SavedJob[], pending = 0, now = new Date()): string {
   return `${JSON.stringify({

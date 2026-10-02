@@ -1,8 +1,23 @@
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { ArrowUpRight, Check, CircleHelp, Globe2, X } from 'lucide-react'
 import type { City, Company } from '../../shared/types'
+import { useDialogFeedbackRegistration } from './DialogFeedback'
+
+const dialogScrollLocks = new WeakMap<Document, { count: number; overflow: string }>()
+
+function lockDialogScroll(document: Document) {
+  const lock = dialogScrollLocks.get(document) ?? { count: 0, overflow: document.body.style.overflow }
+  lock.count++
+  dialogScrollLocks.set(document, lock)
+  document.body.style.overflow = 'hidden'
+  return () => {
+    if (--lock.count) return
+    document.body.style.overflow = lock.overflow
+    dialogScrollLocks.delete(document)
+  }
+}
 
 export function OrbitLogo({ small = false }: { small?: boolean }) {
   return <span className={`orbit-logo ${small ? 'small' : ''}`} aria-hidden="true">
@@ -24,59 +39,79 @@ export function CityImage({ city, className = '' }: { city: City; className?: st
     : <span className={`city-image city-image-fallback ${className}`} aria-hidden="true"><Globe2 /><span>{city.en.slice(0, 3).toUpperCase()}</span></span>
 }
 
-export function Dialog({ title, eyebrow, children, onClose, fallbackFocus, className = '' }: { title: string; eyebrow?: string; children: ReactNode; onClose: () => void; fallbackFocus?: () => HTMLElement | null; className?: string }) {
+export function Dialog({ title, eyebrow, children, onClose, fallbackFocus, ownsStorageNotice = false, className = '' }: { title: string; eyebrow?: string; children: ReactNode; onClose: () => void; fallbackFocus?: () => HTMLElement | null; ownsStorageNotice?: boolean; className?: string }) {
   const ref = useRef<HTMLDialogElement>(null)
+  const feedback = useRef<HTMLDivElement>(null)
+  const registerFeedback = useDialogFeedbackRegistration()
+  const titleId = useId()
   const closeRef = useRef(onClose)
   const fallbackRef = useRef(fallbackFocus)
   closeRef.current = onClose
   fallbackRef.current = fallbackFocus
-  useEffect(() => {
+  useLayoutEffect(() => {
     const dialog = ref.current!
     const activeElement = document.activeElement as HTMLElement | null
     dialog.showModal()
-    const before = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const unregister = feedback.current && registerFeedback?.(feedback.current, dialog, ownsStorageNotice)
+    const unlockScroll = lockDialogScroll(dialog.ownerDocument)
+    const keepTab = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey
+        || event.isComposing || !(event.target instanceof Node) || !dialog.contains(event.target)) return
+      const targets = [...dialog.querySelectorAll<HTMLElement>(
+        'a[href], area[href], button, input, select, textarea, summary, [tabindex], [contenteditable]',
+      )].filter(target => target.tabIndex >= 0 && !target.matches(':disabled') && !target.closest('[inert]')
+        && target.getClientRects().length > 0 && getComputedStyle(target).visibility === 'visible')
+        .sort((left, right) => left.tabIndex === right.tabIndex ? 0 : (left.tabIndex || Infinity) - (right.tabIndex || Infinity))
+      const first = targets[0] ?? dialog
+      const last = targets[targets.length - 1] ?? dialog
+      const active = dialog.ownerDocument.activeElement
+      if (!targets.length || active === dialog || active === (event.shiftKey ? first : last)) {
+        event.preventDefault()
+        const next = event.shiftKey ? last : first
+        next.focus()
+      }
+    }
+    // Portal children have a different React ancestor chain. Observe DOM
+    // bubbling after child handlers so the same boundary covers their controls.
+    dialog.ownerDocument.addEventListener('keydown', keepTab)
     return () => {
+      dialog.ownerDocument.removeEventListener('keydown', keepTab)
+      unregister?.()
       dialog.close()
-      document.body.style.overflow = before
+      unlockScroll()
       if (document.querySelector('dialog[open]')) return
       const focus = (target: HTMLElement | null | undefined) => {
         if (!target?.isConnected || target === document.body || target === document.documentElement || target.closest('[inert]')) return false
         target.focus()
-        return document.activeElement === target
+        if (document.activeElement !== target) return false
+        const owner = target.ownerDocument
+        const view = owner.defaultView
+        // Unregistering the modal moves feedback into the page after this
+        // cleanup. Reveal the restored control after that layout without
+        // taking focus or scrolling away from a later user action.
+        if (view) view.requestAnimationFrame(() => {
+          if (!target.isConnected || owner.activeElement !== target || target === owner.body || target === owner.documentElement
+            || target.matches(':disabled') || target.closest('[inert]') || !target.getClientRects().length
+            || view.getComputedStyle(target).visibility !== 'visible' || owner.querySelector('dialog[open]')) return
+          target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })
+        })
+        return true
       }
       if (focus(activeElement) || focus(fallbackRef.current?.())) return
       focus(document.getElementById('main-content'))
     }
-  }, [])
+  }, [registerFeedback, ownsStorageNotice])
 
-  return createPortal(<dialog ref={ref} className={`dialog ${className}`} onCancel={event => { event.preventDefault(); closeRef.current() }} onKeyDown={event => {
-    if (event.key !== 'Tab' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.nativeEvent.isComposing) return
-    const dialog = event.currentTarget
-    // Native dialogs make the page inert, but Chromium can move Tab focus to
-    // browser chrome at a boundary. Keep the cycle in the current modal.
-    const targets = [...dialog.querySelectorAll<HTMLElement>(
-      'a[href], area[href], button, input, select, textarea, summary, [tabindex], [contenteditable]',
-    )].filter(target => target.tabIndex >= 0 && !target.matches(':disabled') && !target.closest('[inert]')
-      && target.getClientRects().length > 0 && getComputedStyle(target).visibility === 'visible')
-      .sort((left, right) => left.tabIndex === right.tabIndex ? 0 : (left.tabIndex || Infinity) - (right.tabIndex || Infinity))
-    const first = targets[0] ?? dialog
-    const last = targets[targets.length - 1] ?? dialog
-    const active = dialog.ownerDocument.activeElement
-    if (!targets.length || active === dialog || active === (event.shiftKey ? first : last)) {
-      event.preventDefault()
-      const next = event.shiftKey ? last : first
-      next.focus()
-    }
-  }} onClick={event => {
+  return createPortal(<dialog ref={ref} className={`dialog ${className}`} onCancel={event => { event.preventDefault(); closeRef.current() }} onClick={event => {
     if (event.target !== ref.current) return
     const rect = ref.current.getBoundingClientRect()
     if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeRef.current()
-  }} aria-labelledby="dialog-title">
+  }} aria-labelledby={titleId}>
     <header className="dialog-header">
-      <div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h2 id="dialog-title">{title}</h2></div>
+      <div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h2 id={titleId}>{title}</h2></div>
       <button className="icon-button dialog-close" aria-label="닫기" onClick={onClose}><X size={20} /></button>
     </header>
+    <div className="saved-feedback-host dialog-feedback-host" ref={feedback} />
     {children}
   </dialog>, document.body)
 }

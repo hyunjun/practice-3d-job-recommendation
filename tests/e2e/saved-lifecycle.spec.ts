@@ -218,7 +218,7 @@ test('saving still works without a notification channel and the other tab catche
     await page.getByRole('button', { name: title('first'), exact: true }).click()
     await noteField(page).fill('No channel note')
     await waitForSavedCommit(page)
-    await expect(page.getByRole('button', { name: '저장됨', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '저장 목록에서 제거', exact: true })).toBeVisible()
     expect((await readCommitted(page))[0]).toMatchObject({ note: 'No channel note', status: 'saved', savedAt: SAVED_AT })
     expect(await unloadIsProtected(page)).toBe(false)
     await expect(preview(other, 'first')).toHaveText('Original saved note')
@@ -393,7 +393,7 @@ test('a failed return read is reported with the existing texts and keeps the col
   await page.getByRole('button', { name: '기회 저장', exact: true }).click()
   await expect(page.locator('.toast')).toContainText('Aster Transit의 기회를 목록에 추가했어요.')
   await expect(navCount(page)).toHaveText('2')
-  await expect(page.getByRole('button', { name: '목록에서 제거', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: '저장 목록에서 제거', exact: true })).toBeVisible()
   await page.getByRole('button', { name: '닫기', exact: true }).click()
   await expect(page.locator('.global-saved-status')).toContainText('아직 저장하지 못한 변경이 있어요.')
   expect(await unloadIsProtected(page)).toBe(true)
@@ -444,7 +444,7 @@ test('a detail opened from exploration keeps its catalog posting while its saved
   await expect(dialog.getByRole('heading', { name: 'Backend Engineer — Aster Transit London', exact: true })).toBeVisible()
   await dialog.getByRole('button', { name: '기회 저장', exact: true }).click()
   await waitForSavedCommit(page)
-  await expect(dialog.getByRole('button', { name: '저장됨', exact: true })).toBeVisible()
+  await expect(dialog.getByRole('button', { name: '저장 목록에서 제거', exact: true })).toBeVisible()
   const saved = (await readCommitted(page))[0]
   expect(saved).toMatchObject({ job: { id: 'greenhouse-fixture-aster-transit-london', title: 'Backend Engineer — Aster Transit London' }, status: 'saved', note: '' })
   const other = await otherTab(page)
@@ -687,23 +687,23 @@ for (const width of [1440, 320]) {
         await expect(dialog.getByRole('heading', { name: 'Fable 13 · Backend Engineer Updated Snapshot', exact: true })).toBeVisible()
         await expect(dialog.getByRole('link', { name: '원문에서 지원하기', exact: true })).toHaveAttribute('href', 'https://example.org/saved-pages/updated-snapshot-13')
         await expect(noteField(page)).toHaveValue('PRIVATE-SAVED53 CohortNorth note 13')
-        await expect(dialog.getByRole('button', { name: '저장됨', exact: true })).toBeVisible()
+        await expect(dialog.getByRole('button', { name: '저장 목록에서 제거', exact: true })).toBeVisible()
         // VC1: paired header view of the unchanged replacement state (company, full updated title, close control) at scroll top,
         // then the retained lower view (actual updated source excerpt, current note and status control). Both record the same state.
         const mode = await serverMode(page)
-        const replacement = { company: 'Fable Labs', title: 'Fable 13 · Backend Engineer Updated Snapshot', href: 'https://example.org/saved-pages/updated-snapshot-13', note: 'PRIVATE-SAVED53 CohortNorth note 13', savedButton: '저장됨' }
+        const replacement = { company: 'Fable Labs', title: 'Fable 13 · Backend Engineer Updated Snapshot', href: 'https://example.org/saved-pages/updated-snapshot-13', note: 'PRIVATE-SAVED53 CohortNorth note 13', savedButton: '저장 목록에서 제거' }
         const reassertReplacement = async () => {
           await expect(dialog.getByRole('heading', { name: replacement.title, exact: true })).toBeVisible()
           await expect(dialog.getByRole('link', { name: '원문에서 지원하기', exact: true })).toHaveAttribute('href', replacement.href)
           await expect(noteField(page)).toHaveValue(replacement.note)
-          await expect(dialog.getByRole('button', { name: '저장됨', exact: true })).toBeVisible()
+          await expect(dialog.getByRole('button', { name: '저장 목록에서 제거', exact: true })).toBeVisible()
           expect((await readCommitted(page)).find(item => item.job.id === 'greenhouse-fable-labs-13')).toMatchObject({ job: { title: replacement.title, url: replacement.href, description }, note: replacement.note })
         }
         await captureFrame(page, testInfo, {
           imageName: `saved-lifecycle-refreshed-detail-header-${width}-${mode}`, mode,
           anchor: dialog.locator('.dialog-header'), scroller: dialog, stickyFooter: dialog.locator('.dialog-footer'),
           targets: [
-            { name: 'company-title', locator: dialog.locator('#dialog-title'), expected: replacement.company },
+            { name: 'company-title', locator: dialog.locator('.dialog-header').getByRole('heading', { name: replacement.company, exact: true }), expected: replacement.company },
             { name: 'updated-job-title', locator: dialog.locator('.job-detail-heading h3'), expected: replacement.title },
             { name: 'close-control', locator: dialog.getByRole('button', { name: '닫기', exact: true }), kind: 'label', expected: '닫기' },
           ],
@@ -718,7 +718,7 @@ for (const width of [1440, 320]) {
             { name: 'updated-source-excerpt', locator: dialog.locator('.original-description .job-description > p'), expected: description },
             { name: 'note-field', locator: noteField(page), kind: 'value', expected: replacement.note },
             { name: 'status-control', locator: dialog.getByRole('button', { name: '지원 완료로 표시', exact: true }), expected: '지원 완료로 표시' },
-            { name: 'saved-action', locator: dialog.getByRole('button', { name: '저장됨', exact: true }), expected: '저장됨', footerOwned: true },
+            { name: 'saved-action', locator: dialog.getByRole('button', { name: '저장 목록에서 제거', exact: true }), expected: '저장 목록에서 제거', footerOwned: true },
             { name: 'apply-link', locator: dialog.getByRole('link', { name: '원문에서 지원하기', exact: true }), expected: '원문에서 지원하기', footerOwned: true },
           ],
           state: { ...replacement, pairedImage: `saved-lifecycle-refreshed-detail-header-${width}-${mode}` },
@@ -752,7 +752,7 @@ for (const width of [1440, 320]) {
           job: { id: 'greenhouse-fable-labs-13', title: 'Fable 13 · Backend Engineer Updated Snapshot', url: 'https://example.org/saved-pages/updated-snapshot-13', description },
           company: { id: 'fable-labs', name: 'Fable Labs' }, status: 'saved', note: '', savedAt: '2026-09-26T08:00:10.000Z',
         })
-        await expect(dialog.getByRole('button', { name: '저장됨', exact: true })).toBeVisible()
+        await expect(dialog.getByRole('button', { name: '저장 목록에서 제거', exact: true })).toBeVisible()
         await expect(noteField(page)).toHaveValue('')
         expect(traffic.requests).toEqual([])
         expect(otherTraffic.requests).toEqual([])

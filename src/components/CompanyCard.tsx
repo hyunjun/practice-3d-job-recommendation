@@ -1,5 +1,5 @@
 import { useId, useLayoutEffect, useRef, useState } from 'react'
-import { ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, CircleHelp, MapPinOff, ShieldCheck } from 'lucide-react'
+import { ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, CircleHelp, MapPinOff, RotateCcw, ShieldCheck } from 'lucide-react'
 import { isUnmappedJob } from '../../shared/job-location'
 import { jobRoleLabel } from '../../shared/job-roles'
 import { formatJobSalary } from '../../shared/matching'
@@ -17,9 +17,10 @@ const PAGE_SIZE = 10
 interface Props {
   matches: MatchedJob[]
   savedIds: Set<string>
+  restorable: ReadonlyMap<string, number>
   saveReady: boolean
   onOpen: (match: MatchedJob) => void
-  onSave: (match: MatchedJob) => void
+  onSave: (match: MatchedJob, wasSaved: boolean) => void
 }
 
 function revealCard(element: HTMLElement | null) {
@@ -34,7 +35,7 @@ function revealCard(element: HTMLElement | null) {
   } else window.scrollTo({ top: window.scrollY + top, behavior: 'instant' })
 }
 
-export function CompanyCard({ matches, savedIds, saveReady, onOpen, onSave }: Props) {
+export function CompanyCard({ matches, savedIds, restorable, saveReady, onOpen, onSave }: Props) {
   const [expanded, setExpanded] = useState(false)
   const resultIds = JSON.stringify(matches.map(match => match.job.id))
   const [position, setPosition] = useState({ results: resultIds, page: 0 })
@@ -99,7 +100,7 @@ export function CompanyCard({ matches, savedIds, saveReady, onOpen, onSave }: Pr
         <JobFreshnessNotice job={match.job} compact />
         <EligibilityNotice job={match.job} />
         <div className="mini-job-reason">{match.matchedSkills.length ? <Check size={12} /> : <CircleHelp size={12} />}<span>{match.skillSummary}</span></div>
-        <div className="mini-job-footer"><span className={`visa-tag ${match.job.visa === 'yes' ? 'confirmed' : match.job.visa === 'conditional' ? 'conditional' : ''}`}>{match.job.visa === 'yes' ? <ShieldCheck size={12} /> : <CircleHelp size={12} />}비자 {VISA_LABELS[match.job.visa]}</span><button className={`icon-button bookmark-button ${savedIds.has(match.job.id) ? 'is-saved' : ''}`} aria-label={`${company.name} ${match.job.title} ${savedIds.has(match.job.id) ? '저장 취소' : '저장'}`} disabled={!saveReady} onClick={() => onSave(match)}>{savedIds.has(match.job.id) ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}</button></div>
+        <div className="mini-job-footer"><span className={`visa-tag ${match.job.visa === 'yes' ? 'confirmed' : match.job.visa === 'conditional' ? 'conditional' : ''}`}>{match.job.visa === 'yes' ? <ShieldCheck size={12} /> : <CircleHelp size={12} />}비자 {VISA_LABELS[match.job.visa]}</span><button className={`icon-button bookmark-button ${savedIds.has(match.job.id) ? 'is-saved' : ''}`} data-save-job-id={match.job.id} aria-label={`${company.name} ${match.job.title} ${savedIds.has(match.job.id) ? '저장 취소' : restorable.has(match.job.id) ? '제거 취소' : '저장'}`} title={savedIds.has(match.job.id) ? '저장 목록에서 제거' : restorable.has(match.job.id) ? '제거 취소' : '기회 저장'} disabled={!saveReady} onClick={() => onSave(match, savedIds.has(match.job.id))}>{savedIds.has(match.job.id) ? <BookmarkCheck size={17} /> : restorable.has(match.job.id) ? <RotateCcw size={17} /> : <Bookmark size={17} />}</button></div>
       </div>)}
     </div>
     {expanded && pages > 1 && <div className="company-job-bottom">
