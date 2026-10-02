@@ -158,5 +158,5 @@
     "Investigate real keyboard focus entering a scrolled note field above a sticky footer; held-error harness setup alone does not prove a new regression.",
     "Reduce transient informational overlap between catalog success notices and low summary/card content; no focused-control occlusion was observed."
   ],
-  "retention": "Full normal reports, source/evidence snapshots and public review decisions are preserved in a local-only Git archive before owned temporary cleanup; private model reasoning is excluded. Irreplaceable fetched originals and historical observations remain ignored locally. Actual archive/deletion results are recorded separately."
+  "retention": "Full normal reports, source/evidence snapshots and public review decisions were verified in the local-only Git archive branch archive/cleanup-2026-10-02/stage-80-verification-tools before removal of owned temporary files. Private model reasoning was excluded. Irreplaceable fetched originals and historical observations remain ignored locally. See docs/validation/saved-removal-undo-cleanup-2026-10-02.json for the actual archive commit, removed roots and post-cleanup checks."
 }
