@@ -7,6 +7,7 @@ import { SavedJobSchema } from '../../shared/saved-jobs'
 import { CatalogWorkerModel } from '../../src/lib/catalog-worker-model'
 import { isPublicCatalog } from '../../src/lib/catalog-validation'
 import { loadExploration } from '../../src/lib/storage'
+import { CATALOG_PROJECTION_PROTOCOL } from '../../src/lib/catalog-worker-types'
 import type { CatalogViewInput } from '../../src/lib/catalog-worker-types'
 import type { Filters } from '../../shared/types'
 import {
@@ -198,7 +199,8 @@ describe('new regions through catalog validation and the real worker protocol', 
     scope: { kind: 'cities' }, recover: true, collecting: false, now: Date.parse('2026-09-27T06:05:10.000Z'),
   })
   async function project(model: CatalogWorkerModel, revision: number, filters: Partial<Filters>) {
-    const result = await model.handle({ kind: 'project', revision, input: input(filters) })
+    // Stage79 protocol envelope only; expectations are unchanged.
+    const result = await model.handle({ kind: 'project', protocol: CATALOG_PROJECTION_PROTOCOL, revision, input: input(filters) })
     if (result.kind !== 'projected') throw new Error('Expected a projected worker response')
     return result.value
   }

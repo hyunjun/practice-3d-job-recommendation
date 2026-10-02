@@ -3,6 +3,7 @@ import { countSearchJobs, createSearchIndex, inSearchScope, selectSearchJobs } f
 import { upgradeCatalog } from '../../shared/job-upgrade'
 import { analyzeSearchRecovery } from '../../shared/search-recovery'
 import { CatalogWorkerModel } from '../../src/lib/catalog-worker-model'
+import { CATALOG_PROJECTION_PROTOCOL } from '../../src/lib/catalog-worker-types'
 import type { CatalogViewInput } from '../../src/lib/catalog-worker-types'
 import type { Filters } from '../../shared/types'
 import {
@@ -87,8 +88,9 @@ describe('confirmed regional workplaces survive a new city elsewhere', () => {
 describe('partial workplaces through the real catalog worker', () => {
   const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value)).buffer
   async function project(model: CatalogWorkerModel, revision: number, region: Filters['region'], extra: Partial<CatalogViewInput> = {}) {
+    // Stage79 protocol envelope only; expectations are unchanged.
     const result = await model.handle({
-      kind: 'project', revision, input: {
+      kind: 'project', protocol: CATALOG_PROJECTION_PROTOCOL, revision, input: {
         profile: REGIONAL_PROFILE, filters: { ...filters, region },
         scope: { kind: 'unmapped' }, recover: true, collecting: false,
         now: Date.parse('2026-09-27T06:05:10.000Z'), ...extra,

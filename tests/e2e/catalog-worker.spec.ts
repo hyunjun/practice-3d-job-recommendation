@@ -45,7 +45,7 @@ async function salary(page: Page, value: 190000 | 200000 | 250000) {
   await expect(slider).toHaveValue(String(value))
 }
 
-async function visa(page: Page, value: 'possible' | 'yes') {
+async function visa(page: Page, value: 'possible' | 'yes', count: 1 | 2) {
   if (page.viewportSize()!.width >= 680) {
     await page.getByLabel('비자 지원 필터', { exact: true }).selectOption(value)
     return
@@ -54,7 +54,24 @@ async function visa(page: Page, value: 'possible' | 'yes') {
   // actual accessible dialog control; never force an action on a hidden field.
   await page.getByRole('button', { name: /^모든 필터/ }).click()
   await page.getByLabel('비자 지원', { exact: true }).selectOption(value)
-  await page.getByRole('button', { name: /^\d+개 공고 보기$/ }).click()
+  // PROD-MODAL-1 (production run 20261001T193712430872Z-f4b340c7): the final arrival may still
+  // publish while this draft is open, and every publication re-counts the preview and disables
+  // Apply while counting. Commit only after the displayed collection has finished and the current
+  // global summary has settled on the authored literal count, with the selected draft and the
+  // dialog-scoped Apply showing that exact count ready. One ordinary click; then the dialog must
+  // be gone and the requested visa persisted before any background control is touched again.
+  await expect(progress(page)).toHaveCount(0)
+  await expect(page.locator('.active-filter-summary')).toHaveAttribute('aria-busy', 'false')
+  await expect(page.locator('.active-filter-summary')).toContainText(`${count}개 공고가 현재 조건에 맞아요`)
+  const dialog = page.locator('dialog.filters-dialog')
+  await expect(dialog.getByLabel('비자 지원', { exact: true })).toHaveValue(value)
+  const apply = dialog.locator('.dialog-footer .button.primary')
+  await expect(apply).toHaveText(`${count}개 공고 보기`)
+  await expect(apply).toHaveAttribute('aria-busy', 'false')
+  await expect(apply).toBeEnabled()
+  await apply.click()
+  await expect(dialog).toHaveCount(0)
+  await expect.poll(() => exploration(page)).toMatchObject({ filters: { visa: value } })
 }
 
 for (const width of [1440, 320]) test.describe(`catalog arrivals with changing controls at ${width}px`, () => {
@@ -82,10 +99,12 @@ for (const width of [1440, 320]) test.describe(`catalog arrivals with changing c
     await query(page).fill('Atlas')
     await page.getByLabel('직무 필터', { exact: true }).selectOption('frontend')
     await last.fulfill({ json: catalogWorkerUpdate(3) })
-    await visa(page, 'possible')
+    // Authored literals: Atlas + frontend + onsite leaves Birch 'Frontend Engineer — Atlas Canvas' (1);
+    // Beacon London + backend + onsite leaves the Birch and Cedar London backend jobs (2).
+    await visa(page, 'possible', 1)
     await page.getByLabel('직무 필터', { exact: true }).selectOption('backend')
     await query(page).fill('Beacon London')
-    await visa(page, 'yes')
+    await visa(page, 'yes', 2)
     await finalLondon(page)
     await expect(progress(page)).toHaveCount(0)
     await expect(page.locator('.map-stats strong')).toHaveText(['2곳', '1곳'])
@@ -474,44 +493,53 @@ test.describe('dedicated worker delivery and recovery', () => {
     await catalogWorker.expectPaths(initial.attempts, [])
   })
 
-  test('pending preview hides its old count, and a reply from an older draft/catalog cannot enable Apply', async ({ page, catalogWorker }) => {
-    const worker = await installCatalogWorkerControl(page)
-    await catalogWorker.open({ filters: { query: 'Beacon', role: 'backend' } })
-    const initial = await expectInitialCatalogRequest(page, catalogWorker.traffic)
-    await expect(progress(page)).toHaveAttribute('value', '1')
-    await page.getByRole('button', { name: /^모든 필터/ }).click()
-    await expect(page.getByRole('button', { name: '1개 공고 보기', exact: true })).toBeEnabled()
-    await worker.hold('preview')
-    await page.getByLabel('고용 형태', { exact: true }).selectOption('fulltime')
-    await expect.poll(() => worker.held('preview')).toMatchObject([{ revision: 1, filters: { employment: 'fulltime', salaryMin: 0 } }])
-    const apply = page.locator('.filters-dialog .dialog-footer .button.primary')
-    await expect(apply).toHaveText('공고 수 계산 중')
-    await expect(apply).toHaveAttribute('aria-busy', 'true')
-    await expect(apply).toBeDisabled()
-    const first = await catalogWorker.takeProgress(1)
-    await first.fulfill({ json: catalogWorkerUpdate(2) })
-    await expect(progress(page)).toHaveAttribute('value', '2')
-    await salary(page, 200000)
-    await page.getByRole('checkbox', { name: '연봉 미공개·별도 보상 공고도 포함' }).uncheck()
-    const last = await catalogWorker.takeProgress(2)
-    await last.fulfill({ json: catalogWorkerUpdate(3) })
-    await expect(progress(page)).toHaveCount(0)
-    await expect(page.locator('.active-filter-summary')).toContainText('4개 공고가 현재 조건에 맞아요')
-    await worker.releaseOne('preview')
-    await expect.poll(() => worker.held('preview')).toMatchObject([{
-      revision: 3, filters: { query: 'Beacon', employment: 'fulltime', salaryMin: 200000, includeUnknownSalary: false },
-    }])
-    await expect(apply).toHaveText('공고 수 계산 중')
-    await expect(apply).toHaveAttribute('aria-busy', 'true')
-    await expect(apply).toBeDisabled()
-    await worker.releaseAll('preview')
-    await expect(apply).toHaveText('2개 공고 보기')
-    await expect(apply).toHaveAttribute('aria-busy', 'false')
-    await expect(apply).toBeEnabled()
-    await apply.click()
-    await finalLondon(page)
-    await finalMetadata(page)
-    await catalogWorker.expectPaths(initial.attempts, [firstMonitor, finalMonitor])
+  // PROD-MODAL-1: the same held-preview body runs once at the default desktop viewport and once at
+  // 320px, where the observed failure involved the mobile dialog while preview readiness changed.
+  // The desktop execution and every original oracle are unchanged; the 320px execution is new.
+  for (const width of [1440, 320]) test.describe(`pending preview at ${width}px`, () => {
+    test.use({ viewport: { width, height: 960 } })
+
+    test('pending preview hides its old count, and a reply from an older draft/catalog cannot enable Apply', async ({ page, catalogWorker }) => {
+      const worker = await installCatalogWorkerControl(page)
+      await catalogWorker.open({ filters: { query: 'Beacon', role: 'backend' } })
+      const initial = await expectInitialCatalogRequest(page, catalogWorker.traffic)
+      await expect(progress(page)).toHaveAttribute('value', '1')
+      await page.getByRole('button', { name: /^모든 필터/ }).click()
+      await expect(page.getByRole('button', { name: '1개 공고 보기', exact: true })).toBeEnabled()
+      await worker.hold('preview')
+      await page.getByLabel('고용 형태', { exact: true }).selectOption('fulltime')
+      await expect.poll(() => worker.held('preview')).toMatchObject([{ revision: 1, filters: { employment: 'fulltime', salaryMin: 0 } }])
+      const apply = page.locator('.filters-dialog .dialog-footer .button.primary')
+      await expect(apply).toHaveText('공고 수 계산 중')
+      await expect(apply).toHaveAttribute('aria-busy', 'true')
+      await expect(apply).toBeDisabled()
+      const first = await catalogWorker.takeProgress(1)
+      await first.fulfill({ json: catalogWorkerUpdate(2) })
+      await expect(progress(page)).toHaveAttribute('value', '2')
+      await salary(page, 200000)
+      await page.getByRole('checkbox', { name: '연봉 미공개·별도 보상 공고도 포함' }).uncheck()
+      const last = await catalogWorker.takeProgress(2)
+      await last.fulfill({ json: catalogWorkerUpdate(3) })
+      await expect(progress(page)).toHaveCount(0)
+      await expect(page.locator('.active-filter-summary')).toContainText('4개 공고가 현재 조건에 맞아요')
+      await worker.releaseOne('preview')
+      await expect.poll(() => worker.held('preview')).toMatchObject([{
+        revision: 3, filters: { query: 'Beacon', employment: 'fulltime', salaryMin: 200000, includeUnknownSalary: false },
+      }])
+      await expect(apply).toHaveText('공고 수 계산 중')
+      await expect(apply).toHaveAttribute('aria-busy', 'true')
+      await expect(apply).toBeDisabled()
+      await worker.releaseAll('preview')
+      await expect(apply).toHaveText('2개 공고 보기')
+      await expect(apply).toHaveAttribute('aria-busy', 'false')
+      await expect(apply).toBeEnabled()
+      await apply.click()
+      // An ordinary Apply must actually close the dialog before the results are judged.
+      await expect(page.locator('dialog.filters-dialog')).toHaveCount(0)
+      await finalLondon(page)
+      await finalMetadata(page)
+      await catalogWorker.expectPaths(initial.attempts, [firstMonitor, finalMonitor])
+    })
   })
 
   test('a worker crash aborts the active monitor, retains saved data, and explicit retry creates a worker with a fresh consistent view', async ({ page, catalogWorker }) => {

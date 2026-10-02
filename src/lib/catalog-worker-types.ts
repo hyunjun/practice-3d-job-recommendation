@@ -4,6 +4,9 @@ import type { RecoveryAnalysis } from '../../shared/search-recovery'
 import type { Catalog, CityResult, Filters, Job, MatchedJob, Profile } from '../../shared/types'
 import type { GlobeCity } from './globe-cities'
 
+/** Private Worker transport version, independent of the HTTP and saved-data formats. */
+export const CATALOG_PROJECTION_PROTOCOL = 1
+
 export interface CatalogViewInput {
   profile: Profile
   filters: Filters
@@ -20,7 +23,7 @@ export interface CatalogReceipt {
 
 export type CatalogWorkerCommand =
   | { kind: 'decode'; stream: number; initial: boolean; status: number; body: ArrayBuffer }
-  | { kind: 'project'; revision: number; input: CatalogViewInput }
+  | { kind: 'project'; protocol: typeof CATALOG_PROJECTION_PROTOCOL; revision: number; input: CatalogViewInput }
   | { kind: 'preview'; revision: number; profile: Profile; filters: Filters; now: number }
   | { kind: 'acknowledge'; revision: number }
 
@@ -28,13 +31,15 @@ export interface MatchFacts extends Omit<MatchedJob, 'job' | 'company'> {
   id: string
 }
 
-/** Job bodies cross the worker boundary once per changed record, never on each search. */
+/** Full bodies, removals and stale-only changes have disjoint IDs. */
 export interface CatalogProjectionPatch {
+  protocol: typeof CATALOG_PROJECTION_PROTOCOL
   revision: number
   catalog: Omit<Catalog, 'jobs'>
   jobIds: string[]
   jobs: Job[]
   removed: string[]
+  staleUpdates: { id: string; stale: boolean | null }[]
   facts: MatchFacts[]
   matchIds: string[]
   cities: { id: string; matchIds: string[]; companyCount: number; averageScore: number }[]

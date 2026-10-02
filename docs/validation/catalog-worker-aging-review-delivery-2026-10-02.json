@@ -1,0 +1,212 @@
+{
+  "version": 1,
+  "stage": 79,
+  "recordedAt": "2026-10-02T04:02:11.626485+00:00",
+  "title": "Final review delivery and factual corrections after the frozen evidence packet",
+  "frozenFinalEvidence": {
+    "path": "docs/validation/catalog-worker-aging-final-evidence-2026-10-01.json",
+    "bytes": 2691086,
+    "sha256": "053370d161f603719df554fd79e4c69c701d6e7672e8040fe19c530217875bed"
+  },
+  "scope": "Post-packet final reviews02/03 and their corrections. The frozen packet remains unchanged; its pre-creation call inventory excludes later calls. Full originals are for local-only Git preservation.",
+  "applicationOrTestChanges": false,
+  "applicationRerunForTheseCorrections": false,
+  "calls": [
+    {
+      "revision": "02",
+      "owner": {
+        "path": ".local/research/79/collaboration/final-review-02.process.json",
+        "bytes": 1626,
+        "sha256": "8a3a52e5892779b8334a55966874842d5a687070de4783fd55393bf3e28b49ae"
+      },
+      "result": {
+        "path": ".local/research/79/collaboration/final-review-02.result.json",
+        "bytes": 17222,
+        "sha256": "6b43239ea056ba55512ae221f64d8bbc7c17b7b2c7981ea298a2ba834a07120e"
+      },
+      "deliveredReport": {
+        "path": ".local/research/79/collaboration/final-review-02.review.md",
+        "bytes": 14534,
+        "sha256": "1fea15fe338a39f4033aa19151e0bebe6c733fcb8eba3770af254c7b5350dce8"
+      },
+      "processStatus": "complete",
+      "exitCode": 0,
+      "startedAt": "2026-10-02T03:00:50.948833+00:00",
+      "endedAt": "2026-10-02T03:22:12.687782+00:00",
+      "reportEqualsActualResultPlusLF": true,
+      "completeValidJsonReport": false,
+      "acceptedAsFinalApproval": false,
+      "wrapperTerminalObserved": {
+        "execSessionId": 85383,
+        "exitCode": 0
+      }
+    },
+    {
+      "revision": "03",
+      "owner": {
+        "path": ".local/research/79/collaboration/final-review-03.process.json",
+        "bytes": 1626,
+        "sha256": "702e4d53495bc8e87a889cdeb2ffbb89a88e8f6702f6ebb895da139bce6c90f0"
+      },
+      "result": {
+        "path": ".local/research/79/collaboration/final-review-03.result.json",
+        "bytes": 77993,
+        "sha256": "a0c69602e8cf4591780165c1a74a9ee47c56d13cae27fe95cffb38991d1ba644"
+      },
+      "deliveredReport": {
+        "path": ".local/research/79/collaboration/final-review-03.review.md",
+        "bytes": 72277,
+        "sha256": "ecacc48f53ff4a045659613c4cbe8bee79f2a4a23d83329a4865ed2bd100bceb"
+      },
+      "processStatus": "complete",
+      "exitCode": 0,
+      "startedAt": "2026-10-02T03:38:43.312929+00:00",
+      "endedAt": "2026-10-02T03:48:50.040851+00:00",
+      "reportEqualsActualResultPlusLF": true,
+      "completeValidJsonReport": true,
+      "acceptedAsFinalApproval": true,
+      "wrapperTerminalObserved": {
+        "execSessionId": 57740,
+        "exitCode": 0
+      }
+    }
+  ],
+  "priorIncompleteReview": {
+    "revision": "01",
+    "result": "Timed out after original92 input review without a completed authored decision. Preserved in the frozen failure history, never adopted as approval."
+  },
+  "splitDelivery02": {
+    "causeBasis": "An actual public output-token-limit notice separated two authored public text segments. No provider-internal cause is inferred.",
+    "publicEvents": {
+      "path": ".local/research/79/main/final-review-02-public-delivery-events.json",
+      "bytes": 102979,
+      "sha256": "82834e4d76d09450af00b82dae8bad0d266666edf7553d2d37892cef807da146"
+    },
+    "deliveryAudit": {
+      "path": ".local/research/79/main/final-review-02-delivery-audit.json",
+      "bytes": 2597,
+      "sha256": "e253efd199265636f8d1d25cb223622366fc9ac3d720a832ff61584a68a2e220"
+    },
+    "publicTextProjection": {
+      "path": ".local/research/79/main/fable-final-review-02-public-text.json",
+      "bytes": 97839,
+      "sha256": "232f72891ac3a3f9c5b272a9bc0e9de1e8bb04576ea549a292301b0e24bc8925"
+    },
+    "projectionMethod": "Exactly the two public text segments concatenated without changing any bytes. Historical authored detail, never substituted for the tail-only original report or used as the final gate input.",
+    "originalTailPreserved": true,
+    "mainInitialModePairSuspicion": "Main independently confirmed that all36 counterpart PNG pairs are byte-identical. That equality was correct; the old unique-PNG count33 was wrong."
+  },
+  "factualCorrections": {
+    "currentAdditionalEvidence": {
+      "originalSummary": 36,
+      "verified": 33
+    },
+    "limits": {
+      "originalSummary": 37,
+      "verified": 42
+    },
+    "uniquePngByteSets": {
+      "originalSummary": 33,
+      "verified": 28
+    },
+    "namedPngPaths": 72,
+    "equalCorrespondingPngPairs": 36,
+    "transportComparison": "All10 DEV/PROD JSON pairs agree after ignoring only mode, at, now and clockStart for comparison. Original bytes remain unchanged; a clock-only equality claim is not used.",
+    "productionExecutionWaits": {
+      "originalSummary": 46,
+      "verified": 52,
+      "ongoing": 51,
+      "ongoingExitCode": 75,
+      "terminal": 1,
+      "terminalExitCode": 0,
+      "originalReport": {
+        "path": ".local/research/79/collaboration/execution-e2e-production-04.review.md",
+        "bytes": 3314,
+        "sha256": "68072124509b82de979ef915f31487bbd6443a48185140a5e077df5a3d167fe7"
+      },
+      "visibleToolAudit": {
+        "path": ".local/research/79/main/production04-fable-tool-audit-01.json",
+        "bytes": 229137,
+        "sha256": "feac2aa502c32a68d99d8515900b21c1f5f697425a1d269ca149937d7c43977c"
+      },
+      "unsupportedMiscountCauseOmitted": true
+    },
+    "permissionDenials": "The two oversized read-only hash batches were denied during final01. Actual final02/03 result permission_denials are empty.",
+    "aggregateAudit": {
+      "path": ".local/research/79/main/final-review-02-aggregate-corrections.json",
+      "bytes": 40582,
+      "sha256": "332ccec47040de7a8a0759eb1d488b0b16a15c1c686fb1bf8c68e258bfdb981e"
+    }
+  },
+  "actualFinalReissuance03": {
+    "delivery": "One complete public JSON answer; saved report equals actual result.result plus one LF. No manual repair, concatenated replacement or wrapper change.",
+    "modelRequested": "claude-fable-5-1",
+    "effortRequested": "max",
+    "sessionId": "cf55a65e-fed4-48cd-a35c-d4b5727225a3",
+    "all92ConciseObservationsPresent": true,
+    "preservedOwnDetailedObservationsPointer": "/attachmentsReviewed in the public historical projection with sha256 232f72891ac3a3f9c5b272a9bc0e9de1e8bb04576ea549a292301b0e24bc8925",
+    "visibleToolAudit": {
+      "path": ".local/research/79/main/final-review-03-visible-tool-audit.json",
+      "bytes": 10062,
+      "sha256": "9d6c420fc064e8728403ced97071aa7a9698480aeacd52597240187193e94006"
+    },
+    "sizingQualification": "The72277-byte complete report exceeds an advisory approximate70k target; that target was not an evidence acceptance limit."
+  },
+  "all3FinalAgreement": {
+    "gate": {
+      "path": ".local/research/79/collaboration/final-verification-gate.json",
+      "bytes": 520484,
+      "sha256": "d2e1343b32eb60cc1dd8c73533a8011c5d19222648bb83cb37876a7dd3006b41"
+    },
+    "decision": "VERIFICATION_APPROVED",
+    "unresolvedBlockers": [],
+    "stateDigest": "deb7da09f9e1ef61b91ec12750e6fc41cafb733eb4e4e6d120a1ccdf49bfcf58",
+    "contractSha256": "2fc0192c11416eff02252a52a4f5fc0e5474115f8d89c76f9b06abeca998718a",
+    "executionPlanSha256": "0d475b71cfe2e3619b2a6ea627a6ccb2ec050dfd2cdfc2242b734675f3638a90",
+    "participants": {
+      "main": {
+        "review": {
+          "path": ".local/research/79/collaboration/main-final-review-03.json",
+          "bytes": 165347,
+          "sha256": "771363715d6481854fe13affc883a541eb5bcfbf8328054abbb1e7d02a414b21"
+        },
+        "decision": "VERIFICATION_APPROVED",
+        "ownAttachmentsReviewed": 92,
+        "historicalReferenceCorrectionAccepted": true,
+        "executionReportWaitCountCorrectionAccepted": true,
+        "reportDeliveryCorrectionsAccepted": true
+      },
+      "astra": {
+        "review": {
+          "path": ".local/research/79/collaboration/astra-final-review-03.json",
+          "bytes": 264452,
+          "sha256": "5a6d77ea67d661a7f7345427aee82b0fcc3f0bed0b76f3e77ede3e1a0fc07b91"
+        },
+        "decision": "VERIFICATION_APPROVED",
+        "ownAttachmentsReviewed": 92,
+        "historicalReferenceCorrectionAccepted": true,
+        "executionReportWaitCountCorrectionAccepted": true,
+        "reportDeliveryCorrectionsAccepted": true
+      },
+      "fable": {
+        "review": {
+          "path": ".local/research/79/collaboration/final-review-03.review.md",
+          "bytes": 72277,
+          "sha256": "ecacc48f53ff4a045659613c4cbe8bee79f2a4a23d83329a4865ed2bd100bceb"
+        },
+        "decision": "VERIFICATION_APPROVED",
+        "ownAttachmentsReviewed": 92,
+        "historicalReferenceCorrectionAccepted": true,
+        "executionReportWaitCountCorrectionAccepted": true,
+        "reportDeliveryCorrectionsAccepted": true
+      }
+    },
+    "astraFinalTaskCompletionObserved": true,
+    "meaning": "Actual same-version judgments, not inferred from process exit. Git original preservation, process closure and deletion follow separately."
+  },
+  "preservation": {
+    "localOnlyArchiveRef": "refs/heads/archive/cleanup-2026-10-01/stage-79-verification-tools",
+    "statusAtRecordCreation": "pending Git archive and verified deletion",
+    "doNotPushArchiveRef": true
+  }
+}

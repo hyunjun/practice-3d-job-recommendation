@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CatalogWorkerModel } from '../../src/lib/catalog-worker-model'
 import { CatalogWorkerClient } from '../../src/lib/catalog-worker-client'
+import { CATALOG_PROJECTION_PROTOCOL } from '../../src/lib/catalog-worker-types'
 import type {
   CatalogProjectionPatch, CatalogViewInput, CatalogWorkerRequest, CatalogWorkerResponse,
 } from '../../src/lib/catalog-worker-types'
@@ -28,7 +29,8 @@ async function decode(model: CatalogWorkerModel, value: unknown, initial = true,
 }
 
 async function project(model: CatalogWorkerModel, revision: number, value = input()): Promise<CatalogProjectionPatch> {
-  const result = await model.handle({ kind: 'project', revision, input: value })
+  // Stage79 protocol envelope only (docs/design/catalog-worker-aging.md); expectations are unchanged.
+  const result = await model.handle({ kind: 'project', protocol: CATALOG_PROJECTION_PROTOCOL, revision, input: value })
   if (result.kind !== 'projected') throw new Error('Expected a catalog projection.')
   return result.value
 }

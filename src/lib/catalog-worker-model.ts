@@ -5,8 +5,10 @@ import { createCatalogUpgrader } from '../../shared/job-upgrade'
 import { createSearchRanker, groupCities } from '../../shared/matching'
 import { analyzeSearchRecovery } from '../../shared/search-recovery'
 import type { Catalog, Job, MatchedJob, Profile } from '../../shared/types'
+import { classifyCatalogJobChange } from './catalog-job-change'
 import { CatalogRequestError, createCatalogReader } from './catalog-request'
 import { createGlobeCities } from './globe-cities'
+import { CATALOG_PROJECTION_PROTOCOL } from './catalog-worker-types'
 import type { CatalogProjectionPatch, CatalogWorkerCommand, CatalogWorkerResult, MatchFacts } from './catalog-worker-types'
 
 interface Snapshot {
@@ -91,6 +93,10 @@ export class CatalogWorkerModel {
       const { index } = this.search(catalog, command.profile)
       return { kind: 'previewed', count: selectSearchJobs(index, command.filters).length }
     }
+    // Reject mixed formats before aging, search caches, delivery state or revision pins change.
+    if (command.protocol !== CATALOG_PROJECTION_PROTOCOL) {
+      throw new CatalogRequestError('공고 처리 형식이 맞지 않아요. 다시 조회해 주세요.', 'CATALOG_WORKER_FAILED')
+    }
     const { input, revision } = command
     const { catalog, expired, deadlines } = this.snapshot(revision, input.now)
     const { index, rank } = this.search(catalog, input.profile)
@@ -108,8 +114,15 @@ export class CatalogWorkerModel {
       && !catalog.boards.some(board => board.status === 'pending')
       ? analyzeSearchRecovery(index, input.filters, input.scope) : null
 
-    const currentJobs = new Map(catalog.jobs.map(job => [job.id, job]))
-    const jobs = catalog.jobs.filter(job => this.sentJobs.get(job.id) !== job)
+    const currentJobs = new Map<string, Job>()
+    const jobs: Job[] = []
+    const staleUpdates: CatalogProjectionPatch['staleUpdates'] = []
+    for (const job of catalog.jobs) {
+      currentJobs.set(job.id, job)
+      const change = classifyCatalogJobChange(this.sentJobs.get(job.id), job)
+      if (change.kind === 'body') jobs.push(job)
+      else if (change.kind === 'stale') staleUpdates.push({ id: job.id, stale: change.stale })
+    }
     const removed = [...this.sentJobs.keys()].filter(id => !currentJobs.has(id))
     const facts: MatchFacts[] = []
     for (const match of matches) {
@@ -122,7 +135,8 @@ export class CatalogWorkerModel {
     this.sentJobs = currentJobs
     const { jobs: _jobs, ...metadata } = catalog
     const value: CatalogProjectionPatch = {
-      revision, catalog: metadata, jobIds: catalog.jobs.map(job => job.id), jobs, removed, facts,
+      protocol: CATALOG_PROJECTION_PROTOCOL,
+      revision, catalog: metadata, jobIds: catalog.jobs.map(job => job.id), jobs, removed, staleUpdates, facts,
       matchIds: matches.map(match => match.job.id),
       cities: cities.map(result => ({
         id: result.city.id, matchIds: result.matches.map(match => match.job.id),

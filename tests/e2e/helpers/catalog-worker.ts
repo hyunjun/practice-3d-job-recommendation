@@ -21,7 +21,7 @@ export interface CatalogWorkerHarness {
   traffic: ReturnType<typeof watchApiRequests>
   respond: (reply: Reply) => void
   open: (options?: OpenOptions) => Promise<void>
-  takeProgress: (after: 1 | 2) => Promise<Route>
+  takeProgress: (after: 1 | 2, options?: { fastForward?: boolean }) => Promise<Route>
   expectPaths: (initialAttempts: number, following: string[]) => Promise<void>
 }
 
@@ -90,8 +90,11 @@ export const catalogWorkerTest = resourceCheckedTest.extend<{ catalogWorker: Cat
         await page.goto(options.view === 'saved' ? '/#saved' : '/')
         if (options.mapMode === 'globe') await expect(page.locator('.earth-canvas')).toHaveClass(/is-ready/)
       },
-      async takeProgress(after) {
-        if (!monitors.length) await page.clock.fastForward(1100)
+      async takeProgress(after, { fastForward = true } = {}) {
+        // Default behaviour is unchanged. Chronology-controlled tests pass fastForward:false so a
+        // monitor that is not yet pending fails loudly instead of silently advancing the fake clock
+        // by 1100 ms across a deadline they still have to observe.
+        if (!monitors.length && fastForward) await page.clock.fastForward(1100)
         await expect.poll(() => monitors.length).toBe(1)
         const route = monitors.shift()!
         expect(route.request().url()).toBe(`${origin}/api/catalog/progress?id=${CATALOG_WORKER_COLLECTION}&after=${after}`)
