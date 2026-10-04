@@ -1,0 +1,122 @@
+{
+  "observedAt": "2026-10-04T22:01:53.038465+00:00",
+  "plan": {
+    "path": "collaboration/execution-plan.json",
+    "bytes": 24961,
+    "sha256": "bc70cb36e8b482e864d83c3eb5a47a12bf3982116ee900710a065fe86ca57ed2"
+  },
+  "planRevision": 4,
+  "exactSelectedCheckObjects": {
+    "worker-ui": {
+      "args": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "--config",
+        "tests/cloudflare/ui/playwright.ui.config.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json"
+      ],
+      "timeoutSeconds": 3600,
+      "env": {
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "{run}/playwright.json",
+        "PLAYWRIGHT_BROWSERS_PATH": "{stage}/runtime/playwright-browsers",
+        "PLAYWRIGHT_CHANNEL": "chromium",
+        "DEBUG": "pw:browser",
+        "ORBIT_WORKER_TEST_BASE_URL": "http://127.0.0.1:8790",
+        "ORBIT_WORKER_INSPECTOR_PORT": "9230",
+        "WRANGLER_SEND_METRICS": "false",
+        "CI": "1"
+      },
+      "ports": [
+        8790,
+        9230
+      ],
+      "network": "local"
+    },
+    "e2e-production": {
+      "args": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output={run}/playwright-results"
+      ],
+      "timeoutSeconds": 5400,
+      "env": {
+        "ORBIT_TEST_MODE": "production",
+        "ORBIT_TEST_BASE_URL": "http://127.0.0.1:5173",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "{run}/playwright.json",
+        "PLAYWRIGHT_BROWSERS_PATH": "{stage}/runtime/playwright-browsers",
+        "PLAYWRIGHT_CHANNEL": "chromium",
+        "DEBUG": "pw:browser"
+      },
+      "ports": [
+        5173
+      ],
+      "network": "local"
+    },
+    "e2e-development": {
+      "args": [
+        "npx",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/e2e/saved-removal-undo.spec.ts",
+        "tests/e2e/saved-removal-undo-flows.spec.ts",
+        "tests/e2e/saved-removal-undo-focus.spec.ts",
+        "tests/e2e/saved-removal-undo-corrections.spec.ts",
+        "tests/e2e/dialog-focus.spec.ts",
+        "tests/e2e/saved-storage.spec.ts",
+        "tests/e2e/saved-lifecycle.spec.ts",
+        "tests/e2e/saved-pages.spec.ts",
+        "tests/e2e/saved-backup.spec.ts",
+        "tests/e2e/posting-status.spec.ts",
+        "tests/e2e/profile-edit-context.spec.ts",
+        "tests/e2e/resume-import.spec.ts",
+        "tests/e2e/mobile-navigation.spec.ts",
+        "tests/e2e/company-pages.spec.ts",
+        "tests/e2e/catalog-presentation.spec.ts",
+        "tests/e2e/catalog-worker.spec.ts",
+        "tests/e2e/persistence.spec.ts",
+        "tests/e2e/journey.spec.ts",
+        "--workers=1",
+        "--retries=0",
+        "--reporter=line,json",
+        "--output={run}/playwright-results"
+      ],
+      "timeoutSeconds": 2400,
+      "env": {
+        "ORBIT_TEST_MODE": "development",
+        "ORBIT_TEST_BASE_URL": "http://127.0.0.1:5173",
+        "PLAYWRIGHT_JSON_OUTPUT_FILE": "{run}/playwright.json",
+        "PLAYWRIGHT_BROWSERS_PATH": "{stage}/runtime/playwright-browsers",
+        "PLAYWRIGHT_CHANNEL": "chromium",
+        "DEBUG": "pw:browser"
+      },
+      "ports": [
+        5173
+      ],
+      "network": "local"
+    }
+  },
+  "globalAcceptance": "Every check's receipt must be status complete with exitCode 0 and known cleanup; a JSON report, exit 0 or a printed summary is never itself a pass. Full output logs, reporter JSON with machine counts, unhandled errors, source-before/after identities, power/process/port receipts and actual totals are preserved per run. The production E2E scope stays the full 83-file suite (prior 619 tests) and the development scope the exact 18-file Stage80 set (prior 221 tests); neither is reduced. New Cloudflare suites stay outside tests/e2e.",
+  "orderedPositions": {
+    "worker-ui": 11,
+    "e2e-production": 16,
+    "e2e-development": 17
+  },
+  "observedMatchingStage82RunReceipts": [],
+  "sourceGate": {
+    "path": "collaboration/source-gate.json",
+    "bytes": 14494,
+    "sha256": "58ef41d2d194b5986f9456a826dbf52ba35e13624222b2d77bcf98619aec077f"
+  },
+  "finalSourceStatus": "Source68d4: WorkerUI21pass already recorded; capacity9pass/5fail caused stop; final full83 production and exact18 development E2E including G3 remain UNRUN. Planned mode does not establish execution. Both full suite and development selection include journey.spec.ts with the existing DOCX fixture; no source/test edit here.",
+  "limits": "Historical default-mode docs or prior-stage totals are not current-source results. No inferred Vite dev dependency resolution or deployed runtime coverage."
+}

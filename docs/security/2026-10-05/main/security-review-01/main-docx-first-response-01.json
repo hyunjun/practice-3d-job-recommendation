@@ -1,0 +1,92 @@
+{
+  "recordedAt": "2026-10-04T22:04:09.865891+00:00",
+  "actor": "Main",
+  "status": "EVIDENCE_RECONCILIATION_AND_QUALIFICATION_PROPOSAL;AWAITING_ASTRA_PEER_AND_FABLE_DISCUSSION",
+  "scope": "Interim DOCX findings, evidence scope and requested-primary availability only. No final audit, product implementation, test design/execution or deployment approval. Original mandatory scopes remain.",
+  "fableIndependentFirst": {
+    "path": "independent/security-review-01/fable-docx-security-first-01.json",
+    "bytes": 24475,
+    "sha256": "9e318ba663d71f1be3e55c03947c975848175432609a84ac43f60984b1234159"
+  },
+  "mainIndependentFirst": {
+    "path": "main/security-review-01/docx-resource-boundary-01/main-static-first-01.json",
+    "bytes": 6097,
+    "sha256": "733ebbb08564c5ae8e08ca6d3e026687f592fa40d35d5213850eca42a5f21c22"
+  },
+  "astraIndependentFirst": {
+    "path": "independent/security-review-01/astra-docx-source-first-01.json",
+    "bytes": 9312,
+    "sha256": "1a27855e8c39c24ab02d0daaf9618fa0c1e3bc54b6c2bc511e0d36ecb7f4f824"
+  },
+  "requestedMaterial": {
+    "path": "main/security-review-01/docx-requested-primary-01/manifest.json",
+    "bytes": 19154,
+    "sha256": "3cc911014af010b4204926f45af31ccd550edd243454e76b972223bb4a74a2a2"
+  },
+  "agreements": [
+    "Compressed file admission and post-extraction UI truncation constrain different quantities; code-source resource gaps and cancellation of the observer promise are supported. Actual heap, wall time, responsiveness and overlap impacts are unmeasured.",
+    "The existing real DOCX journey fixture is small and valid; mocked unit coverage and txt/pdf import flows do not prove real DOCX extraction cancellation or resource behavior. Preserve the substantive test-gap list without turning it into new approved tests or budgets.",
+    "The listed code-path mitigations and further dependency-source examination are valuable. Preserve exact source/coverage attribution, unread material and no-vote limits."
+  ],
+  "proposedQualifications": [
+    {
+      "id": "DQA1-test-existence-versus-execution",
+      "evidence": "Fable read test source and expressly did not read actual validation reports. Its phrases unit-tested/e2e-tested and UI cannot be overwritten should be read as assertions present in those tests, not new executed outcomes or universal correctness. Current source full83 production/full18 development and G3 are unrun.",
+      "newPrimary": {
+        "path": "main/security-review-01/docx-requested-primary-01/planned-e2e-modes-and-run-availability-01.json",
+        "bytes": 4661,
+        "sha256": "006419fa73040af67080692003c830c9d358531ed023110446cb043cf9792b83"
+      },
+      "requestedDisposition": "Use existing tests assert/cover in source unless an actual bound execution receipt/report supports a stronger attribution. Both planned modes include journey.spec.ts; neither is development-only as a final plan. Keep historical results and future obligations separate."
+    },
+    {
+      "id": "DQA2-source-bundle-provenance",
+      "evidence": "String markers are consistent with particular bundled variants, but alone do not demonstrate complete module transformation, semantic equivalence, embedded subdependency version, runtime execution or deployment.",
+      "newPrimary": {
+        "path": "main/security-review-01/docx-requested-primary-01/existing-document-artifact-identity-01.json",
+        "bytes": 1649,
+        "sha256": "084ebe96da1668fb4b64656fc14a517166460fe6514802e90ee0e0494e08880f"
+      },
+      "requestedDisposition": "The local default and Cloudflare documents chunks are actually byte-identical and match the original fresh dry-run asset descriptor (499279B2c28c909). This closes local chunk-identity availability only. Prefix library algorithm observations with inspected-source scope unless bundle equivalence has separately been traced; no deployed claim."
+    },
+    {
+      "id": "DQA3-header-size-is-not-expansion-budget",
+      "evidence": "The first records the JSZip produced-length comparison at end of inflate, consistent with earlier Main/Astra sources, but also says inflated size is bounded by header values.",
+      "requestedDisposition": "State declared uncompressed-size consistency is checked after production; the reviewed app does not supply a preemptive actual-expansion/work budget. Avoid treating a potentially mismatched header as a processing cap. Adverse impact still requires measurement."
+    },
+    {
+      "id": "DQA4-XML-and-privacy-claim-strength",
+      "evidence": "Fable lists selected XML parser sections and greps, while full sax/dom/entities and other definitions were unread. Several summaries use impossible/no capability/malformed fails closed/never wording.",
+      "requestedDisposition": "Preserve supported exact parser error-handler/entity and read-path facts, but tie conclusions to actual reviewed definitions and avoid a universal malformed-input, full dependency, browser or whole-app privacy guarantee. If stronger findings require unread definitions, inspect the now-available source rather than claiming the gap closed. Astra is independently assessing the specific source claims."
+    },
+    {
+      "id": "DQA5-underlying-work-lifetime",
+      "evidence": "No cancellation/termination signal is passed into the already-started DOCX extraction. The first also says replaced extraction keeps executing to completion.",
+      "requestedDisposition": "Already-started work can continue after caller cancellation; normal completion, errors, scheduling and actual overlap are unmeasured. Cancellation does not guarantee termination, and absence of termination does not prove every task completes successfully."
+    },
+    {
+      "id": "DQA6-advisory-scope",
+      "newPrimary": {
+        "path": "main/security-review-01/docx-requested-primary-01/existing-advisory-result-subset-01.json",
+        "bytes": 2686,
+        "sha256": "f6e49060b1257869f77bc9ad41e83e1052ff9a3300c0cda8c1a8fb0ea0d6a27a"
+      },
+      "requestedDisposition": "The existing public OSV lookup at14:02:04Z contains all359 requested lockfile combinations, including the cited module versions, with empty results. It is time/database/lockfile scoped; prebuilt bundle embedded versions are not established by these lockfile identities."
+    },
+    {
+      "id": "DQA7-requested-material-availability",
+      "newPrimary": {
+        "path": "main/security-review-01/docx-requested-primary-01/manifest.json",
+        "bytes": 19154,
+        "sha256": "3cc911014af010b4204926f45af31ccd550edd243454e76b972223bb4a74a2a2"
+      },
+      "requestedDisposition": "48 requested source files, build script/browser bundles and bounded static contents of the existing 1003Bthree-member DOCX fixture are now available. Availability is not completed semantic review. Missing deployed/runtime/resource-envelope evidence remains explicitly unavailable; no budget or product limit has been selected."
+    }
+  ],
+  "retainedWork": [
+    "Necessary additional source examination requested by a participant is not waived by this wording proposal.",
+    "Actual full required E2E/runtime measurements, D clarification, all3 product/verification gates and remote acceptance remain unfinished.",
+    "No threshold/test scope weakened, no test created/executed, no product/control/model/settings changed, no D content or retry involved."
+  ],
+  "independence": "Main read the actual Fable first and prepared this evidence reconciliation before reading Astra new peer assessment. Fable root-delta first is still independent/pending; no Main/Astra addendum opinions are sent until that first is delivered."
+}

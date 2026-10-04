@@ -1,0 +1,49 @@
+{
+  "recordedAt": "2026-10-04T22:01:53.042731+00:00",
+  "fixture": {
+    "path": "worktree/tests/fixtures/resume.docx",
+    "bytes": 1003,
+    "sha256": "5df3fc658baff60384832abf70e22a6dc0408dd60b35ad6197dba850bde8b761"
+  },
+  "method": "Bounded Python standard-library ZIP member inspection of the existing committed synthetic regression fixture; no app importer, Mammoth, XML parser, browser or test executed. Inspection read bounds are local safety limits, not proposed product/test criteria.",
+  "members": [
+    {
+      "zipName": "[Content_Types].xml",
+      "compressedBytes": 224,
+      "uncompressedBytes": 412,
+      "crc32": 277632204,
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/fixture-members/[Content_Types].xml",
+        "bytes": 412,
+        "sha256": "2d2267e7925f825482f79b9a241a91a19cb0baae30e76d734e387d649da40d50"
+      },
+      "utf8": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\"><Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/><Default Extension=\"xml\" ContentType=\"application/xml\"/><Override PartName=\"/word/document.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\"/></Types>"
+    },
+    {
+      "zipName": "_rels/.rels",
+      "compressedBytes": 162,
+      "uncompressedBytes": 280,
+      "crc32": 3705558838,
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/fixture-members/_rels/.rels",
+        "bytes": 280,
+        "sha256": "737f8dfc276e8f3fe5afd5c285ceabd020379fef289d1c001c395bc3b393a513"
+      },
+      "utf8": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\"><Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"word/document.xml\"/></Relationships>"
+    },
+    {
+      "zipName": "word/document.xml",
+      "compressedBytes": 273,
+      "uncompressedBytes": 498,
+      "crc32": 3369177652,
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/fixture-members/word/document.xml",
+        "bytes": 498,
+        "sha256": "23659ab8970d51235802fdda2c7fee0ebcffaf024821c5b3d364bf9f5130d782"
+      },
+      "utf8": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:body><w:p><w:r><w:t>Alex Kim</w:t></w:r></w:p><w:p><w:r><w:t>Software Engineer</w:t></w:r></w:p><w:p><w:r><w:t>5 years of software engineering experience.</w:t></w:r></w:p><w:p><w:r><w:t>Python, TypeScript, React, Node.js, PostgreSQL, AWS.</w:t></w:r></w:p><w:p><w:r><w:t>Built payment APIs and data platforms for international teams.</w:t></w:r></w:p></w:body></w:document>"
+    }
+  ],
+  "expandedBytes": 1190,
+  "limits": "Static fixture contents only; no import correctness, privacy or performance execution claim."
+}

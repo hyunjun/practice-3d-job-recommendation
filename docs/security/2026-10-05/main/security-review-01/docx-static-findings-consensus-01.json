@@ -1,0 +1,59 @@
+{
+  "recordedAt": "2026-10-04T22:21:11.625122+00:00",
+  "decision": "ALL3_APPROVE_STATIC_FINDINGS_WORDING",
+  "candidate": {
+    "path": "main/security-review-01/docx-static-findings-candidate-03.md",
+    "bytes": 7884,
+    "sha256": "b47ae1350b890d0da5819c107d45223485f1e471353c4a1aa7fb0f4fbb190419"
+  },
+  "scope": "Exact interim DOCX static findings wording and evidence limits only. Not full security, product/test design, implementation gate, execution, stage completion or deployment approval.",
+  "target": {
+    "baseCommit": "d96367ba9e06ad32737250a482c662e11b7881be",
+    "sourceDigest": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c",
+    "fileCount": 526
+  },
+  "participants": [
+    {
+      "role": "Main",
+      "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+      "record": {
+        "path": "main/security-review-01/docx-static-findings-candidate-03.main-vote.json",
+        "bytes": 2888,
+        "sha256": "2b91db31eb5dd8ee8d8a276461159927e5a0f0a9483f233c899869c64d9ff078"
+      },
+      "finalAssessment": "Actual Astra and Fable matching judgments read; no correction to candidate required. Their optional notes are preserved without silently editing approved bytes."
+    },
+    {
+      "role": "Astra",
+      "model": "global.openai.gpt-6-astra",
+      "reasoning": "max",
+      "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+      "record": {
+        "path": "independent/security-review-01/astra-docx-candidate03-review-01.json",
+        "bytes": 11284,
+        "sha256": "4bb5f22efeaea7de065934cb6610e81a0d6459b5084992a3102af70f3ad5b3c5"
+      }
+    },
+    {
+      "role": "Fable",
+      "model": "claude-fable-5-1",
+      "effort": "max",
+      "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+      "record": {
+        "path": "independent/security-review-01/fable-docx-candidate03-review-01.json",
+        "bytes": 12315,
+        "sha256": "9f1c13998ea38f86727475bade66f90309ddc386738f1b374ef72a0753cabd1e"
+      },
+      "completion": {
+        "path": "main/security-review-01/docx-candidate03-completion-01.json",
+        "bytes": 1855,
+        "sha256": "34abd759d9ff5451e32c3d390278d5824103a92a8c0d064a15ff2753dc802868"
+      }
+    }
+  ],
+  "requiredIssuesOnWording": [],
+  "correctionsPreserved": "Initial opinions retained unchanged; header-size, bundle/provenance, cancellation lifetime, XML timing, privacy and test-existence qualifications explicitly acknowledged.",
+  "remaining": "Real DOCX resource/cancellation/compatibility measurement and source/provenance needed for stronger claims remain open. Full83production/18development and G3 unrun; old WorkerUI21 remains scoped.",
+  "unchangedHolds": "D no repeat/recovery/provider substitution, source-gate17 HELD; no product/source/test/runtime/Git-stage/push/deploy authorization. Root Stage81 separate peer still pending.",
+  "preservation": "No private logs/histories or protected sources edited; no cleanup of unfinished evidence."
+}

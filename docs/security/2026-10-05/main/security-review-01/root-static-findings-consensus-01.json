@@ -1,0 +1,60 @@
+{
+  "recordedAt": "2026-10-04T22:26:11.707311+00:00",
+  "decision": "ALL3_APPROVE_STATIC_FINDINGS_WORDING",
+  "candidate": {
+    "path": "main/security-review-01/root-static-findings-candidate-01.md",
+    "bytes": 7077,
+    "sha256": "be6d35dd7edd4dbc8cd0267c87184efc5f34082a88c31d61b04c708ff02668c6"
+  },
+  "scope": "Exact interim root Stage81 six-file static delta findings wording/evidence only. No functional/E2E/security completion, Stage82 source/plan advance, product/test change, Git merge, runtime or deployment approval.",
+  "primaryManifest": {
+    "path": "main/security-review-01/root-delta-independent-primary-01/manifest.json",
+    "bytes": 5343,
+    "sha256": "2d1d2082f38eeeaead2d7f82a04f403a5b364acb3472fbc904ee1995ccaaf3f3"
+  },
+  "baseCommit": "d96367ba9e06ad32737250a482c662e11b7881be",
+  "participants": [
+    {
+      "role": "Main",
+      "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+      "record": {
+        "path": "main/security-review-01/root-static-findings-candidate-01.main-vote.json",
+        "bytes": 1817,
+        "sha256": "386a0970091fc3b49ef7daa5b6f1851ba260961cf80aa8a27acdafa349de16cc"
+      },
+      "finalAssessment": "Actual Astra and Fable exact matching judgments fully read; no candidate correction required. Optional notes retained without silently editing approved bytes."
+    },
+    {
+      "role": "Astra",
+      "model": "global.openai.gpt-6-astra",
+      "reasoning": "max",
+      "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+      "record": {
+        "path": "independent/security-review-01/astra-root-candidate01-review-01.json",
+        "bytes": 12385,
+        "sha256": "a7f15cca7f04d793ff3122ece1679b6897d1be708e83037269486d1f5a4fe004"
+      }
+    },
+    {
+      "role": "Fable",
+      "model": "claude-fable-5-1",
+      "effort": "max",
+      "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+      "record": {
+        "path": "independent/security-review-01/fable-root-candidate01-review-01.json",
+        "bytes": 10502,
+        "sha256": "9bdcd0080a1afce108a90de1554d519786ef4802cfba493ca435ae1cf32dd696"
+      },
+      "completion": {
+        "path": "main/security-review-01/root-candidate01-completion-01.json",
+        "bytes": 1887,
+        "sha256": "62b256558e5abff4599ebd855a02940813d9075d69b538e7de23af2eb16b1969"
+      }
+    }
+  ],
+  "requiredIssuesOnWording": [],
+  "correctionsPreserved": "Firsts immutable; original Event/footer text exposure, passive limitation, content-to-geometry influence, bounded no-exploit finding, unmeasured retention/RAF timing, CSP and test-coverage qualifications explicitly acknowledged.",
+  "remaining": "Separate Stage81 functional/accessibility/lifecycle/IME/privacy/measurement and unread source context remain open. No hypothetical impact is promoted to a reproduced exploit or blanket safety claim.",
+  "unchangedHolds": "Stage82 68d4/526/source-gate17 HELD; capacity D no repeat/recovery/substitution and whole first missing; G3/full83prod/18dev unrun. No new stage commit/push/deployment permission.",
+  "preservation": "Exact approved candidate, independent firsts, corrections and final votes are retained. Private history/logs/protected original22/real44 untouched; no unfinished evidence cleanup."
+}

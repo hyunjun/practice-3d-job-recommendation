@@ -1,0 +1,423 @@
+{
+  "recordedAt": "2026-10-04T22:01:53.066219+00:00",
+  "purpose": "Requested primary-material availability for actual Fable DOCX first9e318ba6; no peer opinion, new test, product change or completion claim.",
+  "fableFirst": {
+    "path": "independent/security-review-01/fable-docx-security-first-01.json",
+    "bytes": 24475,
+    "sha256": "9e318ba663d71f1be3e55c03947c975848175432609a84ac43f60984b1234159"
+  },
+  "artifactProof": {
+    "path": "main/security-review-01/docx-requested-primary-01/existing-document-artifact-identity-01.json",
+    "bytes": 1649,
+    "sha256": "084ebe96da1668fb4b64656fc14a517166460fe6514802e90ee0e0494e08880f"
+  },
+  "planModes": {
+    "path": "main/security-review-01/docx-requested-primary-01/planned-e2e-modes-and-run-availability-01.json",
+    "bytes": 4661,
+    "sha256": "006419fa73040af67080692003c830c9d358531ed023110446cb043cf9792b83"
+  },
+  "advisorySubset": {
+    "path": "main/security-review-01/docx-requested-primary-01/existing-advisory-result-subset-01.json",
+    "bytes": 2686,
+    "sha256": "f6e49060b1257869f77bc9ad41e83e1052ff9a3300c0cda8c1a8fb0ea0d6a27a"
+  },
+  "fixtureContent": {
+    "path": "main/security-review-01/docx-requested-primary-01/synthetic-docx-fixture-content-01.json",
+    "bytes": 3056,
+    "sha256": "5196588c27c982e2cc6f8eb0ec48dbcdbf84ee22665b7cf1643dfe120d4f06b4"
+  },
+  "sourceCopies": [
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/body-reader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/docx/body-reader.js",
+        "bytes": 28748,
+        "sha256": "f1470d5abbd44f60bb15d0e90112de3234de3528e891943d2c9420cd479c5f4c"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/styles-reader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/docx/styles-reader.js",
+        "bytes": 3081,
+        "sha256": "e913cceb785e73789e87ec9750ea4e88cebc0d462c7a251421d390da988a4fb6"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/numbering-xml.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/docx/numbering-xml.js",
+        "bytes": 3899,
+        "sha256": "9b84a3b808bb5a26fdb028a8f28f599ec17a4ea066b8a4d04d097320e359d54e"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/relationships-reader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/docx/relationships-reader.js",
+        "bytes": 1390,
+        "sha256": "432f454ef8630f5cc6b2ba09fc1595232b3a84dd8d89f347647413d70e234671"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/content-types-reader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/docx/content-types-reader.js",
+        "bytes": 1817,
+        "sha256": "b34aec79f0a5ae7b33d3c6c14fd221d31450a413b650ff173e2c6836faceb48b"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/notes-reader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/docx/notes-reader.js",
+        "bytes": 984,
+        "sha256": "958fe26314d4e75b8cedfff2e8a4b29b05cb1860b95823b1d8a6dff5fa1bce4c"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/comments-reader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/docx/comments-reader.js",
+        "bytes": 976,
+        "sha256": "5bb668b0c20bbb8811782b99a1c778589aea7ab7a6983d66d0244ca91de43a53"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/documents.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/documents.js",
+        "bytes": 6437,
+        "sha256": "1a0df4ae1f94b43bac105cfad77a7b6d7cab96e335ec05521b9af3536f0702e3"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/results.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/results.js",
+        "bytes": 1713,
+        "sha256": "99555347dd5caff7f57a110ad2f16266cafe0ccf2ebe7ca38baa5426998b9bda"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/xml/nodes.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/xml/nodes.js",
+        "bytes": 1670,
+        "sha256": "c78143c3b63efcc5e2b9d6d2f2c681bafeff8979e68e75b9c1dc8f4eba36037f"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/uris.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/mammoth/lib/docx/uris.js",
+        "bytes": 596,
+        "sha256": "eccc6620d9cdde9055bfd0b217caec01b74fbc7f1c9b23f45be5a060ce4b9a3d"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/utils.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/lib/utils.js",
+        "bytes": 16926,
+        "sha256": "82538b268e385eabde80d549606ded6d31ec9af7afcf567c6ae708366abe8550"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/zipEntry.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/lib/zipEntry.js",
+        "bytes": 11314,
+        "sha256": "105b8cec00daa3852f92371b3898d6eab52eeb984113ba8958d09bce701e34df"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/utf8.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/lib/utf8.js",
+        "bytes": 8102,
+        "sha256": "5bdfe3666fe57640bc791b4d6d2fc00853f4d954596260138bf488054fa9df5a"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/@xmldom/xmldom/lib/sax.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/@xmldom/xmldom/lib/sax.js",
+        "bytes": 20949,
+        "sha256": "b2592fbf6993b04576c7ffbd78d63cecdf6495ff1f7a43c2516a0482e69736e9"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/@xmldom/xmldom/lib/dom.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/@xmldom/xmldom/lib/dom.js",
+        "bytes": 79146,
+        "sha256": "eae57ba1588b8c025a71cdbb31edd0a87a4d14c1cb00e19155b2cdba44f7548b"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/@xmldom/xmldom/lib/entities.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/@xmldom/xmldom/lib/entities.js",
+        "bytes": 44465,
+        "sha256": "332cda4081c610fdadc0266867ee5ed9f945c99d471ea7234ec61ba00cbf0e40"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/reader/ArrayReader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/lib/reader/ArrayReader.js",
+        "bytes": 1587,
+        "sha256": "bb711509472587e8c88e8e311d5c86bde76528286793afbc6573c1ddd9674814"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/reader/DataReader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/lib/reader/DataReader.js",
+        "bytes": 3709,
+        "sha256": "e8e0b4728ddc6fc3dbe5b449d87b884c4b3be99862bd1edf6a700ecfb3b3b247"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/reader/NodeBufferReader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/lib/reader/NodeBufferReader.js",
+        "bytes": 519,
+        "sha256": "1703f32f1cba687ac630690901848ab07a1b6a06b0e8fbe88a8ae6f5a67da84d"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/reader/StringReader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/lib/reader/StringReader.js",
+        "bytes": 1020,
+        "sha256": "477a2e887eee11a56a50726152327b2a4d75d778f96463933197706e1ce90d59"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/reader/Uint8ArrayReader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/lib/reader/Uint8ArrayReader.js",
+        "bytes": 652,
+        "sha256": "198816389bc1c62b3ca7c5c6f5fdff1b076f83e5bd74b37ee5b504e6d7e155d9"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/reader/readerFor.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/lib/reader/readerFor.js",
+        "bytes": 904,
+        "sha256": "1eef5a73bba844922812893f9a7e01cfdb54072aae42f7ecf67c41dc925ea9cf"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/package.json",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/package.json",
+        "bytes": 1026,
+        "sha256": "0014f350a6834ed6a2d1211e0a2e3aa471cb426edf63379c785f9647ea2b4e01"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/deflate.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/deflate.js",
+        "bytes": 11074,
+        "sha256": "a19a5dee5ac13a5bec54c15629bcd3449a0a7f15410d0ab582c1efc797a01bb0"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/inflate.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/inflate.js",
+        "bytes": 12412,
+        "sha256": "18b7dd3b012a1105f3280737107a5a6f32a97c7036849dba7bd1f1e54cda9f53"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/utils/common.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/utils/common.js",
+        "bytes": 2444,
+        "sha256": "6e7878274f7e0f42e7cfb379933b447df3045b9139501f797ed29adf1affde14"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/utils/strings.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/utils/strings.js",
+        "bytes": 5293,
+        "sha256": "bf827ddd52c2e998196adb640ae1192f7dc49ce5e6e5926e86198feeb94542a8"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/adler32.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/adler32.js",
+        "bytes": 1656,
+        "sha256": "99618eb68a96858148e2dd56f478aa7e4321c434f5f2ee6c57f59c0c568f0596"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/constants.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/constants.js",
+        "bytes": 2312,
+        "sha256": "e0c4148ed267a27f03aba9f9a34cba4bade2090c0f12905907539e38c842abbc"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/crc32.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/crc32.js",
+        "bytes": 1750,
+        "sha256": "213f85e8b2e52e2cf6f7634897197400f7ddaed587274f160045f0b548ec21da"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/deflate.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/deflate.js",
+        "bytes": 61184,
+        "sha256": "4b9b71ae7f42e506fe1fb134f1c21b944ef2b7ef79667ba1fe59eb963c353d22"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/gzheader.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/gzheader.js",
+        "bytes": 2240,
+        "sha256": "8fa0b4995cea477be96b8783a7d6c7cf5fec96765c2108c3bd52e77104bfdbd3"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/inffast.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/inffast.js",
+        "bytes": 12668,
+        "sha256": "b1beb3b55270e8338f23fc397132d179942d5866153ca4e9be264200b00c0d44"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/inflate.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/inflate.js",
+        "bytes": 50284,
+        "sha256": "d31799a23f2ae87f0c52d21241c92278b41d23bb5365b452f2706d41b00c4245"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/inftrees.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/inftrees.js",
+        "bytes": 12500,
+        "sha256": "75f75d8ae4a7bed86f90a4a38f70c5d95e807515e9326801f9a073a7f2bf8bc7"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/messages.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/messages.js",
+        "bytes": 1538,
+        "sha256": "eec5f5d6b8120ada9cd48a3ca0a253c64777906e835477b090e053434d38cf6c"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/trees.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/trees.js",
+        "bytes": 39879,
+        "sha256": "718adbbf68f4343bf17d61edffd9d0788a96a93e4e191d857459d95257e614cf"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/node_modules/pako/lib/zlib/zstream.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/node_modules/pako/lib/zlib/zstream.js",
+        "bytes": 1811,
+        "sha256": "5fa10c7a59ca99113cf92d1260e56cbd6282e15afa85dc8a0eb8e8d6d2321298"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/bluebird/package.json",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/bluebird/package.json",
+        "bytes": 2135,
+        "sha256": "5e8f820b5628dc16da723fdb42c0c8c50a59f201591a335310fe754a076598f6"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/bluebird/js/release/async.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/bluebird/js/release/async.js",
+        "bytes": 4132,
+        "sha256": "5ef0eac31ef8565830c7df55b7fb4db964800f5933747e3025c33ac9d823cda4"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/bluebird/js/release/schedule.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/bluebird/js/release/schedule.js",
+        "bytes": 2109,
+        "sha256": "d98fb65a54a0458063e4b7c115e01a9a6fd961a557dc285cd274ff48b657dea5"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/bluebird/js/release/queue.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/bluebird/js/release/queue.js",
+        "bytes": 1873,
+        "sha256": "683aab2037414e069b2a5f48d39fb4ee5e1ab808c97b2b218ec12c2520b10c82"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/bluebird/js/release/promise.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/bluebird/js/release/promise.js",
+        "bytes": 25724,
+        "sha256": "9318b350040c0b8f32000efa0f7edecb92083f827680507174962ac319d9822a"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/bluebird/js/release/util.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/bluebird/js/release/util.js",
+        "bytes": 10250,
+        "sha256": "9878b58a313178f33212f7afc753604035f37f0cfac2c50e188198cdc96888e6"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/bluebird/js/browser/bluebird.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/bluebird/js/browser/bluebird.js",
+        "bytes": 177769,
+        "sha256": "156ee167c7d8e52ddac30568c95c8290802ace9b0db1e680a4c8125447b28e01"
+      }
+    },
+    {
+      "origin": "worktree/scripts/build-cloudflare.mjs",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/scripts/build-cloudflare.mjs",
+        "bytes": 2290,
+        "sha256": "7c0db31b821a5a16ef399c16c811f68389434f31932391248bbb2e88916bacda"
+      }
+    },
+    {
+      "origin": "worktree/node_modules/jszip/dist/jszip.min.js",
+      "snapshot": {
+        "path": "main/security-review-01/docx-requested-primary-01/source-copies/node_modules/jszip/dist/jszip.min.js",
+        "bytes": 97781,
+        "sha256": "7f839b2d4688b845c105ebf5d2f9803075f91ea0fe72bdaac176c3a04dd3d2c1"
+      }
+    }
+  ],
+  "missingRequestedPaths": [],
+  "availabilityNotReview": "Copies make requested source available; do not mean Main/Astra/Fable have semantically read every file. Future reviewer must state material reads/unread paths. Original library-vs-browser source provenance limits remain.",
+  "notAvailableNow": [
+    "Deployed Cloudflare asset identity and served-runtime evidence: Stage82 deployment not performed/accepted.",
+    "Measured DOCX resource/cancellation envelope, actual dev middleware dependency resolution: no authorized execution performed.",
+    "Agreed product memory/time/expansion budget: not selected; requires design and measurement."
+  ],
+  "unchangedHolds": "D no-relaunch; sourcegate17held; full required E2E unrun; no model substitution or runtime/test/deployment permission."
+}

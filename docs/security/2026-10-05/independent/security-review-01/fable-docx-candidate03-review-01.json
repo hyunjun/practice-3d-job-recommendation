@@ -1,0 +1,70 @@
+{
+  "reviewer": "claude-fable-5-1 (Fable), DOCX peer comparison vote on findings record candidate03",
+  "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+  "candidateSha256": "b47ae1350b890d0da5819c107d45223485f1e471353c4a1aa7fb0f4fbb190419",
+  "candidateBinding": "main/security-review-01/docx-static-findings-candidate-03.md, 7884 bytes, rehashed; approval is of this exact byte content only. Any edit, including the optional notes below, is a new candidate requiring a new vote.",
+  "scope": "Interim static findings wording and evidence-scope agreement only. Not product, test-design, test-execution, security-completion, root-delta, D/capacity or deployment approval. Astra's parallel candidate03 result was not read and its vote is not presumed; all3 remains incomplete until Astra records its own position. My two preserved firsts (DOCX 9e318ba6, root delta d305f34b) are unchanged.",
+  "independence": "No Astra candidate03 result read. Peer DOCX opinions (Main first, Astra first, Main response, Astra peer assessment, Main vote) were read only now, after both my firsts were delivered.",
+  "bindingsRehashed": {
+    "target": "Stage82 source 68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c / 526 files at HEAD d96367ba (identity verified in my first)",
+    "sharedRecords": {
+      "main-static-first-01.json": "733ebbb0... 6097",
+      "astra-docx-source-first-01.json": "1a27855e... 9312",
+      "fable-docx-security-first-01.json": "9e318ba6... 24475 (content equals my delivered first)",
+      "main-docx-first-response-01.json": "c24b20f6... 7626",
+      "astra-docx-first-peer-assessment-01.json": "2376a8e5... 17745",
+      "docx-static-findings-candidate-03.main-vote.json": "2b91db31... 2888",
+      "docx-requested-primary-01/manifest.json": "3cc91101... 19154 (48 source copies counted: 11 mammoth, 3 jszip lib, 6 jszip readers, 3 xmldom, 16 pako, 7 bluebird, build script, jszip.min.js)",
+      "existing-document-artifact-identity-01.json": "084ebe96... 1649",
+      "planned-e2e-modes-and-run-availability-01.json": "006419fa... 4661 (18 development spec files counted; journey.spec.ts and resume-import.spec.ts present)",
+      "existing-advisory-result-subset-01.json": "f6e49060... 2686 (lockSha256 a94e9a3f equals the worktree package-lock.json identity I recorded earlier; all 12 versions I listed have empty responses)",
+      "synthetic-docx-fixture-content-01.json": "51965888... 3056 (412 + 280 + 498 = 1190 expanded bytes, three XML members)"
+    },
+    "independentlyReproducedFacts": {
+      "worktree/dist/assets/documents-D2fT8QPk.js": "499279 bytes, 2c28c909... (matches candidate paragraph 6)",
+      "worktree/dist-cloudflare/assets/documents-D2fT8QPk.js": "499279 bytes, 2c28c909... (byte-identical to default build, as stated)",
+      "worktree/tests/fixtures/resume.docx": "1003 bytes, 5df3fc65...",
+      "verification/wrangler-dry-run-eab683036217/dry-run-inventory.json": "67241 bytes, 52845eb5... hashed only, not read; matches the artifact-identity record's reference"
+    }
+  },
+  "additionalReadsForThisVote": [
+    "worktree/node_modules/jszip/lib/stream/DataLengthProbe.js (full, 29 lines): processChunk adds chunk.data.length to streamInfo and forwards the chunk unchanged; no comparison or ceiling is applied here. Together with compressedObject.js getContentWorker's 'end' handler (read in my first), this confirms the declared-size comparison runs only after all output has been produced.",
+    "worktree/node_modules/@xmldom/xmldom/lib/entities.js lines 1-30: XML_ENTITIES is a frozen map of exactly amp, apos, gt, lt, quot; dom-parser.js (read in my first) passes it for text/xml. This supports 'predefined names and numeric references' wording.",
+    "stage snapshot of scripts/build-cloudflare.mjs (full): dist-cloudflare is produced by a separate 'vite build --outDir dist-cloudflare' under VITE_CATALOG_MODE=scheduled after two tsc checks, then legal copies and a _headers file are written. The identical documents chunk therefore comes from two independent local builds, which supports local identity and nothing about served or deployed bytes. The _headers content belongs to scope slice 4 and does not affect this vote.",
+    "No other requested source copy was read in this step; the remaining 45 copies stay available-but-unread by me."
+  ],
+  "requiredConcernsResolution": {
+    "postInflateCheckNotEarlyCap": "Candidate paragraph 2 states the installed JSZip size comparison is a consistency check performed last after data has emerged and that a small declared size does not stop processing at that value. Confirmed by DataLengthProbe.js and compressedObject.js. Resolved.",
+    "indicatorsNotEquivalence": "Paragraph 6 states markers and browser fields are consistent with the included variants but do not prove semantic identity of readable source to the prebuilt bundle, and that chunk identity is local-candidate identity only, excluding served files, deployment behavior, dev-mode resolution and embedded sub-dependency versions. Matches my independent reproduction of the hashes and my own equivalence disclaimer. Resolved.",
+    "independentSettlementNotCompletion": "Paragraph 3 states already-started Mammoth work may continue until it separately succeeds or fails, without implying every task completes or that overlap is unlimited, and separates the absence of count/expansion/time policy (source observation) from unmeasured latency and memory impact. Resolved.",
+    "observationVersusConsequence": "Paragraphs 3, 5 and 11 keep code observations (no cancellation handle, no budgets, raw library error text shown, controller checks) distinct from unmeasured or unproven consequences and explicitly decline to assert reproduction or severity. Resolved.",
+    "definitionsNotExecutedPasses": "Paragraphs 7 and 8 describe tests as written expectations, state that both planned modes include journey.spec.ts, and record that the final-source production full83 and development exact18 executions and G3 are unrun after the capacity stop; the 21 passed Worker UI checks are not extended. Consistent with the plan-modes record. Resolved.",
+    "xmlDiagnosticsAfterReturn": "Paragraph 4 states the Mammoth wrapper stores a diagnostic and throws after parseFromString returns, with no guarantee of immediate parser termination or complete malformed-document detection. Confirmed by xmldom.js read in my first (only the last diagnostic is retained in the thrown message, which the wording does not contradict). Resolved.",
+    "privacyUiBounded": "Paragraph 5 bounds the no-upload/no-storage statement to the reviewed result-application and profile-save paths, notes derived profile fields may be stored on request, and denies any claim of immediate memory erasure or whole-app leak absence. Resolved."
+  },
+  "correctionsToMyFirstAcknowledged": {
+    "note": "The preserved first 9e318ba6 is not modified. These are agreed readings for future records.",
+    "ADOCX82-PEER-1 / DQA3": "My unverifiedOrHypothetical[0] said inflated size is 'bounded by the deflate format and header values'. The header value is not a bound on transient expansion; it is compared after production. Only the deflate format and the 5 MiB compressed gate bound the theoretical output. Agreed.",
+    "ADOCX82-PEER-2 / DQA2": "My 'confirmed by string presence', 'bundled directly' and 'readable source for the executed logic' overstated what markers show. Agreed reading: markers and package fields are indicators consistent with the browser variants and the prebuilt UMD; executed-code identity, semantic equivalence to lib plus nested pako, served build and deployment remain separately evidenced or unverified.",
+    "ADOCX82-PEER-3 / DQA5": "My 'keeps executing to completion' should read 'continues until it independently settles, by resolution or rejection'. The absence of a concurrency bound is a literal gap; actual overlap is unmeasured. My MD recap grouped raw error rendering and synchronous phases under 'hypothetical' although those are source observations; only their effects are hypothetical. Agreed.",
+    "DQA1": "My shorthand 'unit-tested' and 'e2e-tested' and 'the UI cannot be overwritten' denote assertions present in test definitions, not executed passes on this source. My testCoverageStatic already said pass status was unknown; the shorthand is withdrawn as a reading.",
+    "DQA4": "My phrases 'impossible by construction', 'fails closed', 'never invokes' and 'no network capability' are to be read as bounded to the inspected definitions: no external-entity I/O path identified, reported diagnostics cause rejection, the inspected raw-text conversion does not call image readers. Not universal guarantees. Agreed.",
+    "DQA6": "My 'not queried' was true at my first; the pre-existing 14:02:04Z OSV lookup covers all 12 versions I listed with empty responses, scoped to that time, database and lockfile, and silent about versions embedded in prebuilt bundles. Agreed.",
+    "DQA7": "Material I requested is now available; availability is not review. I read three definitions for this vote and list the rest as remaining coverage."
+  },
+  "requiredIssues": [],
+  "optionalNonBlockingNotes": [
+    "Paragraph 7 '기술 선택' could read 'Python 기술 태그 표시', since journey.spec.ts asserts the 'Python 삭제' tag button is visible. Not required; approval stands on the exact text.",
+    "The fixture content record shows the fixture has no word/_rels/document.xml.rels, styles, numbering, footnotes or comments parts, so the real-DOCX journey case exercises only fallback and default part discovery. This sharpens the existing coverage-gap statement for future design records; it needs no change to candidate03.",
+    "build-cloudflare.mjs shows dist-cloudflare is an independent Vite build, so the chunk identity is a reproducibility observation across two local builds rather than a copy. Candidate03 claims only identity, which remains correct."
+  ],
+  "preservedFromFirsts": "The candidate keeps the deeper source trace in summary (ZIP structure/bounds/unsupported-format checks, XML diagnostics and entity handling, lazy image readers, raw-text-only output, chunked inflate as scheduling points, GenericWorker not a browser Worker) and the meaningful real-DOCX gaps (mocked unit tests, one 1003-byte valid fixture, no extraction-phase cancellation or replacement witness, malformed/size/overlap/long-text/cancel/recovery as future design candidates) without approving numeric budgets or a combinatorial test matrix. Detailed inventories remain in the three preserved firsts.",
+  "remainingObligationsNotWaived": {
+    "sourceCoverage": "Unread by me: mammoth body-reader.js in full, styles-reader, numbering-xml, relationships-reader, content-types-reader, notes-reader, comments-reader, documents.js, results.js, xml/nodes.js, uris.js; jszip utils.js beyond read sections, zipEntry.js in full, utf8.js, reader/*.js; xmldom sax.js in full and dom.js; pako inflate internals; bluebird scheduling; jszip.min.js semantics versus lib. Any stronger claim depending on these must read them first.",
+    "provenance": "Served and deployed asset identity, dev-middleware dependency resolution, and bundle-to-source semantic equivalence remain unverified; no deployment is authorized to fill this.",
+    "runtime": "Expansion, overlap, responsiveness, post-cancel work lifetime and valid-document compatibility remain unmeasured; an acceptable client resource envelope is unselected; measurement and any remedy require separate all3 design.",
+    "executions": "Final-source production full83 and development exact18 E2E including journey.spec.ts, and G3, remain unrun; 21 Worker UI passes keep their original scope; historical results stay bound to their own source and mode.",
+    "holds": "D held with no relaunch, repeat or recovery; source-gate17 held; no product, test, control, model, provider or settings change; no original test scope or criterion reduced by this wording."
+  },
+  "conclusion": "Candidate03 states the shared source facts accurately within their evidence scope, incorporates all seven required qualifications, preserves the trace and coverage gaps, and claims neither security completion nor executed validation. I approve this exact wording as an interim static record and retain no issues."
+}

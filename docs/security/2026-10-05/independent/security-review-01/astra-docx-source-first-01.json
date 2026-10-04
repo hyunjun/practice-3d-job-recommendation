@@ -1,0 +1,123 @@
+{
+  "reviewedAt": "2026-10-04T18:53:37.044074+00:00",
+  "model": "global.openai.gpt-6-astra",
+  "reasoning": "max",
+  "decision": "INDEPENDENT_STATIC_BOUNDARY_FINDINGS_RECORDED",
+  "independence": "Read specified app/library sources and saved public documentation only, before Main first or candidate diagnoses. No peer opinion read; no implementation, execution or gate approval.",
+  "sourceDigest": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c",
+  "fileCount": 526,
+  "planSha256": "bc70cb36e8b482e864d83c3eb5a47a12bf3982116ee900710a065fe86ca57ed2",
+  "identityCheck": "Both app files match gate17 inventory103116B/6cdbc8645d9cc08ad3a1755f6188eac80792610b27d5eb127bd0ba40576d17b4. Installed dependency files are separately bound below; they are not526-source descriptors.",
+  "trace": [
+    "resume.ts23-26 rejects already-aborted work and files above5*1024*1024 bytes before import/read. DOCX selection is by filename extension. Lines71-79 dynamically import Mammoth, read the compressed File into an ArrayBuffer, await extractRawText, then test for empty text. The30-page check belongs to PDF, not DOCX.",
+    "Mammoth1.12.3 package.browser maps unzip to browser/unzip.js6-8, which passes arrayBuffer to zipfile.openArrayBuffer. zipfile.js8-24 calls JSZip.loadAsync and reads requested entries via async(\"uint8array\"), optionally decoding the full array with TextDecoder. index.js81-86 then invokes docxReader.read and maps the document to raw text.",
+    "JSZip3.10.2 load.js31-87 builds the archive/file representation; default checkCRC32=false does not request eager CRC decompression of every entry. zipObject.js74-75 accumulates the selected entry. StreamHelper.js79-105 retains chunks;46-62 sums lengths, allocates the complete Uint8Array and copies them before Mammoth decoding. compressedObject.js30-40 compares produced length with declared size only at end; that is not an application expansion budget."
+  ],
+  "findings": [
+    {
+      "id": "ADOCX82-1",
+      "classification": "Confirmed resource-boundary gap; exploit/severity unmeasured",
+      "refs": "resume.ts25,71-79; ProfileDialog.tsx75-77,185; JSZip StreamHelper.js46-105",
+      "finding": "The compressed5MiB admission limit and eventual content.slice(0,50000) bound different things. The latter runs after extraction and retains at most50000 UTF-16 code units in UI state; it does not cap expanded ZIP entries, intermediate buffers/strings, extraction work or peak memory. No decompressed-byte, aggregate-entry, elapsed-work budget or deadline is supplied by this app path. This does not establish that all ZIP entries inflate eagerly or quantify actual memory."
+    },
+    {
+      "id": "ADOCX82-2",
+      "classification": "Confirmed cancellation semantics; underlying work lifetime unmeasured",
+      "refs": "resume.ts1-20,71-77; ProfileDialog.tsx43-95",
+      "finding": "abortable rejects its observer promise and observes both eventual underlying outcomes. It does not pass AbortSignal into Mammoth/JSZip or call a DOCX destroy/cancel API. Checks between awaits prevent subsequent stages after cancellation, but already-started work can continue. Replacement imports may overlap unfinished extraction; no overlap or resource impact was measured. Abort event handling itself cannot preempt a synchronous JavaScript operation."
+    },
+    {
+      "id": "ADOCX82-3",
+      "classification": "Browser/library boundary clarification",
+      "refs": "GenericWorker.js17-40,119-124,142-199; StreamHelper.js162-190; Mammoth/JSZip package.browser",
+      "finding": "GenericWorker is an in-process pipeline object with callbacks, pause/resume/error state; its name does not mean a browser Worker. Deferred callbacks/promises do not establish off-thread execution. The app DOCX path owns no Worker or termination handle. JSZip browser mapping points to dist/jszip.min.js; exact emitted-bundle resolution/thread behavior was not independently traced here."
+    }
+  ],
+  "existingProtections": "ProfileDialog nulls/aborts the previous controller on cancellation, replacement, tab change and unmount. Current-controller plus aborted checks guard text/error updates, and finally changes busy state only for its owner. Cancellation retains previous text and shows a notice; busy state disables analysis. These protect visible state from stale completion and observe late rejection. They do not prove extraction stopped or guarantee that a blocked event loop can promptly render/respond to cancellation.",
+  "documentationAssessment": "Saved JSZip docs corroborate full-result accumulation. Their generic does-not-freeze wording is not a bound on this complete Mammoth parsing path or a measured responsiveness guarantee. Saved MDN describes Worker.terminate as immediate stopping without allowing operations to finish. That concerns a real Worker instance, absent here; it does not prove an immediate memory reclamation bound or settle this app's promises for it.",
+  "futureValidation": [
+    "Under a separately authorized bounded test design, use synthetic valid/invalid DOCX and controlled expansion inputs within the existing compressed limit; observe extraction cost, peak retention and UI responsiveness. No selected numeric budget or stress execution is authorized here.",
+    "Exercise cancellation/replacement/unmount around loading and extraction; distinguish stale-result suppression from actual work termination, retained memory and repeated-import overlap. Preserve prior input, useful errors and ability to import again.",
+    "Before choosing an isolation/budget remedy, validate legitimate document/text compatibility, Unicode and truncation behavior, actual browser package/bundle resolution and supported browser/CSP constraints. If a real Worker is later chosen, review termination/error/promise ownership and transferable-versus-copy memory effects; isolation alone is not a heap limit."
+  ],
+  "limits": "Requires user-selected input; this static path does not demonstrate anonymous remote exploitation, measured hang, heap ceiling, resource-exhaustion severity or exfiltration. No numeric policy, implementation choice or gate change selected. Library document-reader internals and emitted browser bundle were not exhaustively audited; no app/import/Node/compiler/build/test/server/network/process execution. No private streams, raw logs/registries, credentials or foreignPID30593/8787 access. Only this first report written; earlier records unchanged.",
+  "sources": [
+    {
+      "path": "worktree/src/lib/resume.ts",
+      "bytes": 3978,
+      "sha256": "bd2d062628ccfc47ea630a687a377c429de46a7e1cab3fa47b0acb4fb940f043"
+    },
+    {
+      "path": "worktree/src/components/ProfileDialog.tsx",
+      "bytes": 18374,
+      "sha256": "9327fd767e873abc46ef2622f8d000853a179b7f6439772c4ad6f734ffb6f279"
+    },
+    {
+      "path": "worktree/node_modules/mammoth/package.json",
+      "bytes": 1485,
+      "sha256": "b6670cef45f5f8b71913fa06449033676cbb106cbe1e725cbd3e098f72a6b302"
+    },
+    {
+      "path": "worktree/node_modules/mammoth/browser/unzip.js",
+      "bytes": 349,
+      "sha256": "88bb0cb36ed990dc71b186dbf3a493a4dcd8369984b324ae2208ea21dba9edcb"
+    },
+    {
+      "path": "worktree/node_modules/mammoth/lib/zipfile.js",
+      "bytes": 1890,
+      "sha256": "9eb35456e709d32769da9474c840d6eb9bf501e7a9920ea869d1387b22a9afe9"
+    },
+    {
+      "path": "worktree/node_modules/mammoth/lib/index.js",
+      "bytes": 3686,
+      "sha256": "ca86526cdfc8b572e0637f61312e78d434a454c60ee39131bfcb719d7fdbe380"
+    },
+    {
+      "path": "worktree/node_modules/jszip/package.json",
+      "bytes": 1787,
+      "sha256": "4138415020992b9a832333c64a13bd7e17faa462f7e0c0dd505f824d397f7281"
+    },
+    {
+      "path": "worktree/node_modules/jszip/lib/load.js",
+      "bytes": 3196,
+      "sha256": "7e3181c7669cfc584f29f3060cdf210021ec5c723c36af039fb5433de52d25da"
+    },
+    {
+      "path": "worktree/node_modules/jszip/lib/compressedObject.js",
+      "bytes": 2890,
+      "sha256": "b91f823d32f39cda4002bc0954993f20ffea6747d42109253b7d6347b4abb31b"
+    },
+    {
+      "path": "worktree/node_modules/jszip/lib/zipObject.js",
+      "bytes": 4528,
+      "sha256": "18871af92fac75d015ba7d4d3105c0746839ab089f78670cb86d76bfa53b1ce6"
+    },
+    {
+      "path": "worktree/node_modules/jszip/lib/stream/StreamHelper.js",
+      "bytes": 6877,
+      "sha256": "aebc6518b4871d106e799f90139d55620d02e9413ef2a7b0f953a9cea7bda124"
+    },
+    {
+      "path": "worktree/node_modules/jszip/lib/stream/GenericWorker.js",
+      "bytes": 8206,
+      "sha256": "ae76cecd1d728ca41dd6ae0665b258f442da64d9b25ff94785dcb80a501b8be1"
+    }
+  ],
+  "savedPublicDocumentation": [
+    {
+      "path": "main/security-review-01/docx-resource-boundary-01/jszip-limitations.source",
+      "bytes": 9117,
+      "sha256": "9b35d608115cf9bbcd4e2b3afe44a0ccf8d6fb11fbfb1adc949e9825d4243414"
+    },
+    {
+      "path": "main/security-review-01/docx-resource-boundary-01/mdn-worker-terminate.source",
+      "bytes": 151549,
+      "sha256": "04594270a14d011407b11eae661ba46c1cb29d2ba6608a7944447aae698170e8"
+    },
+    {
+      "path": "main/security-review-01/docx-resource-boundary-01/documentation-references-01.json",
+      "bytes": 3636,
+      "sha256": "94f06ed629f5a4703f1e9f748523c43b45e864f00e19393074f3c745abcb8b76"
+    }
+  ]
+}

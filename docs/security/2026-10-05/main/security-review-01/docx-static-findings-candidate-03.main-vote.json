@@ -1,0 +1,61 @@
+{
+  "recordedAt": "2026-10-04T22:09:31.435527+00:00",
+  "candidate": {
+    "path": "main/security-review-01/docx-static-findings-candidate-03.md",
+    "bytes": 7884,
+    "sha256": "b47ae1350b890d0da5819c107d45223485f1e471353c4a1aa7fb0f4fbb190419"
+  },
+  "mainDecision": "APPROVE_STATIC_FINDINGS_WORDING_CANDIDATE",
+  "requiredIssuesWithThisWording": [],
+  "scope": "Main individual wording/evidence vote; no product security completion, implementation, test design/runtime or deployment approval.",
+  "basis": [
+    {
+      "path": "main/security-review-01/docx-resource-boundary-01/main-static-first-01.json",
+      "bytes": 6097,
+      "sha256": "733ebbb08564c5ae8e08ca6d3e026687f592fa40d35d5213850eca42a5f21c22"
+    },
+    {
+      "path": "independent/security-review-01/astra-docx-source-first-01.json",
+      "bytes": 9312,
+      "sha256": "1a27855e8c39c24ab02d0daaf9618fa0c1e3bc54b6c2bc511e0d36ecb7f4f824"
+    },
+    {
+      "path": "independent/security-review-01/fable-docx-security-first-01.json",
+      "bytes": 24475,
+      "sha256": "9e318ba663d71f1be3e55c03947c975848175432609a84ac43f60984b1234159"
+    },
+    {
+      "path": "main/security-review-01/main-docx-first-response-01.json",
+      "bytes": 7626,
+      "sha256": "c24b20f6f0dc924d345a1acf189be42ff6ee4756844cd412a8972717e3c1de52"
+    },
+    {
+      "path": "independent/security-review-01/astra-docx-first-peer-assessment-01.json",
+      "bytes": 17745,
+      "sha256": "2376a8e56bcb60f37c953189d32a43db52500d5100a1f147be3e70173f10d20c"
+    },
+    {
+      "path": "main/security-review-01/docx-requested-primary-01/manifest.json",
+      "bytes": 19154,
+      "sha256": "3cc911014af010b4204926f45af31ccd550edd243454e76b972223bb4a74a2a2"
+    }
+  ],
+  "incorporatedRequiredQualifications": [
+    "ADOCX82-PEER-1: post-expansion size consistency is not early resource cap",
+    "ADOCX82-PEER-2: indicators/local identity not semantic/served/deployed equivalence",
+    "ADOCX82-PEER-3: may independently settle; literal gap vs unmeasured consequence"
+  ],
+  "xmlWrapperIndependentRead": {
+    "path": "worktree/node_modules/mammoth/lib/xml/xmldom.js",
+    "bytes": 566,
+    "sha256": "d75c75e303ebd8bf126b5bb2bb7a2ead247f870d8eb01e0dbd0c37afb67231c1",
+    "fact": "callback records error; wrapper throws after parseFromString returns"
+  },
+  "otherVotes": "Astra/Fable have not approved this candidate; all3 incomplete. Root Fable first remains independent/pending; peer discussion has not been sent to it.",
+  "supersedesUnsharedDraft": {
+    "path": "main/security-review-01/docx-static-findings-candidate-02.main-vote.json",
+    "bytes": 2950,
+    "sha256": "c676682d8b209bc969fa8ca94c07302d570fb4de6984c9578333de3e85bf6d4c"
+  },
+  "proofreadChanges": "One duplicated Korean phrase corrected; all substantive findings, scopes, evidence and limits unchanged. Drafts01/02 retained and never sent to other reviewers."
+}

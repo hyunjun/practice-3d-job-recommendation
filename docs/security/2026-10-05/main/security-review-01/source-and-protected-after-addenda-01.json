@@ -1,0 +1,107 @@
+{
+  "recordedAt": "2026-10-04T22:27:51.955048+00:00",
+  "operation": "Post-security-addenda all3 wording read-only source/protected audit",
+  "source": {
+    "contentDigest": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c",
+    "fileCount": 526,
+    "head": "d96367ba9e06ad32737250a482c662e11b7881be",
+    "fullDescriptorsEqualGate17": true,
+    "approvedIdentityHelperExitCode": 0
+  },
+  "protectedAudits": [
+    {
+      "baseline": {
+        "path": "main/protected-baseline-01.json",
+        "bytes": 8574,
+        "sha256": "c42e013543005c320abc3de342d1006837c641c12074a21ba5ff1834e98cb50b"
+      },
+      "files": 44,
+      "bytes": 249258224,
+      "mismatches": []
+    },
+    {
+      "baseline": {
+        "path": "main/original-worktree-dirty-baseline-01.json",
+        "bytes": 4195,
+        "sha256": "13de0f3d909ec42ee77f27f6a4297d30966ac116666e4d49a1086dcacd68c37c"
+      },
+      "files": 22,
+      "bytes": 1095048,
+      "mismatches": []
+    }
+  ],
+  "privateMetadataPreservation": {
+    "method": "stat-only; raw private contents not read",
+    "directoryMode": "0700",
+    "allFileModes": "0600",
+    "rawResults": 96,
+    "manifests": 69
+  },
+  "completedModelProcesses": [
+    {
+      "record": {
+        "path": "collaboration/CF82-docx-security-independent-first-01.process.json",
+        "bytes": 2406,
+        "sha256": "a2d0c99dda568dd1d0f021387374d47bbcfa922df8e2c82bf002edc951e115b0"
+      },
+      "modelUsageKeys": [
+        "claude-fable-5-1"
+      ],
+      "closureKnown": true,
+      "remaining": [],
+      "endedAt": "2026-10-04T21:57:25.200574+00:00"
+    },
+    {
+      "record": {
+        "path": "collaboration/CF82-root-delta-security-independent-first-01.process.json",
+        "bytes": 2418,
+        "sha256": "314d65832cec313edc7266e988107e20ae82e35490fba2e09830a525ecccd039"
+      },
+      "modelUsageKeys": [
+        "claude-fable-5-1"
+      ],
+      "closureKnown": true,
+      "remaining": [],
+      "endedAt": "2026-10-04T22:09:03.567685+00:00"
+    },
+    {
+      "record": {
+        "path": "collaboration/CF82-docx-security-peer-candidate03-01.process.json",
+        "bytes": 2404,
+        "sha256": "5512838f17640d04b17bcf75f0fa3a949f8cbb2cdb48baf67ff9bba9d0e061ba"
+      },
+      "modelUsageKeys": [
+        "claude-fable-5-1"
+      ],
+      "closureKnown": true,
+      "remaining": [],
+      "endedAt": "2026-10-04T22:20:40.179753+00:00"
+    },
+    {
+      "record": {
+        "path": "collaboration/CF82-root-delta-security-peer-candidate01-01.process.json",
+        "bytes": 2415,
+        "sha256": "1254471c63b664c2a95d93fcda09685f4efe7439d96fd5f72759234d18ac7d61"
+      },
+      "modelUsageKeys": [
+        "claude-fable-5-1"
+      ],
+      "closureKnown": true,
+      "remaining": [],
+      "endedAt": "2026-10-04T22:25:24.790487+00:00"
+    }
+  ],
+  "astra": "Actual candidate reviews completed; close_agent confirmed completed status before closing.",
+  "currentActivity": "No active owned review remains; no app/server was launched in these static addenda. No foreign process query or signal.",
+  "controls": {
+    "path": "collaboration/controls-gate.json",
+    "bytes": 7836,
+    "sha256": "b63cd6acdc1c7af1b4e545917f2c9246130228c41f04613a20747a6c339c5538"
+  },
+  "sourceGate": {
+    "path": "collaboration/source-gate.json",
+    "bytes": 14494,
+    "sha256": "58ef41d2d194b5986f9456a826dbf52ba35e13624222b2d77bcf98619aec077f"
+  },
+  "scope": "Only approved Python control identity, filesystem/hash/JSON/stat and curated receipt inspection. No application/compiler/import/build/test/browser/server execution. No model/provider substitution, D repeat, stage commit/push/deployment or unfinished-evidence deletion."
+}

@@ -1,0 +1,156 @@
+{
+  "reviewer": "claude-fable-5-1 (Fable), independent static DOCX follow-up under security-review scope-and-plan-01, slice 3 (browser file handling) with slice 5 version notes",
+  "peerOpinionDisclosure": "No Main or Astra DOCX opinion, report08/09, current-security-status or research-note was seen in this session. Only the earlier v10 control records were read. This first is formed from the packet plus the worktree reads listed below.",
+  "modeAndHolds": {
+    "mode": "review only under approved v10 control; no probe, no product/test/build/app/Node execution, no file writes, no network, no private history/stream/registry/cost access",
+    "executionUsed": "stage-identity.py identity (no args) and seven named --sha256 calls; one Grep of my own saved helper output. Nothing else executed.",
+    "holdsUnchanged": "D held (no retry, no reconstruction, no content). Product changes, test/build/app execution, capacity work and deployment held. No all3 design/implementation/test/security-completion vote is given here."
+  },
+  "bindings": {
+    "targetHead": "d96367ba9e06ad32737250a482c662e11b7881be (identity output line 3)",
+    "targetContentDigest": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c / 526 files (identity output lines 3162-3163)",
+    "primaryBodiesPacket": "main/security-review-01/docx-independent-primary-01/primary-bodies.md f7e2574d... 71467 bytes, rehashed",
+    "appSourcesRehashedInWorktree": {
+      "src/lib/resume.ts": "bd2d0626... 3978 (equals packet)",
+      "src/components/ProfileDialog.tsx": "9327fd76... 18374 (equals packet)"
+    },
+    "scopeNote": "main/security-review-01/scope-and-plan-01.md c67d905e... 4480, rehashed and read",
+    "gates": "collaboration/controls-gate.json b63cd6ac... 7836 and collaboration/source-gate.json 58ef41d2... 14494, rehashed only",
+    "libraryBodies": "The 14 node_modules bodies are taken as embedded in the packet; the helper excludes node_modules paths, so they were not rehashed. Files read from worktree/node_modules beyond the packet are listed under filesRead.",
+    "lockfilePins": {
+      "mammoth": "1.12.3 (package-lock.json:3731)",
+      "jszip": "3.10.2 (3391)",
+      "@xmldom/xmldom": "0.8.15 (2554)",
+      "bluebird": "3.4.7 (2632)",
+      "pako nested under jszip": "1.0.11 (3403); app-level pako 3.0.2 (3955) is separate",
+      "underscore": "1.13.8",
+      "lop": "0.4.2",
+      "dingbat-to-unicode": "1.0.1",
+      "xmlbuilder": "10.1.1",
+      "lie": "3.3.0",
+      "setimmediate": "1.0.5",
+      "note": "All carry registry resolved+integrity entries. A version being old is not a finding; no advisory feed was queried (no network)."
+    }
+  },
+  "filesRead": [
+    "packet: src/lib/resume.ts, src/components/ProfileDialog.tsx, mammoth package.json, browser/unzip.js, browser/docx/files.js, lib/zipfile.js, lib/index.js, lib/raw-text.js, lib/docx/docx-reader.js, lib/docx/office-xml-reader.js, jszip package.json, lib/load.js, lib/compressedObject.js, lib/zipObject.js, lib/stream/StreamHelper.js, lib/stream/GenericWorker.js",
+    "worktree app/config: package.json, vite.config.ts, vitest.config.ts, playwright.config.ts, shared/profile.ts (full), shared/types.ts:277-287, src/App.tsx:244-269 and ProfileDialog usage, src/lib/storage.ts (grep), src grep for fetch/localStorage/indexedDB/Worker, POST bodies, innerHTML sinks",
+    "worktree tests: tests/unit/resume-reader.test.ts (full), tests/e2e/resume-import.spec.ts (full), tests/fixtures/resume-import.ts (full), tests/fixtures/default-e2e-server.ts (full), tests/e2e/journey.spec.ts:160-219, tests/e2e/profile-experience.spec.ts:20-49, grep of all tests for docx/setInputFiles/readResume and for 50000/maxLength; fixture identities tests/fixtures/resume.docx 1003 bytes 5df3fc65..., resume-ko.pdf 80728, resume.pdf 818",
+    "worktree node_modules beyond packet: mammoth lib/xml/reader.js, lib/xml/xmldom.js, lib/promises.js, lib/docx/document-xml-reader.js, lib/docx/body-reader.js:262-301 and 596-675 plus targeted grep; @xmldom/xmldom package.json, lib/sax.js:55-76 and 585-644 plus grep, lib/dom-parser.js:70-131; jszip lib/zipEntries.js (full), lib/stream/DataWorker.js (full), lib/flate.js (full), lib/utils.js resolve/delay/prepareContent head, lib/reader/DataReader.js checks, lib/zipEntry.js targeted grep, lib/index.js version line; dist/jszip.min.js marker grep",
+    "worktree build artifact: dist/assets/documents-D2fT8QPk.js string-marker greps only (no full read); dist/legal absent",
+    "docs: docs/improvements.md:2583 (production E2E mode statement) via grep; docs/validation files only listed by grep, not read"
+  ],
+  "dataFlowTrace": [
+    {
+      "stage": "1. Entry",
+      "location": "ProfileDialog.tsx file input and upload-zone drop handler (JSX, lines not individually counted); importFile at 65-89",
+      "literal": "accept=\".pdf,.docx,.txt,.md\" on the hidden input; onChange takes files[0], resets input value to '' (same-file reselect), calls importFile; onDrop takes dataTransfer.files[0] only. accept is advisory and does not apply to drop.",
+      "mitigation": "Server is never involved; the File object stays in the page."
+    },
+    {
+      "stage": "2. Preflight validation",
+      "location": "resume.ts:24-27 and 81",
+      "literal": "throwIfAborted; size > 5*1024*1024 rejects before any read (compressed file size for DOCX); dispatch by lowercase last extension of file.name; file.type (MIME) is not consulted and content is not sniffed; unknown extension rejects with the Korean format message.",
+      "mitigation": "Size gate and extension allowlist are unit-tested (boundary exact 5 MiB, +1 byte, unsupported .rtf)."
+    },
+    {
+      "stage": "3. DOCX branch",
+      "location": "resume.ts:71-80 with abortable() at 1-21",
+      "literal": "await abortable(import('mammoth')); throwIfAborted; await abortable(file.arrayBuffer()); throwIfAborted; await abortable(mammoth.extractRawText({arrayBuffer})); throwIfAborted; empty-after-trim rejects with Korean message; result.value returned untrimmed; result.messages ignored. abortable rejects the awaiting caller on abort and removes its listener, but the wrapped promise is never interrupted (comment at lines 9-10 says so). Mammoth exposes no cancellation API. throwIfAborted between stages only prevents starting the next stage.",
+      "mitigation": "Listener cleanup and late-result discard are unit-tested with mammoth mocked."
+    },
+    {
+      "stage": "4a. Zip container (JSZip 3.10.2)",
+      "location": "mammoth browser/unzip.js -> lib/zipfile.js openArrayBuffer -> JSZip.loadAsync(arrayBuffer); jszip lib/load.js, zipEntries.js, zipEntry.js, reader/DataReader.js, utils.js:328-342",
+      "literal": "loadAsync defaults: checkCRC32 false, createFolders false, utf8 name decoding. ZipEntries.load: EOCD located by lastIndexOfSignature, garbage vs truncated distinguished (zipEntries.js:156-173), zip64 locator/record supported with the 53-bit caveat, multi-volume rejected (109), central-directory loop bounded by signature matches with record-count sanity check (141-151), negative extra-bytes rejected (242-244), local header per entry re-checked (115-125). Every read is bounds-checked (DataReader.checkIndex throws 'End of data reached ... Corrupted zip ?'). Encrypted entries rejected (zipEntry.js:121-123), unknown compression rejected (92-95). Entry names normalized by utils.resolve (dot and dot-dot segments) with unsafeOriginalName retained (load.js). Compressed bytes are referenced at load (readData(compressedSize)); decompression is lazy per .async(). Copy-vs-view semantics of readData not verified.",
+      "mitigation": "Structural rejection of non-zip, truncated, encrypted, unknown-method and multi-volume input happens before any inflate; errors surface as rejections."
+    },
+    {
+      "stage": "4b. Part selection and inflate",
+      "location": "mammoth lib/docx/docx-reader.js read/findPartPaths; lib/zipfile.js read; jszip zipObject.js, compressedObject.js, stream/DataWorker.js, flate.js, stream/StreamHelper.js",
+      "literal": "Parts read: [Content_Types].xml, _rels/.rels, main-document rels, the main document part (relationship target normalized and existence-checked, else fallback word/document.xml; missing -> 'Could not find main document part'), styles, numbering, footnotes, endnotes, comments, each with its own .rels. Each read inflates the whole part: DataWorker emits 16 KiB input chunks, one per setImmediate tick (utils.delay -> setimmediate polyfill), FlateWorker runs pako raw inflate per chunk, StreamHelper.accumulate concatenates into one Uint8Array, DataLengthProbe compares to the header uncompressedSize only after inflate completes ('Bug : uncompressed data size mismatch'). No cap on the inflated size exists in app or library code; the only input bound is the 5 MiB compressed gate.",
+      "mitigation": "Inflate is interleaved with the event loop at chunk granularity; mismatched size headers are detected post hoc; CRC is not checked (default off, mammoth does not enable it)."
+    },
+    {
+      "stage": "4c. XML parse",
+      "location": "mammoth lib/docx/office-xml-reader.js readXmlFromZipFile; lib/xml/reader.js; lib/xml/xmldom.js; @xmldom/xmldom 0.8.15 lib/dom-parser.js:75-129, lib/sax.js:60-76 and 590-611",
+      "literal": "TextDecoder('utf-8') decode, BOM strip, then mammoth's wrapper parses with an errorHandler callback; buildErrorHandler (dom-parser.js:116-127) routes warning, error and fatalError to that callback, and the wrapper throws on any of them, so any xmldom diagnostic rejects the whole extraction (reader.js catches and rejects). Entities: entityReplacer resolves only the predefined XML entity map and numeric references; an undefined entity raises 'entity not found' -> rejection. DOCTYPE: the header name/PUBLIC/SYSTEM tokens are passed to startDTD/endDTD; no code path in the sections read registers internal-subset entity declarations. No fetch/XMLHttpRequest/fs/http usage exists anywhere in xmldom lib (grep). CDATA handled. Parsing is synchronous for the whole part string; mammoth then converts the DOM recursively (reader.js convertNode/convertElement) and collapses mc:AlternateContent to mc:Fallback.",
+      "mitigation": "External entity resolution is impossible by construction in the code read; malformed XML fails closed rather than degrading silently."
+    },
+    {
+      "stage": "4d. Document reading and raw text",
+      "location": "mammoth lib/docx/body-reader.js (readChildElements 279-281, readers table 283+, image helpers 596-671, ignore list incl. 'w:del' at 723), lib/docx/document-xml-reader.js, lib/raw-text.js",
+      "literal": "Body reading is recursive over the element tree. Images: readBlip/readImageData build lazy readers (files.read.bind / docxFile.read.bind at 633 and 656) and only contentTypes.findContentType is evaluated eagerly (661); convertElementToRawText (raw-text.js) emits text, '\\t' for tabs and '\\n\\n' per paragraph and never invokes an image reader, so no image bytes are inflated during extractRawText. The browser Files.read always rejects for linked images, but it is not reached on this path. Footnotes, endnotes and comments parts are parsed (docx-reader .also blocks) yet excluded from raw text because convertElementToRawText walks children only. Hyperlink targets are not emitted. 'w:del' content is ignored; no 'w:vanish' handler was found, so hidden runs are included (fidelity note, not security). Headers/footers are not read by mammoth.",
+      "mitigation": "Output is plain text only; no HTML conversion, no style map, no image handler runs."
+    },
+    {
+      "stage": "5. Result application and sinks",
+      "location": "ProfileDialog.tsx:75-81 (apply/discard), 98-111 (analyze), 43-55 and 91-96 (abort paths); shared/profile.ts; shared/types.ts:277-287; App.tsx:244-269; src/lib/storage.ts:22-23, 65, 119",
+      "literal": "A result is applied only if importRef.current is still this controller and the signal is not aborted; then setText(content.slice(0, 50000)) and setFileName. The slice is in UTF-16 code units after full extraction (it may split a surrogate pair; the textarea maxLength=50000 counts the same units). Errors: cause.message is rendered verbatim in a role=alert paragraph, so JSZip, mammoth and xmldom English diagnostics (including a JSZip help URL) pass through unmapped; only PDF password errors are translated. Rendering is React text nodes; grep found no innerHTML/dangerouslySetInnerHTML/insertAdjacentHTML/document.write/srcdoc in src. analyze requires 30+ trimmed characters, then analyzeResume: NFKC normalize, fixed skill regex list, per-line year regex (lookbehind, 'giu', bounded {0,5} groups; no nested unbounded quantifier observed), name = first line only if <=32 chars matching letters/space/.'-, headline a <100-char line matching engineer/developer terms. Profile (types.ts:277-287) carries no resume text. applyProfile persists Profile+preferences to localStorage 'orbit.v1.profile' only when remember is true (loaded back through a zod ProfileSchema), otherwise deletes the key. Resume text lives only in component state and is dropped on close; the unmount effect aborts an in-flight read.",
+      "mitigation": "No executable or HTML sink for extracted text; derived profile fields are bounded by length and character class; src fetch calls are GET-only to /api/catalog, /api/catalog/progress, /api/posting-status, /api/observations and /earth/*.json; no POST/body construction found in src; the e2e privacy assertions check GET-only, null bodies and absence of private markers in requests/localStorage/saved store for txt and pdf flows."
+    },
+    {
+      "stage": "6. Cancellation and replacement",
+      "location": "ProfileDialog.tsx:43-55, 57-63, 65-89, 91-96; resume.ts abortable",
+      "literal": "stopImport runs on tab change, manual text edit, sample button, cancel button and every new importFile; it aborts the previous controller and clears busy/pending state. The replaced extraction keeps executing to completion inside mammoth/JSZip; its result or error is discarded by the controller identity check. Nothing in app code bounds how many replaced extractions may still be running concurrently (no queue, no counter). The busy indicator belongs to the newest controller only.",
+      "mitigation": "UI state is consistent and stale results cannot overwrite accepted text (e2e-tested for txt/pdf native reads, unit-tested for a pending mocked extractRawText)."
+    }
+  ],
+  "linkageBoundary": {
+    "packageFields": "mammoth package.json maps ./lib/unzip.js -> ./browser/unzip.js and ./lib/docx/files.js -> ./browser/docx/files.js; jszip package.json maps ./lib/index -> ./dist/jszip.min.js and readable-stream -> ./lib/readable-stream-browser.js. vite.config.ts:15-24 groups node_modules/mammoth into the 'documents' chunk.",
+    "observedInWorktreeDist": "dist/assets/documents-D2fT8QPk.js contains the mammoth browser-variant strings 'Could not find file in options' (line 221) and 'cannot open linked files from a web browser' (199), xmldom strings (195), and at lines 191-192 the JSZip strings together with the browserify prelude markers 'Cannot find module' / 'MODULE_NOT_FOUND' and the version literal '3.10.2', which node_modules/jszip/dist/jszip.min.js also carries at its lines 3 and 13. This is consistent with the prebuilt UMD jszip.min.js being what was bundled, not the lib/*.js bodies in the packet.",
+    "consequence": "The packet's jszip lib bodies are same-release readable source for the executed logic, not the executed bytes. Semantic equivalence of dist/jszip.min.js (including its embedded pako 1.0.x) to lib/*.js plus nested pako 1.0.11 was not verified and is not claimed. The mammoth lib bodies are bundled directly (plain CJS) with the two browser substitutions confirmed by string presence.",
+    "notEstablished": "That dist/ in the worktree equals the Cloudflare-deployed artifact (scripts/build-cloudflare.mjs not read; no deployed asset hashes available). The Vite dev-middleware linkage used by default E2E runs (ORBIT_TEST_MODE defaults to development in playwright.config.ts:3 and default-e2e-server.ts:18) was not inspected; docs/improvements.md:2583 documents a production-mode option, but which mode the recorded validation runs used was not read."
+  },
+  "supportedLimitsAndMitigations": [
+    "5 MiB compressed-size gate before any read; extension allowlist of four types; both unit-tested at the boundary.",
+    "Processing is browser-local on the read path: no network or filesystem API in resume.ts, mammoth lib (lib/main.js, lib/unzip.js, lib/docx/files.js require fs but are the Node variants replaced or unused in the browser build), xmldom lib, or the jszip files read.",
+    "JSZip rejects non-zip, truncated, encrypted, unknown-compression and multi-volume input with bounds-checked header parsing and normalizes entry names.",
+    "Mammoth fails closed on any XML diagnostic, requires the main document part, and never reads image bytes for raw text.",
+    "xmldom resolves predefined and numeric entities only and has no external-entity or network capability in the code read.",
+    "Applied text is capped at 50,000 UTF-16 units; derived profile fields are length- and class-bounded; resume text is never persisted; only the Profile object is stored and it is schema-validated on load.",
+    "Cancellation removes listeners, discards stale results, and aborts on unmount; the UI cannot be overwritten by a replaced or cancelled read."
+  ],
+  "unverifiedOrHypothetical": [
+    "Decompression expansion: the 5 MiB gate bounds compressed input only. The inflated size of the XML parts mammoth reads is bounded by the deflate format and header values, not by any app or library cap, and the length check runs after inflate. Peak heap and duration are unmeasured; no browser freeze or out-of-memory claim is made.",
+    "Main-thread phases (TextDecoder, xmldom parse, element conversion, body reading, raw-text join) are synchronous per part while inflate yields per 16 KiB chunk; responsiveness impact is unmeasured.",
+    "Unbounded concurrency of replaced extractions is a literal property of the code; its resource impact is unmeasured.",
+    "Deep XML nesting drives recursion in three places (reader.js convertNode, body-reader readXmlElements, raw-text convertElementToRawText); an engine stack overflow would be thrown inside a promise chain and surface as the error path. Not tested, not measured.",
+    "Regex work in analyzeResume runs over up to 50,000 units per analyze click; per-line application and bounded groups were observed, timing was not measured.",
+    "Advisory status of mammoth 1.12.3, jszip 3.10.2, @xmldom/xmldom 0.8.15 and pako 1.0.11 was not queried; no vulnerability or severity is inferred from versions or source patterns.",
+    "Raw library error text reaching the alert is a literal information/UX observation, not a confirmed security impact.",
+    "Content-fidelity notes (hidden runs included, tracked deletions excluded, notes/comments/headers excluded) are behavior observations, not security findings."
+  ],
+  "testCoverageStatic": {
+    "existing": [
+      "tests/unit/resume-reader.test.ts (vitest, node environment, mammoth and pdfjs mocked via vi.doMock): exact 5 MiB accepted and +1 byte rejected before arrayBuffer; unsupported extension; already-aborted signal does no work for all four extensions; cancel during native read for all four; cancel while the mammoth module is loading; DOCX untrimmed text preserved with listener cleanup; empty-document message; extraction failure propagated with listener cleanup; cancel during pending extractRawText with late text ignored.",
+      "tests/e2e/journey.spec.ts:182-194: real-browser upload of tests/fixtures/resume.docx (1003 bytes) through the actual bundle; asserts filename shown, textarea matches /Python/, years '5', Python skill chip, no form error. Runs in development mode unless ORBIT_TEST_MODE=production.",
+      "tests/e2e/resume-import.spec.ts: txt payloads and resume-ko.pdf; replacement, explicit cancel with focus return, dialog close during pending read, same-file reselect, a11y and overflow checks; privacy assertions (GET-only, null bodies, cross-origin blocked, private markers absent from requests/localStorage/saved store). Gating patches File.prototype.text/arrayBuffer in the page (tests/fixtures/resume-import.ts), so gates sit at native reads, not at the extractor.",
+      "tests/e2e/profile-experience.spec.ts and tests/cloudflare/ui/scheduled-ui.spec.ts:990: txt and resume-ko.pdf imports only."
+    ],
+    "gaps": [
+      "No real-library DOCX coverage beyond one tiny valid fixture: no non-zip file named .docx, truncated zip, encrypted entry, missing main part, malformed XML or undefined entity, zip64, high-ratio large document.xml within 5 MiB, deeply nested XML, large styles/numbering/footnotes/comments parts, embedded images (lazy-read confirmation), tracked changes/hidden text, or empty-text DOCX through real mammoth (only mocked).",
+      "No test references the 50,000-unit slice or textarea maxLength (search found none).",
+      "No test asserts how library error text is presented; current behavior passes raw messages through.",
+      "No e2e cancellation or replacement test with DOCX extraction actually in flight (no extractor-level gate exists); orphaned-work behavior is untested and unmeasured.",
+      "Unit DOCX tests never load real mammoth, so a library regression would only be caught by the single e2e fixture test.",
+      "No test or record read here attests bundle linkage (browser-variant substitution, prebuilt JSZip) for the production build, or records which E2E mode validation runs used."
+    ]
+  },
+  "requiredAdditionalPrimaryMaterial": [
+    "Deployed artifact identity: Cloudflare-published asset hashes or scripts/build-cloudflare.mjs output compared with worktree dist; which ORBIT_TEST_MODE the recorded plan04/validation E2E runs used (docs/validation not read).",
+    "Dev-mode dependency resolution evidence for mammoth/jszip if development-mode E2E remains the only DOCX coverage.",
+    "Unread mammoth modules: body-reader.js in full, styles-reader.js, numbering-xml.js, relationships-reader.js, content-types-reader.js, notes-reader.js, comments-reader.js, documents.js, results.js, xml/nodes.js, uris.js. Unread jszip: utils.js beyond the sections read, reader/*.js, zipEntry.js in full, utf8.js. Unread xmldom: sax.js in full (including the split tokenizer), dom.js, entities.js. pako inflate internals and bluebird scheduling unread.",
+    "Public advisory status for the pinned versions (public names/versions only, per scope slice 5); not done here.",
+    "The fixture resume.docx content (binary not opened; only size and hash recorded).",
+    "A stated acceptable client-side resource envelope, without which the unmeasured expansion and concurrency items cannot be classified."
+  ],
+  "meaningfulNextChecks": [
+    "Measurement before any product change (needs all3 design/plan treatment): a synthetic DOCX corpus covering the gap list, run through readResume in a browser harness recording wall time, long-task durations and memory where the browser exposes it; no numeric budgets are proposed here.",
+    "Regression candidates (test design required; not written here): a real-mammoth unit test in the node environment for the small fixture and the malformed inputs, asserting the error path and no non-Error rejection; an extractor-level gate fixture so e2e can cancel or replace during DOCX extraction; a ProfileDialog-level assertion of the 50,000-unit slice.",
+    "Error-presentation decision: whether JSZip/mammoth/xmldom English diagnostics should map to product messages (a product change, therefore held).",
+    "Linkage attestation in production-mode E2E or via build manifest: presence of the browser-variant markers and the prebuilt JSZip in the served chunk, plus deployed asset hash comparison.",
+    "Replacement/orphan behavior: measure N rapid replacements of a large valid DOCX; decide whether a bound is wanted (design question, not proposed here)."
+  ],
+  "noVoteStatement": "This is an independent static first for the DOCX path only. It records literal code findings, supported mitigations, unmeasured items and coverage gaps. It does not call the path secure or complete, does not assign severity, and does not approve or request any implementation, test execution, deployment or D activity."
+}

@@ -1,0 +1,185 @@
+{
+  "reviewId": "ASTRA-STAGE82-DOCX-CANDIDATE03-REVIEW-01",
+  "recordedAt": "2026-10-04T22:14:46.308935+00:00",
+  "model": "global.openai.gpt-6-astra",
+  "reasoning": "max",
+  "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+  "candidate": {
+    "path": "main/security-review-01/docx-static-findings-candidate-03.md",
+    "bytes": 7884,
+    "sha256": "b47ae1350b890d0da5819c107d45223485f1e471353c4a1aa7fb0f4fbb190419"
+  },
+  "requiredIssues": [],
+  "scope": "Exact candidate03 wording and evidence only. Individual Astra vote, not all3 product/security completion, design, implementation, test/runtime or deployment approval.",
+  "target": {
+    "sourceDigest": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c",
+    "fileCount": 526,
+    "planSha256": "bc70cb36e8b482e864d83c3eb5a47a12bf3982116ee900710a065fe86ca57ed2"
+  },
+  "inputs": [
+    {
+      "path": "main/security-review-01/docx-static-findings-candidate-03.md",
+      "bytes": 7884,
+      "sha256": "b47ae1350b890d0da5819c107d45223485f1e471353c4a1aa7fb0f4fbb190419"
+    },
+    {
+      "path": "main/security-review-01/docx-static-findings-candidate-03.main-vote.json",
+      "bytes": 2888,
+      "sha256": "2b91db31eb5dd8ee8d8a276461159927e5a0f0a9483f233c899869c64d9ff078"
+    },
+    {
+      "path": "main/security-review-01/main-docx-first-response-01.json",
+      "bytes": 7626,
+      "sha256": "c24b20f6f0dc924d345a1acf189be42ff6ee4756844cd412a8972717e3c1de52"
+    },
+    {
+      "path": "main/security-review-01/docx-requested-primary-01/manifest.json",
+      "bytes": 19154,
+      "sha256": "3cc911014af010b4204926f45af31ccd550edd243454e76b972223bb4a74a2a2"
+    },
+    {
+      "path": "main/security-review-01/docx-requested-primary-01/existing-document-artifact-identity-01.json",
+      "bytes": 1649,
+      "sha256": "084ebe96da1668fb4b64656fc14a517166460fe6514802e90ee0e0494e08880f"
+    },
+    {
+      "path": "main/security-review-01/docx-requested-primary-01/planned-e2e-modes-and-run-availability-01.json",
+      "bytes": 4661,
+      "sha256": "006419fa73040af67080692003c830c9d358531ed023110446cb043cf9792b83"
+    },
+    {
+      "path": "main/security-review-01/docx-requested-primary-01/existing-advisory-result-subset-01.json",
+      "bytes": 2686,
+      "sha256": "f6e49060b1257869f77bc9ad41e83e1052ff9a3300c0cda8c1a8fb0ea0d6a27a"
+    },
+    {
+      "path": "main/security-review-01/docx-requested-primary-01/synthetic-docx-fixture-content-01.json",
+      "bytes": 3056,
+      "sha256": "5196588c27c982e2cc6f8eb0ec48dbcdbf84ee22665b7cf1643dfe120d4f06b4"
+    },
+    {
+      "path": "independent/security-review-01/astra-docx-first-peer-assessment-01.json",
+      "bytes": 17745,
+      "sha256": "2376a8e56bcb60f37c953189d32a43db52500d5100a1f147be3e70173f10d20c"
+    }
+  ],
+  "preservedFirsts": [
+    {
+      "path": "independent/security-review-01/astra-docx-source-first-01.json",
+      "bytes": 9312,
+      "sha256": "1a27855e8c39c24ab02d0daaf9618fa0c1e3bc54b6c2bc511e0d36ecb7f4f824"
+    },
+    {
+      "path": "main/security-review-01/docx-resource-boundary-01/main-static-first-01.json",
+      "bytes": 6097,
+      "sha256": "733ebbb08564c5ae8e08ca6d3e026687f592fa40d35d5213850eca42a5f21c22"
+    },
+    {
+      "path": "independent/security-review-01/fable-docx-security-first-01.json",
+      "bytes": 24475,
+      "sha256": "9e318ba663d71f1be3e55c03947c975848175432609a84ac43f60984b1234159"
+    }
+  ],
+  "method": "Read Main's actual independent response, full candidate03, its Main vote, requested-primary manifest and four complete new evidence records. Reused the preserved source comparisons; verified material referenced bytes/descriptors and the566-byte XML wrapper. Did not re-audit all48 libraries or read Fable's pending root first. Drafts01/02 were not used as targets. All earlier records remain unchanged.",
+  "resolvedPriorQualifications": [
+    {
+      "id": "ADOCX82-PEER-1",
+      "result": "RESOLVED",
+      "basis": "Candidate explicitly distinguishes input admission/UI length from prior expansion and treats declared size as an end consistency check, not an early cap. Literal missing resource policy is separated from unmeasured adverse impact."
+    },
+    {
+      "id": "ADOCX82-PEER-2",
+      "result": "RESOLVED",
+      "basis": "Package/marker observations are indicators. Local identical chunk hashes are stated separately from source semantics, embedded dependency versions, dev resolution, executed/served files and deployment."
+    },
+    {
+      "id": "ADOCX82-PEER-3",
+      "result": "RESOLVED",
+      "basis": "Already-started work may independently succeed or fail; no guaranteed successful completion or measured infinite overlap is claimed. Scheduling does not guarantee a time budget. Raw error rendering remains a literal observation without asserted security impact."
+    }
+  ],
+  "evidenceChecks": [
+    {
+      "topic": "XML and privacy wording",
+      "result": "ACCEPT",
+      "basis": "The unchanged xmldom wrapper d75c75e3 records a diagnostic and throws after parseFromString returns. Candidate does not claim immediate parser termination or universal malformed-input detection. Entity/image/privacy statements remain tied to inspected paths, allow intentional derived-profile persistence, and disclaim whole-app non-exfiltration or immediate memory erasure."
+    },
+    {
+      "topic": "Local document chunks",
+      "result": "VERIFIED_WITH_LIMIT",
+      "basis": "Both current default and Cloudflare documents-D2fT8QPk.js files were read/hashed:499279B/2c28c909ea2c2ba59516478773691a05451c6678b44995c8d0cb97bb383269ec. Their bytes are identical and match the exact assets/documents-D2fT8QPk.js descriptor in the original dry-run inventory52845eb5. Candidate correctly limits this to local identity; it is not a served/deployed or semantic-equivalence proof."
+    },
+    {
+      "topic": "Plan modes and test existence",
+      "result": "ACCEPT",
+      "basis": "The selected check objects equal plan04. Production is unfiltered ORBIT_TEST_MODE=production; development explicitly selects18files including journey.spec.ts. Plan acceptance preserves full83 production files. The curated availability record reports no Stage82 full-E2E receipts; candidate labels both final runs/G3 unrun and keeps WorkerUI21 within its original scope. It does not promote test definitions or historical counts into current DOCX passes. No test collection or run was performed here."
+    },
+    {
+      "topic": "Synthetic fixture",
+      "result": "VERIFIED_RECORD_AND_SNAPSHOTS",
+      "basis": "The fixture file hashes to1003B/5df3fc65. Each of the three supplied XML snapshots matches the corresponding literal UTF-8 field/hash; totals are412+280+498=1190B. Content is the fictional Alex Kim/Python/5-year example. Candidate attributes ZIP inspection to Main and explicitly distinguishes it from Mammoth, browser or performance execution. This review did not rerun ZIP extraction or import."
+    },
+    {
+      "topic": "Historical advisory scope",
+      "result": "VERIFIED_WITH_LIMIT",
+      "basis": "The referenced request records2026-10-04T14:02:04.302845Z, HTTP200,359 packages and complete359 results. The bound response contains359 empty objects; all12 selected package/version rows match their original indices. Current lock SHA equals the query lock SHA a94e9a3f. Candidate limits conclusions to that time/database/lockfile and does not identify all prebuilt-bundle internals or imply vulnerability-free code."
+    },
+    {
+      "topic": "Requested material and future work",
+      "result": "ACCEPT",
+      "basis": "Manifest has48source-copy records; each named snapshot exists as a regular file of its declared size. This is availability, not semantic review or blanket hash verification of all48. Candidate preserves unread definitions, unknown deployment/runtime/resource policy and useful malformed/expansion/cancellation/recovery test gaps without adopting a new threshold or matrix."
+    }
+  ],
+  "checkedReferencedBindings": {
+    "artifactReconciliation": {
+      "path": "main/security-review-01/fresh-artifact-reconciliation-01.json",
+      "bytes": 4157,
+      "sha256": "3ebb6e84651fa7a3add622c28439eb3267caec369d435f6ffa1a5fb2ad2dd5a9"
+    },
+    "dryRunInventory": {
+      "path": "verification/wrangler-dry-run-eab683036217/dry-run-inventory.json",
+      "bytes": 67241,
+      "sha256": "52845eb5ced106fb07ba0d82290858abe2ee5db61cebf6442e1843e412207c0b"
+    },
+    "plan": {
+      "path": "collaboration/execution-plan.json",
+      "bytes": 24961,
+      "sha256": "bc70cb36e8b482e864d83c3eb5a47a12bf3982116ee900710a065fe86ca57ed2"
+    },
+    "advisoryQuery": {
+      "path": "main/security-review-01/dependency-advisory-query-01.json",
+      "bytes": 27041,
+      "sha256": "d3806ea9aaa349938d473032cb8b0418ef52df69a63b283a0c386ea744a3d1ef"
+    },
+    "advisoryResponse": {
+      "path": "main/security-review-01/osv-querybatch-response-01.json",
+      "bytes": 1090,
+      "sha256": "7c650ab40b945c3121b411e7d36f0afdd39ba13aaf1186ebbe2f41c97c331bbb"
+    },
+    "currentLock": {
+      "path": "worktree/package-lock.json",
+      "bytes": 184447,
+      "sha256": "a94e9a3f7e18daebe8d67cddad0dce63893c1dc98e74e774c4d0de2d2ef801bc"
+    },
+    "xmlWrapper": {
+      "path": "worktree/node_modules/mammoth/lib/xml/xmldom.js",
+      "bytes": 566,
+      "sha256": "d75c75e303ebd8bf126b5bb2bb7a2ead247f870d8eb01e0dbd0c37afb67231c1"
+    },
+    "fixture": {
+      "path": "worktree/tests/fixtures/resume.docx",
+      "bytes": 1003,
+      "sha256": "5df3fc658baff60384832abf70e22a6dc0408dd60b35ad6197dba850bde8b761"
+    }
+  },
+  "peerPosition": "Agree with Main candidate03 vote2b91db31 for this exact wording. Its response c24b20f6 independently converges on the material qualifications. Fable's first remains preserved; its agreement to candidate03 is not assumed, and its separate root first remains unread.",
+  "remainingLimits": [
+    "The inherited app/library findings remain source-scoped. No new exploit, severity, measured heap/latency/overlap or complete security audit is asserted.",
+    "Local chunk equality and inspected package mappings do not close source-to-bundle semantic, development middleware, browser execution or deployment provenance gaps.",
+    "Run-availability and WorkerUI status are supplied curated historical facts; reporter totals were not re-audited here. Full current E2E/G3 and all other original obligations remain unfinished as stated.",
+    "No whole526-source audit or full48-library semantic review occurred. Necessary stronger-claim definitions remain outstanding; availability is not a read.",
+    "A future resource policy, synthetic measurement corpus or product/test remedy still requires its own concrete all3 process. This wording vote authorizes none of them."
+  ],
+  "unchangedHolds": "D no relaunch/diagnostic repeat/recovery; source-gate17 HELD; no model substitution, product/source/test patch, runtime retry or deployment permission. No original criterion or scope reduced.",
+  "access": "Only permitted source/curated artifacts and metadata were read/hashed; only this report written. No app/Node/import/compiler/bundler/test/build/browser/server/network/model/process execution, protected/private streams/history/raw logs/registries/costs/credentials or foreign-resource access."
+}

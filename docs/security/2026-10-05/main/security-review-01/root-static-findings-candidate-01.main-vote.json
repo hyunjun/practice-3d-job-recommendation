@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-10-04T22:18:39.342020+00:00",
+  "reviewer": "Main",
+  "decision": "APPROVE_STATIC_FINDINGS_WORDING_CANDIDATE",
+  "candidate": {
+    "path": "main/security-review-01/root-static-findings-candidate-01.md",
+    "bytes": 7077,
+    "sha256": "be6d35dd7edd4dbc8cd0267c87184efc5f34082a88c31d61b04c708ff02668c6"
+  },
+  "primaryManifest": {
+    "path": "main/security-review-01/root-delta-independent-primary-01/manifest.json",
+    "bytes": 5343,
+    "sha256": "2d1d2082f38eeeaead2d7f82a04f403a5b364acb3472fbc904ee1995ccaaf3f3"
+  },
+  "response": {
+    "path": "main/security-review-01/main-root-first-response-01.json",
+    "bytes": 4368,
+    "sha256": "af2e68cac26a7f59db27a7665f7f1189a4f41efd44b7095235aece8174136cf5"
+  },
+  "firsts": [
+    {
+      "path": "main/security-review-01/original-worktree-delta-01/main-static-delta-review-01.json",
+      "bytes": 4720,
+      "sha256": "755fdbb1aa9a948e1b851982079d5e934217657a3773b1ca7c287fcf49733dc5"
+    },
+    {
+      "path": "independent/security-review-01/astra-root-delta-first-01.json",
+      "bytes": 9847,
+      "sha256": "aeded3e738f60f999f756b37338c415987acd19a158d8eebee6d13fca39cec04"
+    },
+    {
+      "path": "independent/security-review-01/fable-root-delta-security-first-01.json",
+      "bytes": 21353,
+      "sha256": "d305f34b36042262b27dd5d69570f6db8d28db26bbd1d66e29128ffa96576796"
+    }
+  ],
+  "requiredIssuesWithThisWording": [],
+  "scope": "Individual vote on exact interim root static findings wording/evidence only. No all3 consensus until both actual matching peer votes; no product, functional, E2E, security completion or deployment approval.",
+  "holds": "Stage81 and Stage82 runtime/security completion unapproved; source68d4/526/gate17 and D hold unchanged. No model/provider substitution, D repeat or app execution."
+}

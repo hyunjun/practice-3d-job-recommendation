@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "reviewId": "ASTRA-ROOT-STAGE81-SECURITY-FIRST-01",
+  "reviewer": {
+    "role": "independent Astra source reviewer",
+    "model": "global.openai.gpt-6-astra",
+    "reasoning": "max"
+  },
+  "scope": {
+    "workspace": "/Users/jun/programming/test-3d-job-recommendation",
+    "stage": "Original root Stage81 pending dialog-focus delta; not isolated Stage82",
+    "diffBaseCommit": "d96367ba9e06ad32737250a482c662e11b7881be",
+    "coverage": "Read every hunk in the five named tracked files, surrounding component/data-flow context, and all 765 lines of the new dialog-visibility.ts. CSS coverage is its complete delta, not an audit of all pre-existing styles. ProfileDialog changes only the hidden file input tabindex.",
+    "baseline": {
+      "path": "main/original-worktree-dirty-baseline-01.json",
+      "bytes": 4195,
+      "sha256": "13de0f3d909ec42ee77f27f6a4297d30966ac116666e4d49a1086dcacd68c37c",
+      "recordedFiles": 22,
+      "sourceFilesReviewed": 6
+    },
+    "separation": "The isolated Stage82 68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c/526 identity and its validation are not evidence of root Stage81 correctness."
+  },
+  "method": {
+    "independentFirst": true,
+    "peerSecurityOpinionsRead": false,
+    "basis": "Direct root source reads and explicitly authorized read-only git diff --no-ext-diff --no-textconv against the named commit. No Main first, report08, root security conclusions, consensus archive, or Stage81 validation reports were read.",
+    "identityCheck": "All six source byte counts and SHA-256 values matched the recorded root baseline on initial and final inspection. No root file was edited.",
+    "execution": "Only filesystem/text/hash/JSON inspection and the permitted read-only diff; no application, compiler, bundler, import, test, server, network, process inspection or signalling."
+  },
+  "sourceInputs": [
+    {
+      "path": "src/components/DialogFeedback.tsx",
+      "bytes": 7627,
+      "sha256": "28f956bb777dfd261650dac684e9908b8682747e41efab893ec5ee787d37b501",
+      "matchesRecordedRootBaseline": true
+    },
+    {
+      "path": "src/components/ProfileDialog.tsx",
+      "bytes": 18388,
+      "sha256": "73f03cf09caf9766aa2d9e7b0fa53199fe5c889c31ee5393a28c5ce85b847802",
+      "matchesRecordedRootBaseline": true
+    },
+    {
+      "path": "src/components/SavedDataDialog.tsx",
+      "bytes": 27655,
+      "sha256": "fcc8eac53a3164fe61e8848ea0689bc3f094e92cc67e9b94a929a626c40c6c62",
+      "matchesRecordedRootBaseline": true
+    },
+    {
+      "path": "src/components/ui.tsx",
+      "bytes": 9983,
+      "sha256": "c487f7f9aead553f7546983ac973f22434e008fb262d61bd4487a550d312f274",
+      "matchesRecordedRootBaseline": true
+    },
+    {
+      "path": "src/styles.css",
+      "bytes": 124127,
+      "sha256": "848cbeaa0f44fc234ba7d2db9e46afc0b9e7040b7fb7d83a40da1bc01b42ca6a",
+      "matchesRecordedRootBaseline": true
+    },
+    {
+      "path": "src/lib/dialog-visibility.ts",
+      "bytes": 36445,
+      "sha256": "34f3613a10b31f18c6b56fa3e6979672ab4dc31469b07189d891051c55a02f0f",
+      "matchesRecordedRootBaseline": true
+    }
+  ],
+  "decision": "NO_CONFIRMED_SECURITY_REGRESSION_IN_REVIEWED_ROOT_DELTA",
+  "requiredSecurityIssues": [],
+  "findings": [
+    {
+      "id": "ROOT81-S1",
+      "classification": "Bounded static data-flow finding; no confirmed disclosure or injection path added",
+      "references": [
+        "src/lib/dialog-visibility.ts:57-169",
+        "src/lib/dialog-visibility.ts:300-368",
+        "src/lib/dialog-visibility.ts:602-717",
+        "src/components/SavedDataDialog.tsx:98-105",
+        "src/components/SavedDataDialog.tsx:257-268",
+        "src/components/SavedDataDialog.tsx:330-338"
+      ],
+      "entryToSink": "Document interaction events feed local focus state: element/owner references, selection offsets/direction, event classification, geometry, and a footer text snapshot. The new sinks are focus/scroll, observer registration, fixed attributes, and computed numeric pixel styles. Saved result strings and existing file/name/note/description/JSON displays remain React text children.",
+      "assessment": "No new transmission, persistent storage, raw HTML insertion, executable string, or URL navigation sink occurs in this delta. The helper observes private-input context but does not copy input values into telemetry or a new store. This is a statement about these changes, not a guarantee about every pre-existing consumer."
+    },
+    {
+      "id": "ROOT81-S2",
+      "classification": "Existing import and storage guards preserved at the changed callers",
+      "references": [
+        "src/components/ProfileDialog.tsx:160-165",
+        "src/components/SavedDataDialog.tsx:142-178",
+        "src/components/SavedDataDialog.tsx:201-247",
+        "src/components/SavedDataDialog.tsx:312-325",
+        "src/components/DialogFeedback.tsx:137-141"
+      ],
+      "entryToSink": "Backup selection still checks MAX_SAVED_FILE_BYTES before file.text(), retains request-generation checks and parseSavedImport(), then requires the existing canWrite/stale/selection/count conditions before importRecords(). Discard still requires a selected recovery object and canWrite; cancelling confirmation only changes local state. Export continues through the same backup/recovery functions.",
+      "assessment": "The refactor associates notices with focus tickets; it does not make those tickets permission to mutate storage. Storage actions still run independently of focus-ticket availability. ProfileDialog only removes the hidden file input from sequential tab navigation; it changes neither importer nor cancellation/privacy settings. Underlying parsers, resume extraction and storage transactions were not re-audited."
+    },
+    {
+      "id": "ROOT81-S3",
+      "classification": "Local focus/lifecycle ownership checks, not an authentication boundary",
+      "references": [
+        "src/components/DialogFeedback.tsx:24-62",
+        "src/components/DialogFeedback.tsx:103-141",
+        "src/components/SavedDataDialog.tsx:106-141",
+        "src/lib/dialog-visibility.ts:119-168",
+        "src/lib/dialog-visibility.ts:288-295",
+        "src/lib/dialog-visibility.ts:494-553",
+        "src/lib/dialog-visibility.ts:719-764",
+        "src/components/ui.tsx:53-100"
+      ],
+      "entryToSink": "Registration uses per-mount symbols and the last connected open modal. Tickets bind scope, epoch, stack and owner lifetime; later user intent or registration changes invalidate them. Deferred work rechecks ownership, connection and eligible elements. Recovery cancellation checks the exact recovery object and surviving trigger, otherwise chooses the close button. Saved-job selector interpolation retains CSS.escape().",
+      "assessment": "The delta does not introduce a route from an imported string to arbitrary focus code or a backend privilege. Teardown unregisters controllers/subscribers, disconnects observers, cancels owned animation frames and removes listeners; delayed microtasks check live/generation state. Dialog teardown invokes this before unregister/close. These are source safeguards, not demonstrated browser-ordering or E2E correctness."
+    },
+    {
+      "id": "ROOT81-S4",
+      "classification": "Presentation changes with unverified interaction outcomes",
+      "references": [
+        "src/styles.css:408-423",
+        "src/styles.css:499-505",
+        "src/styles.css:630-633",
+        "src/styles.css:874-876",
+        "src/styles.css:893",
+        "src/styles.css:1306-1308",
+        "src/styles.css:1353",
+        "src/components/ui.tsx:116-120"
+      ],
+      "entryToSink": "Changed styles size dialog readers/footer, wrap controls, and align the transparent checkbox hit area with its visible track. The new style values derive from geometry; attribute values and property names are fixed. Toggle state still changes through its existing native checkbox onChange.",
+      "assessment": "No added external CSS resource, URL, content execution, automatic persistence selection, or removal of import/deletion confirmation is present in these hunks. Actual visibility, hit testing, consent-label accessibility and keyboard behavior remain functional verification obligations."
+    }
+  ],
+  "limitsAndFollowUp": [
+    "No confirmed vulnerability or security-specific required patch was established. This is not a whole-app security verdict, source gate vote, functional acceptance, E2E result, deployment approval, or permission to resume Stage82 checks.",
+    "The six source files were assessed; the other sixteen baseline documentation/test files were not reviewed beyond their descriptor metadata. No credential scan or Git-history audit was repeated.",
+    "The opener restoration helper removes temporary event listeners in its single animation-frame callback rather than exposing a teardown disposer. Paused-frame timing and temporary DOM retention are unmeasured; this alone does not establish a leak, exploit or resource bound.",
+    "Later Stage81 verification should establish that stale file/storage feedback cannot redirect a newer interaction, that nested/open-close/reused recovery controls keep the intended owner, and that IME/selection/touch/resize/footer changes preserve access to notices and confirmation controls. Existing type, interaction and lifecycle evidence must be assessed separately; nothing was executed here.",
+    "No bound on heap, observer work or responsiveness was measured. No claim is made that unchanged import/resource limitations elsewhere are fixed by focus handling. Private streams, raw logs/registries, credentials and foreign PID30593/port8787 were untouched."
+  ],
+  "approvals": {
+    "design": false,
+    "implementationGate": false,
+    "runtime": false,
+    "wholeSecurityClosure": false,
+    "deployment": false
+  }
+}

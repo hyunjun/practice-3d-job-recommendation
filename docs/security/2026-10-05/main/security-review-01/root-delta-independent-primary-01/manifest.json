@@ -1,0 +1,108 @@
+{
+  "preparedAt": "2026-10-04T21:41:44.451427+00:00",
+  "scope": "Independent STATIC SECURITY DELTA follow-up for the six selected original/root Stage81 source files. This is not the frozen Stage82 deployment candidate or a functional/runtime/test/stage/deployment approval.",
+  "rootHead": "d96367ba9e06ad32737250a482c662e11b7881be",
+  "rootProtectedBaseline": {
+    "path": "main/original-worktree-dirty-baseline-01.json",
+    "bytes": 4195,
+    "sha256": "13de0f3d909ec42ee77f27f6a4297d30966ac116666e4d49a1086dcacd68c37c"
+  },
+  "files": [
+    {
+      "rootPath": "src/components/DialogFeedback.tsx",
+      "currentSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-current/src/components/DialogFeedback.tsx",
+        "bytes": 7627,
+        "sha256": "28f956bb777dfd261650dac684e9908b8682747e41efab893ec5ee787d37b501"
+      },
+      "matchesProtectedRootBaseline": true,
+      "headSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-head/src/components/DialogFeedback.tsx",
+        "bytes": 5821,
+        "sha256": "39922917caadff4c90426378df7e655c3b78b26cbc4031fbbb209c4df85a21af"
+      }
+    },
+    {
+      "rootPath": "src/components/ProfileDialog.tsx",
+      "currentSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-current/src/components/ProfileDialog.tsx",
+        "bytes": 18388,
+        "sha256": "73f03cf09caf9766aa2d9e7b0fa53199fe5c889c31ee5393a28c5ce85b847802"
+      },
+      "matchesProtectedRootBaseline": true,
+      "headSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-head/src/components/ProfileDialog.tsx",
+        "bytes": 18374,
+        "sha256": "9327fd767e873abc46ef2622f8d000853a179b7f6439772c4ad6f734ffb6f279"
+      }
+    },
+    {
+      "rootPath": "src/components/SavedDataDialog.tsx",
+      "currentSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-current/src/components/SavedDataDialog.tsx",
+        "bytes": 27655,
+        "sha256": "fcc8eac53a3164fe61e8848ea0689bc3f094e92cc67e9b94a929a626c40c6c62"
+      },
+      "matchesProtectedRootBaseline": true,
+      "headSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-head/src/components/SavedDataDialog.tsx",
+        "bytes": 22919,
+        "sha256": "8604f3ff7b5e00a7608dc5f0d3168f761d45dcfaf299016394ac4ad24ecc6baa"
+      }
+    },
+    {
+      "rootPath": "src/components/ui.tsx",
+      "currentSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-current/src/components/ui.tsx",
+        "bytes": 9983,
+        "sha256": "c487f7f9aead553f7546983ac973f22434e008fb262d61bd4487a550d312f274"
+      },
+      "matchesProtectedRootBaseline": true,
+      "headSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-head/src/components/ui.tsx",
+        "bytes": 10222,
+        "sha256": "5d47925dadd365f0a63854ca72ca5b47347d477b7a945719f378a396622d6c1d"
+      }
+    },
+    {
+      "rootPath": "src/styles.css",
+      "currentSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-current/src/styles.css",
+        "bytes": 124127,
+        "sha256": "848cbeaa0f44fc234ba7d2db9e46afc0b9e7040b7fb7d83a40da1bc01b42ca6a"
+      },
+      "matchesProtectedRootBaseline": true,
+      "headSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-head/src/styles.css",
+        "bytes": 123395,
+        "sha256": "4b0caa729e8f1f82ecbe87ff97ec2d13443b1a258b94eb3ed2060f35ac67f17f"
+      }
+    },
+    {
+      "rootPath": "src/lib/dialog-visibility.ts",
+      "currentSnapshot": {
+        "path": "main/security-review-01/root-delta-independent-primary-01/root-current/src/lib/dialog-visibility.ts",
+        "bytes": 36445,
+        "sha256": "34f3613a10b31f18c6b56fa3e6979672ab4dc31469b07189d891051c55a02f0f"
+      },
+      "matchesProtectedRootBaseline": true,
+      "headSnapshot": null,
+      "status": "Untracked new helper; full current body included independently of tracked diff."
+    }
+  ],
+  "trackedDiff": {
+    "path": "main/security-review-01/root-delta-independent-primary-01/tracked-source-delta.txt",
+    "bytes": 40774,
+    "sha256": "2068f20b91aefbedb179c81578357d214c8b004b6d38e2c3c3d98c7ac287f5f9"
+  },
+  "diffMatchesEarlierSourceBytes": true,
+  "primaryBody": {
+    "path": "main/security-review-01/root-delta-independent-primary-01/primary-bodies.md",
+    "bytes": 77401,
+    "sha256": "801d760bbdbee3d55163f80a8a7b9a99ebbc4bb4d73a5f92e3f7288bff46f0ba"
+  },
+  "selection": "Complete five-file tracked diff plus full new helper. Full current six and HEAD five snapshots available at exact named paths; additional unchanged root source may be read if needed for security data flow. This packet is not an exhaustive app audit.",
+  "peerOpinionsIncluded": false,
+  "heldWork": "No product/test edits or app/runtime/Node/import/build/test/server/model/network execution; no D/capacity design or withheld-source review; source-gate17 unchanged.",
+  "protection": "All current six byte-equal prior protected root baseline; only new ignored local snapshots/manifest written. No actual collected jobs/resumes/private history/logs/registries or secrets included."
+}

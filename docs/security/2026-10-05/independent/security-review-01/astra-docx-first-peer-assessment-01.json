@@ -1,0 +1,260 @@
+{
+  "reviewId": "ASTRA-STAGE82-DOCX-FIRST-PEER-ASSESSMENT-01",
+  "recordedAt": "2026-10-04T22:06:16.910618+00:00",
+  "model": "global.openai.gpt-6-astra",
+  "reasoning": "max",
+  "decision": "CORE_SOURCE_FINDINGS_AGREE_WITH_REQUIRED_REPORT_QUALIFICATIONS",
+  "scope": "Compare the actual Fable DOCX static first with preserved Astra/Main firsts; resolve material source and evidence-language differences only. No product remedy, test design or security-completion vote.",
+  "target": {
+    "sourceDigest": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c",
+    "fileCount": 526,
+    "planSha256": "bc70cb36e8b482e864d83c3eb5a47a12bf3982116ee900710a065fe86ca57ed2"
+  },
+  "firstAndCompletionBindings": [
+    {
+      "path": "independent/security-review-01/fable-docx-security-first-01.json",
+      "bytes": 24475,
+      "sha256": "9e318ba663d71f1be3e55c03947c975848175432609a84ac43f60984b1234159"
+    },
+    {
+      "path": "independent/security-review-01/fable-docx-security-first-01.md",
+      "bytes": 25597,
+      "sha256": "782864d4de4097c6d76e8ecaec5b00c50c0fabfe9b488f82da56d20848da08ac"
+    },
+    {
+      "path": "independent/security-review-01/astra-docx-source-first-01.json",
+      "bytes": 9312,
+      "sha256": "1a27855e8c39c24ab02d0daaf9618fa0c1e3bc54b6c2bc511e0d36ecb7f4f824"
+    },
+    {
+      "path": "main/security-review-01/docx-resource-boundary-01/main-static-first-01.json",
+      "bytes": 6097,
+      "sha256": "733ebbb08564c5ae8e08ca6d3e026687f592fa40d35d5213850eca42a5f21c22"
+    },
+    {
+      "path": "main/security-review-01/docx-independent-primary-01/fable-first-completion-01.json",
+      "bytes": 2075,
+      "sha256": "87b365110b4e1103b0ae6528501f27f2ca13eddea53b935c1730e4da81df60c3"
+    }
+  ],
+  "method": "Read the complete Fable JSON and full MD, verifying its fenced JSON matches; compared the unchanged Astra1a27855e and original Main733ebbb0 source findings. Inspected only relevant app/library/test sections below. No new Main DOCX response/qualifications or pending root-delta opinion was read. Main's separate artifact/mode/advisory/material gathering was not duplicated.",
+  "agreements": [
+    "All three firsts support the distinction between the compressed5MiB input gate and the post-extraction50000 UTF-16-unit UI slice. Neither establishes an earlier expansion/work/heap ceiling. App signal handling observes/rejects pending work and guards current-controller UI updates, without passing a DOCX cancellation or termination handle to the extractor.",
+    "Fable usefully extends the inspected source trace through selected ZIP/XML parts, raw-text conversion and parser diagnostics. The named GenericWorker remains a library pipeline object; deferred chunks/promises are not a browser Worker or a hard resource boundary.",
+    "The source supports user-selected local processing and plain-text UI sinks, not a demonstrated anonymous exploit, exfiltration or severity. No freeze, peak heap, overlap duration, engine stack failure or client resource policy was measured. No numerical budget, implementation or mandatory new test matrix is agreed here."
+  ],
+  "requiredWordingCorrections": [
+    {
+      "id": "ADOCX82-PEER-1",
+      "topic": "Declared size is not a pre-expansion bound",
+      "fableLocation": "unverifiedOrHypothetical[0]: inflated size bounded by deflate format and header values",
+      "source": "jszip/lib/compressedObject.js30-40; stream/DataLengthProbe.js21-26; StreamHelper.js79-104",
+      "assessment": "Header uncompressedSize is compared only on end. DataLengthProbe counts and forwards output without enforcing that declaration as a ceiling; StreamHelper retains delivered chunks. A false small declaration does not establish a small transient expansion budget before rejection. Fable's header-bound wording conflicts with its otherwise accurate end-check observation.",
+      "requiredText": "Declared size is a post-expansion consistency check, not an application resource ceiling. The inspected path has no supplied early expansion budget; actual resource impact and acceptable policy are unmeasured."
+    },
+    {
+      "id": "ADOCX82-PEER-2",
+      "topic": "Source/bundle indicators are not executed-code provenance",
+      "fableLocation": "linkageBoundary.consequence and MD recap: readable source for executed logic; Mammoth bundled directly and browser substitutions confirmed",
+      "source": "mammoth/package.json main/browser; jszip/package.json main/browser; Fable's explicitly limited artifact marker greps",
+      "assessment": "Package mappings and reported string markers support consistency with those browser variants. They do not prove the exact source bodies executed, semantic equivalence of minified JSZip to lib plus nested pako, the served build identity, or deployment provenance. Fable already disclaims equivalence, so the stronger executed/directly-confirmed wording should be reconciled with that limit. I did not independently repeat its artifact grep or Main's artifact gathering.",
+      "requiredText": "Treat these as source-resolution and bundle-content indicators. Keep exact emitted/served linkage, source equivalence, validation mode and deployed identity separately evidenced or explicitly unverified."
+    },
+    {
+      "id": "ADOCX82-PEER-3",
+      "topic": "Underlying lifetime and literal findings versus hypothetical impact",
+      "fableLocation": "dataFlowTrace cancellation: keeps executing to completion; unverifiedOrHypothetical and MD recap",
+      "source": "resume.ts1-20,71-79; ProfileDialog.tsx43-89; JSZip DataWorker.js67-107/flate.js34-50; ProfileDialog.tsx81,189",
+      "assessment": "The observer does not cancel the extractor, but source alone does not guarantee every replaced extraction completes; it may independently reject or terminate. No app-level outstanding-extraction cap is supplied, which is different from measured unlimited concurrent work. The MD also calls raw-error rendering and processing/concurrency structure merely hypothetical although those are source observations; their security/resource effects remain hypothetical or unmeasured.",
+      "requiredText": "Already-started DOCX work may continue to its independent settlement; actual overlap/lifetime is unmeasured. Separate literal absence of cancellation/budgets and raw error rendering from unproved harmful consequences. Deferred16KiB compressed-input chunks provide scheduling points, not a wall-time/output-size/responsiveness guarantee."
+    }
+  ],
+  "mitigationPrecision": [
+    {
+      "topic": "XML diagnostics and entity handling",
+      "position": "Supported for the inspected source path: default XML_ENTITIES contains the five predefined names; SAX handles numeric references and reports unknown entities; the inspected DTD handler builds metadata rather than fetching an external subset. No external-entity I/O resolver was identified here. Mammoth records a diagnostic then throws after parseFromString returns (xmldom.js5-19); reader.js15-19 rejects that error. Say reported diagnostics cause rejection, not that every malformed/hostile document has been proven detected or that rejection necessarily stops parser work immediately. This is not a new XXE finding or deployed-parser proof."
+    },
+    {
+      "topic": "Images and raw text",
+      "position": "The inspected body-reader constructs image read callbacks; documents.Image stores callable reader methods; raw-text.js walks children/text/tabs and does not invoke those image read methods. This supports the ordinary raw-text image-laziness observation without claiming every archive entry inflates eagerly or attesting deployed bundle behavior."
+    },
+    {
+      "topic": "UI/privacy/lifecycle",
+      "position": "Current-controller and aborted checks guard text/error writes; busy cleanup is owner-checked. App.tsx335 conditionally mounts ProfileDialog, supporting unmount on close and its abort cleanup. Extracted text is a React text value; applying a profile stores derived fields only when remember is chosen. Prefer no raw-resume upload/storage sink identified in the reviewed path over universal no-network/never-in-memory claims. Closing UI is not proof that outstanding buffers/work have been erased; derived profile fields may intentionally persist."
+    }
+  ],
+  "coverageAssessment": {
+    "confirmedStaticAssertions": "resume-reader.test.ts76-89 mocks Mammoth. Lines303-337 cover successful text, empty/error outcomes, listener cleanup and an unresolved mocked extraction whose late text cannot become the cancelled observer result. Its exact5MiB test103-110 uses TXT acceptance and PDF over-limit rejection: a common admission-guard assertion, not a valid near-limit real DOCX extraction witness. journey.spec.ts182-194 contains a real DOCX import path with filename/Python/years/skill/error oracles. resume-import.ts49-108 gates native File text/arrayBuffer delivery, not the extractor.",
+    "existenceNotExecution": "These are existing test definitions/assertions. Neither reading them nor this static Fable terminal supplies a new test pass, production-mode execution or artifact attestation. Historical runs may exist and must retain their actual source/mode bindings; this assessment does not claim they never ran.",
+    "usefulGapsPreserved": "Real-library malformed/expansion behavior, replacement or cancellation during actual DOCX extraction, post-extraction50000-unit behavior and meaningful browser responsiveness/resource observations remain substantive areas for later risk-directed design. Fable's broader malformed-format/content-fidelity list is a candidate inventory, not an approved Cartesian matrix. Reported test absence is bounded by its searches; this comparison did not re-audit every test.",
+    "futureTestDesignLimit": "A real-library Node test would not automatically cover browser resolution or the emitted JSZip variant. Any proposed harness, non-Error rejection expectation, synthetic corpus, resource policy or timing oracle still needs separate concrete all3 design. No original test or criterion is waived."
+  },
+  "nextMaterial": [
+    {
+      "kind": "Source definitions versus availability",
+      "needed": "Fable's unread modules are missing review coverage, not demonstrated missing files. Main may supply named definitions where a specific stronger claim depends on them. I inspected the relevant Image and XML entity/diagnostic definitions to refine those claims; a blanket demand to read every dependency is not needed to state the bounded resource/cancellation observations."
+    },
+    {
+      "kind": "Build/mode/provenance evidence",
+      "needed": "Use Main's separately gathered local default/Cloudflare artifact identities and actual plan/run modes before stating which build a DOCX case exercised. Local artifact identity is distinct from a deployed asset. Deployment evidence is not an available runtime pass merely because requested; do not authorize deployment to fill this gap."
+    },
+    {
+      "kind": "Advisories and fixture contents",
+      "needed": "Main's existing public advisory records and permitted fictional fixture material can qualify the remaining source/coverage account. Fable did not query advisories or open the DOCX fixture body; that is unread evidence, not a finding based on package age or proof of an absent check. I did not duplicate that gathering."
+    },
+    {
+      "kind": "Runtime/policy",
+      "needed": "Separately authorized bounded synthetic measurements are needed to quantify expansion, actual overlap, responsiveness and compatibility before choosing a policy/remedy. An acceptable resource envelope is a later design input; its absence does not make the present source-level lack of explicit budgets or cancellation hypothetical."
+    }
+  ],
+  "examinedSourcesBase": "worktree/",
+  "examinedSources": [
+    {
+      "path": "src/lib/resume.ts",
+      "bytes": 3978,
+      "sha256": "bd2d062628ccfc47ea630a687a377c429de46a7e1cab3fa47b0acb4fb940f043",
+      "read": "1-82"
+    },
+    {
+      "path": "src/components/ProfileDialog.tsx",
+      "bytes": 18374,
+      "sha256": "9327fd767e873abc46ef2622f8d000853a179b7f6439772c4ad6f734ffb6f279",
+      "read": "1-140,163-193,218-233"
+    },
+    {
+      "path": "src/App.tsx",
+      "bytes": 31284,
+      "sha256": "64a0c991437130da89fd985306574657afdfc8b2cc0dff26f0ebdf3064aee766",
+      "read": "240-275,332-342"
+    },
+    {
+      "path": "node_modules/mammoth/package.json",
+      "bytes": 1485,
+      "sha256": "b6670cef45f5f8b71913fa06449033676cbb106cbe1e725cbd3e098f72a6b302",
+      "read": "version/main/browser fields"
+    },
+    {
+      "path": "node_modules/jszip/package.json",
+      "bytes": 1787,
+      "sha256": "4138415020992b9a832333c64a13bd7e17faa462f7e0c0dd505f824d397f7281",
+      "read": "version/main/browser fields"
+    },
+    {
+      "path": "node_modules/mammoth/lib/index.js",
+      "bytes": 3686,
+      "sha256": "ca86526cdfc8b572e0637f61312e78d434a454c60ee39131bfcb719d7fdbe380",
+      "read": "75-90"
+    },
+    {
+      "path": "node_modules/mammoth/lib/zipfile.js",
+      "bytes": 1890,
+      "sha256": "9eb35456e709d32769da9474c840d6eb9bf501e7a9920ea869d1387b22a9afe9",
+      "read": "1-72"
+    },
+    {
+      "path": "node_modules/mammoth/lib/xml/xmldom.js",
+      "bytes": 566,
+      "sha256": "d75c75e303ebd8bf126b5bb2bb7a2ead247f870d8eb01e0dbd0c37afb67231c1",
+      "read": "1-23"
+    },
+    {
+      "path": "node_modules/mammoth/lib/xml/reader.js",
+      "bytes": 1999,
+      "sha256": "0e1d055f94e96cccdb5a400793ea41863153946587a07b726cde6d2da1cd0d67",
+      "read": "1-69"
+    },
+    {
+      "path": "node_modules/@xmldom/xmldom/lib/dom-parser.js",
+      "bytes": 10312,
+      "sha256": "03915c54c4bf44cfee38807af253abaabb022c27652918e8a233fae2d92fe1d2",
+      "read": "60-140,225-285"
+    },
+    {
+      "path": "node_modules/@xmldom/xmldom/lib/sax.js",
+      "bytes": 20949,
+      "sha256": "b2592fbf6993b04576c7ffbd78d63cecdf6495ff1f7a43c2516a0482e69736e9",
+      "read": "40-80,575-655"
+    },
+    {
+      "path": "node_modules/@xmldom/xmldom/lib/entities.js",
+      "bytes": 44465,
+      "sha256": "332cda4081c610fdadc0266867ee5ed9f945c99d471ea7234ec61ba00cbf0e40",
+      "read": "XML_ENTITIES definition12-18 and adjacent comments"
+    },
+    {
+      "path": "node_modules/jszip/lib/compressedObject.js",
+      "bytes": 2890,
+      "sha256": "b91f823d32f39cda4002bc0954993f20ffea6747d42109253b7d6347b4abb31b",
+      "read": "1-74"
+    },
+    {
+      "path": "node_modules/jszip/lib/stream/StreamHelper.js",
+      "bytes": 6877,
+      "sha256": "aebc6518b4871d106e799f90139d55620d02e9413ef2a7b0f953a9cea7bda124",
+      "read": "35-109"
+    },
+    {
+      "path": "node_modules/jszip/lib/stream/DataLengthProbe.js",
+      "bytes": 829,
+      "sha256": "638e65360b0fbe1f4e0b2628fd3a1782a4df59c477d454007fa52b1a2587b93f",
+      "read": "1-29"
+    },
+    {
+      "path": "node_modules/jszip/lib/stream/DataWorker.js",
+      "bytes": 2748,
+      "sha256": "8203f14e856d33aa9afc272a576f169b29980e8da0ee0f633e6e5f23cfa48a3e",
+      "read": "1-116"
+    },
+    {
+      "path": "node_modules/jszip/lib/flate.js",
+      "bytes": 2365,
+      "sha256": "57f1452680cf7af6a9659de398d847dd1e870ea3a601662c498b073c640eb547",
+      "read": "1-85"
+    },
+    {
+      "path": "node_modules/jszip/lib/utils.js",
+      "bytes": 16926,
+      "sha256": "82538b268e385eabde80d549606ded6d31ec9af7afcf567c6ae708366abe8550",
+      "read": "385-420"
+    },
+    {
+      "path": "node_modules/mammoth/lib/raw-text.js",
+      "bytes": 456,
+      "sha256": "1c02e81738b056456071a03e3205e142fe4c07c474b6cd794168c421e5183b5a",
+      "read": "1-14"
+    },
+    {
+      "path": "node_modules/mammoth/lib/docx/body-reader.js",
+      "bytes": 28748,
+      "sha256": "f1470d5abbd44f60bb15d0e90112de3234de3528e891943d2c9420cd479c5f4c",
+      "read": "592-677"
+    },
+    {
+      "path": "node_modules/mammoth/lib/documents.js",
+      "bytes": 6437,
+      "sha256": "1a0df4ae1f94b43bac105cfad77a7b6d7cab96e335ec05521b9af3536f0702e3",
+      "read": "Image read-method closures160-185"
+    },
+    {
+      "path": "tests/unit/resume-reader.test.ts",
+      "bytes": 15726,
+      "sha256": "4b9cd290140cae3ac69504da539a3af3bac00d444405f627a2e4666d9ca68854",
+      "read": "1-188,303-338 relevant assertions; PDF context not re-audited"
+    },
+    {
+      "path": "tests/e2e/journey.spec.ts",
+      "bytes": 24133,
+      "sha256": "e365eac41a2036f3c695842a6248dfbfa94813a5f54bbf15b6f12d25034d7f63",
+      "read": "170-208; DOCX case182-194"
+    },
+    {
+      "path": "tests/fixtures/resume-import.ts",
+      "bytes": 5005,
+      "sha256": "c66365691662dfb3a65de65922e5064cbd66c32fe81103dc641d0dc81c009016",
+      "read": "1-130"
+    }
+  ],
+  "limits": "No new confirmed exploit, severity or source patch is asserted. The original firsts remain immutable. Fable completion2075B/87b36511 corroborates a completed static review, not tests. Main's new response, root-delta pending opinion, bundle/deployment receipts, plan-mode evidence, binary fixture contents and advisory updates were not inspected in this comparison. No product remedy/test design/security closure/implementation/runtime/deployment/all3-stage approval.",
+  "unchangedHolds": "Source68d4/526 and plan04 remain bound; source-gate17 HELD; D no relaunch/diagnostic repeat/recovery and no model substitution. All original required checks remain. Static further review is not execution authorization.",
+  "access": "Only approved source/curated JSON/MD reads and hashes, plus this single new report write. No application/Node/import/compiler/bundler/test/build/browser/server/network/model/process command, protected real data, private streams/history/raw logs/registries/costs/credentials or foreign-resource access."
+}

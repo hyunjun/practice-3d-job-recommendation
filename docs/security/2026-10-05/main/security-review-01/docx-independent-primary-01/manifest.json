@@ -1,0 +1,192 @@
+{
+  "preparedAt": "2026-10-04T21:40:29.987042+00:00",
+  "scope": "Independent static DOCX security/processing follow-up within existing user security request; no new implementation, test execution, runtime probe, D review, capacity design, approval or threshold change.",
+  "targetSourceDigest": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c",
+  "targetSourceFiles": 526,
+  "targetHead": "d96367ba9e06ad32737250a482c662e11b7881be",
+  "sources": [
+    {
+      "origin": "worktree/src/lib/resume.ts",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/src/lib/resume.ts",
+      "bytes": 3978,
+      "sha256": "bd2d062628ccfc47ea630a687a377c429de46a7e1cab3fa47b0acb4fb940f043",
+      "bodyStartByte": 128,
+      "bodyEndByte": 4106,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": true
+    },
+    {
+      "origin": "worktree/src/components/ProfileDialog.tsx",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/src/components/ProfileDialog.tsx",
+      "bytes": 18374,
+      "sha256": "9327fd767e873abc46ef2622f8d000853a179b7f6439772c4ad6f734ffb6f279",
+      "bodyStartByte": 4271,
+      "bodyEndByte": 22645,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": true
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/package.json",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/mammoth/package.json",
+      "bytes": 1485,
+      "sha256": "b6670cef45f5f8b71913fa06449033676cbb106cbe1e725cbd3e098f72a6b302",
+      "bodyStartByte": 22810,
+      "bodyEndByte": 24295,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/browser/unzip.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/mammoth/browser/unzip.js",
+      "bytes": 349,
+      "sha256": "88bb0cb36ed990dc71b186dbf3a493a4dcd8369984b324ae2208ea21dba9edcb",
+      "bodyStartByte": 24463,
+      "bodyEndByte": 24812,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/browser/docx/files.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/mammoth/browser/docx/files.js",
+      "bytes": 304,
+      "sha256": "3c9880809af2bc8485662667b8d20562c6ea3b504ddb4eb2f7bc635b9aeeaab6",
+      "bodyStartByte": 24985,
+      "bodyEndByte": 25289,
+      "matchesPriorInspectedSource": false,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/zipfile.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/mammoth/lib/zipfile.js",
+      "bytes": 1890,
+      "sha256": "9eb35456e709d32769da9474c840d6eb9bf501e7a9920ea869d1387b22a9afe9",
+      "bodyStartByte": 25456,
+      "bodyEndByte": 27346,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/index.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/mammoth/lib/index.js",
+      "bytes": 3686,
+      "sha256": "ca86526cdfc8b572e0637f61312e78d434a454c60ee39131bfcb719d7fdbe380",
+      "bodyStartByte": 27511,
+      "bodyEndByte": 31197,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/raw-text.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/mammoth/lib/raw-text.js",
+      "bytes": 456,
+      "sha256": "1c02e81738b056456071a03e3205e142fe4c07c474b6cd794168c421e5183b5a",
+      "bodyStartByte": 31364,
+      "bodyEndByte": 31820,
+      "matchesPriorInspectedSource": false,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/docx-reader.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/mammoth/lib/docx/docx-reader.js",
+      "bytes": 8302,
+      "sha256": "f0f96f96e78561665176a6c4b3b55df7ed21dc656bb9383a9c8d99d9bfeba1c8",
+      "bodyStartByte": 31996,
+      "bodyEndByte": 40298,
+      "matchesPriorInspectedSource": false,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/mammoth/lib/docx/office-xml-reader.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/mammoth/lib/docx/office-xml-reader.js",
+      "bytes": 2454,
+      "sha256": "72f1f41e54c9074b22c960357855857dea16231bea40722a920bc928d6c2ebbd",
+      "bodyStartByte": 40481,
+      "bodyEndByte": 42935,
+      "matchesPriorInspectedSource": false,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/jszip/package.json",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/jszip/package.json",
+      "bytes": 1787,
+      "sha256": "4138415020992b9a832333c64a13bd7e17faa462f7e0c0dd505f824d397f7281",
+      "bodyStartByte": 43099,
+      "bodyEndByte": 44886,
+      "matchesPriorInspectedSource": false,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/load.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/jszip/lib/load.js",
+      "bytes": 3196,
+      "sha256": "7e3181c7669cfc584f29f3060cdf210021ec5c723c36af039fb5433de52d25da",
+      "bodyStartByte": 45049,
+      "bodyEndByte": 48245,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/compressedObject.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/jszip/lib/compressedObject.js",
+      "bytes": 2890,
+      "sha256": "b91f823d32f39cda4002bc0954993f20ffea6747d42109253b7d6347b4abb31b",
+      "bodyStartByte": 48420,
+      "bodyEndByte": 51310,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/zipObject.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/jszip/lib/zipObject.js",
+      "bytes": 4528,
+      "sha256": "18871af92fac75d015ba7d4d3105c0746839ab089f78670cb86d76bfa53b1ce6",
+      "bodyStartByte": 51478,
+      "bodyEndByte": 56006,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/stream/StreamHelper.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/jszip/lib/stream/StreamHelper.js",
+      "bytes": 6877,
+      "sha256": "aebc6518b4871d106e799f90139d55620d02e9413ef2a7b0f953a9cea7bda124",
+      "bodyStartByte": 56184,
+      "bodyEndByte": 63061,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": false
+    },
+    {
+      "origin": "worktree/node_modules/jszip/lib/stream/GenericWorker.js",
+      "snapshot": "main/security-review-01/docx-independent-primary-01/sources/node_modules/jszip/lib/stream/GenericWorker.js",
+      "bytes": 8206,
+      "sha256": "ae76cecd1d728ca41dd6ae0665b258f442da64d9b25ff94785dcb80a501b8be1",
+      "bodyStartByte": 63240,
+      "bodyEndByte": 71446,
+      "matchesPriorInspectedSource": true,
+      "matchesApplicationInventory": false
+    }
+  ],
+  "primaryBody": {
+    "path": "main/security-review-01/docx-independent-primary-01/primary-bodies.md",
+    "bytes": 71467,
+    "sha256": "f7e2574db5d7a03331aa8bcedfe01877bc16f2c6246b31b1e6b9b30b21690b46"
+  },
+  "sourceCoverage": "16 complete source/package bodies; library sources are installed files, not proof of emitted browser bundle linkage. Additional relevant static source may be read if necessary. No Main/Astra DOCX opinion or addendum report included.",
+  "originalRequestScope": {
+    "path": "main/security-review-01/scope-and-plan-01.md",
+    "bytes": 4480,
+    "sha256": "c67d905e898620a926b177d2769dfd24fa7a581609457ded30c554d7397189f9"
+  },
+  "currentControlsGate": {
+    "path": "collaboration/controls-gate.json",
+    "bytes": 7836,
+    "sha256": "b63cd6acdc1c7af1b4e545917f2c9246130228c41f04613a20747a6c339c5538"
+  },
+  "sourceGate": {
+    "path": "collaboration/source-gate.json",
+    "bytes": 14494,
+    "sha256": "58ef41d2d194b5986f9456a826dbf52ba35e13624222b2d77bcf98619aec077f"
+  },
+  "priorFirstsNotInputs": true,
+  "protection": "No real resumes, user storage, actual jobs, private history/streams/logs/registries or secrets included."
+}

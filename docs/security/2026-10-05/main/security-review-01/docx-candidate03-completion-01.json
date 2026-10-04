@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-10-04T22:21:11.622408+00:00",
+  "label": "CF82-docx-security-peer-candidate03-01",
+  "actualExecHandle": 9229,
+  "outerTerminalExitCode": 0,
+  "process": {
+    "path": "collaboration/CF82-docx-security-peer-candidate03-01.process.json",
+    "bytes": 2404,
+    "sha256": "5512838f17640d04b17bcf75f0fa3a949f8cbb2cdb48baf67ff9bba9d0e061ba"
+  },
+  "rawPrivateResult": {
+    "path": "collaboration/CF82-docx-security-peer-candidate03-01.result.json",
+    "bytes": 15311,
+    "sha256": "1f2148bc426629a872e3d3128b75aa736eae114fb0c13f714ad2178fff28d8f4"
+  },
+  "judgment": {
+    "path": "independent/security-review-01/fable-docx-candidate03-review-01.json",
+    "bytes": 12315,
+    "sha256": "9f1c13998ea38f86727475bade66f90309ddc386738f1b374ef72a0753cabd1e"
+  },
+  "actualInterval": {
+    "startedAt": "2026-10-04T22:14:26.621567+00:00",
+    "endedAt": "2026-10-04T22:20:40.179753+00:00"
+  },
+  "numTurns": 20,
+  "requestedModel": "claude-fable-5-1",
+  "requestedEffort": "max",
+  "observedModelUsageKeys": [
+    "claude-fable-5-1"
+  ],
+  "isError": false,
+  "permissionDenials": [],
+  "ownedClosure": {
+    "signalled": [],
+    "forced": [],
+    "remaining": [],
+    "directChildReap": {
+      "enabled": true,
+      "returnCode": 0
+    },
+    "registeredSpawns": 0,
+    "observedOwnedProcesses": 12,
+    "registryErrors": [],
+    "incompleteRegistryRecord": false,
+    "registryRequired": false,
+    "registryPresent": false,
+    "observerAcknowledgements": 0,
+    "closureKnown": true
+  },
+  "reviewedByMain": "Full returned opinion including corrections, optional notes and retained obligations read before preservation. Candidate03 unchanged; explicit exact-hash approval, no required issues. No runtime/security completion.",
+  "observationLimit": "JSON result modelUsage observed; backend effort is not independently exposed."
+}

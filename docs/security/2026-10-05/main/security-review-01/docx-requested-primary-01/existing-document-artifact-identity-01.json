@@ -1,0 +1,36 @@
+{
+  "observedAt": "2026-10-04T22:01:53.035922+00:00",
+  "method": "Read/hash existing public build artifacts only; no rebuild, imports, browser or app execution.",
+  "sourceDigest": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c",
+  "priorReconciliation": {
+    "path": "main/security-review-01/fresh-artifact-reconciliation-01.json",
+    "bytes": 4157,
+    "sha256": "3ebb6e84651fa7a3add622c28439eb3267caec369d435f6ffa1a5fb2ad2dd5a9"
+  },
+  "dryRunInventory": {
+    "path": "verification/wrangler-dry-run-eab683036217/dry-run-inventory.json",
+    "bytes": 67241,
+    "sha256": "52845eb5ced106fb07ba0d82290858abe2ee5db61cebf6442e1843e412207c0b"
+  },
+  "documentsChunks": [
+    {
+      "path": "worktree/dist/assets/documents-D2fT8QPk.js",
+      "bytes": 499279,
+      "sha256": "2c28c909ea2c2ba59516478773691a05451c6678b44995c8d0cb97bb383269ec"
+    },
+    {
+      "path": "worktree/dist-cloudflare/assets/documents-D2fT8QPk.js",
+      "bytes": 499279,
+      "sha256": "2c28c909ea2c2ba59516478773691a05451c6678b44995c8d0cb97bb383269ec"
+    }
+  ],
+  "defaultAndCloudflareDocumentsBytesIdentical": true,
+  "deploymentReceiptExists": false,
+  "limits": "Local default and Cloudflare candidate identity only; no deployment performed by this review, no remote request or served/deployed-byte proof, no JSZip source/bundle semantic equivalence or embedded pako version inferred.",
+  "originalFreshDryRunAssetDescriptor": {
+    "path": "assets/documents-D2fT8QPk.js",
+    "bytes": 499279,
+    "sha256": "2c28c909ea2c2ba59516478773691a05451c6678b44995c8d0cb97bb383269ec"
+  },
+  "bothCurrentChunksMatchOriginalFreshAssetDescriptor": true
+}

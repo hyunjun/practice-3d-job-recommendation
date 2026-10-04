@@ -1,0 +1,45 @@
+{
+  "reviewId": "ASTRA-ROOT-STAGE81-SECURITY-PEER-01",
+  "reviewer": {
+    "role": "independent Astra reviewer",
+    "model": "global.openai.gpt-6-astra",
+    "reasoning": "max"
+  },
+  "scope": "Peer comparison of already preserved root Stage81 security delta opinions only; no new source audit.",
+  "inputs": [
+    {
+      "path": "main/security-review-01/original-worktree-delta-01/main-static-delta-review-01.json",
+      "bytes": 4720,
+      "sha256": "755fdbb1aa9a948e1b851982079d5e934217657a3773b1ca7c287fcf49733dc5"
+    },
+    {
+      "path": "independent/security-review-01/astra-root-delta-first-01.json",
+      "bytes": 9847,
+      "sha256": "aeded3e738f60f999f756b37338c415987acd19a158d8eebee6d13fca39cec04"
+    }
+  ],
+  "sequence": "Astra first was saved and hashed before reading Main. This separate comparison preserves that first unchanged.",
+  "bindings": {
+    "rootBaseCommit": "d96367ba9e06ad32737250a482c662e11b7881be",
+    "sameSixSourceDescriptors": true,
+    "sourceIdentities": "The six exact byte/hash bindings in both input records are equal. Those records are incorporated by reference; no new live-source or whole22-file rehash is claimed here.",
+    "separateStage82Source": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c/526 remains outside this root comparison."
+  },
+  "decision": "AGREE_WITH_BOUNDED_SOURCE_ONLY_SHARED_WORDING",
+  "agreements": [
+    "The reviewed five tracked diffs and complete new helper establish no confirmed new exploit. Their added data flows concern local DOM ownership, focus, scroll and layout; no new transmission, persistence, raw HTML/code execution or external navigation path was identified.",
+    "Focus tickets and action-authority terminology describe local interaction ownership. They are not backend authentication or a substitute for existing storage/import guards. The changed callers retain those guards and CSS.escape for job-ID selector interpolation.",
+    "Main correctly treats its lexical helper searches as supporting evidence rather than proof of every possible data flow. Our source-level observations remain the substantive basis for the bounded conclusion.",
+    "Main reports zero matches for nine specified credential formats across22 current baseline files/1095048 UTF8 bytes. Accept that narrowly attributed scan result, without repeating the scan or independently attesting the other16 files. It does not establish absence of arbitrary tokens, personal data, dynamic secrets, other files or Git-history leaks.",
+    "Root Stage81 functional, lifecycle, E2E and all3 acceptance remain separate. Isolated Stage82 source or execution results cannot validate this root delta."
+  ],
+  "retainedCaveat": "revealRestoredOpener removes its temporary listeners in the scheduled animation-frame callback. Paused-frame lifetime and temporary DOM retention remain unmeasured. Neither report establishes a security leak, exploit, resource bound or runtime failure from that observation.",
+  "missedEvidence": "No material omitted source evidence or concrete new security issue emerged from the peer record. Its additional credential-pattern scan has the scope limits above; no further audit is needed to reconcile these two static opinions.",
+  "disagreements": [],
+  "requiredCorrections": [],
+  "sharedWording": "Independent static reviews of the same six root Stage81 source deltas found no confirmed new exploit in that scope. The changes preserve the reviewed import/storage guards and add local focus/layout state, without identifying a new executable-content or disclosure path. This is not overall security clearance or evidence that root behavior, resource use or lifecycle handling passed runtime validation.",
+  "limits": [
+    "No new source/test execution, source edit, credential scan, capacity review or peer-remedy review occurred. No protected streams, raw logs/registries, credentials or foreign PID30593/port8787 were accessed.",
+    "This is Main/Astra opinion reconciliation only. No whole security, design, implementation, validation, stage or deployment gate vote is issued; no all3 agreement is inferred."
+  ]
+}

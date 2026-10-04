@@ -1,0 +1,116 @@
+{
+  "recordedAt": "2026-10-04T18:49:07.677568+00:00",
+  "reviewer": "main",
+  "status": "Independent static source follow-up; not a design choice, runtime test, measured exploit or all3 approval",
+  "sourceDigest": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c",
+  "sourceCount": 526,
+  "files": [
+    {
+      "path": "src/lib/resume.ts",
+      "bytes": 3978,
+      "sha256": "bd2d062628ccfc47ea630a687a377c429de46a7e1cab3fa47b0acb4fb940f043",
+      "reviewScope": "full source"
+    },
+    {
+      "path": "src/components/ProfileDialog.tsx",
+      "bytes": 18374,
+      "sha256": "9327fd767e873abc46ef2622f8d000853a179b7f6439772c4ad6f734ffb6f279",
+      "reviewScope": "selected import/cancellation/limit context"
+    },
+    {
+      "path": "node_modules/mammoth/package.json",
+      "bytes": 1485,
+      "sha256": "b6670cef45f5f8b71913fa06449033676cbb106cbe1e725cbd3e098f72a6b302",
+      "reviewScope": "full source"
+    },
+    {
+      "path": "node_modules/mammoth/browser/unzip.js",
+      "bytes": 349,
+      "sha256": "88bb0cb36ed990dc71b186dbf3a493a4dcd8369984b324ae2208ea21dba9edcb",
+      "reviewScope": "full source"
+    },
+    {
+      "path": "node_modules/mammoth/lib/zipfile.js",
+      "bytes": 1890,
+      "sha256": "9eb35456e709d32769da9474c840d6eb9bf501e7a9920ea869d1387b22a9afe9",
+      "reviewScope": "full source"
+    },
+    {
+      "path": "node_modules/mammoth/lib/index.js",
+      "bytes": 3686,
+      "sha256": "ca86526cdfc8b572e0637f61312e78d434a454c60ee39131bfcb719d7fdbe380",
+      "reviewScope": "full source"
+    },
+    {
+      "path": "node_modules/jszip/lib/load.js",
+      "bytes": 3196,
+      "sha256": "7e3181c7669cfc584f29f3060cdf210021ec5c723c36af039fb5433de52d25da",
+      "reviewScope": "full source"
+    },
+    {
+      "path": "node_modules/jszip/lib/compressedObject.js",
+      "bytes": 2890,
+      "sha256": "b91f823d32f39cda4002bc0954993f20ffea6747d42109253b7d6347b4abb31b",
+      "reviewScope": "full source"
+    },
+    {
+      "path": "node_modules/jszip/lib/zipObject.js",
+      "bytes": 4528,
+      "sha256": "18871af92fac75d015ba7d4d3105c0746839ab089f78670cb86d76bfa53b1ce6",
+      "reviewScope": "full source"
+    },
+    {
+      "path": "node_modules/jszip/lib/stream/StreamHelper.js",
+      "bytes": 6877,
+      "sha256": "aebc6518b4871d106e799f90139d55620d02e9413ef2a7b0f953a9cea7bda124",
+      "reviewScope": "full source"
+    },
+    {
+      "path": "node_modules/jszip/lib/stream/GenericWorker.js",
+      "bytes": 8206,
+      "sha256": "ae76cecd1d728ca41dd6ae0665b258f442da64d9b25ff94785dcb80a501b8be1",
+      "reviewScope": "first105lines"
+    }
+  ],
+  "installedVersions": {
+    "mammoth": "1.12.3",
+    "jszip": "3.10.2"
+  },
+  "moduleResolutionLimit": "Mammoth declares its browser/unzip.js mapping; no nested Mammoth/jszip installation exists, and root JSZip source was reviewed. No bundler/import execution was performed.",
+  "observations": [
+    {
+      "id": "DOCX82-1",
+      "fact": "readResume checks file.size<=5MiB before reading. For DOCX it calls mammoth.extractRawText({arrayBuffer}) inside abortable; no AbortSignal, extraction byte limit or deadline is passed to Mammoth.",
+      "source": "src/lib/resume.ts:23,71-79"
+    },
+    {
+      "id": "DOCX82-2",
+      "fact": "abortable rejects its own promise and continues observing work.then. It does not invoke a cancellation/termination method on the underlying DOCX work. ProfileDialog also checks controller identity/aborted state before applying results.",
+      "source": "src/lib/resume.ts:1-19;src/components/ProfileDialog.tsx:43-84",
+      "limit": "Static absence of a cancellation path is not a measurement of post-cancel CPU duration or browser freeze."
+    },
+    {
+      "id": "DOCX82-3",
+      "fact": "ProfileDialog applies content.slice(0,50000) after await readResume. This result/UI length bound does not cap prior ZIP expansion, XML parsing or raw text creation.",
+      "source": "src/components/ProfileDialog.tsx:75-77"
+    },
+    {
+      "id": "DOCX82-4",
+      "fact": "Browser Mammoth opens JSZip.loadAsync(arrayBuffer) without limit options and reads entries through async(uint8array). JSZip async accumulates chunks and concatenates full output. Its declared uncompressed-size equality check is at end, not an application budget.",
+      "source": "mammoth/browser/unzip.js;mammoth/lib/zipfile.js;jszip/lib/zipObject.js;jszip/lib/stream/StreamHelper.js;jszip/lib/compressedObject.js"
+    },
+    {
+      "id": "DOCX82-5",
+      "fact": "JSZip GenericWorker is an in-library event/stream object; this name does not establish a browser Worker or OS-thread resource boundary. The inspected application DOCX path creates no browser Worker.",
+      "source": "jszip/lib/stream/GenericWorker.js:1-105;src/lib/resume.ts:71-79"
+    }
+  ],
+  "requiredFollowUpBeforeProductChange": [
+    "Use bounded fictional valid DOCX fixtures to measure expansion/cancellation and UI responsiveness, not real resumes or an unbounded stress payload.",
+    "Independently design limits for declared and actually expanded bytes, entry count/XML work and wall time; choose budgets from valid-file compatibility and measurements rather than the unrelated Cloudflare128MiB limit.",
+    "A disposable browser Worker may provide cancellable execution; it alone does not provide a hard heap ceiling. Compression metadata preflight alone does not prove actual expansion is bounded.",
+    "Preserve normal imports, latest-import-wins/cancel behavior, no stale profile/filename writes, private-data network guarantees and recovery through a subsequent normal import.",
+    "Whole-source/testing stages and all3 exact-plan consent remain required before patching or claiming validation. No DOCX code/test change in this follow-up."
+  ],
+  "riskLimit": "Exposure inspected here is user-selected local DOCX processing. No remote code execution, server upload, anonymous service attack, resource-exhaustion reproduction, browser crash or final severity is established. JSZip documentation explicitly distinguishes full-result memory use from guaranteed browser freezing."
+}

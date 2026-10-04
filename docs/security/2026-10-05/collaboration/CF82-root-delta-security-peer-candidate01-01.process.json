@@ -1,0 +1,65 @@
+{
+  "stage": 82,
+  "startedAt": "2026-10-04T22:21:23.082379+00:00",
+  "mode": "review",
+  "label": "CF82-root-delta-security-peer-candidate01-01",
+  "sessionId": "f5b93a1a-a7be-474c-a32e-7b4309d115b0",
+  "actor": "f5b93a1a-a7be-474c-a32e-7b4309d115b0|CF82-root-delta-security-peer-candidate01-01",
+  "modelRequested": "claude-fable-5-1",
+  "effortRequested": "max",
+  "timeoutSeconds": 1800,
+  "tools": [
+    "Read",
+    "Glob",
+    "Grep",
+    "Bash"
+  ],
+  "allowedTools": [
+    "Read",
+    "Glob",
+    "Grep",
+    "Bash(python3 .local/research/82/collaboration/stage-identity.py)",
+    "Bash(python3 .local/research/82/collaboration/stage-identity.py --sha256 *)"
+  ],
+  "sessionSettingsRequested": {
+    "switchModelsOnFlag": false
+  },
+  "sessionSettingsArgumentSha256": "c6a50a59d449eb26ffcee8e6de82825d7041c568ce14af7bcf5216262bbc2cdd",
+  "sessionSettingsObservationLimit": "Session-only CLI override requested; effective managed-policy resolution is not independently exposed. Classification and refusal remain in force. Process completion is not substantive review approval.",
+  "controlHashes": {
+    "stage-identity.py": "d689f70bdb081ad536f63769eeb213ef7bb8c360831a27266b1f35f49707a5de",
+    "run-review.py": "047deaa894a6cf3d3f5030bcb20833056fa9d8756484fc5d85bf69be36da5867",
+    "process-ownership.py": "af40f04ad990b422b3bd028e196f90475578382527b07d51c08a03caf5dec969",
+    "register-processes.cjs": "c7f08bdb647030798117bf0ff5a1edfd6ee5a0243f1e1e9998c1340daed35b1e",
+    "run-validation.py": "c395bda21f6f86eeba6ac9a10744ea001586f65fc7682c8f3bbdc9d6bf96095c"
+  },
+  "promptSha256": "143c60e1917b86a2f3db8f3d9ab5cffac2eb65ed426b4fd2d44ab501119362f1",
+  "processStatus": "complete",
+  "exitCode": 0,
+  "pid": 72330,
+  "endedAt": "2026-10-04T22:25:24.790487+00:00",
+  "interrupted": false,
+  "runnerError": null,
+  "processCleanup": {
+    "signalled": [],
+    "forced": [],
+    "remaining": [],
+    "directChildReap": {
+      "enabled": true,
+      "returnCode": 0
+    },
+    "registeredSpawns": 0,
+    "observedOwnedProcesses": 2,
+    "registryErrors": [],
+    "incompleteRegistryRecord": false,
+    "registryRequired": false,
+    "registryPresent": false,
+    "observerAcknowledgements": 0,
+    "closureKnown": true
+  },
+  "modelUsageKeys": [
+    "claude-fable-5-1"
+  ],
+  "isError": false,
+  "modelObservationLimit": "JSON result modelUsage observed; backend effort is not independently exposed."
+}

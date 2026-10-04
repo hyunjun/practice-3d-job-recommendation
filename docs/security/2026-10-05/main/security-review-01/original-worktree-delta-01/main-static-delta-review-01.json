@@ -1,0 +1,77 @@
+{
+  "recordedAt": "2026-10-04T19:03:38.994210+00:00",
+  "reviewer": "main",
+  "scope": "Additional static delta review of original/root Stage81 work, separate from the526-file frozen Stage82 deployment candidate. No app/test execution, independent all3 approval, source modification or merge.",
+  "rootHead": "d96367ba9e06ad32737250a482c662e11b7881be",
+  "reviewedSourceDelta": {
+    "trackedFiles": [
+      "src/components/DialogFeedback.tsx",
+      "src/components/ProfileDialog.tsx",
+      "src/components/SavedDataDialog.tsx",
+      "src/components/ui.tsx",
+      "src/styles.css"
+    ],
+    "newFile": "src/lib/dialog-visibility.ts",
+    "coverage": "Read complete diffs of five tracked source files and the full765-line new helper. Initial combined display was truncated; omitted tracked diffs and the complete helper were reread in bounded parts.",
+    "diffBytes": 40774,
+    "diffSha256": "2068f20b91aefbedb179c81578357d214c8b004b6d38e2c3c3d98c7ac287f5f9",
+    "fileBindings": [
+      {
+        "path": "src/components/DialogFeedback.tsx",
+        "bytes": 7627,
+        "sha256": "28f956bb777dfd261650dac684e9908b8682747e41efab893ec5ee787d37b501"
+      },
+      {
+        "path": "src/components/ProfileDialog.tsx",
+        "bytes": 18388,
+        "sha256": "73f03cf09caf9766aa2d9e7b0fa53199fe5c889c31ee5393a28c5ce85b847802"
+      },
+      {
+        "path": "src/components/SavedDataDialog.tsx",
+        "bytes": 27655,
+        "sha256": "fcc8eac53a3164fe61e8848ea0689bc3f094e92cc67e9b94a929a626c40c6c62"
+      },
+      {
+        "path": "src/components/ui.tsx",
+        "bytes": 9983,
+        "sha256": "c487f7f9aead553f7546983ac973f22434e008fb262d61bd4487a550d312f274"
+      },
+      {
+        "path": "src/lib/dialog-visibility.ts",
+        "bytes": 36445,
+        "sha256": "34f3613a10b31f18c6b56fa3e6979672ab4dc31469b07189d891051c55a02f0f"
+      },
+      {
+        "path": "src/styles.css",
+        "bytes": 124127,
+        "sha256": "848cbeaa0f44fc234ba7d2db9e46afc0b9e7040b7fb7d83a40da1bc01b42ca6a"
+      }
+    ]
+  },
+  "observations": [
+    "Changes register/retire DOM dialog focus ownership, suppress stale focus/reveal actions, adjust scrolling/sizing and change hidden-file-input tab eligibility. Their action-authority terminology is UI focus ownership, not publication authorization.",
+    "SavedDataDialog retains MAX_SAVED_FILE_BYTES and parseSavedImport, stale/canWrite/selection/limit guards and existing storage.importRecords/discardRecovery/download helpers. New feedback envelopes carry existing mapped messages and focus tickets; reviewed changes add no HTML-as-code rendering or new upload destination.",
+    "DialogFeedback retains CSS.escape when a job ID participates in a DOM selector. The new helper uses fixed selectors, DOM references, numeric layout values and lifecycle checks; its footer textContent read detects layout-basis changes.",
+    "No new network request, credential persistence, raw HTML/code execution or external navigation path was identified in these reviewed deltas. Full new-helper token searches for the specifically listed network/storage/HTML/code/navigation/console constructs returned no occurrences; this lexical result alone is not a proof of all possible data flow.",
+    "Existing root pending UI changes remain unmerged/uncommitted and preserve their separate required functional/E2E/all3 review. No Stage82 test result is carried over as validation of them."
+  ],
+  "boundedSecretPatternScan": {
+    "files": 22,
+    "utf8Bytes": 1095048,
+    "patterns": {
+      "aws_access_key": "\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b",
+      "github_classic": "\\bgh[pousr]_[A-Za-z0-9]{30,}\\b",
+      "github_fine_grained": "\\bgithub_pat_[A-Za-z0-9_]{40,}\\b",
+      "slack_token": "\\bxox[baprs]-[A-Za-z0-9-]{20,}\\b",
+      "google_api_key": "\\bAIza[0-9A-Za-z_-]{35}\\b",
+      "anthropic_key": "\\bsk-ant-[A-Za-z0-9_-]{24,}\\b",
+      "openai_project_key": "\\bsk-proj-[A-Za-z0-9_-]{24,}\\b",
+      "stripe_live_secret": "\\bsk_live_[A-Za-z0-9]{20,}\\b",
+      "private_key_header": "-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----"
+    },
+    "findingsWithoutSecretValues": [],
+    "coverageLimit": "Only these22currentdirtyfiles; known literal credential formats. Not arbitrary bearer tokens, every privacy issue, other working files, Git history, dynamic strings or comprehensive leak absence. File contents were not sent to an external service."
+  },
+  "conclusion": "No additional confirmed security exploit found in this static delta scope. Not overall security clearance, root Stage81 functionality approval or deployment approval.",
+  "protection": "All22files still match original preserved baseline; source/test/control edits none."
+}

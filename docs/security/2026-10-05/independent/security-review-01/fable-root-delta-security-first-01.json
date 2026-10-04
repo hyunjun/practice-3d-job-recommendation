@@ -1,0 +1,155 @@
+{
+  "reviewer": "claude-fable-5-1 (Fable), independent-first STATIC SECURITY DELTA review, root Stage81 pending source (six selected files)",
+  "independenceDisclosure": "No Main or Astra root-delta or DOCX addendum opinion, summary, report08/09 or current-security-status was seen in this session. Prior judgments in this session are my own: the v10 control reviews and my DOCX first on the deployment worktree. The root HEAD ProfileDialog snapshot (9327fd76) is byte-identical to the deployment file I read for that task, so it is familiar, but no peer judgment on this delta has been seen.",
+  "scopeAndHolds": {
+    "subject": "Only the five-file tracked diff HEAD -> protected current root plus the full new helper src/lib/dialog-visibility.ts. Not Stage81 functionality, not full-project security acceptance, not the frozen deployment candidate 68d4.../526.",
+    "mode": "Static read only. No app/Node/import/compiler/bundler/test/build/browser/server/network/model execution; no file writes; no private history, registries, logs, costs, credentials, real jobs/resumes/user storage.",
+    "executionUsed": "Approved stage-identity helper only: 14 named --sha256 calls on stage82 snapshot/manifest paths. Root files are outside the helper's scope and were not hashed.",
+    "unchanged": "Deployment source 68d4.../526, plan and source-gate17, D/capacity hold, all runtime/source/test/deployment holds. No gate advance, no stage approval, no peer comparison here."
+  },
+  "bindings": {
+    "rootHead": "d96367ba9e06ad32737250a482c662e11b7881be per manifest; corroborated by this session's opening git status (latest commit d96367b, same modified/untracked set). Not independently re-derived (no git execution).",
+    "rootProtectedBaseline": "main/original-worktree-dirty-baseline-01.json 13de0f3d... 4195 bytes, rehashed and read; its six source hashes equal the manifest current snapshots.",
+    "primaryBodies": "801d760b... 77401, rehashed",
+    "trackedDiff": "2068f20b... 40774, rehashed",
+    "currentSnapshotsRehashed": {
+      "DialogFeedback.tsx": "28f956bb... 7627",
+      "ProfileDialog.tsx": "73f03cf0... 18388",
+      "SavedDataDialog.tsx": "fcc8eac5... 27655",
+      "ui.tsx": "c487f7f9... 9983",
+      "styles.css": "848cbeaa... 124127",
+      "dialog-visibility.ts": "34f3613a... 36445 (untracked, no HEAD)"
+    },
+    "headSnapshotsRehashed": {
+      "DialogFeedback.tsx": "39922917... 5821",
+      "ProfileDialog.tsx": "9327fd76... 18374",
+      "SavedDataDialog.tsx": "8604f3ff... 22919",
+      "ui.tsx": "5d47925d... 10222",
+      "styles.css": "4b0caa72... 123395"
+    },
+    "rootContentSpotCheck": "Delta markers present in the live root files: dialog-visibility.ts exports createDialogFocusScope (line 57), installDialogVisibility (247), revealRestoredOpener (748); ui.tsx installs at line 58 and reveals at 94; SavedDataDialog.tsx uses useDialogFocusScope at 91; ProfileDialog.tsx carries tabIndex={-1} on the file input; styles.css carries the data-dialog-footer-flow rule. Byte-equality of root files to snapshots rests on the baseline record, not on my own hash."
+  },
+  "filesRead": [
+    "Embedded: complete tracked diff and complete new helper",
+    "Snapshots (stage paths, full): root-current ui.tsx, DialogFeedback.tsx, SavedDataDialog.tsx; main/original-worktree-dirty-baseline-01.json",
+    "Root app (unchanged context): src/lib/saved-files.ts (full); shared/saved-backup.ts lines 5-8 and 76-79; src/main.tsx StrictMode grep; src grep for subscribe/useDialogFocusScope/install/reveal/provider usage; src grep for error boundaries (none); the six root delta files grepped for innerHTML, dangerouslySetInnerHTML, eval, Function, location, window.open, postMessage, fetch, XMLHttpRequest, localStorage, sessionStorage, indexedDB, sendBeacon, cookie, dynamic import, setAttribute, insertAdjacentHTML, srcdoc, href",
+    "Root tests: Glob of tests/e2e/dialog-focus-visibility*.spec.ts and helpers (7 specs, 6 helpers, all untracked); test titles via grep; grep for request/route/storage monitoring in those files; tests/unit grep for dialog-visibility (none)",
+    "docs/design/dialog-focus-visibility.md: keyword grep only (intent lines 90, 100, 117, 120, 148); not relied on as evidence. docs/validation/dialog-focus-visibility-* not read."
+  ],
+  "deltaSummary": {
+    "dialog-visibility.ts (new)": "createDialogFocusScope: document-level capture listeners publishing user-intent events to subscribers; epoch/stack/owner tickets gating deferred focus and scroll. installDialogVisibility: per-open-dialog controller using ResizeObserver, MutationObserver, scroll/resize/fonts listeners to keep the focused control visible by scrolling the dialog and publishing two numeric CSS custom properties plus a data attribute. revealRestoredOpener: deferred scrollIntoView of the restored opener, cancelled by any new user intent.",
+    "DialogFeedback.tsx": "Provider creates the scope, listens in a layout effect, keeps a synchronous registry for currentOwner, and exposes useDialogFocusScope. SavedFeedback's deferred focus recovery now requires a ticket captured at action time and runs inside focus.run with a permitted() re-check.",
+    "SavedDataDialog.tsx": "error/message state replaced by a revisioned FileFeedback envelope carrying the originating ticket; reveal of the feedback host via the scope; cancel-removal focus restoration to the original trigger or the dialog close button; movePage reveals the import section through the scope; recovery export moved into exportRecovery. File import, export, apply, discard and refresh calls and their arguments are unchanged.",
+    "ui.tsx": "Dialog installs the visibility controller after showModal and stops it before close; opener reveal delegated to revealRestoredOpener. Tab trap, backdrop click close, scroll lock unchanged.",
+    "ProfileDialog.tsx": "tabIndex={-1} on the hidden resume file input only.",
+    "styles.css": "Layout only: viewport inset variable, scroll-padding with footer clearance, wrapping footer, reader max-height via min()/var(), footer static when data-dialog-footer-flow=\"true\", toggle input hit area over the track with pointer-events none on the track, mobile button padding."
+  },
+  "changedDataflows": [
+    {
+      "flow": "User input events -> scope listeners -> subscribers",
+      "where": "dialog-visibility.ts createDialogFocusScope.listen (focusin, focusout, input, selectionchange, keydown, pointerdown/up/cancel, wheel, touchstart/move/end/cancel, compositionstart/end), all registered with capture:true and passive:true",
+      "whatIsRead": "Event target identity, editor selectionStart/End/Direction (numbers), key name, isComposing, pointerId, pointerType, clientX, touch identifiers. Input values are never read; the only text read anywhere in the helper is footer.textContent for a geometry basis comparison.",
+      "whatIsRetained": "Last focused element reference, selection offsets, gesture metadata (scrollTop, ids), ticket objects referencing owner dialog and origin elements. Nothing is persisted, serialized, logged or transmitted.",
+      "sinks": "None. The sole subscriber is installDialogVisibility (dialog-visibility.ts:602). The subscribe method is reachable by any component through context (a future surface, not a current flow).",
+      "mitigation": "passive listeners cannot preventDefault, so the helper cannot block or alter user input; cleanup removes listeners with the matching capture flag."
+    },
+    {
+      "flow": "Computed geometry -> dialog inline style and attribute",
+      "where": "installDialogVisibility styleValue and size (setAttribute at dialog-visibility.ts:361, restore at 742)",
+      "values": "Two custom properties set via CSSOM dialog.style.setProperty with Math.max(0, value).toFixed(3) + 'px'; one data attribute with the constant 'true' or removed. No string from user, file or catalog reaches these writes.",
+      "mitigation": "CSSOM property writes are not governed by CSP style-src; cleanup restores originals only when the current value still equals the published one; MutationObserver filters out the dialog's own style records; ResizeObserver callbacks only schedule."
+    },
+    {
+      "flow": "Programmatic focus and scroll",
+      "where": "DialogFeedback.tsx focusTarget (83-95) inside focus.run (117-135); SavedDataDialog.tsx restoration effect (106-137); dialog-visibility.ts expose/jointMovement (dialog.scrollTo) and revealRestoredOpener (scrollIntoView)",
+      "targets": "Constant selectors only ('.dialog-close', READERS, ':scope > .dialog-footer', ':scope > .dialog-header .dialog-close', '.toggle-row > input', 'input.sr-only') plus the pre-existing CSS.escape(jobId) selectors (DialogFeedback.tsx:120-122, unchanged). Restoration destinations are limited to buttons inside the same dialog (SavedDataDialog.tsx:119-128).",
+      "mitigation": "Every action requires a valid ticket (same scope, epoch, stack, owner lifetime, owner connected and open); any new user intent increments the epoch; focus.run's owned window only shields the recovery's own focus event. Compared with HEAD, this removes unconditional late focus moves."
+    },
+    {
+      "flow": "Backup file import",
+      "where": "SavedDataDialog.tsx readFile 164-178 and file input 264",
+      "change": "Only the feedback envelope and a ticket capture were added. The size gate (MAX_SAVED_FILE_BYTES = 50 MiB, shared/saved-backup.ts:5), file.text(), request-ticket staleness check, parseSavedImport (byte re-check and JSON.parse with BOM strip, saved-backup.ts:76-79) and makeReview are unchanged.",
+      "sinks": "storage.importRecords with unchanged arguments, still gated by canWrite (142), stale, chosen and overLimit (200)."
+    },
+    {
+      "flow": "Backup and recovery export",
+      "where": "SavedDataDialog.tsx exportBackup 179-185, exportRecovery 241-247 -> src/lib/saved-files.ts",
+      "change": "Calls re-routed through wrappers; arguments identical to HEAD. Sink is Blob + URL.createObjectURL + anchor download + click, revoked after one second; filename is app-generated from the current date.",
+      "mitigation": "No new data enters the file contents; the recovery payload is the storage-provided source object as before."
+    },
+    {
+      "flow": "Recovery discard and cancel",
+      "where": "SavedDataDialog.tsx discard 212-227, cancelRemoval 228-235, trigger onClick 312-316",
+      "change": "New refs retain the triggering button, source and a ticket for focus restoration; storage.discardRecovery and refresh calls unchanged; canWrite gating unchanged. Refs are cleared when removing ends and on unmount (138-141).",
+      "sinks": "Unchanged storage mutation."
+    },
+    {
+      "flow": "Feedback text",
+      "where": "SavedDataDialog.tsx OPERATION_ERRORS/FILE_ERRORS (43-60) and publish calls",
+      "values": "Constant Korean strings with numeric interpolations (record counts). Rendered as React text nodes in role=status/alert paragraphs (258-259). No user, file or catalog string is interpolated."
+    },
+    {
+      "flow": "Resume file input",
+      "where": "ProfileDialog.tsx file input (diff hunk at 157-160)",
+      "change": "tabIndex={-1} only; accept, onChange, value reset and importFile are unchanged. The keepTab trap already excludes tabIndex < 0 (ui.tsx:65) and the helper's eligible() excludes input.sr-only, so the input is never a reveal or Tab target; the visible upload button's programmatic click path is unchanged."
+    }
+  ],
+  "securityJudgment": {
+    "supportedIssueIntroduced": "NONE. No new network, storage, HTML, code, navigation or cookie sink exists in the six files (grep: the only setAttribute writes a constant data attribute; no innerHTML, eval, Function, location, window.open, postMessage, fetch, XHR, localStorage, sessionStorage, indexedDB, sendBeacon, cookie, dynamic import, srcdoc or href construction). Every pre-existing sink the delta touches (download, importRecords, discardRecovery, refresh) receives unchanged arguments under unchanged gating. Dataflow, not lexical absence, supports this: the only values the helper writes are clamped numbers and a constant, and the only values it reads from events are identities, offsets, names and coordinates.",
+    "trustBoundaryChange": "NONE. 'Owner', 'ticket', 'authority' and 'permitted' in this delta denote focus and scroll permission inside the page. They have no relation to publisher authentication, Worker routes, or storage write authorization; the storage write gate canWrite and the publication path are untouched.",
+    "privacyBoundaryChange": "NONE. No data leaves the page and nothing new is persisted. The document-level listeners observe keyboard and pointer activity across the whole page, but consume only key names and pointer metadata synchronously and retain no content. This is a widened observation surface, not a disclosure.",
+    "attackPathSearch": "Attacker-influenced content in these dialogs (catalog job text, saved notes, imported file fields) is rendered as text and can only change element sizes; it cannot create elements matching the constant selectors, cannot reach the style writes, and the jobId selector path is unchanged and escaped. No clickjacking, focus-steering to foreign content, selector injection or input suppression path was found. No severity is assigned because no attack path exists.",
+    "additionalSecurityCoverageRequired": "No. Remaining items are robustness and performance, listed separately below."
+  },
+  "existingMitigationsGroundedInSource": [
+    "Ticket validity: scope, epoch, stack, owner lifetime, owner node connected, dialog open (createDialogFocusScope.valid); captured only when an owner exists and the origin's dialog is the owner (capture).",
+    "Owned window: focus.run increments owned so the recovery's own focus event does not bump the epoch, while later events still expire it.",
+    "Eligibility checks before any focus or scroll: isConnected, inside dialog, not :disabled, not inside [inert], not input.sr-only, has client rects, visibility visible (installDialogVisibility.eligible; DialogFeedback.tsx:84-86; SavedDataDialog.tsx:118-123).",
+    "Observer discipline: ResizeObserver and MutationObserver callbacks only schedule a frame; the dialog's own style mutations are filtered; size() avoids clientHeight to prevent self-shrinking; flow mode latches until the geometry basis or footer text changes.",
+    "Lifetime ownership: isOwner() requires live, connected, open, current owner dialog and matching lifetime; cleanup disconnects observers, removes listeners, cancels frames and restores only still-published values (dialog-visibility.ts cleanup ending at 742).",
+    "Dialog effect ordering: install after showModal, stopVisibility before unregister and close (ui.tsx:56-85); keepTab trap unchanged (60-79).",
+    "Deferred opener reveal cancels on wheel, touch, pointer, key or focus and re-checks owner lifetime, no open dialog, connection and visibility (revealRestoredOpener).",
+    "Unchanged import limits: 50 MiB pre-read size gate, byte re-check, JSON.parse failure mapped to a format error, MAX_IMPORT_RECORDS 5000 (shared/saved-backup.ts)."
+  ],
+  "staleOrDetachedDomHandling": [
+    "currentOwner filters hosts by node.isConnected and dialog.open from a synchronous registry (DialogFeedback.tsx:28-33), so a closed or unmounted dialog cannot own focus.",
+    "SavedFeedback discards the pending request when the ticket is invalid, when another element took focus, or when the button is still usable (DialogFeedback.tsx:107-116).",
+    "SavedDataDialog restoration refuses detached, foreign-dialog, disabled, inert, invisible or zero-size destinations and verifies the trigger still maps to the same source that still exists in storage.recovery (119-128); refs cleared on removal end and unmount (108-110, 138-141); recoveryTriggers is a WeakMap keyed by buttons.",
+    "Helper generation counters (invalidate, engage) retire deferred work from superseded contexts; a cleaned-up controller never writes (live flag).",
+    "Minor retention only: the last focused element, ticket origin/owner references in state, and the observed Set live until replaced or cleanup; bounded, not a leak path in the code read."
+  ],
+  "unverifiedOrUnmeasured": [
+    "Performance and lifecycle: a subtree MutationObserver with characterData, ResizeObserver on dialog, direct children and the focused proxy, per-keystroke engage() microtasks with layout reads, and size() running querySelectorAll(READERS) plus getComputedStyle per matched element (up to about three readers per row times PAGE_SIZE 20 in the backup dialog). Cost is unmeasured; no freeze or jank claim is made or excluded.",
+    "Convergence of the flow/sticky footer mode and the scheduling loop is argued from source (latching basis, filtered mutations, one coalesced follow-up frame) but not executed.",
+    "Browser API assumptions: ResizeObserver, document.fonts (unconditional addEventListener), Array.prototype.at, scrollTo with behavior 'instant', visualViewport (optional-chained), CSS.escape (pre-existing). No error boundary exists in src (grep), so an install-time exception inside Dialog's layout effect would propagate to the root. Robustness, not security; not observed.",
+    "StrictMode is on (src/main.tsx:9). listen() throws on a second attach without cleanup; React's effect cleanup-then-rerun satisfies this by design, but it was not executed here.",
+    "Root HEAD identity and byte-equality of root files to the snapshots rest on the manifest, the baseline record and content markers, since the helper cannot hash root paths.",
+    "No functional or E2E correctness is asserted; the untracked specs were not run and no validation document was imported."
+  ],
+  "testCoverageStatic": {
+    "existing": "Seven untracked Playwright specs and six helpers under tests/e2e (hashes in the baseline record). Titles cover keyboard visibility K1-K4, filters/profile/data dialogs (P-profile explicitly covers the file input not being a Tab stop while Enter on the upload button still imports), reader exposure R-read/R-edit, 200% text growth and no-space fallback, late-result A-recovery valid/invalid and B-protection, inner reading, busy close refusal, AP3/AP5/AP6 lifecycle, replacement modal, composition, deferred opener restore, and DIAG81 surveys. Pass status unknown here.",
+    "gaps": [
+      "No unit tests for createDialogFocusScope ticket, epoch, stack and owner semantics (tests/unit has none).",
+      "The new specs contain no request/response monitoring or storage-diff assertion; their storage and route matches are seeding and a catalog stub. Privacy for these flows is covered only indirectly by other suites. Not a security requirement given no new sink, but a regression hook is absent.",
+      "No assertion that the helper never writes non-numeric style values or attributes other than the two properties and one data attribute.",
+      "No measurement of observer-driven layout work at the backup dialog's maximum page size with long notes."
+    ]
+  },
+  "missingPrimaryContext": [
+    "Root CSP and security headers (scope slice 4) not read; the delta's CSSOM writes would be unaffected either way.",
+    "Other dialogs that now receive installDialogVisibility (JobDialog, FiltersDialog, DataDialog, etc.) were not read; their content is text-rendered per earlier src greps, and the helper's behavior toward them is functional, not security-relevant.",
+    "src/hooks/useSavedJobs.ts, useSavedRemoval.ts, src/lib/saved-store.ts and saved-controller.ts are unchanged and were not re-reviewed.",
+    "shared/saved-backup.ts beyond the limit and parse-entry lines was not re-reviewed.",
+    "docs/validation/dialog-focus-visibility-2026-10-03.md and the evidence JSON were deliberately not read.",
+    "Root vite/tsconfig targets were not re-read; the worktree target was es2022."
+  ],
+  "futureProposalsSeparateFromAnyPass": [
+    "A static guard test asserting dialog-visibility.ts imports and references no network, storage, HTML or navigation API, and that its only DOM writes are the two custom properties and one data attribute.",
+    "A privacy monitor (same-origin GET-only, no bodies, no storage marker leakage) wrapped around the backup dialog flows exercised by the new specs.",
+    "Measurement of long-task and layout-read counts in the backup dialog at PAGE_SIZE rows with long notes during typing, pagination and late results.",
+    "DOM-environment unit tests for ticket invalidation on each intent kind and for cleanup restoring styles only when still published.",
+    "A browser-support decision or guard for document.fonts and ResizeObserver, or an error boundary around dialogs, if the project's support matrix requires it.",
+    "These are proposals only; none is an agreed implementation or test pass, and none changes the security judgment above."
+  ],
+  "conclusion": "Static security delta result: no supported security issue introduced; no trust or privacy boundary changed; no new user-controlled value reaches any security-relevant sink; pre-existing import limits, write gating, Tab trap and download sinks are unchanged. Remaining concerns are unmeasured performance/lifecycle and browser-support robustness, recorded separately. No functional, E2E, Stage81 or full-project security acceptance is implied; all holds remain."
+}

@@ -1,0 +1,200 @@
+{
+  "reviewId": "ASTRA-ROOT-STAGE81-CANDIDATE01-WORDING-REVIEW",
+  "reviewer": {
+    "role": "Independent Astra reviewer",
+    "model": "global.openai.gpt-6-astra",
+    "reasoning": "max"
+  },
+  "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+  "candidate": {
+    "path": "main/security-review-01/root-static-findings-candidate-01.md",
+    "bytes": 7077,
+    "sha256": "be6d35dd7edd4dbc8cd0267c87184efc5f34082a88c31d61b04c708ff02668c6"
+  },
+  "requiredIssues": [],
+  "scope": "Exact interim root Stage81 static findings wording/evidence only. No new product audit, implementation, functional, security-completion, source/plan, runtime or deployment approval.",
+  "independenceHistory": "Astra independent first aeded3e7 and earlier Main/Astra comparison09fbb292 remain unchanged. This authorized peer review read the full actual Fable first, all three preserved firsts, old peer, Main response and exact candidate/vote. It is not a new blind first. No pending Fable matching vote was inspected or inferred.",
+  "inputs": [
+    {
+      "path": "main/security-review-01/root-static-findings-candidate-01.main-vote.json",
+      "bytes": 1817,
+      "sha256": "386a0970091fc3b49ef7daa5b6f1851ba260961cf80aa8a27acdafa349de16cc"
+    },
+    {
+      "path": "main/security-review-01/main-root-first-response-01.json",
+      "bytes": 4368,
+      "sha256": "af2e68cac26a7f59db27a7665f7f1189a4f41efd44b7095235aece8174136cf5"
+    },
+    {
+      "path": "independent/security-review-01/fable-root-delta-security-first-01.json",
+      "bytes": 21353,
+      "sha256": "d305f34b36042262b27dd5d69570f6db8d28db26bbd1d66e29128ffa96576796"
+    },
+    {
+      "path": "independent/security-review-01/astra-root-delta-first-01.json",
+      "bytes": 9847,
+      "sha256": "aeded3e738f60f999f756b37338c415987acd19a158d8eebee6d13fca39cec04"
+    },
+    {
+      "path": "main/security-review-01/original-worktree-delta-01/main-static-delta-review-01.json",
+      "bytes": 4720,
+      "sha256": "755fdbb1aa9a948e1b851982079d5e934217657a3773b1ca7c287fcf49733dc5"
+    },
+    {
+      "path": "independent/security-review-01/astra-root-delta-peer-01.json",
+      "bytes": 4131,
+      "sha256": "09fbb2924e7760014c89a8b05e8ae1cc8973178ca2e273720221ab09aae211c5"
+    },
+    {
+      "path": "main/security-review-01/root-delta-independent-primary-01/manifest.json",
+      "bytes": 5343,
+      "sha256": "2d1d2082f38eeeaead2d7f82a04f403a5b364acb3472fbc904ee1995ccaaf3f3"
+    }
+  ],
+  "sourceBindings": {
+    "rootHead": "d96367ba9e06ad32737250a482c662e11b7881be",
+    "headBasis": "Named baseline/manifest and preserved firsts; no Git execution this turn.",
+    "trackedDiff": {
+      "path": "main/security-review-01/root-delta-independent-primary-01/tracked-source-delta.txt",
+      "bytes": 40774,
+      "sha256": "2068f20b91aefbedb179c81578357d214c8b004b6d38e2c3c3d98c7ac287f5f9"
+    },
+    "currentRootFiles": [
+      {
+        "rootPath": "src/components/DialogFeedback.tsx",
+        "bytes": 7627,
+        "sha256": "28f956bb777dfd261650dac684e9908b8682747e41efab893ec5ee787d37b501",
+        "equalsFrozenSnapshot": true
+      },
+      {
+        "rootPath": "src/components/ProfileDialog.tsx",
+        "bytes": 18388,
+        "sha256": "73f03cf09caf9766aa2d9e7b0fa53199fe5c889c31ee5393a28c5ce85b847802",
+        "equalsFrozenSnapshot": true
+      },
+      {
+        "rootPath": "src/components/SavedDataDialog.tsx",
+        "bytes": 27655,
+        "sha256": "fcc8eac53a3164fe61e8848ea0689bc3f094e92cc67e9b94a929a626c40c6c62",
+        "equalsFrozenSnapshot": true
+      },
+      {
+        "rootPath": "src/components/ui.tsx",
+        "bytes": 9983,
+        "sha256": "c487f7f9aead553f7546983ac973f22434e008fb262d61bd4487a550d312f274",
+        "equalsFrozenSnapshot": true
+      },
+      {
+        "rootPath": "src/styles.css",
+        "bytes": 124127,
+        "sha256": "848cbeaa0f44fc234ba7d2db9e46afc0b9e7040b7fb7d83a40da1bc01b42ca6a",
+        "equalsFrozenSnapshot": true
+      },
+      {
+        "rootPath": "src/lib/dialog-visibility.ts",
+        "bytes": 36445,
+        "sha256": "34f3613a10b31f18c6b56fa3e6979672ab4dc31469b07189d891051c55a02f0f",
+        "equalsFrozenSnapshot": true
+      }
+    ],
+    "verification": "Rehashed all six frozen current snapshots and corresponding live root files; each pair is byte-equal and matches manifest. Rehashed all five available HEAD snapshots against their manifest descriptors. Only specific current-source definitions below were semantically reread; earlier complete-diff/helper review is reused.",
+    "separateStage82Source": "68d4637464026dca435b64e3440b519687e8145a8583518df1f302232fdcdc7c /526",
+    "unchangedPlanSha256": "bc70cb36e8b482e864d83c3eb5a47a12bf3982116ee900710a065fe86ca57ed2",
+    "stage82Limit": "These Stage82 identity/hold bindings are retained context, not a newly rehashed whole inventory or root validation."
+  },
+  "targetedSourceRead": [
+    {
+      "path": "src/lib/dialog-visibility.ts",
+      "lines": "1-30,57-169,276-310,310-367,602-655,714-765",
+      "purpose": "Original Event forwarding, passive registration, tickets, numeric style writes/content-sensitive geometry, subscriber ownership, teardown and opener-frame lifetime."
+    },
+    {
+      "path": "src/components/DialogFeedback.tsx",
+      "lines": "24-62,79-141",
+      "purpose": "Owner registry, provider subscription, focus restoration and retained CSS.escape."
+    },
+    {
+      "path": "src/components/SavedDataDialog.tsx",
+      "lines": "142-178,193-247",
+      "purpose": "File-size/read-generation/parse guards, storage permission and selection checks, unchanged mutation/export calls."
+    },
+    {
+      "path": "src/components/ProfileDialog.tsx",
+      "lines": "154-166",
+      "purpose": "Hidden file input tabindex and retained upload/import path."
+    },
+    {
+      "path": "src/components/ui.tsx",
+      "lines": "53-100",
+      "purpose": "Install/teardown ordering, existing Tab trap and opener restoration."
+    }
+  ],
+  "resolvedConcerns": [
+    {
+      "id": "ROOT81-W1",
+      "mainQualification": "Q1",
+      "position": "Agree with correction; resolved in candidate01.",
+      "basis": "dialog-visibility.ts:71-83,155-166; DialogFeedback.tsx:83-94. Passive registration prevents preventDefault cancellation by that listener; it does not prohibit focus/scroll changes or prove noninterference.",
+      "assessment": "Reject Fable first changedDataflows[0].mitigation guarantee that passive makes the helper unable to block or alter input. Candidate explicitly preserves browser interaction outcomes as unverified."
+    },
+    {
+      "id": "ROOT81-W2",
+      "mainQualification": "Q3",
+      "position": "Agree with correction; resolved in candidate01.",
+      "basis": "Intent.event at helper19-23; publish forwards the original Event at71-74; input/key/composition registration100-118; basisText278 and349-351.",
+      "assessment": "Original input/composition/key events may carry typed data, and footer text is retained for geometry comparisons. Reject content-free/retain-no-content/privacy-invariance absolutes. No new logging, transmission or persistence sink was identified in the reviewed path; this is narrower than a universal no-disclosure conclusion."
+    },
+    {
+      "id": "ROOT81-W3",
+      "mainQualification": "Q2,Q6",
+      "position": "Agree with correction; resolved in candidate01.",
+      "basis": "helper300-308,322-367 and735-742; DialogFeedback.tsx120-122.",
+      "assessment": "Content can influence geometry and numeric pixel writes. Fixed property names, computed px strings and the fixed data attribute do not establish zero user influence, but no arbitrary user-string CSS/selector interpolation path was found. CSS.escape remains in the existing job-ID selector. Candidate omits the unverified global CSP/CSSOM assertion and does not claim policy enforcement was tested. Restoration uses previously captured values only when still owned."
+    },
+    {
+      "id": "ROOT81-W4",
+      "mainQualification": "Q4",
+      "position": "Agree with correction; resolved in candidate01.",
+      "basis": "Preserved complete-delta reviews; changed callers rechecked at SavedDataDialog142-178,199-247; focus-ticket validation helper138-166.",
+      "assessment": "Support no confirmed new exploit in this six-source delta, not Fable first no attack path exists or categorical no additional security coverage required. Existing import/storage guards remain at inspected callers; focus ownership is not authentication or storage authorization. Other dialogs and unreviewed storage internals remain limits, not declared security-irrelevant. No broader clearance or original verification waiver follows."
+    },
+    {
+      "id": "ROOT81-W5",
+      "mainQualification": "Q5",
+      "position": "Agree with correction; resolved in candidate01.",
+      "basis": "helper311-320 prunes observed elements on measurement;719-744 stops owned work/restores still-published values;748-764 registers temporary opener listeners and removes them in RAF.",
+      "assessment": "Reject a measured bounded-retention/no-leak conclusion from these source guards. Paused-frame listener and DOM-reference lifetime remain unmeasured. The listeners also use once:true, so an individual fired listener can be removed before RAF; that does not establish a time bound for untriggered listeners or the pending callback. Candidate wording needs no change for this nuance."
+    },
+    {
+      "id": "ROOT81-W6",
+      "mainQualification": "Q7",
+      "position": "Agree with correction; resolved in candidate01.",
+      "basis": "Fable filesRead/testCoverageStatic explicitly limits its seven-spec/six-helper examination to lists, titles and selected grep matches; prior Astra first retains functional obligations.",
+      "assessment": "Candidate attributes this partial test inspection accurately and claims no runtime pass or comprehensive test-semantic review. Source-lexical/API-name guards are not substitutes for observable privacy, interaction or lifecycle outcomes. No new matrix, threshold or approved implementation is selected. No new test enumeration or execution was performed in this peer review."
+    }
+  ],
+  "peerDisposition": {
+    "fableFirst": "Agree with the bounded core source finding and existing guard descriptions; do not adopt the stronger universal language identified above. The original first remains immutable.",
+    "mainResponse": "Agree with all seven qualifications in af2e68ca on the inspected evidence.",
+    "mainCandidateVote": "Agree with Main386a0970 only for exact candidate be6d35dd interim findings wording.",
+    "ownEarlierFirst": "Retained unchanged. The new comparison makes original-Event/footer-text exposure explicit without converting it into an unobserved disclosure. Prior opener-RAF caveat is preserved.",
+    "allThreeStatus": "Fable matching candidate vote remains required/pending. Neither its completed first nor Main/Astra votes establish all3 agreement."
+  },
+  "remainingLimits": [
+    "No additional concrete security issue or material omitted primary definition was established by this targeted comparison. No required correction remains to exact candidate01 wording.",
+    "Memory retention, paused frames, observer/layout cost, input/IME/touch behavior, browser API support and actual interaction/privacy outcomes remain unmeasured. No leak, exploit, severity or performance bound is asserted.",
+    "Unread dialogs, pre-existing parser/storage internals, global CSP enforcement and whole-app behavior remain outside this review. No root HEAD or full22-file credential scan was repeated.",
+    "Root Stage81 remains separate from Stage82 source68d4/526. Source-gate17 stays HELD; D no-repeat/no-provider-substitution holds remain; no capacity partial/remedy or D content was read.",
+    "Only ordinary source/curated text/JSON/hash inspection and this new report write occurred. No app/Node/import/compiler/build/test/browser/network/server/model/CLI/helper/Git/process operation, private history/stream/raw log/registry/cost/credential read, or foreign PID30593/port8787 access occurred."
+  ],
+  "approvals": {
+    "exactInterimStaticFindingsWording": true,
+    "allThreeConsensus": false,
+    "productDesignOrImplementation": false,
+    "rootFunctionalOrE2E": false,
+    "sourceOrPlanGate": false,
+    "securityCompletion": false,
+    "runtime": false,
+    "deployment": false
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Exact public documentation-only preservation candidate; selected immutable review records and explicitly scoped Main summaries.",
+  "baseCommit": "d96367ba9e06ad32737250a482c662e11b7881be",
+  "productChanges": false,
+  "entries": [
+    {
+      "path": "docs/security/2026-10-05/README.md",
+      "bytes": 2465,
+      "sha256": "7d5cc9b0c7f5cc6cccd98ced81ee6f8c8ead3ef4c26e6219c1df1fc8f2fe3458",
+      "sourceStagePath": null
+    },
+    {
+      "path": "docs/security/2026-10-05/collaboration/CF82-docx-security-peer-candidate03-01.process.json",
+      "bytes": 2404,
+      "sha256": "5512838f17640d04b17bcf75f0fa3a949f8cbb2cdb48baf67ff9bba9d0e061ba",
+      "sourceStagePath": "collaboration/CF82-docx-security-peer-candidate03-01.process.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/collaboration/CF82-root-delta-security-peer-candidate01-01.process.json",
+      "bytes": 2415,
+      "sha256": "1254471c63b664c2a95d93fcda09685f4efe7439d96fd5f72759234d18ac7d61",
+      "sourceStagePath": "collaboration/CF82-root-delta-security-peer-candidate01-01.process.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/astra-docx-candidate03-review-01.json",
+      "bytes": 11284,
+      "sha256": "4bb5f22efeaea7de065934cb6610e81a0d6459b5084992a3102af70f3ad5b3c5",
+      "sourceStagePath": "independent/security-review-01/astra-docx-candidate03-review-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/astra-docx-first-peer-assessment-01.json",
+      "bytes": 17745,
+      "sha256": "2376a8e56bcb60f37c953189d32a43db52500d5100a1f147be3e70173f10d20c",
+      "sourceStagePath": "independent/security-review-01/astra-docx-first-peer-assessment-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/astra-docx-source-first-01.json",
+      "bytes": 9312,
+      "sha256": "1a27855e8c39c24ab02d0daaf9618fa0c1e3bc54b6c2bc511e0d36ecb7f4f824",
+      "sourceStagePath": "independent/security-review-01/astra-docx-source-first-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/astra-root-candidate01-review-01.json",
+      "bytes": 12385,
+      "sha256": "a7f15cca7f04d793ff3122ece1679b6897d1be708e83037269486d1f5a4fe004",
+      "sourceStagePath": "independent/security-review-01/astra-root-candidate01-review-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/astra-root-delta-first-01.json",
+      "bytes": 9847,
+      "sha256": "aeded3e738f60f999f756b37338c415987acd19a158d8eebee6d13fca39cec04",
+      "sourceStagePath": "independent/security-review-01/astra-root-delta-first-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/astra-root-delta-peer-01.json",
+      "bytes": 4131,
+      "sha256": "09fbb2924e7760014c89a8b05e8ae1cc8973178ca2e273720221ab09aae211c5",
+      "sourceStagePath": "independent/security-review-01/astra-root-delta-peer-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/fable-docx-candidate03-review-01.json",
+      "bytes": 12315,
+      "sha256": "9f1c13998ea38f86727475bade66f90309ddc386738f1b374ef72a0753cabd1e",
+      "sourceStagePath": "independent/security-review-01/fable-docx-candidate03-review-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/fable-docx-security-first-01.json",
+      "bytes": 24475,
+      "sha256": "9e318ba663d71f1be3e55c03947c975848175432609a84ac43f60984b1234159",
+      "sourceStagePath": "independent/security-review-01/fable-docx-security-first-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/fable-root-candidate01-review-01.json",
+      "bytes": 10502,
+      "sha256": "9bdcd0080a1afce108a90de1554d519786ef4802cfba493ca435ae1cf32dd696",
+      "sourceStagePath": "independent/security-review-01/fable-root-candidate01-review-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/independent/security-review-01/fable-root-delta-security-first-01.json",
+      "bytes": 21353,
+      "sha256": "d305f34b36042262b27dd5d69570f6db8d28db26bbd1d66e29128ffa96576796",
+      "sourceStagePath": "independent/security-review-01/fable-root-delta-security-first-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/current-security-status-02.md",
+      "bytes": 5456,
+      "sha256": "b50c4c6e94b7bd8896d1387f697895b4475833f9aeff018dc646e47f6fec4ab3",
+      "sourceStagePath": "main/security-review-01/current-security-status-02.md"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/current-security-status-02.provenance.json",
+      "bytes": 1751,
+      "sha256": "1993bd7f791831302a5fadacea0d624b3375386233b570c29b48f8870a219961",
+      "sourceStagePath": "main/security-review-01/current-security-status-02.provenance.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-candidate03-completion-01.json",
+      "bytes": 1855,
+      "sha256": "34abd759d9ff5451e32c3d390278d5824103a92a8c0d064a15ff2753dc802868",
+      "sourceStagePath": "main/security-review-01/docx-candidate03-completion-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-independent-primary-01/manifest.json",
+      "bytes": 8778,
+      "sha256": "8f8fa350e8d0367ce6e0a6b589cb92704b47388defb8b6e45601422db6520f9d",
+      "sourceStagePath": "main/security-review-01/docx-independent-primary-01/manifest.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-requested-primary-01/existing-advisory-result-subset-01.json",
+      "bytes": 2686,
+      "sha256": "f6e49060b1257869f77bc9ad41e83e1052ff9a3300c0cda8c1a8fb0ea0d6a27a",
+      "sourceStagePath": "main/security-review-01/docx-requested-primary-01/existing-advisory-result-subset-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-requested-primary-01/existing-document-artifact-identity-01.json",
+      "bytes": 1649,
+      "sha256": "084ebe96da1668fb4b64656fc14a517166460fe6514802e90ee0e0494e08880f",
+      "sourceStagePath": "main/security-review-01/docx-requested-primary-01/existing-document-artifact-identity-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-requested-primary-01/manifest.json",
+      "bytes": 19154,
+      "sha256": "3cc911014af010b4204926f45af31ccd550edd243454e76b972223bb4a74a2a2",
+      "sourceStagePath": "main/security-review-01/docx-requested-primary-01/manifest.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-requested-primary-01/planned-e2e-modes-and-run-availability-01.json",
+      "bytes": 4661,
+      "sha256": "006419fa73040af67080692003c830c9d358531ed023110446cb043cf9792b83",
+      "sourceStagePath": "main/security-review-01/docx-requested-primary-01/planned-e2e-modes-and-run-availability-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-requested-primary-01/synthetic-docx-fixture-content-01.json",
+      "bytes": 3056,
+      "sha256": "5196588c27c982e2cc6f8eb0ec48dbcdbf84ee22665b7cf1643dfe120d4f06b4",
+      "sourceStagePath": "main/security-review-01/docx-requested-primary-01/synthetic-docx-fixture-content-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-resource-boundary-01/main-static-first-01.json",
+      "bytes": 6097,
+      "sha256": "733ebbb08564c5ae8e08ca6d3e026687f592fa40d35d5213850eca42a5f21c22",
+      "sourceStagePath": "main/security-review-01/docx-resource-boundary-01/main-static-first-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-static-findings-candidate-03.main-vote.json",
+      "bytes": 2888,
+      "sha256": "2b91db31eb5dd8ee8d8a276461159927e5a0f0a9483f233c899869c64d9ff078",
+      "sourceStagePath": "main/security-review-01/docx-static-findings-candidate-03.main-vote.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-static-findings-candidate-03.md",
+      "bytes": 7884,
+      "sha256": "b47ae1350b890d0da5819c107d45223485f1e471353c4a1aa7fb0f4fbb190419",
+      "sourceStagePath": "main/security-review-01/docx-static-findings-candidate-03.md"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/docx-static-findings-consensus-01.json",
+      "bytes": 2945,
+      "sha256": "003f25f1f05e842836e991aeadeb19aefd6f121e12ef288c94202540d82525e4",
+      "sourceStagePath": "main/security-review-01/docx-static-findings-consensus-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/main-docx-first-response-01.json",
+      "bytes": 7626,
+      "sha256": "c24b20f6f0dc924d345a1acf189be42ff6ee4756844cd412a8972717e3c1de52",
+      "sourceStagePath": "main/security-review-01/main-docx-first-response-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/main-root-first-response-01.json",
+      "bytes": 4368,
+      "sha256": "af2e68cac26a7f59db27a7665f7f1189a4f41efd44b7095235aece8174136cf5",
+      "sourceStagePath": "main/security-review-01/main-root-first-response-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/original-worktree-delta-01/main-static-delta-review-01.json",
+      "bytes": 4720,
+      "sha256": "755fdbb1aa9a948e1b851982079d5e934217657a3773b1ca7c287fcf49733dc5",
+      "sourceStagePath": "main/security-review-01/original-worktree-delta-01/main-static-delta-review-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/root-candidate01-completion-01.json",
+      "bytes": 1887,
+      "sha256": "62b256558e5abff4599ebd855a02940813d9075d69b538e7de23af2eb16b1969",
+      "sourceStagePath": "main/security-review-01/root-candidate01-completion-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/root-delta-independent-primary-01/manifest.json",
+      "bytes": 5343,
+      "sha256": "2d1d2082f38eeeaead2d7f82a04f403a5b364acb3472fbc904ee1995ccaaf3f3",
+      "sourceStagePath": "main/security-review-01/root-delta-independent-primary-01/manifest.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/root-static-findings-candidate-01.main-vote.json",
+      "bytes": 1817,
+      "sha256": "386a0970091fc3b49ef7daa5b6f1851ba260961cf80aa8a27acdafa349de16cc",
+      "sourceStagePath": "main/security-review-01/root-static-findings-candidate-01.main-vote.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/root-static-findings-candidate-01.md",
+      "bytes": 7077,
+      "sha256": "be6d35dd7edd4dbc8cd0267c87184efc5f34082a88c31d61b04c708ff02668c6",
+      "sourceStagePath": "main/security-review-01/root-static-findings-candidate-01.md"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/root-static-findings-consensus-01.json",
+      "bytes": 3216,
+      "sha256": "2e06d7bf359a0ad2a308d796d984814a27446283b4c3fb70ab1a590a2b67d261",
+      "sourceStagePath": "main/security-review-01/root-static-findings-consensus-01.json"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/security-assessment-candidate-10.md",
+      "bytes": 19110,
+      "sha256": "a02d93b0a1d8699c37de2c8e70c473d6e19db7139a7945f051dc125b57e649e6",
+      "sourceStagePath": "main/security-review-01/security-assessment-candidate-10.md"
+    },
+    {
+      "path": "docs/security/2026-10-05/main/security-review-01/source-and-protected-after-addenda-01.json",
+      "bytes": 3693,
+      "sha256": "a5c2e95c4a22ffa49f9f4888fe89172221d13a4241885a391cd0dff71aea71d7",
+      "sourceStagePath": "main/security-review-01/source-and-protected-after-addenda-01.json"
+    }
+  ],
+  "notIncluded": "Referenced inputs may be absent. No raw private results/history/logs/credentials/actual collected data/vendor copies/build artifacts.",
+  "scope": "No source/plan gate advance, full security/runtime acceptance or deployment authorization."
+}

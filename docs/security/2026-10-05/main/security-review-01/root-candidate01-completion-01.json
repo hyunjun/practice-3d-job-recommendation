@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-10-04T22:26:11.706372+00:00",
+  "label": "CF82-root-delta-security-peer-candidate01-01",
+  "actualExecHandle": 93083,
+  "outerTerminalExitCode": 0,
+  "process": {
+    "path": "collaboration/CF82-root-delta-security-peer-candidate01-01.process.json",
+    "bytes": 2415,
+    "sha256": "1254471c63b664c2a95d93fcda09685f4efe7439d96fd5f72759234d18ac7d61"
+  },
+  "rawPrivateResult": {
+    "path": "collaboration/CF82-root-delta-security-peer-candidate01-01.result.json",
+    "bytes": 13113,
+    "sha256": "a2d44423aa6e6a84208ef6066c4844a949d1000b2574dc7330f43d94686fdff7"
+  },
+  "judgment": {
+    "path": "independent/security-review-01/fable-root-candidate01-review-01.json",
+    "bytes": 10502,
+    "sha256": "9bdcd0080a1afce108a90de1554d519786ef4802cfba493ca435ae1cf32dd696"
+  },
+  "actualInterval": {
+    "startedAt": "2026-10-04T22:21:23.082379+00:00",
+    "endedAt": "2026-10-04T22:25:24.790487+00:00"
+  },
+  "numTurns": 12,
+  "requestedModel": "claude-fable-5-1",
+  "requestedEffort": "max",
+  "observedModelUsageKeys": [
+    "claude-fable-5-1"
+  ],
+  "isError": false,
+  "permissionDenials": [],
+  "ownedClosure": {
+    "signalled": [],
+    "forced": [],
+    "remaining": [],
+    "directChildReap": {
+      "enabled": true,
+      "returnCode": 0
+    },
+    "registeredSpawns": 0,
+    "observedOwnedProcesses": 2,
+    "registryErrors": [],
+    "incompleteRegistryRecord": false,
+    "registryRequired": false,
+    "registryPresent": false,
+    "observerAcknowledgements": 0,
+    "closureKnown": true
+  },
+  "reviewedByMain": "Full returned opinion, all seven corrections, optional notes and retained obligations read before preservation. Exact candidate01 explicitly approved, no required issues; original first unchanged. Not runtime/security completion.",
+  "observationLimit": "JSON result modelUsage observed; backend effort is not independently exposed."
+}

@@ -1,0 +1,117 @@
+{
+  "recordedAt": "2026-10-04T22:01:53.040232+00:00",
+  "sourceQuery": {
+    "path": "main/security-review-01/dependency-advisory-query-01.json",
+    "bytes": 27041,
+    "sha256": "d3806ea9aaa349938d473032cb8b0418ef52df69a63b283a0c386ea744a3d1ef"
+  },
+  "sourceResponse": {
+    "path": "main/security-review-01/osv-querybatch-response-01.json",
+    "bytes": 1090,
+    "sha256": "7c650ab40b945c3121b411e7d36f0afdd39ba13aaf1186ebbe2f41c97c331bbb"
+  },
+  "actualQueryTime": "2026-10-04T14:02:04.302845+00:00",
+  "httpStatus": 200,
+  "lockSha256": "a94e9a3f7e18daebe8d67cddad0dce63893c1dc98e74e774c4d0de2d2ef801bc",
+  "currentLockSha256": "a94e9a3f7e18daebe8d67cddad0dce63893c1dc98e74e774c4d0de2d2ef801bc",
+  "all359ResponsesPresent": true,
+  "selectedResults": [
+    {
+      "index": 180,
+      "package": {
+        "name": "@xmldom/xmldom",
+        "version": "0.8.15"
+      },
+      "response": {}
+    },
+    {
+      "index": 187,
+      "package": {
+        "name": "bluebird",
+        "version": "3.4.7"
+      },
+      "response": {}
+    },
+    {
+      "index": 211,
+      "package": {
+        "name": "dingbat-to-unicode",
+        "version": "1.0.1"
+      },
+      "response": {}
+    },
+    {
+      "index": 249,
+      "package": {
+        "name": "jszip",
+        "version": "3.10.2"
+      },
+      "response": {}
+    },
+    {
+      "index": 251,
+      "package": {
+        "name": "lie",
+        "version": "3.3.0"
+      },
+      "response": {}
+    },
+    {
+      "index": 264,
+      "package": {
+        "name": "lop",
+        "version": "0.4.2"
+      },
+      "response": {}
+    },
+    {
+      "index": 267,
+      "package": {
+        "name": "mammoth",
+        "version": "1.12.3"
+      },
+      "response": {}
+    },
+    {
+      "index": 286,
+      "package": {
+        "name": "pako",
+        "version": "1.0.11"
+      },
+      "response": {}
+    },
+    {
+      "index": 287,
+      "package": {
+        "name": "pako",
+        "version": "3.0.2"
+      },
+      "response": {}
+    },
+    {
+      "index": 316,
+      "package": {
+        "name": "setimmediate",
+        "version": "1.0.5"
+      },
+      "response": {}
+    },
+    {
+      "index": 341,
+      "package": {
+        "name": "underscore",
+        "version": "1.13.8"
+      },
+      "response": {}
+    },
+    {
+      "index": 355,
+      "package": {
+        "name": "xmlbuilder",
+        "version": "10.1.1"
+      },
+      "response": {}
+    }
+  ],
+  "limits": "Historical public OSV lookup at stated time; no new query made. Empty response means no reported match there, not absence of all vulnerabilities. Lockfile package identities do not identify every embedded dependency/version in a prebuilt browser bundle."
+}

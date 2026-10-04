@@ -1,0 +1,54 @@
+{
+  "reviewer": "claude-fable-5-1 (Fable), root Stage81 six-file delta peer comparison vote on findings candidate01",
+  "decision": "APPROVE_STATIC_FINDINGS_WORDING",
+  "candidateSha256": "be6d35dd7edd4dbc8cd0267c87184efc5f34082a88c31d61b04c708ff02668c6",
+  "candidateBinding": "main/security-review-01/root-static-findings-candidate-01.md, 7077 bytes, rehashed. Approval covers this exact byte content only; any edit, including the optional notes below, is a new candidate requiring a new vote.",
+  "scope": "Interim static findings wording and evidence agreement for the root Stage81 six-file delta only. Not an overall security certificate, Stage81 functional or E2E acceptance, Stage82 68d4.../526 gate advance, product or test change, Git merge, runtime or deployment permission. Separate from the DOCX record. Astra's parallel candidate01 vote was not read and is not presumed; all3 remains incomplete until Astra records its own position. My first d305f34b is unchanged.",
+  "bindingsRehashed": {
+    "candidate01.main-vote.json": "386a0970... 1817",
+    "main-root-first-response-01.json": "af2e68ca... 4368",
+    "main-static-delta-review-01.json (Main first)": "755fdbb1... 4720",
+    "astra-root-delta-first-01.json (Astra first)": "aeded3e7... 9847",
+    "fable-root-delta-security-first-01.json (my first)": "d305f34b... 21353; content equals what I delivered",
+    "astra-root-delta-peer-01.json (Astra's Main/Astra reconciliation, supplied)": "09fbb292... 4131",
+    "root-delta-independent-primary-01/manifest.json": "2d1d2082... 5343 (cited in candidate paragraph 1)",
+    "tracked-source-delta.txt": "2068f20b... 40774 (cited in paragraph 1)",
+    "rootHead": "d96367ba9e06ad32737250a482c662e11b7881be per manifest and session git status; not re-derived",
+    "sixSourceDescriptors": "Identical across Main first, Astra first, manifest and my first (28f956bb, 73f03cf0, fcc8eac5, c487f7f9, 848cbeaa, 34f3613a). Root files remain outside the helper's hash scope; the candidate's paragraph 2 describes my verification level accurately."
+  },
+  "additionalReadsForThisVote": [
+    "Grep line count of the current dialog-visibility.ts snapshot: 765 lines, matching the candidate's figure.",
+    "Grep with line numbers on the same snapshot for the constructs the qualifications cite: publish forwards the original Event to every subscriber (71-73); scope listeners registered with capture and passive (83); basisText declared and assigned from footer.textContent (278, 349-351); styleValue formats numbers with toFixed(3) + 'px' (302) and writes two properties (366-367); observed Set pruned (316); dialog.scrollTo in jointMovement and expose (453, 478); event.isComposing and event.key read in the key branch (691, 696); revealRestoredOpener registers six listeners with capture, passive and once (756) and calls scrollIntoView (763).",
+    "No other source was read; no Astra candidate01 vote, validation report or private material was opened."
+  ],
+  "responsesToMainQualifications": {
+    "MAIN-ROOT81-Q1 passive": "Corrected. My changedDataflows[0].mitigation said passive listeners mean the helper 'cannot block or alter user input'. Passive only forbids preventDefault in those listeners (line 83). The helper does act on input through focus() in DialogFeedback.tsx:87 and SavedDataDialog.tsx:130, dialog.scrollTo at helper 453 and 478, and scrollIntoView at 763. Candidate paragraph 5 states this correctly.",
+    "MAIN-ROOT81-Q2 content and computed style": "Corrected. My 'No string from user, file or catalog reaches these writes' and 'cannot reach the style writes' hold only for string interpolation. Footer text and reader content change element geometry, and size() derives footerHeight, requirements and basisText from that geometry and text (349-351, 366-367), so content influences the numeric values indirectly. Candidate paragraph 6 states both halves correctly and keeps CSS.escape for jobId.",
+    "MAIN-ROOT81-Q3 event content and privacy": "Corrected. My 'Input values are never read' and 'retain no content' were too strong. publish forwards the original Event object to all subscribers (71-73); key, input and composition events can carry typed text, and the subscriber reads event.key, which for printable keys is the typed character, for a list comparison (696). Footer textContent is retained as basisText (278, 351). What remains supported: in the reviewed path no new log, transmission or storage sink receives any of this, and the only subscriber is installDialogVisibility. Candidate paragraph 4 records exactly this and declines the 'content-free metadata' phrasing. My privacyBoundaryChange 'NONE' is to be read as 'no new disclosure sink found in the reviewed path, with a widened observation surface'.",
+    "MAIN-ROOT81-Q4 scope of 'no attack path'": "Corrected. 'No severity is assigned because no attack path exists' should read 'because no attack path was found in the reviewed delta and inspected callers'. My description of unread dialogs as 'functional, not security-relevant' is withdrawn as a reading; they are unread limits. Candidate paragraphs 3 and 9 state this correctly.",
+    "MAIN-ROOT81-Q5 cleanup versus bounded retention": "Corrected. 'bounded, not a leak path in the code read' was an inference from cleanup code, not a measurement. Cleanup, generation checks and observed-Set pruning (316) exist; retention size and duration are unmeasured, and the opener's temporary listeners (756) are removed in a scheduled animation-frame callback whose timing under paused frames is unknown. Candidate paragraph 8 states this correctly without asserting a leak.",
+    "MAIN-ROOT81-Q6 CSP/CSSOM": "Accepted as an omission. The general distinction between CSSOM property writes and inline style attributes was background knowledge, not validated against this project's actual headers or browsers, and the finding does not need it. Candidate paragraph 6 records that policy and browser enforcement were not verified.",
+    "MAIN-ROOT81-Q7 tests and lexical guards": "Accepted. My test coverage statements rest on file lists, titles and selected greps, not semantic review or execution; my proposed static guard is supplementary and not a substitute for observable privacy, interaction and lifecycle outcomes. Candidate paragraph 10 states this and approves no matrix or threshold."
+  },
+  "defendedFromMyFirst": [
+    "Changed callers keep the import and storage guards: MAX_SAVED_FILE_BYTES before file.text(), request-generation check, parseSavedImport, canWrite/stale/selection/limit gating, unchanged importRecords/discardRecovery/refresh/download arguments (SavedDataDialog.tsx 142-247). All three firsts agree; candidate paragraph 7 records it.",
+    "Focus 'owner', 'ticket' and 'authority' are local interaction ownership, not publication authentication or storage authorization. All three firsts agree; candidate paragraph 7 records it.",
+    "Style writes are fixed property names with clamped numeric px strings (302, 366-367) and one data attribute with a constant value; jobId selectors keep CSS.escape. All three firsts agree; candidate paragraph 6 records it.",
+    "The tabIndex={-1} change on the hidden resume input alters sequential Tab eligibility only and re-verifies neither the extractor nor the storage transaction. Candidate paragraph 7 records it."
+  ],
+  "candidateAccuracyCheck": "Each paragraph was compared with the three firsts and the line evidence above: target and bindings (765 lines, manifest 2d1d2082, diff 40774/2068f20b, six-file scope within 22 protected files) are exact; the description of each reviewer's hash verification is accurate, including the limit on mine; the bounded no-attack-path statement, the event-forwarding and basisText observation, the passive and ticket statements, the CSSOM and CSP statements, the preserved guards, the cleanup-versus-retention statement, the unexecuted items, the characterization of my test inspection, and the scope and holds paragraph are all consistent with the source and the shared records. No statement overstates evidence or waives an obligation.",
+  "requiredIssues": [],
+  "optionalNonBlockingNotes": [
+    "Paragraph 8 could add that the temporary opener listeners also carry once:true (line 756), so each is removed when it fires as well as in the animation-frame callback; the paused-frame limit stands for listeners that never fire. Not required.",
+    "Paragraph 4's phrase listing action tickets alongside the forwarded Event could be tightened to make clear tickets are not forwarded to subscribers; the data-flow statement is otherwise correct. Not required.",
+    "The scope's subscribe method is reachable by any component through the React context (useDialogFocusScope); only installDialogVisibility subscribes today. A future-surface note, not a current finding; omission does not affect accuracy."
+  ],
+  "remainingObligationsNotWaived": {
+    "functionalAndLifecycle": "Stage81 functional, accessibility, focus-restoration, IME/selection/touch/resize, nested and reopened dialog behavior, and after-close quiescence are unexecuted and belong to the separate Stage81 validation path; the seven untracked specs were neither semantically reviewed in full nor run.",
+    "measurement": "Observer and computed-style read cost, long-note and maximum-page responsiveness, memory retention and duration, and browser API support failure effects are unmeasured.",
+    "unreadContext": "Other dialogs receiving installDialogVisibility, saved-store and controller internals, saved-backup parsing beyond the limit lines, and actual CSP or header policy remain unread limits (slice 4 for headers).",
+    "tests": "Test existence is not review or pass; any privacy monitor, lifecycle oracle or unit coverage for ticket semantics requires separate all3 design; no matrix or threshold is agreed.",
+    "holds": "source-gate17 held; capacity review D held with no repeat, recovery or substitution; Stage82 68d4.../526 unaffected by this root vote; the 22 original files and collected data remain protected; no product, test, control, model, provider or settings change."
+  },
+  "conclusion": "Candidate01 states the shared source facts within their evidence scope, incorporates all seven qualifications, preserves the bounded no-new-sink finding and the unmeasured items, and claims no completion. I approve this exact wording as an interim static record, record no required issues, and accept the seven corrections as readings of my preserved first."
+}

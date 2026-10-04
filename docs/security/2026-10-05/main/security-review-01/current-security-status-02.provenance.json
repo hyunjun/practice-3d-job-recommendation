@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-10-04T22:29:17.710510+00:00",
+  "author": "Main",
+  "scope": "Current readout02 and report10 integrate actual independent static findings and historical execution facts; not all3 full-security or runtime completion.",
+  "reports": [
+    {
+      "path": "main/security-review-01/current-security-status-02.md",
+      "bytes": 5456,
+      "sha256": "b50c4c6e94b7bd8896d1387f697895b4475833f9aeff018dc646e47f6fec4ab3"
+    },
+    {
+      "path": "main/security-review-01/security-assessment-candidate-10.md",
+      "bytes": 19110,
+      "sha256": "a02d93b0a1d8699c37de2c8e70c473d6e19db7139a7945f051dc125b57e649e6"
+    }
+  ],
+  "wordingConsensus": [
+    {
+      "path": "main/security-review-01/docx-static-findings-consensus-01.json",
+      "bytes": 2945,
+      "sha256": "003f25f1f05e842836e991aeadeb19aefd6f121e12ef288c94202540d82525e4"
+    },
+    {
+      "path": "main/security-review-01/root-static-findings-consensus-01.json",
+      "bytes": 3216,
+      "sha256": "2e06d7bf359a0ad2a308d796d984814a27446283b4c3fb70ab1a590a2b67d261"
+    }
+  ],
+  "finalPreservationAudit": {
+    "path": "main/security-review-01/source-and-protected-after-addenda-01.json",
+    "bytes": 3693,
+    "sha256": "a5c2e95c4a22ffa49f9f4888fe89172221d13a4241885a391cd0dff71aea71d7"
+  },
+  "status": "Both DOCX and root exact static wording all3 approved. Source68d4/526/source-gate17 and capacity D remain held. No full E2E/G3 execution, product change or deployment occurred.",
+  "integrity": "No U+FFFD replacement characters; JSON records parse. Exact approved candidates and all independent firsts remain unchanged.",
+  "git": "No application-stage commit. A separate documentation-only preservation candidate is being prepared, not yet committed."
+}
