@@ -266,6 +266,12 @@ export interface Catalog {
   unmappedCount: number | null
   checkedAt?: string
   refreshAfter?: string
+  publication?: {
+    mode: 'scheduled'
+    generation: string
+    publishedAt: string
+    intervalMinutes: 30
+  }
 }
 
 export interface Profile {

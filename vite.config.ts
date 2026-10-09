@@ -10,6 +10,7 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
+    ...(process.env.VITE_CATALOG_MODE === 'scheduled' ? { license: { fileName: 'legal/bundled-licenses.md' } } : {}),
     chunkSizeWarningLimit: 850,
     rolldownOptions: {
       output: {

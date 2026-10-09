@@ -12,6 +12,9 @@
     "dev": "tsx watch server/index.ts",
     "prebuild": "npm run prepare:assets",
     "build": "tsc --noEmit && vite build && esbuild server/index.ts --bundle --platform=node --packages=external --format=esm --outfile=dist-server/index.mjs",
+    "build:cloudflare": "node scripts/build-cloudflare.mjs",
+    "check:worker": "tsc --project tsconfig.worker.json --noEmit",
+    "publish:catalog": "tsx scripts/publish-catalog.ts",
     "start": "node dist-server/index.mjs --production",
     "boards:check": "tsx scripts/check-boards.ts",
     "test": "vitest run",
@@ -27,6 +30,7 @@
     "express": "^5.2.1",
     "lucide-react": "^1.47.0",
     "mammoth": "^1.12.3",
+    "pako": "3.0.2",
     "pdfjs-dist": "^6.3.289",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -36,6 +40,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@cloudflare/workers-types": "5.20261003.1",
     "@playwright/test": "^1.63.0",
     "@types/compression": "^1.8.1",
     "@types/d3-geo": "^3.1.1",
@@ -51,6 +56,8 @@
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vite": "^8.3.0",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.1",
+    "wrangler": "4.147.0",
+    "ws": "8.21.0"
   }
 }

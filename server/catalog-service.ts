@@ -11,7 +11,8 @@ import { belongsToBoard, BoardSnapshotSchema, filterBoardSnapshot } from './boar
 import type { BoardCache, BoardSnapshot, CachedBoard } from './board-cache'
 import { parseCachedPresence, presenceBelongsToBoard, PresenceResultSchema } from './posting-presence'
 import type { CachedPresence, PresenceCache, PresenceResult } from './posting-presence'
-import type { ObservationStore } from './catalog-observations'
+import type { ObservationCheckpoint, ObservationStore } from './catalog-observations'
+import type { ObservationHistory } from '../shared/catalog-observations'
 
 export const CATALOG_POLICY = {
   ...CATALOG_LIFETIME,
@@ -77,9 +78,27 @@ interface Options {
   now?: () => number
   random?: () => number
   onCacheError?: (error: unknown) => void | Promise<void>
+  /** A publisher gets an exclusive, one-shot instance with no HTTP getters. */
+  publicationMode?: boolean
 }
 
-export function createCatalogService({ companies, cache, fetchBoard, presence, observations, now = Date.now, random = Math.random, onCacheError = console.warn }: Options) {
+export interface CatalogPublicationCapture {
+  capturedAt: string
+  catalog: Catalog
+  postingStatus: PostingStatusIndex
+  boards: CachedBoard[]
+  presences: CachedPresence[]
+  history: ObservationHistory
+  observationCheckpoint: ObservationCheckpoint
+  clocks: {
+    companyId: string
+    inventoryDeadline: string | null
+    contentDeadline: string | null
+    postingCheckedAt: string | null
+  }[]
+}
+
+export function createCatalogService({ companies, cache, fetchBoard, presence, observations, now = Date.now, random = Math.random, onCacheError = console.warn, publicationMode = false }: Options) {
   if (!companies.length || companies.some(company => !company.board || !PUBLIC_PROVIDERS.includes(company.provider ?? 'greenhouse')
     || (company.boardRegion && company.provider !== 'lever')) || new Set(companies.map(company => company.id)).size !== companies.length) {
     throw new Error('Each configured job board must have a unique company and board name')
@@ -89,6 +108,10 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
   let initialized: Promise<void> | null = null
   let pending: Promise<void> | null = null
   let presencePending: Promise<void> | null = null
+  let publicationStarted = false
+  const interactive = () => {
+    if (publicationMode) throw new Error('A publication instance only supports collectPublication()')
+  }
   interface Collection {
     id: string
     revision: number
@@ -203,8 +226,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
     return Date.parse(content.checkedAt) >= Date.parse(inventory.checkedAt) ? content : inventory
   }
 
-  function compose(partial = false): Catalog {
-    const current = now()
+  function compose(partial = false, current = now()): Catalog {
     const jobs: Job[] = []
     const statuses: BoardStatus[] = []
     const successfulDates: number[] = []
@@ -292,8 +314,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
     }
   }
 
-  async function composePresenceStatus(): Promise<PostingStatusIndex> {
-    const current = now()
+  async function composePresenceStatus(current = now()): Promise<PostingStatusIndex> {
     const statuses = await Promise.all(companies.map(async (company): Promise<PostingBoard> => {
       const entry = presences.get(company.id)
       const snapshot = entry?.snapshot
@@ -543,15 +564,18 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
 
   return {
     async getObservations() {
+      interactive()
       await (initialized ??= initialize())
       if (!observations) throw new Error('관측 기록을 지원하지 않는 서버입니다.')
       return observations.read()
     },
     async get(force = false): Promise<Catalog> {
+      interactive()
       await ensureFresh(force)
       return compose()
     },
     async getProgressive(force = false, queued = false): Promise<{ catalog: Catalog; progress: CatalogProgress | null }> {
+      interactive()
       const run = await startCollection(force)
       if (run && ((!queued && run.phase === 'waiting-for-presence')
         || run.phase === 'collecting' && run.total === 0 && !run.done)) await run.ready
@@ -560,6 +584,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       return { catalog: compose(Boolean(running)), progress: running ? progress(run) : null }
     },
     readProgress(id: string, after: number): CatalogCollectionUpdate | null {
+      interactive()
       const run = collection
       if (!run || run.id !== id) throw new CatalogProgressGoneError()
       if (!Number.isSafeInteger(after) || after < 0 || after > run.revision) throw new RangeError('잘못된 수집 진행 번호입니다.')
@@ -571,6 +596,7 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       return { progress: progress(run), companyIds, jobs: jobs.filter(job => changed.has(job.companyId)), catalog }
     },
     async getPostingStatus(force = false, content = false): Promise<PostingStatusIndex> {
+      interactive()
       if (!presence) {
         await ensureFresh(force)
         return composePostingStatus()
@@ -578,6 +604,36 @@ export function createCatalogService({ companies, cache, fetchBoard, presence, o
       if (content) await ensureFresh(force)
       else await ensurePresence(force)
       return composePresenceStatus()
+    },
+    async collectPublication(): Promise<CatalogPublicationCapture> {
+      if (!publicationMode || publicationStarted || !presence || !observations?.capture) {
+        throw new Error('Publication requires a fresh exclusive instance with presence and restorable observations')
+      }
+      publicationStarted = true
+      // Each pass applies the normal due/backoff policy once. In particular,
+      // reading the resulting catalog/index must not start another collection.
+      await ensurePresence(false)
+      await ensureFresh(false)
+      const current = now()
+      const capturedBoards = structuredClone(companies.flatMap(company => boards.get(company.id) ?? []))
+      const capturedPresences = structuredClone(companies.flatMap(company => presences.get(company.id) ?? []))
+      const deadline = (id: string, content: boolean): string | null => {
+        const value = nextRefresh(id, content)
+          || Date.parse(presences.get(id)?.checkedAt ?? boards.get(id)?.checkedAt ?? '')
+        return Number.isFinite(value) ? iso(value) : null
+      }
+      const catalog = compose(true, current)
+      const postingStatus = await composePresenceStatus(current)
+      const observed = await observations.capture(current)
+      return {
+        capturedAt: iso(current), catalog, postingStatus, boards: capturedBoards, presences: capturedPresences,
+        history: observed.history, observationCheckpoint: observed.checkpoint,
+        clocks: companies.map(company => ({
+          companyId: company.id,
+          inventoryDeadline: deadline(company.id, false), contentDeadline: deadline(company.id, true),
+          postingCheckedAt: presences.get(company.id)?.checkedAt ?? boards.get(company.id)?.checkedAt ?? null,
+        })),
+      }
     },
   }
 }

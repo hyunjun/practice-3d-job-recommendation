@@ -7,6 +7,7 @@ import type { ObservationHistory, ObservationPoint, ObservationStats } from '../
 import { formatCollectionTime } from '../../shared/catalog-health'
 import { MODE_LABELS, ROLE_FILTER_LABELS } from '../../shared/types'
 import { Spinner } from './ui'
+import { SCHEDULED_CATALOG } from '../lib/catalog-mode'
 
 const number = (value: number) => value.toLocaleString('ko-KR')
 const percent = (count: number, total: number) => total ? `${(count / total * 100).toFixed(1)}%` : '—'
@@ -16,37 +17,65 @@ const BOARD_STATUS = {
 } as const
 type Distribution = 'companies' | 'regions' | 'roles' | 'workModes' | 'skills'
 
-export function ObservationPanel({ collectionStamp, collecting }: { collectionStamp?: string; collecting: boolean }) {
+export function ObservationPanel({ collectionStamp, collecting, generation, onRefreshCatalog }: {
+  collectionStamp?: string; collecting: boolean; generation?: string; onRefreshCatalog?: () => void
+}) {
   const [open, setOpen] = useState(false)
-  const [history, setHistory] = useState<ObservationHistory | null>(null)
+  const [loaded, setLoaded] = useState<{ generation?: string; history: ObservationHistory } | null>(null)
+  const history = loaded?.generation === generation ? loaded?.history ?? null : null
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [failure, setFailure] = useState<{ generation?: string; message: string; gone: boolean } | null>(null)
+  const error = failure?.generation === generation ? failure?.message ?? '' : ''
+  const needsCatalogRefresh = failure?.generation === generation && failure?.gone
   const [retry, setRetry] = useState(0)
   const [date, setDate] = useState('')
   const [distribution, setDistribution] = useState<Distribution>('companies')
   useEffect(() => {
-    if (!open || collecting) return
+    setLoaded(previous => previous?.generation === generation ? previous : null)
+    setFailure(previous => previous?.generation === generation ? previous : null)
+    setDate('')
+  }, [generation])
+  useEffect(() => {
+    if (!open || collecting || SCHEDULED_CATALOG && !generation) return
     const controller = new AbortController()
     let cancelled = false
     const timeout = window.setTimeout(() => controller.abort(), 15_000)
     setLoading(true)
-    setError('')
+    setFailure(null)
     void (async () => {
       try {
-        const response = await fetch('/api/observations', { signal: controller.signal })
-        if (!response.ok) throw new Error('관측 기록 응답 오류')
+        const response = await fetch(`/api/observations${generation ? `?generation=${encodeURIComponent(generation)}` : ''}`, { signal: controller.signal })
+        if (response.status === 410 && generation) {
+          // Dispose of the unused expired-response body before updating the UI.
+          controller.abort()
+          if (!cancelled) {
+            setLoaded(null)
+            setFailure({ generation, message: '이 자료 버전의 관측 기록은 더 이상 보관하지 않아요. 공고를 새로고침해 주세요.', gone: true })
+          }
+          return
+        }
+        if (!response.ok) {
+          // Dispose of the unused error body immediately.
+          controller.abort()
+          throw new Error('관측 기록 응답 오류')
+        }
+        if (generation && response.headers.get('X-Orbit-Generation')?.toLowerCase() !== generation.toLowerCase()) {
+          // Dispose of the mismatched generation without reading its body.
+          controller.abort()
+          throw new Error('관측 기록 버전 불일치')
+        }
         const parsed = ObservationHistorySchema.safeParse(await response.json())
         if (!parsed.success) throw new Error('관측 기록 형식 오류')
-        if (!cancelled) setHistory(parsed.data)
+        if (!cancelled) setLoaded({ generation, history: parsed.data })
       } catch {
-        if (!cancelled) setError('관측 기록을 불러오지 못했어요. 다시 읽어 주세요.')
+        if (!cancelled) setFailure({ generation, message: '관측 기록을 불러오지 못했어요. 다시 읽어 주세요.', gone: false })
       } finally {
         window.clearTimeout(timeout)
         if (!cancelled) setLoading(false)
       }
     })()
     return () => { cancelled = true; window.clearTimeout(timeout); controller.abort() }
-  }, [open, collecting, collectionStamp, retry])
+  }, [open, collecting, collectionStamp, generation, retry])
   const days = [...(history?.days ?? [])].sort((left, right) => right.day.localeCompare(left.day))
   const selected = days.find(day => day.day === date) ?? days[0]
   const point = selected?.complete
@@ -60,10 +89,12 @@ export function ObservationPanel({ collectionStamp, collecting }: { collectionSt
         {days.length > 0 && <label>관측 날짜 (UTC)<select value={selected?.day ?? ''} onChange={event => setDate(event.target.value)}>
           {days.map(day => <option key={day.day} value={day.day}>{day.day}{day.complete ? '' : ' · 전체 집계 미확인'}</option>)}
         </select></label>}
-        <button className="text-button" disabled={loading || collecting} onClick={() => setRetry(value => value + 1)}><RefreshCw size={13} />관측 기록 다시 읽기</button>
+        <button className="text-button" disabled={loading || collecting || SCHEDULED_CATALOG && !generation} onClick={() => setRetry(value => value + 1)}><RefreshCw size={13} />관측 기록 다시 읽기</button>
       </div>
-      {(loading || collecting && !history) && <Spinner label={collecting ? '본문 수집이 끝나면 관측 기록을 읽어요…' : '관측 기록을 읽고 있어요…'} />}
+      {(loading || collecting && !history) && <Spinner label={collecting ? SCHEDULED_CATALOG ? '공고 자료를 불러온 뒤 관측 기록을 읽어요…' : '본문 수집이 끝나면 관측 기록을 읽어요…' : '관측 기록을 읽고 있어요…'} />}
+      {SCHEDULED_CATALOG && !generation && !collecting && <p className="observation-empty" role="status">공고 자료를 먼저 불러온 뒤 같은 버전의 관측 기록을 확인할 수 있어요.</p>}
       {error && <p className="form-error" role="alert">{error}{history && ' 아래는 앞서 읽은 기록입니다.'}</p>}
+      {needsCatalogRefresh && onRefreshCatalog && <button className="button secondary" disabled={collecting} onClick={onRefreshCatalog}><RefreshCw size={14} />공고 새로고침</button>}
       {history?.error && <p className="form-error" role="alert">{history.error}</p>}
       {history && <>
         <p className="observation-scope">대상 {number(history.scope.boards.length)}개 회사 · 최근 {history.retentionDays}일 이내 · UTC 날짜별 마지막 정상 집계</p>

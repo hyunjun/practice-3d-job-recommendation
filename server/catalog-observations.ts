@@ -17,10 +17,11 @@ import type { CachedBoard } from './board-cache'
 
 const MAX_FILE_BYTES = 16 * 1024 * 1024
 const DAY_MS = 86_400_000
-const HistoryFileSchema = z.object({
+export const HistoryFileSchema = z.object({
   version: z.literal(1), series: z.array(ObservationSeriesSchema).max(4),
 }).refine(value => new Set(value.series.map(series => `${series.scope.key}:${series.method}`)).size === value.series.length)
-type HistoryFile = z.infer<typeof HistoryFileSchema>
+export type ObservationCheckpoint = z.infer<typeof HistoryFileSchema>
+type HistoryFile = ObservationCheckpoint
 export interface ObservationCache {
   load(): Promise<unknown>
   save(history: HistoryFile): Promise<void>
@@ -29,6 +30,8 @@ export interface ObservationStore {
   readonly method: string
   record(boards: CachedBoard[], origin: 'cache' | 'collection'): Promise<void>
   read(): Promise<ObservationHistory>
+  /** Full restorable state; a public history response omits older scope data. */
+  capture?(at?: number): Promise<{ history: ObservationHistory; checkpoint: ObservationCheckpoint }>
 }
 
 export function observationCacheFile(fullCacheFile: string): string {
@@ -68,6 +71,7 @@ function scopeKey(boards: ObservationSeries['scope']['boards']): string {
     .sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right), 'en'))
   return createHash('sha256').update(JSON.stringify(identities)).digest('hex')
 }
+export { scopeKey as observationScopeKey }
 
 export function createObservationStore({
   companies, cache, now = Date.now, method = OBSERVATION_METHOD, onError = console.warn,
@@ -87,7 +91,7 @@ export function createObservationStore({
   let error: string | undefined
   const utcDay = (time: number) => new Date(time).toISOString().slice(0, 10)
   const matches = (series: ObservationSeries) => series.scope.key === scope.key && series.method === method
-  const cutoff = () => utcDay(now() - (OBSERVATION_RETENTION_DAYS - 1) * DAY_MS)
+  const cutoff = (at = now()) => utcDay(at - (OBSERVATION_RETENTION_DAYS - 1) * DAY_MS)
 
   async function initialize() {
     try {
@@ -103,8 +107,8 @@ export function createObservationStore({
     }
   }
 
-  function retained(input: ObservationSeries[]): ObservationSeries[] {
-    const firstDay = cutoff()
+  function retained(input: ObservationSeries[], at = now()): ObservationSeries[] {
+    const firstDay = cutoff(at)
     return input.map(series => ({
       ...series, days: series.days.filter(day => day.day >= firstDay).sort((left, right) => left.day.localeCompare(right.day)),
     }))
@@ -196,6 +200,19 @@ export function createObservationStore({
     }
   }
 
+  function publicHistory(at = now()): ObservationHistory {
+    const series = retained(file.series, at)
+    return ObservationHistorySchema.parse({
+      version: 1, retentionDays: OBSERVATION_RETENTION_DAYS,
+      scope, method, days: series.find(matches)?.days ?? [],
+      otherSeries: series.filter(item => !matches(item)).map(item => ({
+        scopeKey: item.scope.key, method: item.method, firstDay: item.days[0].day,
+        lastDay: item.days.at(-1)!.day, companyCount: item.scope.boards.length,
+      })),
+      storage: error ? 'error' : 'ok', ...(error ? { error } : {}),
+    })
+  }
+
   return {
     method,
     record(entries, origin) {
@@ -206,16 +223,13 @@ export function createObservationStore({
     async read() {
       await (initialization ??= initialize())
       await pending
-      const series = retained(file.series)
-      return ObservationHistorySchema.parse({
-        version: 1, retentionDays: OBSERVATION_RETENTION_DAYS,
-        scope, method, days: series.find(matches)?.days ?? [],
-        otherSeries: series.filter(item => !matches(item)).map(item => ({
-          scopeKey: item.scope.key, method: item.method, firstDay: item.days[0].day,
-          lastDay: item.days.at(-1)!.day, companyCount: item.scope.boards.length,
-        })),
-        storage: error ? 'error' : 'ok', ...(error ? { error } : {}),
-      })
+      return publicHistory()
+    },
+    async capture(at = now()) {
+      await (initialization ??= initialize())
+      await pending
+      if (blockedWrites || error) throw new Error(error ?? '관측 기록을 안전하게 저장하지 못했어요.')
+      return { history: publicHistory(at), checkpoint: structuredClone(file) }
     },
   }
 }

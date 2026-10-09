@@ -62,6 +62,7 @@
 
 - [Express](https://github.com/expressjs/express): MIT.
 - [compression](https://github.com/expressjs/compression): MIT. API와 배포용 정적 응답의 압축을 처리합니다.
+- [pako 3.0.2](https://github.com/nodeca/pako/tree/32be8f8e0ead1e6e8a74a1586a34f84734382d01): MIT AND Zlib. Workers의 저장된 gzip 자료를 제한된 출력 버퍼로 해제합니다. 패키지의 [MIT 원문](licenses/pako-MIT.txt)과 사용한 zlib 포트의 [저작권·허가 고지](licenses/pako-zlib.txt)를 보존했습니다.
 - 서버 패키지는 의존성으로 설치하며 라이선스 원문은 각 패키지에 포함됩니다.
 
 ## 채용 데이터

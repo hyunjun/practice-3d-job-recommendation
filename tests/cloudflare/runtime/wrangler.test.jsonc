@@ -1,0 +1,26 @@
+{
+  // Stage82 test-only local runtime configuration. Never deployed. The PUBLISH_TOKEN
+  // below is a fictional test value; production uses a Worker secret instead.
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "job-contract-test",
+  "main": "./entry.ts",
+  "compatibility_date": "2026-10-03",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./assets",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api", "/api/*", "/__orbit/publish", "/__orbit/publish/*", "/__test", "/__test/*"]
+  },
+  "durable_objects": {
+    "bindings": [{"name": "CATALOG_STORE", "class_name": "CatalogStore"}]
+  },
+  "exports": {
+    "CatalogStore": {"type": "durable-object", "storage": "sqlite"}
+  },
+  "vars": {
+    "PUBLISH_TOKEN": "fictional-worker-contract-token-0123456789abcdef0123456789abcdef0123456789"
+  },
+  "observability": {"enabled": false}
+}

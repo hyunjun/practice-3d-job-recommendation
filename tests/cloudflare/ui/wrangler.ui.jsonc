@@ -1,0 +1,27 @@
+{
+  // Stage82 local scheduled-build UI harness: the real Worker/CatalogStore through the
+  // test-only entry (clock + verified wipe), serving the actual `dist-cloudflare` build
+  // produced by `npm run build:cloudflare` (VITE_CATALOG_MODE=scheduled). Never deployed.
+  "name": "job-ui-test",
+  "main": "../runtime/entry.ts",
+  "compatibility_date": "2026-10-03",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "../../../dist-cloudflare",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api", "/api/*", "/__orbit/publish", "/__orbit/publish/*", "/__test", "/__test/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "CATALOG_STORE", "class_name": "CatalogStore" }]
+  },
+  "exports": {
+    "CatalogStore": { "type": "durable-object", "storage": "sqlite" }
+  },
+  "vars": {
+    // Synthetic test-only token; the deployed Worker receives its secret through the secrets file.
+    "PUBLISH_TOKEN": "fictional-worker-contract-token-0123456789abcdef0123456789abcdef0123456789"
+  },
+  "observability": { "enabled": false }
+}

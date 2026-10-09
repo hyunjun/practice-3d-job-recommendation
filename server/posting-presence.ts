@@ -19,7 +19,7 @@ export interface PresenceSnapshot extends PresenceResult {
   /** Listed again, but an earlier detail explicitly said inactive/private. */
   unconfirmedIds?: string[]
 }
-const CachedPresenceSchema = z.object({
+export const CachedPresenceSchema = z.object({
   companyId: z.string().min(1).max(100),
   board: z.string().min(1).max(200),
   provider: JobProviderSchema,

@@ -44,7 +44,7 @@ export const BoardSnapshotSchema = z.object({
   // Validate the stored counts first, then migrate locations and their count together.
   .transform(snapshot => upgradeJobCollection(snapshot))
 
-const CachedBoardSchema = z.object({
+export const CachedBoardSchema = z.object({
   companyId: z.string().min(1).max(100),
   board: z.string().min(1).max(200),
   provider: JobProviderSchema.default('greenhouse'),

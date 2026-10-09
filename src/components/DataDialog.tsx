@@ -10,6 +10,7 @@ import { useRetryCountdown } from '../hooks/useRetryCountdown'
 import { CompanyLogo, Dialog, Spinner } from './ui'
 import { CollectionProgress } from './CollectionProgress'
 import { ObservationPanel } from './ObservationPanel'
+import { SCHEDULED_CATALOG } from '../lib/catalog-mode'
 
 export function DataDialog({ catalog, loading, progress, error, expired, retryAt, onRefresh, onClose }: { catalog: Catalog; loading: boolean; progress?: CatalogProgress | null; error: string; expired?: boolean; retryAt?: string; onRefresh: () => void; onClose: () => void }) {
   const ready = Boolean(catalog.fetchedAt)
@@ -30,7 +31,13 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
         <Database size={22} aria-hidden="true" /><div><h3 id="public-data-title">공개 채용공고</h3><p>회사 공식 게시판과 공개 잡 사이트에서 수집한 공고로 탐색해요. 각 공고의 출처·원문·조회 시각을 확인할 수 있어요.</p><small>새 공고를 조회하려면 인터넷 연결이 필요해요.</small></div>
       </section>
       {providers.length > 0 && <ul className="provider-coverage" aria-label="공개 공고 출처">{providers.map(item => <li key={item.provider}><strong>{item.provider === 'himalayas' ? <a href="https://himalayas.app" target="_blank" rel="noopener noreferrer">Himalayas</a> : JOB_SOURCE_LABELS[item.provider]}</strong><span>{item.count}개 회사</span></li>)}</ul>}
-      {loading && (progress ? <CollectionProgress catalog={catalog} progress={progress} /> : <div className="data-loading"><Spinner label="회사별 공개 채용공고를 가져오고 있어요…" /><p>첫 조회에는 1분 이상 걸릴 수 있어요. 먼저 확인된 회사부터 표시합니다.</p></div>)}
+      {SCHEDULED_CATALOG && <section className="data-explanation">
+        <h3><RefreshCw size={16} />예약 수집으로 갱신되는 공고</h3>
+        <p>약 30분마다 공개 자료를 수집해 발행합니다. 예약 작업은 지연되거나 건너뛸 수 있고, 출처마다 확인 간격이 다릅니다. 회사별 마지막 정상 확인 시각을 기준으로 자료의 최신 여부를 표시해요.</p>
+        <p>새로고침은 최근 발행 자료를 다시 읽습니다. 채용 사이트의 수집을 즉시 실행하지 않아요.</p>
+        {catalog.publication && <p>최근 발행 · <time dateTime={catalog.publication.publishedAt}>{formatCollectionTime(catalog.publication.publishedAt)}</time></p>}
+      </section>}
+      {loading && (progress ? <CollectionProgress catalog={catalog} progress={progress} /> : <div className="data-loading"><Spinner label={SCHEDULED_CATALOG ? '저장된 공개 공고를 불러오고 있어요…' : '회사별 공개 채용공고를 가져오고 있어요…'} /><p>{SCHEDULED_CATALOG ? '최근 발행된 자료를 읽고 있어요. 검색 조건과 저장 기록은 유지됩니다.' : '첫 조회에는 1분 이상 걸릴 수 있어요. 먼저 확인된 회사부터 표시합니다.'}</p></div>)}
       {error && <p className="form-error" role="alert">{error}</p>}
       {expired && <p className="retry-note" role="status">마지막 정상 조회가 24시간을 지나 추천을 비웠어요. 검색 조건과 저장 기록은 유지하며, 다시 조회하면 현재 공고로 갱신됩니다.</p>}
       {!loading && retryIn > 0 && <p className="retry-note">다음 조회 가능 시각: <time dateTime={retryAt}>{formatCollectionTime(retryAt)}</time>. 게시판별 대기 시간을 지키며 다시 확인해요.</p>}
@@ -46,7 +53,8 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
         {!loading && health.pending > 0 && <p className="retry-note">{health.pending}개 회사의 진행 상태가 미확인입니다. 다시 조회하면 이어서 확인할 수 있어요.</p>}
       </>}
       {catalog.boards.length > 0 && <BoardHistory catalog={catalog} loading={loading} retryIn={retryIn} onRefresh={onRefresh} />}
-      <ObservationPanel collectionStamp={catalog.checkedAt ?? catalog.fetchedAt} collecting={loading} />
+      <ObservationPanel collectionStamp={catalog.checkedAt ?? catalog.fetchedAt} collecting={loading}
+        generation={catalog.publication?.generation} onRefreshCatalog={onRefresh} />
       {hasHimalayas && <section className="data-explanation">
         <h3><Globe2 size={16} />Himalayas 공개 원격 공고</h3>
         <p>Himalayas에서 제공하는 해당 회사의 원격 공고를 보충합니다. 회사 공식 채용 사이트의 전체 목록과 수집 범위가 다르며, 게시 여부도 Himalayas 목록을 기준으로 확인해요. 각 공고에서 출처와 원문 링크를 확인할 수 있습니다.</p>
@@ -91,6 +99,7 @@ export function DataDialog({ catalog, loading, progress, error, expired, retryAt
           : `이전 조회에서 목록에 포함하지 못한 공고 ${coverage.unavailable}개가 더 있어요.`} 정상 조회 후 목록과 집계가 갱신됩니다.</p>}
       </section>
       <section className="data-explanation"><h3><ShieldCheck size={16} />추천과 개인정보</h3><p>기술 키워드, 희망 직무, 경력 연수를 기준으로 공고를 정렬해요. 비자는 지원 명시·조건부·지원 없음·미확인을 구분하고, 발급 가능성을 보장하지 않아요. 풀타임은 근무 시간, 기간 제한 없음은 공고에 명시된 계약 기간 분류입니다. 지역·경력별 보상 구간은 상세에서 따로 확인할 수 있어요. 하나의 연봉으로 비교할 수 없는 금액은 연봉 집계에서 제외합니다.</p><p>연봉 비교에는 고정 참고 환율을 사용하며 생활비나 합격 확률을 추정하지 않아요. 이력서 파일과 원문은 서버나 외부 AI로 전송하지 않아요. 기억하기를 선택하면 확인한 프로필을 이 브라우저에 저장합니다. 프로필 화면에서 언제든 삭제할 수 있어요.</p><p>검색 조건·선택 도시·지도 보기는 다시 방문할 때 이어집니다. 프로필 기억하기를 끄거나 프로필을 삭제하면 개인 탐색 조건도 지워지고 표시 설정은 유지돼요.</p></section>
+      {SCHEDULED_CATALOG && <section className="data-explanation"><h3>자산과 오픈소스 고지</h3><p><a href="/legal/attributions.md" target="_blank" rel="noopener noreferrer">지도·이미지·폰트 출처와 고지</a> · <a href="/legal/bundled-licenses.md" target="_blank" rel="noopener noreferrer">번들에 포함된 오픈소스 라이선스</a></p></section>}
     </div>
   </Dialog>
 }
@@ -101,7 +110,7 @@ function BoardHistory({ catalog, loading, retryIn, onRefresh }: { catalog: Catal
   const snapshotTimes = catalogBoardSnapshotTimes(catalog)
   return <section className="board-section">
     <div className="board-heading"><h3>게시판 조회 상태</h3><button className="text-button" disabled={loading || retryIn > 0} onClick={onRefresh}><RefreshCw size={13} />새로고침{!loading && retryIn > 0 && <span aria-hidden="true"> · {formatRetryWait(retryIn)} 후</span>}</button></div>
-    <p className="field-description">최근 게시판 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />게시 목록·공고 내용 조회를 포함한 최근 시도이며, 정상 확인 시각은 회사마다 다릅니다.<br />일반 공개 게시판은 정상 확인 후 30분이 지나면 이전 조회로 표시해요.{hasHimalayas && ' Himalayas는 하루 단위 갱신에 맞춰 24시간 동안 재사용해요.'}{hasCareers && ' 회사 공식 사이트 직접 수집도 부하를 줄이기 위해 24시간 동안 재사용해요.'} 모든 출처에서 24시간을 넘긴 공고는 추천에서 제외해요. 공개 탐색·도시 비교 화면으로 돌아오거나 그 화면에서 네트워크가 다시 연결되면 오래되거나 확인하지 못한 게시판을 다시 조회해요. 게시판별 대기 시간을 지키며 검색 조건과 저장 기록은 유지합니다.</p>
+    <p className="field-description">최근 게시판 조회 시도 · {formatCollectionTime(catalog.checkedAt ?? catalog.fetchedAt)}<br />게시 목록·공고 내용 조회를 포함한 최근 시도이며, 정상 확인 시각은 회사마다 다릅니다.<br />일반 공개 게시판은 정상 확인 후 30분이 지나면 이전 조회로 표시해요.{hasHimalayas && ' Himalayas는 하루 단위 갱신에 맞춰 24시간 동안 재사용해요.'}{hasCareers && ' 회사 공식 사이트 직접 수집도 부하를 줄이기 위해 24시간 동안 재사용해요.'} 모든 출처에서 24시간을 넘긴 공고는 추천에서 제외해요. {SCHEDULED_CATALOG ? '공개 탐색·도시 비교 화면으로 돌아오거나 네트워크가 다시 연결되면 최근 발행된 자료를 다시 읽어요. 채용 사이트 수집은 별도 예약 작업에서 진행하며, 검색 조건과 저장 기록은 유지합니다.' : '공개 탐색·도시 비교 화면으로 돌아오거나 그 화면에서 네트워크가 다시 연결되면 오래되거나 확인하지 못한 게시판을 다시 조회해요. 게시판별 대기 시간을 지키며 검색 조건과 저장 기록은 유지합니다.'}</p>
     <details className="board-details" open={loading || catalogNeedsAttention(catalog)}>
       <summary>회사별 조회 기록<ChevronDown size={14} /></summary>
       <div className="board-list">{catalog.boards.map(board => {

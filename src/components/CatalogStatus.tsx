@@ -5,6 +5,7 @@ import { catalogNeedsAttention, collectionHealth, formatRetryWait } from '../../
 import { useRetryCountdown } from '../hooks/useRetryCountdown'
 import { EmptyState, Spinner } from './ui'
 import { CollectionProgress } from './CollectionProgress'
+import { SCHEDULED_CATALOG } from '../lib/catalog-mode'
 
 interface Props {
   catalog: Catalog
@@ -25,9 +26,9 @@ export function CatalogStatus({ catalog, loading, progress, error, expired, retr
   </section>
   if (!catalog.fetchedAt) return <section className="catalog-placeholder" aria-live="polite" aria-busy={loading}>
     <EmptyState
-      icon={loading ? <Spinner label="공개 공고 조회 중" /> : <CircleHelp size={27} />}
-      title={loading ? '공개 공고를 불러오고 있어요' : expired ? '공고를 다시 확인해 주세요' : '공개 공고에 연결하지 못했어요'}
-      text={loading ? '현재 탐색 조건을 유지한 채 채용 게시판을 조회하고 있어요.' : expired ? `마지막 정상 조회가 24시간을 지나 이전 공고를 추천에서 제외했어요. 검색 조건과 저장한 기록은 유지됩니다.${error ? ` 다시 조회하지 못했어요. ${error}` : ''}` : error || '연결 상태를 확인한 뒤 다시 조회해 주세요.'}
+      icon={loading ? <Spinner label={SCHEDULED_CATALOG ? '저장된 공개 공고 불러오는 중' : '공개 공고 조회 중'} /> : <CircleHelp size={27} />}
+      title={loading ? SCHEDULED_CATALOG ? '저장된 공개 공고를 불러오고 있어요' : '공개 공고를 불러오고 있어요' : expired ? '공고를 다시 확인해 주세요' : '공개 공고에 연결하지 못했어요'}
+      text={loading ? SCHEDULED_CATALOG ? '현재 탐색 조건을 유지한 채 최근 발행된 공고 자료를 읽고 있어요.' : '현재 탐색 조건을 유지한 채 채용 게시판을 조회하고 있어요.' : expired ? `마지막 정상 조회가 24시간을 지나 이전 공고를 추천에서 제외했어요. 검색 조건과 저장한 기록은 유지됩니다.${error ? ` 다시 조회하지 못했어요. ${error}` : ''}` : error || '연결 상태를 확인한 뒤 다시 조회해 주세요.'}
     >
       {!loading && <button className="button primary" disabled={retryIn > 0} onClick={onRetry}><RefreshCw size={15} />다시 조회{retryIn > 0 && <small aria-hidden="true"> · {formatRetryWait(retryIn)} 후</small>}</button>}
       <button className="text-button" onClick={onData}>공개 공고 안내</button>

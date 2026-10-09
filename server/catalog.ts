@@ -27,6 +27,11 @@ const presenceProviders: Record<JobProvider, (company: Company, fetchedAt: strin
   workable: fetchWorkablePresence, himalayas: fetchHimalayasPresence, careers: fetchCareersPresence,
 }
 
+export const fetchPublicBoard = (company: Company, fetchedAt: string) =>
+  providers[company.provider ?? 'greenhouse'](company, fetchedAt)
+export const fetchPublicPresence = (company: Company, fetchedAt: string) =>
+  presenceProviders[company.provider ?? 'greenhouse'](company, fetchedAt)
+
 let service: ReturnType<typeof createCatalogService> | undefined
 let initialization: Promise<void> | undefined
 
@@ -35,10 +40,10 @@ export function initializePublicCatalog(): Promise<void> {
     service = createCatalogService({
       companies: config.companies,
       cache: createFileBoardCache(config.cacheFile, config.legacyCacheFiles, config.companies),
-      fetchBoard: (company, fetchedAt) => providers[company.provider ?? 'greenhouse'](company, fetchedAt),
+      fetchBoard: fetchPublicBoard,
       presence: {
         cache: createFilePresenceCache(presenceCacheFile(config.cacheFile)),
-        fetchBoard: (company, fetchedAt) => presenceProviders[company.provider ?? 'greenhouse'](company, fetchedAt),
+        fetchBoard: fetchPublicPresence,
       },
       observations: createObservationStore({
         companies: config.companies,

@@ -296,3 +296,74 @@ test('keeps the most recently selected file when an earlier file finishes readin
   await expect(importRow(page, 'earlier')).toHaveCount(0)
   expect(await readSaved(page)).toEqual([])
 })
+
+test('imported jobs with hostile URLs open normally but expose no application link, while a credential-free HTTPS job keeps its exact safe link and nothing leaves the browser', async ({ page, context }) => {
+  // Every request the page makes is observed by URL and body before the journey starts: the resource audit fixture excludes API traffic,
+  // so this explicit capture is what proves the private note sentinels never leave the browser (security regression proposal 01).
+  const requests: { url: string; body: string | null }[] = []
+  page.on('request', request => requests.push({ url: request.url(), body: request.postData() }))
+  const openedPages: string[] = []
+  context.on('page', opened => openedPages.push(opened.url()))
+  const sentinel = (id: string) => `PRIVATE-G3-SENTINEL-${id}`
+  const inert = '<img src="https://example.com/g3-note-should-not-load" onerror="window.g3Injected=true">'
+  const imported = (id: string, url: string, note: string): SavedJob => {
+    const base = record(id, note)
+    return { ...base, job: { ...base.job, url } }
+  }
+  // Otherwise valid saved jobs whose only hostile part is the literal URL, plus one credential-free HTTPS control; every title and identity is distinct.
+  const hostile = [
+    imported('g3-javascript', 'javascript:alert(1)', `${sentinel('javascript')} ${inert}`),
+    imported('g3-data', 'data:text/html,g3-data-control', sentinel('data')),
+    imported('g3-credential', 'https://user:secret@example.test/jobs/g3-credential', sentinel('credential')),
+  ]
+  const safe = imported('g3-safe', 'https://example.test/jobs/g3-safe-control', sentinel('safe'))
+  await seed(page, [])
+  const origin = new URL(page.url()).origin
+  await openFiles(page)
+  await chooseFile(page, JSON.stringify({ format: 'orbit-saved-backup', version: 1, exportedAt: PUBLIC_PROTOCOL_TIME, records: [...hostile, safe] }))
+  await expect(page.locator('.saved-import-row')).toHaveCount(4)
+  await page.getByRole('button', { name: '선택한 4개 가져오기', exact: true }).click()
+  await expect(page.locator('.saved-file-message')).toContainText('선택한 4개 기록을 저장했어요.')
+  await page.keyboard.press('Escape')
+  await waitForSavedCommit(page)
+  await expect(page.locator('.saved-card')).toHaveCount(4)
+  // The imported records are kept as plain data with their literal URLs; only the visible action below refuses the hostile ones.
+  expect((await readSaved(page)).map(item => [item.job.id, item.job.url]).sort()).toEqual([...hostile, safe].map(item => [item.job.id, item.job.url]).sort())
+  const openDetail = async (item: SavedJob) => {
+    const card = page.locator('.saved-card').filter({ hasText: item.job.title })
+    await expect(card.locator('.saved-note-preview')).toHaveText(item.note)
+    await card.locator('.saved-title').click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.getByRole('heading', { name: item.job.title, exact: true })).toBeVisible()
+    await expect(dialog.getByLabel('이 기회에 대한 나의 메모')).toHaveValue(item.note)
+    return dialog
+  }
+  for (const item of hostile) {
+    const dialog = await openDetail(item)
+    // No application link and no replacement navigation link of any kind in this detail; the hostile string never becomes an href.
+    await expect(dialog.getByRole('link', { name: '원문에서 지원하기' })).toHaveCount(0)
+    await expect(dialog.locator('a[href]')).toHaveCount(0)
+    await expect(page.locator(`a[href="${item.job.url}"]`)).toHaveCount(0)
+    await dialog.getByRole('button', { name: '닫기', exact: true }).click()
+    await expect(dialog).toHaveCount(0)
+  }
+  const dialog = await openDetail(safe)
+  const link = dialog.getByRole('link', { name: '원문에서 지원하기' })
+  await expect(link).toHaveAttribute('href', 'https://example.test/jobs/g3-safe-control')
+  await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  await expect(link).toHaveAttribute('target', '_blank')
+  await expect(dialog.locator('a[href]')).toHaveCount(1)
+  await dialog.getByRole('button', { name: '닫기', exact: true }).click()
+  await expect(dialog).toHaveCount(0)
+  // Nothing navigated or executed: no javascript:/data: anchor anywhere, the note's markup stayed text, no new page, same origin, no request outside it.
+  await expect(page.locator('a[href^="javascript:"], a[href^="data:"]')).toHaveCount(0)
+  await expect(page.locator('img[src*="g3-note-should-not-load"]')).toHaveCount(0)
+  expect(await page.evaluate(() => Reflect.get(window, 'g3Injected'))).toBeUndefined()
+  expect(openedPages).toEqual([])
+  expect(new URL(page.url()).origin).toBe(origin)
+  const network = requests.filter(request => /^https?:/.test(request.url))
+  expect(network.filter(request => new URL(request.url).origin !== origin)).toEqual([])
+  // The saved-only journey makes no API attempt at all, and no request carries a private sentinel in its URL or body.
+  expect(network.filter(request => new URL(request.url).pathname.startsWith('/api/'))).toEqual([])
+  expect(JSON.stringify(requests)).not.toContain('PRIVATE-G3-SENTINEL')
+})

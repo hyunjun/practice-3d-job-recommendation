@@ -15,5 +15,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["src", "server", "shared", "scripts", "tests", "*.ts"]
+  "include": ["src", "server", "shared", "scripts", "tests", "*.ts"],
+  "exclude": ["worker", "tests/cloudflare/runtime"]
 }

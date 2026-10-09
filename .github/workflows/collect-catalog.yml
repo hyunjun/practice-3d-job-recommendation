@@ -1,0 +1,53 @@
+name: Publish public job catalog
+
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Collect public jobs, or publish the previous public data with the newest collector checkpoint'
+        type: choice
+        options: [collect, rollback]
+        default: collect
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orbit-public-catalog-publication
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || vars.ORBIT_COLLECTION_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Validate verified collector reference
+        env:
+          COLLECTOR_REF: ${{ vars.ORBIT_COLLECTOR_REF }}
+        run: |
+          if [[ ! "$COLLECTOR_REF" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "ORBIT_COLLECTOR_REF must be the verified full commit SHA."
+            exit 1
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ vars.ORBIT_COLLECTOR_REF }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Collect and atomically publish
+        env:
+          ORBIT_PUBLICATION_URL: https://job.hyunjun.workers.dev
+          ORBIT_PUBLISH_TOKEN: ${{ secrets.ORBIT_PUBLISH_TOKEN }}
+          ORBIT_OPERATION: ${{ inputs.operation || 'collect' }}
+        run: |
+          collection_tmp="$(mktemp -d)"
+          export TMPDIR="$collection_tmp"
+          trap 'rm -rf -- "$collection_tmp"' EXIT
+          npm run publish:catalog -- "$ORBIT_OPERATION"

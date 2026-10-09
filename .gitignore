@@ -1,6 +1,10 @@
 node_modules/
 dist/
 dist-server/
+dist-cloudflare/
+.wrangler/
+.dev.vars
+.dev.vars.*
 .local/
 .env
 .env.*

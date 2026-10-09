@@ -27,6 +27,11 @@ const board = z.object({
 const metadata = z.object({
   source: z.literal('public'), fetchedAt: z.union([timestamp, z.literal('')]), stale: z.boolean(),
   boards: z.array(board), unmappedCount: count.nullable(), checkedAt: timestamp.optional(), refreshAfter: timestamp.optional(),
+  publication: z.object({
+    mode: z.literal('scheduled'),
+    generation: z.string().regex(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/),
+    publishedAt: timestamp, intervalMinutes: z.literal(30),
+  }).strict().optional(),
 })
 const jobs = z.array(JobSchema.safeExtend({ source: JobProviderSchema, fetchedAt: timestamp }))
 const catalogSchema = metadata.extend({ companies: z.array(company), cities: z.array(city), jobs })

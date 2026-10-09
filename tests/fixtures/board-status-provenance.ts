@@ -15,12 +15,12 @@ export const PROVENANCE_BASE = `${PROVENANCE_DAY}T06:00:00.000Z`
 /** `stamp('06:01:00.000')` → `2026-10-01T06:01:00.000Z`. */
 export const stamp = (time: string) => `${PROVENANCE_DAY}T${time}Z`
 
-export const PROVENANCE_ALDER: Company = {
+export const PROVENANCE_ALDER: Company & { board: string } = {
   id: 'provenance-alder', name: 'Alder Forge', initials: 'AF', color: '#3974cc',
   industry: '가상 출처 검증', provider: 'greenhouse', board: 'AlderProvenance74',
   careerUrl: 'https://example.com/careers/provenance-alder',
 }
-export const PROVENANCE_BIRCH: Company = {
+export const PROVENANCE_BIRCH: Company & { board: string } = {
   id: 'provenance-birch', name: 'Birch Signal', initials: 'BS', color: '#487950',
   industry: '가상 출처 검증', provider: 'smartrecruiters', board: 'BirchProvenance74',
   careerUrl: 'https://example.com/careers/provenance-birch',
