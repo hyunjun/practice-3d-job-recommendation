@@ -598,3 +598,234 @@ describe('REMEDY queued caller context, pacing and abort ownership', () => {
     }
   })
 })
+
+describe('PACING separate clocks and observable transport invocation', () => {
+  type Result = { status: 'fulfilled'; value: unknown } | { status: 'rejected'; error: unknown }
+
+  function separateClocks(options: {
+    fractionalWallLead?: boolean
+    firstLookupCostMs?: number
+    reply?: (url: string) => Response | Promise<Response>
+  } = {}) {
+    vi.useFakeTimers({ toFake: ['Date', 'performance', 'setTimeout', 'clearTimeout'] })
+    vi.setSystemTime(new Date(DAANGN_NOW))
+    const timerNow = performance.now.bind(performance)
+    let invocationCost = 0
+    vi.spyOn(performance, 'now').mockImplementation(() => {
+      const elapsed = timerNow()
+      // Continuous, nondecreasing elapsed clock: it lags the timer/wall clock
+      // by exactly .25ms at 3000ms, then advances at the same rate.
+      const fractionalLag = options.fractionalWallLead ? Math.min(elapsed / 12_000, 0.25) : 0
+      return elapsed - fractionalLag + invocationCost
+    })
+    const fallback = vi.fn(() => { throw new Error('Unexpected global network fallback') })
+    vi.stubGlobal('fetch', fallback)
+    const calls: { url: string; monotonicAt: number; wallAt: number; signal: AbortSignal }[] = []
+    const fetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input)
+      expect([DAANGN_ROBOTS_URL, DAANGN_LIST_URL, DAANGN_MARKET_URL]).toContain(url)
+      expect(init?.method).toBe('GET')
+      expect(init?.body).toBeUndefined()
+      expect(init?.redirect).toBe('manual')
+      const headers = new Headers(init?.headers)
+      expect(headers.get('User-Agent')).toBe('OrbitCareerAtlas/1.0')
+      expect(headers.get('Accept')).toBe(url === DAANGN_ROBOTS_URL ? 'text/plain' : 'text/html')
+      expect(headers.has('Authorization')).toBe(false)
+      expect(headers.has('Cookie')).toBe(false)
+      expect(init?.signal).toBeInstanceOf(AbortSignal)
+      calls.push({
+        url, monotonicAt: performance.now(), wallAt: Date.now() - Date.parse(DAANGN_NOW),
+        signal: init!.signal!,
+      })
+      return options.reply ? options.reply(url)
+        : url === DAANGN_ROBOTS_URL ? robots() : html('fictional paced page')
+    })
+    let firstLookup = true
+    const factory = createDaangnRequestFactory({
+      get fetch() {
+        // The public injected transport lookup runs synchronously before the
+        // recorded fetch. Model event-loop work without sleeping or running
+        // timers; both clocks advance by the same literal cost.
+        if (firstLookup) {
+          firstLookup = false
+          const cost = options.firstLookupCostMs ?? 0
+          if (cost) {
+            vi.setSystemTime(Date.now() + cost)
+            invocationCost += cost
+          }
+        }
+        return fetch
+      },
+    })
+    const owned: {
+      parent: AbortController
+      session: DaangnSession
+      result: Promise<Result>
+      settled: () => boolean
+    }[] = []
+    function start(url = DAANGN_LIST_URL) {
+      const parent = new AbortController()
+      const session = factory.createSession(parent.signal)
+      let settled = false
+      // Attach both outcomes immediately, including expected pre-fix failures.
+      const result: Promise<Result> = session.request(url, parent.signal).then(
+        value => { settled = true; return { status: 'fulfilled' as const, value } },
+        error => { settled = true; return { status: 'rejected' as const, error } },
+      )
+      const item = { parent, session, result, settled: () => settled }
+      owned.push(item)
+      return item
+    }
+    async function close() {
+      owned.forEach(item => item.parent.abort())
+      let joined = false
+      const cleanup = Promise.allSettled([
+        ...owned.map(item => item.result), ...owned.map(item => item.session.close()),
+      ]).then(() => { joined = true })
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(joined).toBe(true)
+      if (joined) await cleanup
+      expect(vi.getTimerCount()).toBe(0)
+      expect(fallback).not.toHaveBeenCalled()
+    }
+    return { calls, start, close }
+  }
+
+  it('PACING-REPRO holds a request at wall3000ms but monotonic2999.75ms', async () => {
+    const h = separateClocks({ fractionalWallLead: true })
+    const request = h.start()
+    try {
+      await vi.advanceTimersByTimeAsync(0)
+      expect(h.calls.map(call => call.monotonicAt)).toEqual([0])
+      await vi.advanceTimersByTimeAsync(3000)
+      expect(Date.now() - Date.parse(DAANGN_NOW)).toBe(3000)
+      expect(performance.now()).toBe(2999.75)
+      expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL])
+      expect(request.settled()).toBe(false)
+      await vi.advanceTimersByTimeAsync(1)
+      expect(request.settled()).toBe(true)
+      expect(await request.result).toEqual({ status: 'fulfilled', value: 'fictional paced page' })
+      expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL, DAANGN_LIST_URL])
+      expect(h.calls.map(call => call.monotonicAt)).toEqual([0, 3000.75])
+      expect(h.calls[1].monotonicAt - h.calls[0].monotonicAt).toBeGreaterThanOrEqual(3000)
+      expect(request.session.requestCount()).toBe(2)
+    } finally { await h.close() }
+  })
+
+  it('PACING-REPRO includes synchronous pre-fetch overhead in the next observed gap', async () => {
+    const h = separateClocks({ firstLookupCostMs: 25 })
+    const request = h.start()
+    try {
+      await vi.advanceTimersByTimeAsync(0)
+      expect(h.calls.map(call => call.monotonicAt)).toEqual([25])
+      expect(h.calls.map(call => call.wallAt)).toEqual([25])
+      await vi.advanceTimersByTimeAsync(2975)
+      expect(performance.now()).toBe(3000)
+      expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL])
+      await vi.advanceTimersByTimeAsync(24)
+      expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL])
+      await vi.advanceTimersByTimeAsync(1)
+      expect(request.settled()).toBe(true)
+      expect(await request.result).toEqual({ status: 'fulfilled', value: 'fictional paced page' })
+      expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL, DAANGN_LIST_URL])
+      expect(h.calls.map(call => call.monotonicAt)).toEqual([25, 3025])
+      expect(h.calls[1].monotonicAt - h.calls[0].monotonicAt).toBeGreaterThanOrEqual(3000)
+      expect(request.session.requestCount()).toBe(2)
+    } finally { await h.close() }
+  })
+
+  it.each([
+    ['forward', 60_000, [0, 63_000, 66_000, 69_000]],
+    ['backward', -60_000, [0, -57_000, -54_000, -51_000]],
+  ] as const)('PACING-REPRO %s wall adjustment cannot change monotonic request spacing',
+    async (_direction, wallJump, expectedWallStarts) => {
+      const h = separateClocks()
+      const a = h.start()
+      try {
+        await vi.advanceTimersByTimeAsync(0)
+        expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL])
+        vi.setSystemTime(Date.now() + wallJump)
+        expect(performance.now()).toBe(0)
+        // A second employer's enqueue wakes the shared scheduler. Its public
+        // request must neither skip the gate nor stretch it by the wall jump.
+        const b = h.start(DAANGN_MARKET_URL)
+        await vi.advanceTimersByTimeAsync(0)
+        expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL])
+        await vi.advanceTimersByTimeAsync(2999)
+        expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL])
+        await vi.advanceTimersByTimeAsync(1)
+        expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL, DAANGN_LIST_URL])
+        await vi.advanceTimersByTimeAsync(6000)
+        expect(a.settled()).toBe(true)
+        expect(b.settled()).toBe(true)
+        expect(await a.result).toEqual({ status: 'fulfilled', value: 'fictional paced page' })
+        expect(await b.result).toEqual({ status: 'fulfilled', value: 'fictional paced page' })
+        expect(h.calls.map(call => call.url)).toEqual([
+          DAANGN_ROBOTS_URL, DAANGN_LIST_URL, DAANGN_ROBOTS_URL, DAANGN_MARKET_URL,
+        ])
+        expect(h.calls.map(call => call.monotonicAt)).toEqual([0, 3000, 6000, 9000])
+        expect(h.calls.map(call => call.wallAt)).toEqual(expectedWallStarts)
+        for (let index = 1; index < h.calls.length; index++)
+          expect(h.calls[index].monotonicAt - h.calls[index - 1].monotonicAt).toBeGreaterThanOrEqual(3000)
+        expect([a.session.requestCount(), b.session.requestCount()]).toEqual([2, 2])
+      } finally { await h.close() }
+    },
+  )
+
+  it('PACING-REPRO keeps HTTP-date Retry-After on wall time and post-expiry pacing on monotonic time', async () => {
+    let rateLimited = false
+    const h = separateClocks({
+      reply(url) {
+        if (url === DAANGN_ROBOTS_URL) return robots()
+        if (!rateLimited) {
+          rateLimited = true
+          return new Response('fictional rate limit', {
+            status: 429, headers: { 'Retry-After': 'Sun, 25 Oct 2026 06:02:03 GMT' },
+          })
+        }
+        return html('fictional recovery')
+      },
+    })
+    const a = h.start()
+    try {
+      await vi.advanceTimersByTimeAsync(3000)
+      expect(a.settled()).toBe(true)
+      expect(await a.result).toMatchObject({
+        status: 'rejected', error: { retryAfter: Date.parse('2026-10-25T06:02:03.000Z') },
+      })
+      expect(h.calls.map(call => call.monotonicAt)).toEqual([0, 3000])
+
+      vi.setSystemTime(new Date('2026-10-25T05:59:00.000Z'))
+      expect(performance.now()).toBe(3000)
+      const b = h.start()
+      await vi.advanceTimersByTimeAsync(0)
+      expect(b.settled()).toBe(true)
+      expect(await b.result).toMatchObject({
+        status: 'rejected', error: { retryAfter: Date.parse('2026-10-25T06:02:03.000Z') },
+      })
+      expect(b.session.requestCount()).toBe(0)
+      expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL, DAANGN_LIST_URL])
+
+      vi.setSystemTime(new Date('2026-10-25T06:02:03.000Z'))
+      expect(performance.now()).toBe(3000)
+      const c = h.start()
+      await vi.advanceTimersByTimeAsync(0)
+      expect(h.calls.map(call => call.url)).toEqual([DAANGN_ROBOTS_URL, DAANGN_LIST_URL])
+      await vi.advanceTimersByTimeAsync(2999)
+      expect(h.calls).toHaveLength(2)
+      await vi.advanceTimersByTimeAsync(1)
+      expect(h.calls.map(call => call.monotonicAt)).toEqual([0, 3000, 6000])
+      await vi.advanceTimersByTimeAsync(3000)
+      expect(c.settled()).toBe(true)
+      expect(await c.result).toEqual({ status: 'fulfilled', value: 'fictional recovery' })
+      expect(h.calls.map(call => call.url)).toEqual([
+        DAANGN_ROBOTS_URL, DAANGN_LIST_URL, DAANGN_ROBOTS_URL, DAANGN_LIST_URL,
+      ])
+      expect(h.calls.map(call => call.monotonicAt)).toEqual([0, 3000, 6000, 9000])
+      expect(h.calls.map(call => call.wallAt)).toEqual([0, 3000, 126_000, 129_000])
+      expect([a.session.requestCount(), b.session.requestCount(), c.session.requestCount()]).toEqual([2, 0, 2])
+      for (let index = 1; index < h.calls.length; index++)
+        expect(h.calls[index].monotonicAt - h.calls[index - 1].monotonicAt).toBeGreaterThanOrEqual(3000)
+    } finally { await h.close() }
+  })
+})

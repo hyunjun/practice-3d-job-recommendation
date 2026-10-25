@@ -130,17 +130,20 @@ export function createDaangnRequestFactory(options: { fetch?: typeof fetch } = {
     }
     const item = waiting[0]
     const due = Math.max(nextStart, lastStart === undefined ? 0 : lastStart + item.interval)
-    if (due > Date.now()) {
-      timer = setTimeout(pump, due - Date.now())
+    const remaining = due - performance.now()
+    if (remaining > 0) {
+      timer = setTimeout(pump, Math.ceil(remaining))
       return
     }
     waiting.shift()
     item.signal.removeEventListener('abort', item.cancel)
     if (item.signal.aborted) { item.reject(item.signal.reason); pump(); return }
     active = true
-    lastStart = Date.now()
+    const response = item.run()
+    // Include synchronous dispatch work in the next request’s minimum gap.
+    lastStart = performance.now()
     nextStart = lastStart + item.interval
-    void item.run().then(item.resolve, cause => {
+    void response.then(item.resolve, cause => {
       if (cause instanceof BoardResponseError && (cause.status === 429 || cause.retryAfter)) {
         const retryAfter = Math.max(cause.retryAfter ?? Date.now() + 60_000, cooldown?.retryAfter ?? 0)
         cooldown = new BoardFetchError(cause.message, retryAfter)

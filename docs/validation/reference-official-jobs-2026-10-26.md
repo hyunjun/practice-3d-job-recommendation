@@ -1,6 +1,6 @@
 # 공식 채용 출처 확장 — 로컬 검증 기록
 
-2026-10-26 KST 기준, 이 문서는 source07의 초기 전체 production·development 검사와 Main·Astra의 결과 합의를 보존한다. 후속 실제 출처 수집에서 발견한 문제와 수정 후 검사는 [당근 실제 수집 실패 수정과 검증](daangn-live-remedy-2026-10-26.md)에 별도로 기록한다. 실제 신규 공고의 운영 반영 및 자동 발행 확인은 아직 완료되지 않았다. 아래 실행 시각은 UTC다. 초기 검증의 기계 판독용 요약은 [검증 근거](reference-official-jobs-evidence-2026-10-26.json)에 보존한다.
+2026-10-26 KST 기준, 이 문서는 source07의 초기 전체 production·development 검사와 Main·Astra의 결과 합의를 보존한다. 후속 실제 출처 수집에서 발견한 문제와 수정 후 검사는 [HTML·문맥 수정](daangn-live-remedy-2026-10-26.md)과 [요청 간격 수정 검증](daangn-pacing-remedy-2026-10-26.md)에 따로 기록한다. 요청 간격 수정의 최종 247개 로컬 검사·타입·빌드는 통과했고 Main·Astra가 같은 최종 소스·결과 해시에 명시적으로 동의했다. 실제 신규 공고의 운영 반영 및 자동 발행 확인은 아직 완료되지 않았다. 아래 실행 시각은 UTC다. 초기 검증의 기계 판독용 요약은 [검증 근거](reference-official-jobs-evidence-2026-10-26.json)에 보존한다.
 
 ## 변경과 적용 근거
 

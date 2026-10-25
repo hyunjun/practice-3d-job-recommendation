@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T21:25:27.661749+00:00",
+  "status": "LOCAL_PACING_VALIDATION_PASSED_AND_EXPLICITLY_AGREED",
+  "scope": "Monotonic minimum request pacing and test-only return type correction; complete affected synthetic validation. Live capture and rollout remain incomplete.",
+  "participants": {
+    "main": "Implementation, integration and independent raw result review",
+    "astra": {
+      "requestedModel": "global.openai.gpt-6-astra",
+      "requestedReasoning": "max",
+      "role": "Independent design/code/actual review; explicit final agreement"
+    },
+    "tester": "Separate subagent executed actual pinned validation",
+    "fable": "Excluded by later user instruction; historical missing review is unreceived, never approved."
+  },
+  "validatedSource": {
+    "manifestSha256": "4c7ee9819e3d30b1bf8d1b4b4e9b5889c43e70ddca031677b2e1dacb8ed47c28",
+    "contentDigest": "b079514be2005c23e00bf3cf5e14012125d44a77c1f0ba85d9157d158992af2d",
+    "files": 631,
+    "bytes": 61793808,
+    "baseCommit": "357344d17064b981fa3fd1729ff6735176d5e63b",
+    "changedProductAndTest": [
+      {
+        "path": "server/providers/daangn-http.ts",
+        "bytes": 13448,
+        "sha256": "c794939b2eb18215d75f4a7d88e28ec671db1c212c3960f61255f5c9dd14c763"
+      },
+      {
+        "path": "tests/unit/daangn-http.test.ts",
+        "bytes": 42441,
+        "sha256": "cbcac2de2f5916a5f1127284535d8e865d036ca7ace6b3728d36a5e9067fa43d"
+      }
+    ]
+  },
+  "priorEvidence": {
+    "live02": {
+      "rawStatus": "FAILED",
+      "exitCode": 1,
+      "providerRequests": 42,
+      "beforeCatalogRequests": 1,
+      "replayProviderRequests": 0,
+      "partialNewIdAndUrls": 34,
+      "monoMinimumMs": 2999.861374999993,
+      "minimumRequiredMs": 3000,
+      "fullSourceAssessmentReached": false,
+      "consensusSha256": "668e5fe14eb76ca73793e24fbbf3b824ed82343e5f4ae48e5e46180e7e9dd970"
+    },
+    "preFixReproduction": {
+      "rawStatus": "FAILED",
+      "exitCode": 1,
+      "expectedBehaviorFailures": 5,
+      "oldTestsFilteredSkipped": 53,
+      "consensusSha256": "5f7c5b07eb1ac5ae0648c8a91fa527b815f1f61a1a38abf84b3b0e147291c0da"
+    },
+    "firstPostFix": {
+      "rawStatus": "FAILED",
+      "exitCode": 1,
+      "passedCases": 245,
+      "failure": "TS2322 local test result value:string vs CareerRequest Promise<unknown>",
+      "phasesNotRun": 5,
+      "consensusSha256": "51cc13f60efcf80e88fe05cb467194c1e8ad7eac7eee49a2324a75baa3e9e895"
+    },
+    "typeRemedyConsensusSha256": "ebf9402379689a63685eea39443179e2a33835db9cc6fb56b561000774f11557"
+  },
+  "postFixActual": {
+    "toolExitCode": 0,
+    "starts": 1,
+    "retries": 0,
+    "phasesPassed": 12,
+    "phasesNotRun": 0,
+    "caseTotals": {
+      "productUnitPassed": 208,
+      "assessorPassed": 37,
+      "productionE2EPassed": 2,
+      "totalPassed": 247,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0,
+      "retries": 0
+    },
+    "units": {
+      "fileCounts": {
+        "tests/unit/daangn-http.test.ts": 58,
+        "tests/unit/daangn-integration.test.ts": 8,
+        "tests/unit/daangn-lifecycle.test.ts": 4,
+        "tests/unit/daangn-parser.test.ts": 106,
+        "tests/unit/daangn-robots.test.ts": 32
+      },
+      "distinctFileTitles": 185,
+      "listJsonJunitMultiplicitiesExact": true,
+      "allFivePacingRegressionsPassedFresh": true
+    },
+    "e2e": {
+      "cases": 2,
+      "widths": [
+        1440,
+        320
+      ],
+      "fullHtmlSteps": 546,
+      "unsuccessfulIntermediateSamples": 6,
+      "successfulReadinessParents": 2,
+      "rootOrGlobalFailures": 0,
+      "jsonHtmlListAgreement": true,
+      "screenshotCountViewed": 4,
+      "nonemptyDialogGeometryRecords": 4,
+      "literalCatalogCounts": {
+        "companies": 132,
+        "boards": 132,
+        "jobs": 7
+      },
+      "newIdAndOriginalUrlAssertionsPassed": true,
+      "sixSyntheticRequestsPerCase": true,
+      "adjacentGapsMilliseconds": [
+        [
+          3003.0,
+          3004.0,
+          3002.0,
+          3003.0,
+          3002.0
+        ],
+        [
+          3002.0,
+          3004.0,
+          3003.0,
+          3003.0,
+          3003.0
+        ]
+      ]
+    },
+    "builds": {
+      "rootTypecheck": "PASSED",
+      "workerTypecheck": "PASSED",
+      "productionBuild": "PASSED",
+      "workerAssetsBuild": "PASSED",
+      "workerDryRunBundle": "PASSED",
+      "workerInputModules": 111,
+      "workerImportEdges": 360,
+      "workerGzipBytes": 160255,
+      "assets": 367,
+      "forbiddenParse5EntitiesServerProviderCollectorAsyncHooks": [],
+      "emittedHashAndGraphCorrespondence": true
+    },
+    "workerBytes": 944332,
+    "workerSha256": "95abc70046d112328b03d9467dc1704e9d57d5f9ad216e007f240fefd2fd5d0c",
+    "assetBytes": 14892289,
+    "realDeployment": false
+  },
+  "preservation": {
+    "freshGeneratedFiles": 926,
+    "currentPdfArchiveFiles": 198,
+    "currentPdfArchiveBytes": 3510867,
+    "currentPdfJournals": 3,
+    "e2eArchiveFiles": 758,
+    "e2eArchiveDirectoriesIncludingRoot": 31,
+    "e2eArchiveLinks": 2,
+    "e2eArchiveBytes": 33225032,
+    "rawSnapshotFiles": 1138,
+    "rawSnapshotBytes": 36534789,
+    "dependencyEntriesBeforeAfter": 13611,
+    "dependencyDirectoriesBeforeAfter": 1088,
+    "browserEntriesBeforeAfter": 358,
+    "cleanupComplete": false
+  },
+  "closure": {
+    "queriedOwnedPidsAbsent": 84,
+    "internalLiteralBirths": 26,
+    "externalEarlyPrimaryRows": 3,
+    "setsMayOverlap": true,
+    "registeredSpawns": 43,
+    "exitCallbacks": 40,
+    "missingIndividualEsbuildExitCallbacks": 3,
+    "vitestSigtermCallbacks": 10,
+    "defaultServerSigkillCallbacks": 1,
+    "productionFixtureServersCode0": 2,
+    "outerObservedAggregate": 111,
+    "aggregateNotBirthCount": true,
+    "guardReleased": true,
+    "power": {
+      "timestampedRows": 36904,
+      "validSummaryRows": 12,
+      "overlappingRows": 9,
+      "overlapMeaning": "Nine assertion rows; zero Sleep/Wake/DarkWake events or malformed records.",
+      "monotonicControllerAndTeardownSeconds": 81.36625962500693,
+      "outerWallSeconds": 84.161329,
+      "sameGuardBeforeAfter": true,
+      "guardReleased": true,
+      "pmsetSnapshotLimit": "Actual before/after/released assertions only; no periodic pmset snapshots inferred."
+    }
+  },
+  "evidence": {
+    "testerReportSha256": "5ad8c1176f19ffa1f5a6bd12646796f55eeeb0bdcf9e8e5603a7f0092832aa17",
+    "testerIndexSha256": "2d2ef6173e10dfd367ba2be6710d560f9a88b295674e02ad596e569c4a413e15",
+    "mainActualReviewSha256": "20f8861fa94c2a12b894cf03a18d28cf083248cce6d422c875f147be885bb35a",
+    "astraActualReviewSha256": "8ad4f2a0eb00339102afa36d4167907c3565e27af75861bf785c832344681e9f",
+    "actualConsensusSha256": "623d0893f53bc2af35833dd249c0da38d7200b24000ce176a2178845ca1f2b2b",
+    "planSha256": "3a0556f6fb4e7a9d69a84425ac42bc915b36f818f495f47a30080b1ce5cdfd3e",
+    "innerResultSha256": "e5db32a9bdb43d62eb848a54759c29c4323cad988683d0afb498bf220ee8472f",
+    "outerResultSha256": "9da2e305829b08a71762b3121a6aa3e5915dacbdeabae9b5403c5205c698c62e",
+    "terminalReceiptSha256": "28cd3705e37a6f4e2c6135973ebf8582f9decbf900881f558e755da7d91bae44",
+    "retainedOutputInventorySha256": "7f561aeafe8f7deed8843e6649bee09cfd1e64004352a4ab8707674e6ef02515",
+    "retainedRawInventorySha256": "f852f902a0af437cc315497952e39f0b94a9ab433261690fdfaf8501a08a0553"
+  },
+  "localEvidenceRetention": {
+    "root": ".local/research/reference-official-jobs-2026-10-25/",
+    "reason": "Irreproducible source responses and active validation evidence retained through complete live capture/publication/schedule verification; final reproducible output cleanup separately recorded."
+  },
+  "remaining": [
+    "Fresh complete live capture of both sources, exact mono gaps, independent content assessment, newID AND URL and zero-request checkpoint replay",
+    "132-source actual capacity and >=115 existing-source recent availability",
+    "Reviewed collector/default workflow rollout and exact active Worker relationship",
+    "Published132-source API and1440/320 realUI acceptance",
+    "Genuine original event=schedule follow-up using reviewed collector",
+    "Final owned cleanup/retention audit"
+  ],
+  "goalComplete": false
+}
