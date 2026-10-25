@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T22:27:39.922750+00:00",
+  "status": "TWO_SOURCE_ACTUAL_EVIDENCE_ACCEPTED_WITH_POWER_SUPPLEMENT_ROLLOUT_PENDING",
+  "validatedSource": {
+    "commit": "443340e6ad23a9afb9f8dc1f9acd9a69476b6a21",
+    "files": 633,
+    "manifest": {
+      "path": "pacing-remedy-preserved-source-manifest-01.json",
+      "bytes": 109652,
+      "sha256": "98b5b1bfe33a094766c78da4ca32adc2becca3e80f2824cc3bde46565a39f279"
+    }
+  },
+  "before": {
+    "requests": 1,
+    "companies": 130,
+    "boards": 130,
+    "uniqueJobs": 7040,
+    "stale": true,
+    "generation": "3caaad63-cdd8-4db8-87e0-59d50a4decbe",
+    "final132HealthClaim": false
+  },
+  "capture": {
+    "providerRequests": 42,
+    "robots": 4,
+    "lists": 4,
+    "details": 34,
+    "allHttp200Complete": true,
+    "providerBytes": 3067277,
+    "listCorporateCounts": {
+      "daangn": 45,
+      "daangn-pay": 5
+    },
+    "includedTechnical": {
+      "daangn": 31,
+      "daangn-pay": 3
+    },
+    "excluded": {
+      "daangn": 14,
+      "daangn-pay": 2
+    },
+    "newIdAndCanonicalUrlPairs": 34,
+    "minimumMonotonicGapMs": 3000.921166999993,
+    "minimumRequiredMs": 3000,
+    "toleranceMs": 0,
+    "countryOnlyKr": 34,
+    "unknownCityJobs": 34,
+    "datePostedNotPromotedToUpdatedAt": true
+  },
+  "replay": {
+    "providerRequests": 0,
+    "sameIdsUrlsBoardsPresencesAndClocks": true,
+    "duplicates": 0,
+    "addedIds": 0,
+    "freshSourceCollectionClaim": false
+  },
+  "originalExecution": {
+    "session": 56677,
+    "outerStatus": "FAILED",
+    "exitCode": 1,
+    "innerPassedPhases": 3,
+    "notRunPhases": 0,
+    "preserved": true,
+    "solePowerFailure": "Valid owning-process assertion named Video Wake Lock was misclassified as untimestamped Wake event."
+  },
+  "supplement": {
+    "directToolExitCode": 0,
+    "toolChunk": "4af25f",
+    "sessionId": null,
+    "runs": 1,
+    "retries": 0,
+    "nativePassed": 45,
+    "failedErrorsSkippedNotRun": 0,
+    "expectedParserRefusals": 36,
+    "successfulParserReturns": 9,
+    "nativeTestSeconds": 0.831,
+    "sameRawLogAndRecordedInterval": true,
+    "timestampedRows": 37370,
+    "summaries": 12,
+    "recognizedOwners": 11,
+    "events": 0,
+    "malformed": 0,
+    "allOtherIntervalFieldsPreserved": true,
+    "originalFailureReproducedExactly": true,
+    "priorAcceptedLogPreserved": true,
+    "newHostObservation": false,
+    "newProviderApiPmsetWrapperStarts": 0
+  },
+  "closure": {
+    "originalScopedAbsentPids": 30,
+    "originalUnknownIndividualExitCallbackPid": 66564,
+    "originalControllerExitCode": 0,
+    "originalGuardExitCode": -15,
+    "originalGuardReaped": true,
+    "supplementDirectPythonExited": true,
+    "supplementChildren": 0,
+    "supplementOpenAdapterDescriptors": 0,
+    "hostWideAbsenceClaim": false
+  },
+  "agreement": {
+    "combinedSourceAndSupplementAccepted": true,
+    "consensus": {
+      "path": "live03-combined-actual-consensus-01.json",
+      "bytes": 5291,
+      "sha256": "634b3d0ba4e6ef19f11521c7cea8322908efaed66157aadc50ce759ea058b1fe"
+    },
+    "main": {
+      "path": "main-live03-power-parser-actual-review-01.json",
+      "bytes": 5258,
+      "sha256": "0b5bc55313fae9e943784378123a5b1bf9568f5cfc9fe5facd70e526f9641baa"
+    },
+    "astra": {
+      "path": "astra-live03-power-parser-actual-review-01.json",
+      "bytes": 8955,
+      "sha256": "56a3d1b951c8348aafba5df0ac7fba9d7169a77fc80f76ff05dda15926055ce9"
+    },
+    "originalReport": {
+      "path": "tester/live03-actual-report-01.json",
+      "bytes": 32879,
+      "sha256": "998dfa8e498013aaa0bd9251775d75b3370912084cd20afa55d16c78a7d8dd58"
+    },
+    "originalIndex": {
+      "path": "tester/live03-actual-index-01.json",
+      "bytes": 5303,
+      "sha256": "c1a40a8fe18febc35f8a833bf12c32ee9a5b95d61091bc27a59edd417a2de38e"
+    },
+    "supplementReport": {
+      "path": "tester/live-power-parser-remedy-01/actual-report-01.json",
+      "bytes": 16689,
+      "sha256": "726b2116803f5d798de9bf0adb283f71055053334401e1ea0c06d43ce987ed8b"
+    },
+    "supplementIndex": {
+      "path": "tester/live-power-parser-remedy-01/actual-index-01.json",
+      "bytes": 2962,
+      "sha256": "a965e62667cd4e13b9d64a8cb52d62f5cfd5b1732d4cc5bf0cc9db7aab8d98af"
+    }
+  },
+  "retention": {
+    "ignoredRoot": ".local/research/reference-official-jobs-2026-10-25/",
+    "reason": "Actual raw responses, original failures and immutable observation/approval evidence remain needed for ongoing132-company rollout and cannot be reconstructed as the same observations.",
+    "cumulativeBeforeRequests": 3,
+    "cumulativeProviderRequests": 88,
+    "cumulativeReplayProviderRequests": 0,
+    "cleanupComplete": false
+  },
+  "remaining": [
+    "Fresh remote GitHub/Cloudflare state and controlled collector/workflow installation.",
+    "Actual132-company publication, old130identity and minimum115recent-normal old boards, exact capacity checks.",
+    "Same-generation operatingAPI and new-job UI at1440/320.",
+    "Original event=schedule follow-up with verified collector, final preservation and owned cleanup."
+  ],
+  "newCollectorDeployed": false,
+  "fullGoalComplete": false
+}
