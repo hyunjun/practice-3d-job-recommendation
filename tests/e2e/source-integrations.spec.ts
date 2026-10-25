@@ -67,20 +67,20 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       ])
       await surveyDataButton(page).click()
       const data = page.getByRole('dialog')
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '130', '75'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '132', '75'])
       await expect(data.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
         'Greenhouse67개 회사', 'Ashby29개 회사', 'Lever10개 회사', 'SmartRecruiters10개 회사',
-        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
+        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트5개 회사',
       ])
       await expect(data.getByText('Himalayas는 하루 단위로 갱신됩니다. 정상 조회 후 24시간 동안 자료를 재사용하며 새로고침도 같은 대기 시간을 따릅니다. 거주 국가·시간대 조건을 회사의 오피스 위치로 표시하지 않습니다.', { exact: true })).toBeVisible()
       await surveyBoardHistory(page)
-      await expect(data.locator('.board-row')).toHaveCount(130)
+      await expect(data.locator('.board-row')).toHaveCount(132)
       for (const [name, id] of [['Hugging Face', 'hugging-face'], ['SmartNews', 'smartnews'], ['Mercari', 'mercari']] as const) {
         const row = data.locator('.board-row').filter({ has: page.getByText(name, { exact: true }) })
         await expect(row.getByRole('link', { name: `${name} 채용 페이지`, exact: true })).toHaveAttribute('href', WORKABLE_CAREER_URLS[id])
       }
       await expectPublicSourceOverview(page)
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '130', '75'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '132', '75'])
       await surveyClose(page, surveyDataButton(page))
       await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
       await expect(page.locator('.saved-card')).toHaveCount(0)
@@ -223,7 +223,7 @@ for (const width of [1440, 320]) test.describe(`independent source integrations 
       expect(firstRequests.map(request => request.url).sort()).toEqual([...INTEGRATION_FULL_URLS].sort())
       const before = await readFile(server.defaultCache, 'utf8')
       const cache = JSON.parse(before)
-      expect(cache.boards).toHaveLength(130)
+      expect(cache.boards).toHaveLength(132)
       for (const previous of old.boards) expect(cache.boards.find((board: { companyId: string }) => board.companyId === previous.companyId))
         .toMatchObject({ checkedAt: '2026-10-01T23:39:55.000Z', snapshot: {
           fetchedAt: '2026-10-01T23:39:55.000Z', total: previous.snapshot.total,
@@ -311,7 +311,7 @@ test('daily source remains browse-fresh while a new UTC day cannot claim a compa
     expect(history.days[1].complete).toBeUndefined()
     expect(history.days[1].latest.boards.filter(board => board.status === 'stale').map(board => board.companyId)).toEqual([
       'microsoft', 'adobe', 'salesforce', 'cisco', 'qualcomm', 'broadcom', 'redhat',
-      'booking', 'zalando', 'starbucks',
+      'booking', 'zalando', 'starbucks', 'daangn', 'daangn-pay',
     ])
     expect(history.days[0].complete).toEqual(initial.days[0].complete)
     const requests = await assertSynthetic(server, 184, 12)

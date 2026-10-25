@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T16:37:14.425511+00:00",
+  "status": "LOCAL_VALIDATION_CONSENSUS_COMPLETE_LIVE_ROLLOUT_PENDING",
+  "references": [
+    {
+      "url": "https://github.com/ai-job-search-dev/ai-job-search",
+      "commit": "e16acee3abdaae57f8026789338a3c6eebf4608b"
+    },
+    {
+      "url": "https://github.com/wing0828/ai-job-search-kr",
+      "commit": "ae76108fc5e2ae75dc057e4147a3c56982042ec5"
+    }
+  ],
+  "source": {
+    "validatedManifestSha256": "b1b043315eae1086b927e8efb9e8d154a525adf3d6a418e4662e47bd0f85ae7d",
+    "contentDigest": "804e0d66bddcb549a91c5ae3382dab22655ef1d3006691c37eb414cadc392a16",
+    "files": 620,
+    "baseCommit": "1a9c1e04e0aac19f99193a97fe97ae25d148257c",
+    "preservationDelta": "Only documentation status and this validation record are added after the validated snapshot; product and test bytes stay identical."
+  },
+  "participants": {
+    "main": {
+      "decision": "approve",
+      "review": {
+        "localPath": "main-go11-final-review-01.json",
+        "bytes": 7774,
+        "sha256": "b8bd58d03dea748a8d86cb592fd22e21a4822e041a198e71a82b4aa51c6d35e9"
+      }
+    },
+    "astra": {
+      "decision": "approve",
+      "requestedModel": "global.openai.gpt-6-astra",
+      "requestedReasoning": "max",
+      "review": {
+        "localPath": "astra-go11-final-review-01.json",
+        "bytes": 46773,
+        "sha256": "ddec67b4d44715e8b00fcd79299490444d7ab78a9602205f8cb114360c3b2a94"
+      },
+      "configurationNote": "Requested settings are recorded; this is not a separate runtime-attestation claim."
+    },
+    "tester": {
+      "role": "independent test agent",
+      "report": {
+        "localPath": "tester/power-runs/20261025T152436Z-4fddb2713b21/actual-execution-report-11-01.json",
+        "bytes": 93398,
+        "sha256": "814a55675a578f21321f24275198bcdc6d5c375da658ba3d96b2a299f90c6447"
+      }
+    },
+    "fable": "Excluded by later user instruction; old blocked/unreceived review remains unreceived, not approval."
+  },
+  "localEvidenceRoot": ".local/research/reference-official-jobs-2026-10-25 (original repository checkout; ignored local evidence, not public raw data)",
+  "consensus": {
+    "localPath": "go11-actual-consensus-01.json",
+    "bytes": 9070,
+    "sha256": "7ddda1371087bd4502a3ac6472034f6ef8af8d8f3ca5eb9aa13749ed50800b28"
+  },
+  "currentRun": {
+    "singleOuterToolSession": 73176,
+    "toolExitCode": 0,
+    "setupAdmissions": 3,
+    "productionPreflight": 13,
+    "fullProduction": {
+      "files": 84,
+      "cases": 622
+    },
+    "development": {
+      "files": 8,
+      "cases": 39
+    },
+    "caseAttemptsAcrossThreePhases": 674,
+    "not674UniqueDeclaredTests": true,
+    "failed": 0,
+    "notRun": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "testRetries": 0,
+    "rootOrPerResultErrors": 0,
+    "sourceFiles": 620,
+    "frozenControls": 83,
+    "sourceObservations": 14,
+    "archiveEntries": 29222,
+    "regularFiles": 21896,
+    "regularBytes": 1434532268,
+    "directoriesIncludingRoots": 1775,
+    "rawSymlinks": 5551,
+    "archiveJournals": 14,
+    "archiveRootsCompleted": 4,
+    "archiveRootsSourceAbsent": 2,
+    "identitySnapshots": 707,
+    "literalBirthKeys": 1108,
+    "normalizedBirthIdentities": 1106,
+    "matchingOwnedBirthsAtFinalTesterAndMainPs": 0,
+    "fixtureTerminal0Runs": 194,
+    "fixtureProcessFiles": 121,
+    "powerGuardReleasedAndReaped": true,
+    "powerMonotonicSeconds": 3537.053028166003,
+    "powerTimestampedRows": 37961,
+    "overlapPowerAssertions": 2071,
+    "overlapSleepWakeDarkWakeEvents": 0
+  },
+  "acceptedCarriedChecks": [
+    {
+      "run": "GO05",
+      "checks": [
+        "TypeScript",
+        "111 unit test files / 3669 tests",
+        "Cloudflare static build",
+        "Worker production bundle",
+        "production build",
+        "publication CLI 15"
+      ]
+    },
+    {
+      "run": "GO06",
+      "checks": [
+        "native Worker contracts 28"
+      ]
+    },
+    {
+      "run": "GO08",
+      "checks": [
+        "scheduled UI 21 with Cloudflare metadata fetch disabled",
+        "Daangn production preflight 2"
+      ]
+    },
+    {
+      "run": "GO09",
+      "checks": [
+        "survey production preflight 2"
+      ]
+    }
+  ],
+  "carryCondition": "Exact prior complete phases only; source03→07 changes are approved E2E expectation/fixture corrections and retained product/build inputs remain identical. Historical partial full-suite failures are not carried as passes.",
+  "historicalFailures": [
+    {
+      "run": "GO04",
+      "unitPassed": 3655,
+      "unitFailed": 14,
+      "resolution": "Corrected before GO05 full 3669 pass."
+    },
+    {
+      "run": "GO05",
+      "status": "FAILED after completed checks; Worker assertions28 were followed by a port-check failure",
+      "resolution": "Separate port witness7 passed; native Worker contracts28 rerun in GO06."
+    },
+    {
+      "run": "GO06",
+      "status": "CANCELLED",
+      "productionPassed": 197,
+      "productionFailed": 2,
+      "interrupted": 1,
+      "notRun": 422,
+      "resolution": "Korean country-label test oracle corrected; archive and Cloudflare metadata observation corrections preserved."
+    },
+    {
+      "run": "GO08",
+      "status": "FAILED",
+      "productionPassed": 375,
+      "productionFailed": 1,
+      "notRun": 246,
+      "resolution": "Await complete132-source collection before unchanged historical-cohort oracle."
+    },
+    {
+      "run": "GO09",
+      "status": "FAILED",
+      "productionPassed": 589,
+      "productionFailed": 1,
+      "notRun": 32,
+      "resolution": "Append the two newly registered empty Daangn boards to exact source-membership expectations."
+    },
+    {
+      "run": "GO10",
+      "status": "FAILED",
+      "preflightPassed": 11,
+      "preflightFailed": 1,
+      "preflightNotRun": 1,
+      "fullProduction": "NOT_RUN",
+      "development": "NOT_RUN",
+      "resolution": "Preserve129 original cache entries and append2 fresh empty Daangn entries before unchanged Booking lifecycle checks."
+    }
+  ],
+  "limits": [
+    "Preflight65/production900/development153 unsuccessful intermediate samples remain recorded under23/512/54 successful parent groups; they are not successful requests or testcase retries.",
+    "Development stderr retains219-byte existing Vite server.hmr deprecation warning.",
+    "Default server92697/99660/47946 SIGKILL and303 lsof listener-inspection exit1 records remain distinct from194fixture terminal0 records; no graceful default server/Miniflare.dispose claim.",
+    "Retained707snapshot birth census differs from continuous controller counts. Nine historical scoped port checks do not make a new final all-port or OS-wide egress claim.",
+    "Earlier failed/partial executions and reporting-only schema/path/projection corrections stay historical; no expectations/deadlines were weakened.",
+    "Astra and tester rechecked dependency/browser/build payloads; Main reviewed exact records/manifests without separately repeating the full dependency/browser payload walk."
+  ],
+  "remaining": [
+    "Separate publication-evidence CLI/workflow implementation and affected verification.",
+    "Bounded real capture of both new companies with at least one new stable ID and canonical URL compared with prior public data.",
+    "Actual132-source publication capacity and availability, verified collector/workflow rollout, public UI1440/320.",
+    "Genuine follow-up scheduled publication, final requirement audit and owned temporary cleanup."
+  ],
+  "liveCollectionCompleted": false,
+  "newDeploymentOrPublication": false,
+  "goalComplete": false
+}

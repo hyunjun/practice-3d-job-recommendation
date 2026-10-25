@@ -1,3 +1,4 @@
+import { expectEmptyDaangnTraffic } from './helpers/daangn-empty-traffic'
 import { REGIONAL_SOURCE_FULL_URLS } from '../fixtures/regional-sources'
 import { expect, test } from '@playwright/test'
 import type { BrowserContext, Locator, Page, TestInfo } from '@playwright/test'
@@ -46,8 +47,8 @@ async function fullCatalog(page: Page, origin: string) {
     expect(response.status()).toBe(200)
     const catalog = await response.json() as Catalog
     expect(catalog.source).toBe('public')
-    expect(catalog.companies).toHaveLength(130)
-    expect(catalog.boards).toHaveLength(130)
+    expect(catalog.companies).toHaveLength(132)
+    expect(catalog.boards).toHaveLength(132)
     expect(catalog.jobs).toHaveLength(36)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.companies.slice(93, 124).map(company => company.id)).toEqual(SOURCE_EXPANSION_IDS)
@@ -60,7 +61,7 @@ async function fullCatalog(page: Page, origin: string) {
     }
     for (const id of SOURCE_EXPANSION_EXCLUDED_IDS) expect(catalog.jobs.some(job => job.id === id)).toBe(false)
     expect(catalog.boards.filter(board => board.provider === 'careers').map(board => [board.companyId, board.total, board.included]))
-      .toEqual([['booking', 101, 2], ['zalando', 16, 2], ['starbucks', 11, 2]])
+      .toEqual([['booking', 101, 2], ['zalando', 16, 2], ['starbucks', 11, 2], ['daangn', 0, 0], ['daangn-pay', 0, 0]])
     return catalog
   } finally { await response.dispose() }
 }
@@ -87,7 +88,7 @@ async function syntheticRequests(server: Awaited<ReturnType<typeof fixture>>) {
   expect(requests.every(request => request.synthetic && !request.networkSent && request.method === 'GET' && request.body === null)).toBe(true)
   expect(requests.some(request => request.url.includes('position_details'))).toBe(false)
   expect(requests.some(request => request.url.includes('/companies/AUTO1/'))).toBe(false)
-  return requests
+  return expectEmptyDaangnTraffic(requests)
 }
 
 for (const width of [1440, 320]) test.describe(`two expansion cohorts at ${width}px`, () => {
@@ -112,16 +113,16 @@ for (const width of [1440, 320]) test.describe(`two expansion cohorts at ${width
       }
       await surveyDataButton(page).click()
       const data = page.getByRole('dialog')
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '130', '36'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '132', '36'])
       await expect(data.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
         'Greenhouse67개 회사', 'Ashby29개 회사', 'Lever10개 회사', 'SmartRecruiters10개 회사',
-        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
+        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트5개 회사',
       ])
       await expect(data.getByText('Booking.com 게시판에는 Booking Holdings의 공고도 포함됩니다.', { exact: true })).toBeVisible()
       await expect(data.getByText('Starbucks는 공식 Technology 분류의 공고를 수집합니다. 매장 등 다른 분류의 전체 채용 수가 아니며, 분류 이동으로 목록에서 빠질 수도 있어 채용 마감을 단정하지 않아요.', { exact: true })).toBeVisible()
       await expect(data.getByText('공식 사이트의 부하를 줄이기 위해 정상 조회 후 24시간 동안 자료를 재사용합니다. 목록 확인과 본문 수집에 각각 적용하며, 새로고침도 같은 대기 시간을 지켜요.', { exact: true })).toBeVisible()
       await surveyBoardHistory(page)
-      await expect(data.locator('.board-row')).toHaveCount(130)
+      await expect(data.locator('.board-row')).toHaveCount(132)
       for (const company of SOURCE_EXPANSION_REGISTRATIONS) {
         const row = data.locator('.board-row').filter({ has: page.getByText(company.name, { exact: true }) })
         await expect(row.getByRole('link', { name: `${company.name} 채용 페이지`, exact: true })).toHaveAttribute('href', company.careerUrl)
@@ -180,7 +181,7 @@ for (const width of [1440, 320]) test.describe(`two expansion cohorts at ${width
       await surveyClose(page, starbucks)
       await surveyDataButton(page).click()
       await expectPublicSourceOverview(page)
-      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '130', '36'])
+      await expect(data.locator('.coverage-stats strong')).toHaveText(['35', '132', '36'])
       await surveyClose(page, surveyDataButton(page))
       await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
       await expect(page.locator('.saved-card')).toHaveCount(2)
@@ -303,7 +304,7 @@ test('truncated daily lists cannot close saved careers jobs, and Technology-scop
     await page.clock.fastForward(86_402_000)
     const failed = await statusAction(page, false)
     expect(failed.boards.filter(board => board.provider === 'careers').map(board => [board.companyId, board.status]))
-      .toEqual([['booking', 'error'], ['zalando', 'error'], ['starbucks', 'error']])
+      .toEqual([['booking', 'error'], ['zalando', 'error'], ['starbucks', 'error'], ['daangn', 'ok'], ['daangn-pay', 'ok']])
     expect(failed.boards.filter(board => board.provider !== 'careers').every(board => board.status === 'ok')).toBe(true)
     expect(failed.boards.find(board => board.companyId === 'stripe')?.listing?.publishedIds).toEqual(['greenhouse-stripe-44001'])
     expect(failed.boards.find(board => board.companyId === 'notion')?.listing?.publishedIds).toEqual(['ashby-notion-synthetic-57102'])
@@ -321,7 +322,7 @@ test('truncated daily lists cannot close saved careers jobs, and Technology-scop
     expect(await syntheticRequests(server)).toHaveLength(firstRequests.length)
     const restoredFailure = await statusAction(page, false)
     expect(restoredFailure.boards.filter(board => board.provider === 'careers').map(board => [board.companyId, board.status]))
-      .toEqual([['booking', 'error'], ['zalando', 'error'], ['starbucks', 'error']])
+      .toEqual([['booking', 'error'], ['zalando', 'error'], ['starbucks', 'error'], ['daangn', 'ok'], ['daangn-pay', 'ok']])
     await expect(savedStarbucks(page).locator('.posting-notice-heading strong')).toHaveText('현재 상태 확인 필요')
     expect(await readSaved(page)).toEqual(saved)
     expect(await syntheticRequests(server)).toHaveLength(firstRequests.length)

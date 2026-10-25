@@ -168,4 +168,6 @@ export const PUBLIC_COMPANIES: Company[] = [
   { id: 'lalamove', name: 'Lalamove', initials: 'L', color: '#ff9c78', industry: '물류 · 모빌리티', careerUrl: 'https://www.lalamove.com/careers', provider: 'lever', board: 'lalamove' },
   { id: 'dat', name: 'DAT Freight & Analytics', initials: 'DAT', color: '#f7d878', industry: '물류 · 운송 데이터', careerUrl: 'https://careers.dat.com/jobs/', provider: 'greenhouse', board: 'datsolutions' },
   { id: 'pikpok', name: 'PikPok', initials: 'PP', color: '#83d1c7', industry: '게임 · 소프트웨어', careerUrl: 'https://pikpok.com/careers/', provider: 'workable', board: 'pikpok' },
+  { id: 'daangn', name: '당근', initials: '당', color: '#ff9864', industry: '지역 · 커뮤니티', careerUrl: 'https://careers.daangn.com/jobs/', provider: 'careers', board: 'daangn' },
+  { id: 'daangn-pay', name: '당근페이', initials: '당', color: '#f5bd83', industry: '핀테크 · 결제', careerUrl: 'https://careers.daangn.com/jobs/', provider: 'careers', board: 'daangn-pay' },
 ]

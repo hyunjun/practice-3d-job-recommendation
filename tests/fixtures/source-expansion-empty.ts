@@ -1,4 +1,5 @@
 import { BOOKING_LIST_URLS, STARBUCKS_LIST_URLS, ZALANDO_LIST_URLS } from './careers-contract'
+import { withDaangnEmptyBoards } from './daangn-wire'
 import { flightObjectHtml } from './careers-wire'
 import { coverageReply } from './public-coverage-transport'
 import { withRegionalSourceEmptyBoards } from './regional-sources'
@@ -32,11 +33,11 @@ export function withSourceExpansionEmptyBoards(responses: Record<string, unknown
     empty[SOURCE_EXPANSION_ATS_FULL_URLS[company.id]] = value
     empty[SOURCE_EXPANSION_ATS_PRESENCE_URLS[company.id]] = value
   }
-  return withRegionalSourceEmptyBoards({
+  return withDaangnEmptyBoards(withRegionalSourceEmptyBoards({
     ...empty,
     [BOOKING_LIST_URLS[0]]: { totalCount: 0, count: 0, jobs: [] },
     [ZALANDO_LIST_URLS[0]]: coverageReply(flightObjectHtml({ total: 0, data: [], next: null }), { format: 'text' }),
     [STARBUCKS_LIST_URLS[0]]: { data: { count: 0, positions: [], appliedFilters: { jobCategory: ['technology'] } } },
     ...responses,
-  })
+  }))
 }

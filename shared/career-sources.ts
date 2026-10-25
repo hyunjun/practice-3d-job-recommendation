@@ -1,7 +1,7 @@
 import type { Job } from './types'
 
 /** Site-specific public collectors. These identifiers never become arbitrary hosts. */
-export const CAREER_BOARDS = ['booking', 'zalando', 'starbucks-technology'] as const
+export const CAREER_BOARDS = ['booking', 'zalando', 'starbucks-technology', 'daangn', 'daangn-pay'] as const
 export type CareerBoard = typeof CAREER_BOARDS[number]
 
 export function isCareerBoard(board: string): board is CareerBoard {

@@ -1,3 +1,4 @@
+import { withEmptyDaangnBoard } from '../fixtures/daangn-empty-board'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { parseCachedBoards } from '../../server/board-cache'
 import type { CachedBoard } from '../../server/board-cache'
@@ -24,7 +25,7 @@ afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 describe('both approved expansion cohorts and preserved original93 contracts', () => {
   it('appends exactly31 literal registrations with22 regional and9 cross-industry employers', () => {
-    expect(PUBLIC_COMPANIES).toHaveLength(130)
+    expect(PUBLIC_COMPANIES).toHaveLength(132)
     expect(PUBLIC_COMPANIES.slice(93, 124).map(({ id, name, provider, board, careerUrl, industry }) =>
       ({ id, name, provider, board, careerUrl, industry }))).toEqual(
       SOURCE_EXPANSION_REGISTRATIONS.map(({ cohort: _cohort, region: _region, ...company }) => company),
@@ -55,12 +56,12 @@ describe('both approved expansion cohorts and preserved original93 contracts', (
     const cache = { load: async () => structuredClone(boards), save: async (value: CachedBoard[]) => { boards = structuredClone(value) } }
     const service = () => createCatalogService({
       companies: PUBLIC_COMPANIES, cache, now: () => Date.parse(SOURCE_EXPANSION_NOW), random: () => 0,
-      fetchBoard: (company, at) => fetchers[company.provider ?? 'greenhouse'](company, at),
+      fetchBoard: (company, at) => withEmptyDaangnBoard(company, at, fetchers[company.provider ?? 'greenhouse']),
     })
     const current = service()
     const catalog = await current.get()
-    expect(catalog.companies).toHaveLength(130)
-    expect(catalog.boards).toHaveLength(130)
+    expect(catalog.companies).toHaveLength(132)
+    expect(catalog.boards).toHaveLength(132)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.jobs).toHaveLength(36)
     expect(catalog.boards.reduce((sum, board) => sum + board.total, 0)).toBe(164)
@@ -74,7 +75,7 @@ describe('both approved expansion cohorts and preserved original93 contracts', (
     for (const id of SOURCE_EXPANSION_EXCLUDED_IDS) expect(catalog.jobs.some(job => job.id === id)).toBe(false)
     expect(transport.urls().sort()).toEqual([...SOURCE_EXPANSION_ALL_FULL_URLS, ...REGIONAL_SOURCE_FULL_URLS].sort())
     expect(transport.urls().some(url => url.includes('/companies/AUTO1/'))).toBe(false)
-    expect(boards).toHaveLength(130)
+    expect(boards).toHaveLength(132)
     for (const previous of raw.boards) {
       const retained = boards.find(board => board.companyId === previous.companyId)!
       expect(retained).toMatchObject({ checkedAt: previous.checkedAt, retryAt: previous.retryAt, failures: previous.failures,

@@ -1,3 +1,5 @@
+import { expectEmptyDaangnTraffic } from './helpers/daangn-empty-traffic'
+import { isDaangnRequest } from '../fixtures/daangn-wire'
 import { isRegionalSourceRequest, REGIONAL_SOURCE_FULL_URLS } from '../fixtures/regional-sources'
 import { expect, test } from '@playwright/test'
 import type { Page, TestInfo } from '@playwright/test'
@@ -43,17 +45,18 @@ async function fixture(page: Page, info: TestInfo, baseURL: string | undefined, 
 
 async function requestsAre(server: Server, count: number, additional: [number, number] = [7, 3], regionalCount = 6) {
   const all = await server.requests()
+  expectEmptyDaangnTraffic(all)
   const regional = all.filter(request => isRegionalSourceRequest(request.url))
   expect(regional).toHaveLength(regionalCount)
   expect(regional.slice(0, 6).map(request => request.url).sort()).toEqual([...REGIONAL_SOURCE_FULL_URLS].sort())
   // Keep the original83-provider wire assertions intact and account for each
   // new provider separately, including its distinct successful-read deadline.
-  const requests = all.filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url) && !isRegionalSourceRequest(request.url))
+  const requests = all.filter(request => !isIntegrationRequest(request.url) && !isSourceExpansionRequest(request.url) && !isRegionalSourceRequest(request.url) && !isDaangnRequest(request.url))
   expect(requests).toHaveLength(count)
   expect(all.filter(request => isSourceExpansionRequest(request.url)).slice(0, 31).map(request => request.url).sort())
     .toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
   expect(all.filter(request => request.url.startsWith('https://himalayas.app/'))).toHaveLength(additional[0])
-  expect(all.filter(request => request.url.startsWith('https://apply.workable.com/') && !isRegionalSourceRequest(request.url))).toHaveLength(additional[1])
+  expect(all.filter(request => request.url.startsWith('https://apply.workable.com/') && !isRegionalSourceRequest(request.url) && !isDaangnRequest(request.url))).toHaveLength(additional[1])
   expect(all.every(request => request.synthetic && !request.networkSent && request.method === 'GET' && request.body === null)).toBe(true)
   await server.assertDefaultConfiguration()
   return requests
@@ -61,8 +64,8 @@ async function requestsAre(server: Server, count: number, additional: [number, n
 
 function expectRegistrations(catalog: Catalog, jobs: number) {
   expect(catalog.source).toBe('public')
-  expect(catalog.companies).toHaveLength(130)
-  expect(catalog.boards).toHaveLength(130)
+  expect(catalog.companies).toHaveLength(132)
+  expect(catalog.boards).toHaveLength(132)
   expect(catalog.jobs).toHaveLength(jobs)
   expect(catalog.companies.slice(36, 83).map(({ id, name, careerUrl, provider, board }) =>
     ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
@@ -71,7 +74,7 @@ function expectRegistrations(catalog: Catalog, jobs: number) {
 async function observations(page: Page) {
   const panel = page.getByRole('dialog').locator('.observation-panel')
   await panel.locator('> summary').click()
-  await expect(panel.locator('.observation-scope')).toHaveText('대상 130개 회사 · 최근 90일 이내 · UTC 날짜별 마지막 정상 집계')
+  await expect(panel.locator('.observation-scope')).toHaveText('대상 132개 회사 · 최근 90일 이내 · UTC 날짜별 마지막 정상 집계')
   return panel
 }
 
@@ -108,7 +111,7 @@ function expectSaved(records: SavedJob[]) {
   })
 }
 
-for (const width of [1440, 320]) test.describe(`independent historical47 survey in130 defaults at ${width}px`, () => {
+for (const width of [1440, 320]) test.describe(`independent historical47 survey in132 defaults at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
   test('all47 new sources have literal positive jobs and search, role and region survive saved exploration in public-only startup', async ({ page, baseURL }, info) => {
@@ -136,14 +139,14 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
 
       await surveyDataButton(page).click()
       const dialog = page.getByRole('dialog')
-      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['35', '130', '65'])
+      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['35', '132', '65'])
       await expect(dialog.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
         'Greenhouse67개 회사', 'Ashby29개 회사', 'Lever10개 회사', 'SmartRecruiters10개 회사',
-        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
+        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트5개 회사',
       ])
       await expect(dialog.locator('.posting-purpose-count')).toHaveText('조회된 개발 공고에 인재풀·관심 등록 2개가 포함되어 있어요. 기본 추천에서는 제외하며 모집 유형 필터로 따로 볼 수 있어요.')
       await surveyBoardHistory(page)
-      await expect(dialog.locator('.board-row')).toHaveCount(130)
+      await expect(dialog.locator('.board-row')).toHaveCount(132)
       for (const company of SURVEY_REGISTRATIONS) {
         const row = dialog.locator('.board-row').filter({ has: page.getByText(company.name, { exact: true }) })
         await expect(row).toHaveCount(1)
@@ -188,7 +191,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '1'])
       await surveyDataButton(page).click()
       await expectPublicSourceOverview(page)
-      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['35', '130', '65'])
+      await expect(dialog.locator('.coverage-stats strong')).toHaveText(['35', '132', '65'])
       await surveyClose(page, surveyDataButton(page))
       await surveyNavigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
       await expect(page.locator('.saved-card')).toHaveCount(0)
@@ -226,7 +229,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       expect(upstream.map(request => request.url).sort()).toEqual([...Object.values(SURVEY_FULL_URLS), ...SURVEY_DETAIL_URLS].sort())
       const initialBytes = await readFile(server.defaultCache, 'utf8')
       const expanded = JSON.parse(initialBytes)
-      expect(expanded.boards).toHaveLength(130)
+      expect(expanded.boards).toHaveLength(132)
       for (const original of old.boards)
         expect(expanded.boards.find((board: { companyId: string }) => board.companyId === original.companyId)).toMatchObject(original)
 
@@ -314,7 +317,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       await expectPublicSourceOverview(page)
       // Saved-content checks updated the server to65 jobs. The separate browser
       // catalog remains its original50 until the user rejoins exploration.
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '130', '50'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '132', '50'])
       await surveyClose(page, surveyDataButton(page))
       expect(await readSaved(page)).toEqual(saved)
       const fullBytes = await readFile(server.defaultCache, 'utf8')
@@ -336,7 +339,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       await expect(page.getByLabel('직무 필터', { exact: true })).toHaveValue('backend')
       await surveyDataButton(page).click()
       await expectPublicSourceOverview(page)
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '130', '65'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '132', '65'])
       await surveyClose(page, surveyDataButton(page))
       expect(await readSaved(page)).toEqual(saved)
       expect(await readFile(server.defaultCache, 'utf8')).toBe(fullBytes)
@@ -362,7 +365,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
         ['servicenow', 'unavailable', null], ['xai', 'unavailable', null],
       ])
       await surveyDataButton(page).click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '130', '60'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '132', '60'])
       await surveyBoardHistory(page)
       for (const name of ['ClickHouse', 'Palantir', 'ServiceNow', 'xAI (SpaceXAI)']) {
         const row = page.getByRole('dialog').locator('.board-row').filter({ has: page.getByText(name, { exact: true }) })
@@ -434,8 +437,18 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       expect(await server.requests()).toEqual([])
       await server.assertDefaultConfiguration()
       const state = await seedSurvey(page, server.origin, { query: 'Coupang' })
+      // Aggregate observations require the complete collection, not the first matching job.
+      const initialCatalog = await surveyJson<Catalog>(page, server.origin, '/api/catalog?source=public')
+      expectRegistrations(initialCatalog, 65)
+      expect(initialCatalog.boards.filter(board => board.status === 'pending' || board.status === 'error')).toEqual([])
+      expect(initialCatalog.boards.filter(board => ['daangn', 'daangn-pay'].includes(board.companyId))
+        .map(({ companyId, status, total, included }) => ({ companyId, status, total, included }))).toEqual([
+        { companyId: 'daangn', status: 'ok', total: 0, included: 0 },
+        { companyId: 'daangn-pay', status: 'ok', total: 0, included: 0 },
+      ])
       await expect(page.locator('.city-detail-count strong')).toHaveText(['1', '1'])
       await surveyDataButton(page).click()
+      await surveyBoardHistory(page)
       const panel = await observations(page)
       await expect(panel.locator('.observation-totals dd')).toHaveText(['69개', '65개', '63개', '2개'])
       await expect(panel.locator('.observation-denominator')).toHaveText('분모: 일반 개발·컴퓨팅 공고 63개 · 인재풀 2개 제외')
@@ -444,7 +457,7 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       const excluded = panel.getByText('회사·게시판 구성 또는 분류 기준이 다른 이전 기록 1개 묶음은 현재 비교에서 제외했어요.', { exact: true })
       await expect(excluded).toBeVisible()
       await expect(panel.getByRole('combobox', { name: '관측 날짜 (UTC)', exact: true }).locator('option')).toHaveText(['2026-09-26'])
-      await expect(panel.locator('.observation-table tbody tr')).toHaveCount(130)
+      await expect(panel.locator('.observation-table tbody tr')).toHaveCount(132)
       await requestsAre(server, 85)
       await excluded.scrollIntoViewIfNeeded()
       await expect(excluded).toBeInViewport()
@@ -479,12 +492,12 @@ for (const width of [1440, 320]) test.describe(`independent historical47 survey 
       await requestsAre(server, 170, [14, 6], 12)
       expect(await readSaved(page)).toEqual([])
       expectSurveyPrivacy(state, server.origin)
-      await writeFile(info.outputPath('observation-cohorts.json'), JSON.stringify({ old, history, persisted }, null, 2))
+      await writeFile(info.outputPath('observation-cohorts.json'), JSON.stringify({ old, initialCatalog, history, persisted }, null, 2))
     } finally { await page.close(); await server.stop() }
   })
 })
 
-test('the unconfigured130-source server retains real browser304 and file-cache behavior across its owned process restart', async ({ page, baseURL }, info) => {
+test('the unconfigured132-source server retains real browser304 and file-cache behavior across its owned process restart', async ({ page, baseURL }, info) => {
   test.setTimeout(90_000)
   const server = await fixture(page, info, baseURL)
   try {

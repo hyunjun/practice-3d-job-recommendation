@@ -35,7 +35,7 @@ const historical36Ids = [
   'openai', 'notion', 'reddit', 'discord', 'coinbase', 'dropbox', 'duolingo', 'roblox',
   'spacex', 'pinterest', 'databricks', 'robinhood',
 ]
-const defaultIds = [...historical36Ids, ...SURVEY_REGISTRATIONS.map(company => company.id), ...INTEGRATION_DEFAULT_IDS, ...SOURCE_EXPANSION_IDS, ...REGIONAL_SOURCE_IDS]
+const defaultIds = [...historical36Ids, ...SURVEY_REGISTRATIONS.map(company => company.id), ...INTEGRATION_DEFAULT_IDS, ...SOURCE_EXPANSION_IDS, ...REGIONAL_SOURCE_IDS, 'daangn', 'daangn-pay']
 const BASE = Date.parse('2026-09-20T06:00:00.000Z')
 const initialTime = '2026-09-20T06:00:00.000Z'
 const directories: string[] = []
@@ -122,7 +122,7 @@ describe('board configuration resolution', () => {
     expect(ids(resolved.companies)).toEqual(defaultIds)
     expect(ids(resolved.companies.slice(0, 36))).toEqual(historical36Ids)
     expect(resolved.companies.slice(0, 83)).toHaveLength(83)
-    expect(resolved.companies).toHaveLength(130)
+    expect(resolved.companies).toHaveLength(132)
     expect(resolved.cacheFile).toBe(path.join(cwd, '.local/public-board-cache-v5.json'))
     expect(resolved.legacyCacheFiles).toEqual([
       path.join(cwd, '.local/greenhouse-cache-v4.json'), path.join(cwd, '.local/greenhouse-cache-v3.json'),
@@ -582,7 +582,7 @@ describe('offline board-check CLI', () => {
     expect(result.code).toBe(0)
     expect(result.signal).toBeNull()
     expect(result.stdout).toContain('기본 공개 게시판 목록을 사용합니다.')
-    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 130개')
+    expect(result.stdout).toContain('설정 확인 완료: 공개 게시판 132개')
     expect(result.stdout).toContain('stripe · Stripe · Greenhouse · stripe')
     expect(result.stdout).toContain('wise · Wise · SmartRecruiters · Wise')
     expect(result.stdout).toContain('openai · OpenAI · Ashby · openai')

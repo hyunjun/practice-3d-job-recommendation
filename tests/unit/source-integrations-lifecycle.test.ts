@@ -112,11 +112,11 @@ async function lifecycle(companies = [integrationCompany('microsoft'), integrati
 }
 
 describe('daily source registration, cache and visible age', () => {
-  it('keeps the approved ten after the unchanged old36 and approved47 within the130 public-only defaults', async () => {
+  it('keeps the approved ten after the unchanged old36 and approved47 within the132 public-only defaults', async () => {
     const cwd = await directory()
     const configuration = await loadBoardConfiguration({ cwd })
     const identity = ({ id, name, board, provider }: Company) => ({ id, name, board, provider })
-    expect(configuration.companies).toHaveLength(130)
+    expect(configuration.companies).toHaveLength(132)
     expect(configuration.companies.slice(0, 36).map(identity)).toEqual(old83Companies.slice(0, 36).map(identity))
     expect(configuration.companies.slice(36, 83).map(({ id, name, board, provider, careerUrl }) =>
       ({ id, name, board, provider, careerUrl }))).toEqual(SURVEY_REGISTRATIONS)

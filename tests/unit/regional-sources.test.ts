@@ -88,16 +88,17 @@ function fictionalResponses() {
   })
 }
 
-describe('six regional sources in the130-company registry', () => {
-  it('preserves the historical124 and appends exactly the approved names, boards and official links', () => {
-    expect(PUBLIC_COMPANIES).toHaveLength(130)
-    expect(PUBLIC_COMPANIES.slice(124).map(({ id, name, provider, board, careerUrl, industry }) =>
+describe('six regional sources in the132-company registry', () => {
+  it('preserves the six regional registrations after the historical124 and before the two Daangn boards', () => {
+    expect(PUBLIC_COMPANIES).toHaveLength(132)
+    expect(PUBLIC_COMPANIES.slice(124, 130).map(({ id, name, provider, board, careerUrl, industry }) =>
       ({ id, name, provider, board, careerUrl, industry }))).toEqual(REGIONAL_SOURCE_REGISTRATIONS)
     expect(PUBLIC_COMPANIES[123].id).toBe('auto1')
-    expect(new Set(PUBLIC_COMPANIES.map(company => company.id)).size).toBe(130)
+    expect(PUBLIC_COMPANIES.slice(130).map(company => company.id)).toEqual(['daangn', 'daangn-pay'])
+    expect(new Set(PUBLIC_COMPANIES.map(company => company.id)).size).toBe(132)
     expect(Object.fromEntries(['greenhouse', 'ashby', 'lever', 'smartrecruiters', 'workable', 'himalayas', 'careers']
       .map(provider => [provider, PUBLIC_COMPANIES.filter(company => company.provider === provider).length])))
-      .toEqual({ greenhouse: 67, ashby: 29, lever: 10, smartrecruiters: 10, workable: 4, himalayas: 7, careers: 3 })
+      .toEqual({ greenhouse: 67, ashby: 29, lever: 10, smartrecruiters: 10, workable: 4, himalayas: 7, careers: 5 })
     const configured = parseBoardConfiguration({ version: 1, mode: 'replace', companies: REGIONAL_SOURCE_IDS })
     expect(configured.companies.map(company => company.id))
       .toEqual(['halter', 'partly', 'pushpay', 'lalamove', 'dat', 'pikpok'])

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { withEmptyDaangnBoard } from '../fixtures/daangn-empty-board'
 import { createHash } from 'node:crypto'
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -65,7 +66,7 @@ const expectedDefaultIds = [
   'openai', 'notion', 'reddit', 'discord', 'coinbase', 'dropbox', 'duolingo', 'roblox',
   'spacex', 'pinterest', 'databricks', 'robinhood',
 ]
-const currentDefaultIds = [...expectedDefaultIds, ...SURVEY_REGISTRATIONS.map(company => company.id), ...INTEGRATION_DEFAULT_IDS, ...SOURCE_EXPANSION_IDS, ...REGIONAL_SOURCE_IDS]
+const currentDefaultIds = [...expectedDefaultIds, ...SURVEY_REGISTRATIONS.map(company => company.id), ...INTEGRATION_DEFAULT_IDS, ...SOURCE_EXPANSION_IDS, ...REGIONAL_SOURCE_IDS, 'daangn', 'daangn-pay']
 const sha = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 
 async function directory() {
@@ -97,7 +98,7 @@ function service(config: BoardConfiguration, now: () => number = () => NOW) {
   return createCatalogService({
     companies: config.companies,
     cache: createFileBoardCache(config.cacheFile, config.legacyCacheFiles, config.companies),
-    fetchBoard: (company, fetchedAt) => providers[company.provider ?? 'greenhouse'](company, fetchedAt),
+    fetchBoard: (company, fetchedAt) => withEmptyDaangnBoard(company, fetchedAt, providers[company.provider ?? 'greenhouse']),
     now, random: () => 0,
   })
 }
@@ -124,7 +125,7 @@ afterEach(async () => {
 describe('default public coverage and retired historical samples', () => {
   it('preserves the frozen93 registrations before the31 additions', () => {
     expect(PUBLIC_COMPANIES.slice(0, 83)).toHaveLength(83)
-    expect(PUBLIC_COMPANIES).toHaveLength(130)
+    expect(PUBLIC_COMPANIES).toHaveLength(132)
     expect(PUBLIC_COMPANIES.slice(0, 22)).toEqual(ORIGINAL_PUBLIC_REGISTRATIONS)
     expect(PUBLIC_COMPANIES.slice(22, 24)).toEqual(ADDED_PUBLIC_REGISTRATIONS)
     expect(PUBLIC_COMPANIES.slice(24, 36).map(({ id, name, careerUrl, provider, board }) =>
@@ -137,7 +138,7 @@ describe('default public coverage and retired historical samples', () => {
     expect(PUBLIC_COMPANIES.slice(36, 83).map(({ id, name, careerUrl, provider, board }) =>
       ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
     expect(PUBLIC_COMPANIES.map(company => company.id)).toEqual(currentDefaultIds)
-    expect(new Set(PUBLIC_COMPANIES.map(company => company.id)).size).toBe(130)
+    expect(new Set(PUBLIC_COMPANIES.map(company => company.id)).size).toBe(132)
     expect(Object.fromEntries(['greenhouse', 'ashby', 'lever', 'smartrecruiters'].map(provider =>
       [provider, PUBLIC_COMPANIES.slice(0, 93).filter(company => company.provider === provider).length])))
       .toEqual({ greenhouse: 50, ashby: 24, lever: 4, smartrecruiters: 5 })
@@ -168,7 +169,7 @@ describe('default public coverage and retired historical samples', () => {
     expect(JSON.stringify(records)).toBe(before)
   })
 
-  it('loads the130 defaults without an environment/local configuration or filesystem side effects', async () => {
+  it('loads the132 defaults without an environment/local configuration or filesystem side effects', async () => {
     const cwd = await directory()
     const config = await loadBoardConfiguration({ cwd })
     expect(config.mode).toBe('default')
@@ -178,13 +179,13 @@ describe('default public coverage and retired historical samples', () => {
     expect(await readdir(cwd)).toEqual([])
   })
 
-  it('collects all130 default boards, retaining the original83 requests and pool/publication IDs', async () => {
+  it('collects all132 default boards, retaining the original83 requests and pool/publication IDs', async () => {
     const network = transport()
     const config = await loadBoardConfiguration({ cwd: await directory() })
     const catalogService = service(config)
     const catalog = await catalogService.get()
     expect(catalog.companies.map(company => company.id)).toEqual(currentDefaultIds)
-    expect(catalog.boards).toHaveLength(130)
+    expect(catalog.boards).toHaveLength(132)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.jobs.map(job => job.id)).toEqual(expectedJobIds)
     expect(catalog.jobs.map(job => job.cityIds)).toEqual([['seoul'], ['seoul'], ['seoul'], ['seoul'], ['seoul']])
@@ -217,7 +218,7 @@ describe('default public coverage and retired historical samples', () => {
     expect(network.regionalRequests.every(request => request.method === 'GET')).toBe(true)
     expect(network.unexpected).toEqual([])
     const stored = JSON.parse(await readFile(config.cacheFile, 'utf8'))
-    expect(stored.boards).toHaveLength(130)
+    expect(stored.boards).toHaveLength(132)
     expect(stored.boards.find((board: { companyId: string }) => board.companyId === 'sendbird').snapshot.jobs[0].url)
       .toBe('https://sendbird.com/careers?gh_jid=44201')
   })

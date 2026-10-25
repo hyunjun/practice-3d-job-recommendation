@@ -6,6 +6,9 @@ import type { BoardResult } from '../catalog-service'
 import { bookingPosting, readBookingInventory } from './booking'
 import { normalizeCareerPosting } from './careers-common'
 import type { CareerPosting } from './careers-common'
+import { DAANGN_EMPLOYERS, readDaangnInventory, readDaangnPosting } from './daangn'
+import { createDaangnRequestFactory } from './daangn-http'
+import type { DaangnSession } from './daangn-http'
 import { includedJobs, readBoardInventory } from './http'
 import { createBoardRequestQueue } from './request-queue'
 import { readStarbucksInventory, readStarbucksPosting } from './starbucks'
@@ -17,12 +20,14 @@ export function createCareersFetcher(policy: { concurrency: number; interval: nu
   const booking = createBoardRequestQueue({ concurrency: 1, interval: policy.bookingInterval })
   const starbucks = createBoardRequestQueue({ concurrency: 1, interval: policy.starbucksInterval ?? policy.interval })
   const zalando = createBoardRequestQueue({ ...policy, response: 'text' })
+  const daangn = createDaangnRequestFactory()
 
   async function collect(company: Company, fetchedAt: string, content: boolean): Promise<BoardResult> {
     if (!company.board || !isCareerBoard(company.board)) throw new BoardFetchError('지원하지 않는 공식 채용 사이트예요.')
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(new BoardFetchError('공식 채용 사이트의 수집 시간이 초과됐어요.')), policy.timeout)
     const signal = controller.signal
+    let daangnSession: DaangnSession | undefined
     try {
       let ids: (string | number)[]
       let postings: CareerPosting[] = []
@@ -35,17 +40,27 @@ export function createCareersFetcher(policy: { concurrency: number; interval: nu
         ids = listed.map(job => job.id)
         if (content) postings = await details(listed.filter(job => needsOccupationDescription(job.name)),
           job => readStarbucksPosting(job, (url, signal) => starbucks(url, signal, 'text'), signal))
-      } else {
+      } else if (company.board === 'daangn' || company.board === 'daangn-pay') {
+        daangnSession = daangn.createSession(signal)
+        const request = daangnSession.request
+        const all = await readBoardInventory(() => readDaangnInventory(request, signal))
+        const employer = DAANGN_EMPLOYERS[company.board]
+        const listed = all.filter(job => job.corporate === employer.corporate)
+        ids = listed.map(job => job.id)
+        if (content) postings = await details(listed.filter(job => needsOccupationDescription(job.title)),
+          job => readDaangnPosting(job, request, signal))
+      } else if (company.board === 'zalando') {
         const listed = await readBoardInventory(() => readZalandoInventory(zalando, signal))
         ids = listed.map(job => job.id)
         if (content) postings = await details(listed.filter(job => needsOccupationDescription(job.title)),
           job => readZalandoPosting(job, zalando, signal))
-      }
+      } else throw new BoardFetchError('지원하지 않는 공식 채용 사이트예요.')
       return includedJobs(postings.map(posting => normalizeCareerPosting(posting, company.id, fetchedAt)),
         ids.length, ids.map(id => `careers-${company.id}-${id}`))
     } finally {
       clearTimeout(timer)
       controller.abort()
+      await daangnSession?.close()
     }
   }
 

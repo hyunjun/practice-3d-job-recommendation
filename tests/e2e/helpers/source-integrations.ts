@@ -1,3 +1,5 @@
+import { expectEmptyDaangnTraffic } from './daangn-empty-traffic'
+import { isDaangnRequest } from '../../fixtures/daangn-wire'
 import { isRegionalSourceRequest, REGIONAL_SOURCE_FULL_URLS } from '../../fixtures/regional-sources'
 import { expect } from '@playwright/test'
 import type { Locator, Page, TestInfo } from '@playwright/test'
@@ -26,8 +28,8 @@ export async function integrationServer(page: Page, info: TestInfo, baseURL: str
 
 export async function catalog130(page: Page, origin: string, count: number) {
   const catalog = await surveyJson<Catalog>(page, origin, '/api/catalog?source=public')
-  expect(catalog.companies).toHaveLength(130)
-  expect(catalog.boards).toHaveLength(130)
+  expect(catalog.companies).toHaveLength(132)
+  expect(catalog.boards).toHaveLength(132)
   expect(catalog.jobs).toHaveLength(count)
   for (const expected of INTEGRATION_JOBS) expect(catalog.jobs.find(job => job.id === expected.id)).toMatchObject(expected)
   return catalog
@@ -86,10 +88,11 @@ export function csvRows(text: string) {
 
 export async function assertSynthetic(server: Awaited<ReturnType<typeof createPublicCoverageServer>>, count: number, regionalCount = 6) {
   const all = await server.requests()
+  expectEmptyDaangnTraffic(all)
   const regional = all.filter(request => isRegionalSourceRequest(request.url))
   expect(regional).toHaveLength(regionalCount)
   expect(regional.slice(0, 6).map(request => request.url).sort()).toEqual([...REGIONAL_SOURCE_FULL_URLS].sort())
-  const requests = all.filter(request => !isSourceExpansionRequest(request.url) && !isRegionalSourceRequest(request.url))
+  const requests = all.filter(request => !isSourceExpansionRequest(request.url) && !isRegionalSourceRequest(request.url) && !isDaangnRequest(request.url))
   expect(all.filter(request => isSourceExpansionRequest(request.url)).slice(0, 31).map(request => request.url).sort())
     .toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
   expect(requests).toHaveLength(count)

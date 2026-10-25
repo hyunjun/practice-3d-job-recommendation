@@ -4,6 +4,21 @@
 
 별도로 수행한 [국내·해외 채용 트렌드 조사](hiring-trends-research.md)와 [LinkedIn 수집 검토](linkedin-source-assessment.md)는 조사 시점·확인 범위·데이터 해석의 한계와 함께 보존했습니다.
 
+## 공식 채용 출처 확장 2026-10-25
+
+다음 두 저장소의 조사·수집 방식을 참고해 당근·당근페이의 공식 원문을 연결하는 코드를 작성했습니다. 아래 커밋은 이번 조사에 사용한 버전입니다. 기존 130개 회사의 운영이나 과거 Cloudflare 배포를 이번 레퍼런스 적용 결과로 간주하지 않습니다.
+
+| 레퍼런스 버전 | 참고한 방법 | 이번 변경의 연결 지점 |
+| --- | --- | --- |
+| [ai-job-search · e16acee3](https://github.com/ai-job-search-dev/ai-job-search/tree/e16acee3abdaae57f8026789338a3c6eebf4608b) | 실제 출처 조사, 목록·본문 수집, 안정적인 식별자로 중복 구분 | 전체 목록을 검증하는 어댑터와 회사 등록, 정규 URL·ID로 이전 catalog와 신규 공고 비교 |
+| [ai-job-search-kr · ae76108f](https://github.com/wing0828/ai-job-search-kr/tree/ae76108fc5e2ae75dc057e4147a3c56982042ec5) | 공식 원문 우선, 사이트별 접근 정책·요청 간격과 실패 구분 | 당근 공식 고용주·본문 확인, robots와 호스트 대기열, 한도 초과·부분 실패에서 이전 자료 보존 |
+
+두 회사의 목록과 JSON-LD를 기존 회사별 수집·관측·발행 계약에 연결하는 세부 방식은 ORBIT의 설계입니다. 개인 이력서 작성 흐름이나 모든 포털을 이식하는 변경은 아닙니다. `parse5`로 HTML을 읽으며 페이지 JavaScript를 실행하지 않습니다.
+
+[설계](design/reference-official-jobs.md)와 [공식 출처 조사](source-survey.md#2026-10-25-공식-출처-추가-조사)에 원문 확인 범위와 제약을 기록했습니다. 설계 합의 후 소스·테스트 검토를 진행 중이며, 새 공고의 실제 수집·운영 발행은 후속 검증 대상입니다.
+
+## 화면과 탐색
+
 | 레퍼런스 | 확인한 자료 | ORBIT에 적용한 부분 |
 | --- | --- | --- |
 | [Google Earth](https://earth.google.com/web/) | 공간 탐색의 조작 방식 | 드래그 회전, 확대·축소, 도시로 카메라 이동, 북쪽·초기 위치 복귀 |

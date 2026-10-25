@@ -358,7 +358,7 @@ describe('publish CLI collect outcomes', () => {
   }, 180_000)
 
   it('restores the current head\'s private checkpoint before recollecting, keeps the restored snapshots when every due provider fails, and publishes a child of that head', async () => {
-    expect(PUBLIC_COMPANIES, 'the design\'s registry size').toHaveLength(130)
+    expect(PUBLIC_COMPANIES, 'the design\'s registry size').toHaveLength(132)
     const existing = await existingPublication()
     server = await startPublicationServer({ token: CLI_TOKEN, initial: existing })
     const outcome = await runPublishCli(fixtureRepo(), { publicationUrl: server.origin })

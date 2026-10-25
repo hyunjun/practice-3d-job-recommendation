@@ -1,3 +1,5 @@
+import { expectEmptyDaangnTraffic } from './helpers/daangn-empty-traffic'
+import { isDaangnRequest } from '../fixtures/daangn-wire'
 import { isRegionalSourceRequest, REGIONAL_SOURCE_FULL_URLS } from '../fixtures/regional-sources'
 import { expect, test } from '@playwright/test'
 import type { Locator, Page, TestInfo } from '@playwright/test'
@@ -59,8 +61,8 @@ async function catalog(page: Page, origin: string): Promise<Catalog> {
 
 function expectExpandedCatalog(value: Catalog, total: number) {
   expect(value.source).toBe('public')
-  expect(value.companies).toHaveLength(130)
-  expect(value.boards).toHaveLength(130)
+  expect(value.companies).toHaveLength(132)
+  expect(value.boards).toHaveLength(132)
   expect(value.companies.slice(0, 36)).toHaveLength(36)
   expect(value.jobs).toHaveLength(total)
   expect(value.companies.slice(24, 36).map(({ id, name, careerUrl, provider, board }) =>
@@ -139,7 +141,7 @@ async function image(page: Page, info: TestInfo, name: string) {
 for (const width of [1440, 320]) test.describe(`expanded default public companies at ${width}px`, () => {
   test.use({ viewport: { width, height: 960 }, isMobile: width === 320, hasTouch: width === 320 })
 
-  test('the original twelve registrations collect synthetic public jobs through the130-source HTTP default and preserve query/filter context through saved exploration', async ({ page, request, baseURL }, info) => {
+  test('the original twelve registrations collect synthetic public jobs through the132-source HTTP default and preserve query/filter context through saved exploration', async ({ page, request, baseURL }, info) => {
     const mode = await readServerMode(request, `${baseURL}/api/health`)
     const server = await createPublicCoverageServer(info.outputPath('expanded-default-server'), mode)
     const responses = withSurveyEmptyBoards(expansionResponses())
@@ -156,10 +158,10 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
         'greenhouse-sendbird-44201', 'greenhouse-sendbird-44202',
       ])
       await dataButton(page).click()
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '130', '17'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '132', '17'])
       await expect(page.getByRole('list', { name: '공개 공고 출처' }).locator('li')).toHaveText([
         'Greenhouse67개 회사', 'Ashby29개 회사', 'Lever10개 회사', 'SmartRecruiters10개 회사',
-        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트3개 회사',
+        'Workable4개 회사', 'Himalayas7개 회사', '공식 채용 사이트5개 회사',
       ])
       await page.getByRole('dialog').locator('.board-details > summary').click()
       for (const registration of EXPANDED_PUBLIC_REGISTRATIONS) {
@@ -182,7 +184,7 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
 
       await dataButton(page).click()
       await expectPublicSourceOverview(page)
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '130', '17'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '132', '17'])
       await closeTo(page, dataButton(page))
       await navigation(page).getByRole('button', { name: /^저장한 기회/ }).click()
       await expect(page.locator('.saved-card')).toHaveCount(0)
@@ -200,16 +202,17 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
       const after = await catalog(page, server.origin)
       expect(after.jobs).toEqual(before.jobs)
       const upstream = await server.requests()
+      expectEmptyDaangnTraffic(upstream)
       expect(upstream.filter(request => isRegionalSourceRequest(request.url)).map(request => request.url).sort())
         .toEqual([...REGIONAL_SOURCE_FULL_URLS].sort())
       expect(upstream.filter(value => isSourceExpansionRequest(value.url)).map(value => value.url).sort())
         .toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
-      expect(upstream).toHaveLength(130)
-      const historical = upstream.filter(value => !isIntegrationRequest(value.url) && !isSourceExpansionRequest(value.url) && !isRegionalSourceRequest(value.url))
+      expect(upstream).toHaveLength(134)
+      const historical = upstream.filter(value => !isIntegrationRequest(value.url) && !isSourceExpansionRequest(value.url) && !isRegionalSourceRequest(value.url) && !isDaangnRequest(value.url))
       expect(historical).toHaveLength(83)
       expect(new Set(historical.map(value => value.url)).size).toBe(83)
       expect(historical.map(value => value.url).sort()).toEqual(Object.keys(responses).sort())
-      expect(upstream.filter(value => isIntegrationRequest(value.url) && !isRegionalSourceRequest(value.url)).map(value => value.url).sort())
+      expect(upstream.filter(value => isIntegrationRequest(value.url) && !isRegionalSourceRequest(value.url) && !isDaangnRequest(value.url)).map(value => value.url).sort())
         .toEqual([...INTEGRATION_EMPTY_FULL_URLS].sort())
       expect(upstream.every(value => value.synthetic && !value.networkSent && value.method === 'GET')).toBe(true)
       await server.assertDefaultConfiguration()
@@ -239,13 +242,13 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
         id: 'greenhouse-stripe-44001', title: COVERAGE_TITLES.stripe, fetchedAt: oldTime,
         updatedAt: COVERAGE_UPDATED_AT, url: 'https://example.com/synthetic/stripe-44001',
       })
-      expect((await server.requests()).filter(value => !isIntegrationRequest(value.url) && !isSourceExpansionRequest(value.url) && !isRegionalSourceRequest(value.url)).map(value => value.url).sort())
+      expect((await server.requests()).filter(value => !isIntegrationRequest(value.url) && !isSourceExpansionRequest(value.url) && !isRegionalSourceRequest(value.url) && !isDaangnRequest(value.url)).map(value => value.url).sort())
         .toEqual([...COVERAGE_EXPANSION_URLS, ...Object.values(SURVEY_FULL_URLS)].sort())
-      expect((await server.requests()).filter(value => isIntegrationRequest(value.url) && !isRegionalSourceRequest(value.url)).map(value => value.url).sort())
+      expect((await server.requests()).filter(value => isIntegrationRequest(value.url) && !isRegionalSourceRequest(value.url) && !isDaangnRequest(value.url)).map(value => value.url).sort())
         .toEqual([...INTEGRATION_EMPTY_FULL_URLS].sort())
       const serializedCache = await readFile(server.defaultCache, 'utf8')
       const expanded = JSON.parse(serializedCache)
-      expect(expanded.boards).toHaveLength(130)
+      expect(expanded.boards).toHaveLength(132)
       for (const original of old.boards) {
         expect(expanded.boards.find((board: { companyId: string }) => board.companyId === original.companyId)).toMatchObject(original)
       }
@@ -281,7 +284,7 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
 
       await dataButton(page).click()
       await expectPublicSourceOverview(page)
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '130', '13'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '132', '13'])
       await closeTo(page, dataButton(page))
       await contextIs(page, 'Notion', 'backend')
       expectSavedNotion(await readSaved(page))
@@ -303,7 +306,7 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
       await expect(page.locator('.mini-job-title')).toHaveText('Backend Engineer — Synthetic Maple Index')
       await dataButton(page).click()
       await expectPublicSourceOverview(page)
-      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '130', '13'])
+      await expect(page.getByRole('dialog').locator('.coverage-stats strong')).toHaveText(['35', '132', '13'])
       await closeTo(page, dataButton(page))
       await contextIs(page, 'Notion', 'backend')
       const after = await catalog(page, server.origin)
@@ -311,15 +314,16 @@ for (const width of [1440, 320]) test.describe(`expanded default public companie
       expect(await readFile(server.defaultCache, 'utf8')).toBe(serializedCache)
       expect(await readSaved(page)).toEqual(records)
       const upstream = await server.requests()
+      expectEmptyDaangnTraffic(upstream)
       expect(upstream.filter(request => isRegionalSourceRequest(request.url)).map(request => request.url).sort())
         .toEqual([...REGIONAL_SOURCE_FULL_URLS].sort())
       expect(upstream.filter(value => isSourceExpansionRequest(value.url)).map(value => value.url).sort())
         .toEqual([...SOURCE_EXPANSION_EMPTY_FULL_URLS].sort())
-      expect(upstream).toHaveLength(106)
-      const historical = upstream.filter(value => !isIntegrationRequest(value.url) && !isSourceExpansionRequest(value.url) && !isRegionalSourceRequest(value.url))
+      expect(upstream).toHaveLength(110)
+      const historical = upstream.filter(value => !isIntegrationRequest(value.url) && !isSourceExpansionRequest(value.url) && !isRegionalSourceRequest(value.url) && !isDaangnRequest(value.url))
       expect(historical).toHaveLength(59)
       expect(historical.map(value => value.url).sort()).toEqual([...COVERAGE_EXPANSION_URLS, ...Object.values(SURVEY_FULL_URLS)].sort())
-      expect(upstream.filter(value => isIntegrationRequest(value.url) && !isRegionalSourceRequest(value.url)).map(value => value.url).sort())
+      expect(upstream.filter(value => isIntegrationRequest(value.url) && !isRegionalSourceRequest(value.url) && !isDaangnRequest(value.url)).map(value => value.url).sort())
         .toEqual([...INTEGRATION_EMPTY_FULL_URLS].sort())
       expect(upstream.every(value => value.synthetic && !value.networkSent && value.method === 'GET')).toBe(true)
       await server.assertDefaultConfiguration()

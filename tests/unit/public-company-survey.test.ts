@@ -1,3 +1,4 @@
+import { withEmptyDaangnBoard } from '../fixtures/daangn-empty-board'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -99,10 +100,12 @@ async function fixture(options: { old36?: boolean; history?: boolean; failures?:
     return createCatalogService({
       companies: config.companies,
       cache: createFileBoardCache(config.cacheFile, config.legacyCacheFiles, config.companies),
-      fetchBoard: (company, at) => full[company.provider ?? 'greenhouse'](company, at),
+      fetchBoard: (company, at) => withEmptyDaangnBoard(company, at, full[company.provider ?? 'greenhouse']),
       presence: {
         cache: createFilePresenceCache(presenceCacheFile(config.cacheFile)),
-        fetchBoard: (company, at) => presence[company.provider ?? 'greenhouse'](company, at),
+        fetchBoard: (company, at) => company.provider === 'careers' && (company.board === 'daangn' || company.board === 'daangn-pay')
+          ? Promise.resolve({ total: 0, publishedIds: [] })
+          : presence[company.provider ?? 'greenhouse'](company, at),
       },
       observations: createObservationStore({
         companies: config.companies, cache: createFileObservationCache(observationCacheFile(config.cacheFile)), now: () => now,
@@ -132,13 +135,13 @@ describe('independent47-company public survey', () => {
     const state = await fixture()
     const service = state.service()
     const catalog = await service.get()
-    expect(catalog.companies).toHaveLength(130)
+    expect(catalog.companies).toHaveLength(132)
     expect(catalog.companies.slice(36, 83).map(({ id, name, careerUrl, provider, board }) =>
       ({ id, name, careerUrl, provider, board }))).toEqual(SURVEY_REGISTRATIONS)
     expect(catalog.jobs).toHaveLength(65)
     expect(catalog.jobs.filter(job => SURVEY_REGISTRATIONS.some(company => company.id === job.companyId)
       && job.id !== 'greenhouse-xai-61901').map(positiveFields)).toEqual(SURVEY_JOBS.map(positiveFields))
-    expect(catalog.boards).toHaveLength(130)
+    expect(catalog.boards).toHaveLength(132)
     expect(catalog.boards.every(board => board.status === 'ok' && board.dataStatus === 'fresh')).toBe(true)
     expect(catalog.jobs.filter(job => job.postingPurpose).map(job => job.id)).toEqual([
       'greenhouse-moloco-44102', 'greenhouse-xai-61901',
@@ -182,7 +185,7 @@ describe('independent47-company public survey', () => {
     expect(state.requests.map(request => request.url).sort()).toEqual([...Object.values(SURVEY_FULL_URLS), ...SURVEY_DETAIL_URLS].sort())
     const bytes = await readFile(state.config.cacheFile, 'utf8')
     const cache = JSON.parse(bytes)
-    expect(cache.boards).toHaveLength(130)
+    expect(cache.boards).toHaveLength(132)
     for (const original of state.old.boards) {
       const kept = cache.boards.find((board: { companyId: string }) => board.companyId === original.companyId)
       expect(kept).toMatchObject(original)
@@ -271,7 +274,7 @@ describe('independent47-company public survey', () => {
     expect(state.unexpected).toEqual([])
   })
 
-  it('excludes a complete old36 cohort and compares only the current130-company days', async () => {
+  it('excludes a complete old36 cohort and compares only the current132-company days', async () => {
     const state = await fixture({ history: true })
     const service = state.service()
     const old = await service.getObservations()
