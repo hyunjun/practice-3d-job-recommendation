@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BoardFetchError } from '../../server/catalog-service'
 import { readDaangnInventory, readDaangnPosting } from '../../server/providers/daangn'
 import type { DaangnSummary } from '../../server/providers/daangn'
@@ -165,5 +165,96 @@ describe('Daangn detail integrity and public facts', () => {
     ['multiple canonical links', daangnDetail(undefined, { extra: `<link rel="canonical" href="${DAANGN_MARKET_URL}">` })],
   ])('rejects %s', async (_name, html) => {
     await expect(posting(html)).rejects.toBeInstanceOf(BoardFetchError)
+  })
+})
+
+// Fictional postlude; no real provider body or Astro asset is copied.
+const remedyModules = '<script type="module" src="/_astro/fictional-layout.js"></script>'
+  + '<script type="module" src="/_astro/fictional-index.js"></script>'
+const remedyPostludes = [
+  ['two modules', remedyModules],
+  ['whitespace and closed comments', ` \n<!-- fictional bundle -->${remedyModules}\n<!-- end -->\t`],
+] as const
+
+describe('REMEDY HTML completeness without executing a postlude', () => {
+  const forbiddenFetch = vi.fn(() => { throw new Error('Postlude must not cause network access') })
+  beforeEach(() => { forbiddenFetch.mockClear(); vi.stubGlobal('fetch', forbiddenFetch) })
+  afterEach(() => {
+    try { expect(forbiddenFetch).not.toHaveBeenCalled() }
+    finally { vi.unstubAllGlobals() }
+  })
+
+  it.each(remedyPostludes)('REMEDY-REPRO inventory accepts %s with exact complete facts', async (_name, tail) => {
+    const request = vi.fn(async () => daangnList() + tail)
+    expect(await readDaangnInventory(request, signal())).toEqual([
+      { id: '830001', title: 'Backend Engineer — Fictional Cedar Market83',
+        corporate: 'karrot-market', employment: 'full-time',
+        departments: ['tech', 'platform', 'developer experience'] },
+      { id: '830002', title: 'Account Executive — Fictional Cedar Sales83',
+        corporate: 'karrot-market', employment: 'full-time',
+        departments: ['tech', 'platform', 'developer experience'] },
+      { id: '830101', title: 'Frontend Engineer — Fictional Birch Pay83',
+        corporate: 'karrot-pay', employment: 'full-time',
+        departments: ['tech', 'platform', 'developer experience'] },
+    ])
+    expect(request.mock.calls).toHaveLength(1)
+    expect(request).toHaveBeenCalledWith(DAANGN_LIST_URL, expect.any(AbortSignal))
+  })
+
+  it.each(remedyPostludes)('REMEDY-REPRO detail accepts %s with literal posting facts', async (_name, tail) => {
+    const request = vi.fn(async () => daangnDetail() + tail)
+    const raw = await readDaangnPosting(summary, request, signal())
+    expect(raw).toMatchObject({
+      id: '830001', title: 'Backend Engineer — Fictional Cedar Market83',
+      url: 'https://careers.daangn.com/jobs/role/830001/',
+      employment: 'FULL_TIME', updatedAt: null,
+      locations: [{ address: { addressCountry: 'KR' } }],
+    })
+    expect(raw.description).toBe(DAANGN_BODY)
+    const job = normalizeCareerPosting(raw, 'daangn', DAANGN_NOW)!
+    expect(job).toMatchObject({
+      id: 'careers-daangn-830001', companyId: 'daangn',
+      title: 'Backend Engineer — Fictional Cedar Market83',
+      url: 'https://careers.daangn.com/jobs/role/830001/',
+      employment: 'fulltime', cityIds: [], locationLabel: '대한민국',
+      workMode: 'unknown', updatedAt: null,
+    })
+    expect(job.skills).toEqual(['TypeScript', 'PostgreSQL'])
+    expect(request.mock.calls).toHaveLength(1)
+    expect(request).toHaveBeenCalledWith(DAANGN_MARKET_URL, expect.any(AbortSignal))
+  })
+
+  const invalid: [string, (document: string) => string][] = [
+    ['missing actual html close', document => document.replace('</html>', '')],
+    ['fake html close in a closed comment', document => document.replace('</html>', '<!-- </html> -->')],
+    ['fake html close inside script text', document =>
+      document.replace('</html>', '<script>const fictional = "</html>";</script>')],
+    ['truncated suffix start tag', document => document + '<script type="module" src="'],
+    ['missing suffix script end', document => document + '<script type="module" src="/_astro/fictional.js">'],
+    ['self-closing script', document => document + '<script type="module" src="/_astro/fictional.js"/>'],
+    ['truncated suffix comment', document => document + '<!-- fictional'],
+    ['arbitrary trailing text', document => document + 'unexpected content'],
+    ['trailing content element', document => document + '<div>unexpected content</div>'],
+    ['second document', document => document + '<html><body></body></html>'],
+    ['duplicate suffix attribute', document =>
+      document + '<script type="module" src="/_astro/a.js" src="/_astro/b.js"></script>'],
+    ['inline suffix script body', document =>
+      document + '<script type="module" src="/_astro/a.js">throw new Error("must stay inert")</script>'],
+    ['missing suffix src', document => document + '<script type="module"></script>'],
+    ['empty suffix src', document => document + '<script type="module" src=""></script>'],
+    ['non-module suffix script', document => document + '<script src="/_astro/a.js"></script>'],
+    ['whitespace-only script body', document => document + '<script type="module" src="/_astro/a.js"> \n\t</script>'],
+    ['padded module type', document => document + '<script type=" module " src="/_astro/a.js"></script>'],
+    ['ignored trailing body tags', document => document + '<body></body>'],
+    ['ignored trailing html start', document => document + '<html lang="en">'],
+    ['ignored stray closing tag', document => document + '</div>'],
+    ['bad content before later html close', document => document + '<div>unexpected</div></html>'],
+    ['allowed modules followed by extra html close', document => document + remedyModules + '</html>'],
+  ]
+  it.each(invalid)('rejects inventory %s', async (_name, mutate) => {
+    await expect(inventory(mutate(daangnList()))).rejects.toBeInstanceOf(BoardFetchError)
+  })
+  it.each(invalid)('rejects detail %s', async (_name, mutate) => {
+    await expect(posting(mutate(daangnDetail()))).rejects.toBeInstanceOf(BoardFetchError)
   })
 })

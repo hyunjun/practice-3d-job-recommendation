@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T20:01:45.242752+00:00",
+  "status": "LOCAL_REMEDY_VALIDATION_PASSED_AND_EXPLICITLY_AGREED",
+  "scope": "Daangn HTML postlude completeness and per-request async caller context; affected synthetic tests and Cloudflare bundle boundary. Real capture and publication remain incomplete.",
+  "participants": {
+    "main": "Codex implementation and independent report review",
+    "astra": {
+      "requestedModel": "global.openai.gpt-6-astra",
+      "requestedReasoning": "max",
+      "role": "independent design/code/result review"
+    },
+    "tester": "Separate Codex subagent executed pinned tests, builds and production E2E",
+    "fable": "Excluded by later user instruction; historical missing review remains unreceived."
+  },
+  "validatedSource": {
+    "manifestSha256": "ccd2eb16ed80628582faa37fc4ddf3adf942a94581e57e01758c608e0d1b19e1",
+    "contentDigest": "cf7dbaf75e6e4338c9f60b136d0a2dda98dc755a93a85c108c42db706838567e",
+    "files": 629,
+    "bytes": 61767909,
+    "baseCommit": "a57a156ebe65204a4e7b0ae99cb35c7c4d7bd93a",
+    "productAndTestFiles": [
+      {
+        "path": "server/providers/daangn-http.ts",
+        "bytes": 13286,
+        "sha256": "a1a1b131b2fa36bb6b636279eadfb2ecb3605e48b1120238a316aa9c1d204b53"
+      },
+      {
+        "path": "server/providers/daangn.ts",
+        "bytes": 17239,
+        "sha256": "21d991f271c51cd77c59bab5c05987fb16400b3932e1584da5d5325cbcbcab1e"
+      },
+      {
+        "path": "tests/e2e/daangn-source.spec.ts",
+        "bytes": 8528,
+        "sha256": "ea2290caf5ad1693a35e5e894eca48f4257501da2625e7028acb1b2a059b7ed0"
+      },
+      {
+        "path": "tests/unit/daangn-http.test.ts",
+        "bytes": 31423,
+        "sha256": "98e2679af5cefdf9c34050104caec129e56eb214f3829556fe56361a580f8c0e"
+      },
+      {
+        "path": "tests/unit/daangn-parser.test.ts",
+        "bytes": 15815,
+        "sha256": "a7883a1b2de2106641e4c31e34773cddb63a1db6d136a1f31ed3ca3c8fe7789d"
+      }
+    ]
+  },
+  "priorReproduction": {
+    "productFailures": 5,
+    "assessorFailures": 2,
+    "bothOrdinaryExitCodes": [
+      1,
+      1
+    ],
+    "rawStatus": "FAILED",
+    "actualConsensusSha256": "eaef8c56701a3d76b78874dd8caaa771c13b3efa925a722ce4dd085765437f68",
+    "notAPass": true
+  },
+  "postFixActual": {
+    "actualToolExitCode": 0,
+    "starts": 1,
+    "retries": 0,
+    "phasesPassed": 12,
+    "phasesNotRun": 0,
+    "unitFiles": 5,
+    "unitCasesPassed": 203,
+    "uniqueUnitFileTitles": 180,
+    "newProductCases": 51,
+    "independentAssessorCasesPassed": 37,
+    "productionE2ECasesPassed": 2,
+    "viewportWidths": [
+      1440,
+      320
+    ],
+    "e2eRawSteps": 546,
+    "failedSamplesInsideSuccessfulStartupPolls": 6,
+    "successfulStartupPollGroups": 2,
+    "testAndGlobalErrors": 0,
+    "rootAndWorkerTypesActuallyExecuted": true,
+    "workerDryRun": true,
+    "realDeployment": false,
+    "workerInputs": 111,
+    "workerImportEdges": 360,
+    "workerBytes": 944332,
+    "workerSha256": "95abc70046d112328b03d9467dc1704e9d57d5f9ad216e007f240fefd2fd5d0c",
+    "workerGzipBytes": 160255,
+    "assetFiles": 367,
+    "nodeCollectorParserAsyncHooksInWorker": false
+  },
+  "preservation": {
+    "priorGeneratedFiles": 926,
+    "priorGeneratedBytes": 33649043,
+    "priorGeneratedNestedDirectories": 20,
+    "priorGeneratedJournals": 15,
+    "e2eArchiveFiles": 758,
+    "e2eArchiveDirectoriesIncludingRoot": 31,
+    "e2eArchiveSymlinks": 2,
+    "e2eArchiveBytes": 33224896,
+    "dependencyEntriesBeforeAndAfter": 13611,
+    "dependencyDirectoriesBeforeAndAfter": 1088,
+    "browserEntriesBeforeAndAfter": 358,
+    "cleanupComplete": false
+  },
+  "closure": {
+    "queriedOwnedPidsAbsent": 83,
+    "literalBirthIdentities": 24,
+    "outerObservedOwnedCount": 114,
+    "registrySpawns": 43,
+    "registryExitCallbacks": 40,
+    "unmatchedIndividualExitCallbacks": 3,
+    "exit0Callbacks": 27,
+    "vitestSigtermCallbacks": 10,
+    "lsofAbsenceExit1Callbacks": 2,
+    "defaultServerSigkillCallbacks": 1,
+    "powerIntervalSeconds": 81.287674332998,
+    "outerWallSeconds": 83.882279,
+    "overlapAssertions": 9,
+    "overlapSleepWakeDarkWake": 0,
+    "guardReleased": true,
+    "scope": "Recorded owned identities and bounded interval only; missing child exit callbacks are not inferred."
+  },
+  "evidence": {
+    "testerReportSha256": "3ae54ab827c2b438aacb50d2d7807314a8e98fcf56cec2d359110c591fc07de7",
+    "testerIndexSha256": "55a6be61374fc4a3672832acd9e08b31764fbd22c0418f043eb338404551a592",
+    "mainActualReviewSha256": "69348f8d0515b64a96cd0eda98a337f28b16666d389d859bbb0c0036fccf084f",
+    "astraActualReviewSha256": "5b1fde422679f68060e8f24342e5cfe1ceea69d47df276507e87b4ce992fdf44",
+    "actualConsensusSha256": "ba62a5e2c00a4d0c806eb8ff1c64d2859d2070f4cb7b9e5173611323ae2d4c6a",
+    "planSha256": "0b912cfa8b512ec0dda073cf0d60ca174fec679b02d3d0c7df8d4654d550bfd8",
+    "innerResultSha256": "a196206f2137cd354e3d293a04cf63db50fc63f072cd89c08fea4e3bd7d0b545",
+    "outerResultSha256": "31268759d4fa068a3aeacbc674d0f124849aa99b3369f20a8d7d6ccc4cb4e7aa",
+    "terminalReceiptSha256": "92dfab3aedb8d8546ac2bfc52cec0c6295d0af56cf7591f070544217a8e6ecbc",
+    "retainedOutputInventorySha256": "f6877725eb93e922ef2c901cb53027e37b37b46330b18c173afcd71d3f1e1aa1"
+  },
+  "localEvidenceRetention": {
+    "root": ".local/research/reference-official-jobs-2026-10-25/",
+    "reason": "Actual initial failed source responses are irreproducible observations; active raw validation and subsequent capture evidence are not deleted before final preservation."
+  },
+  "remaining": [
+    "New complete live capture/replay with fresh before-catalog and new ID AND canonical URL",
+    "Real132source capacity and existing-source availability verification",
+    "Reviewed collector workflow rollout, publicAPI/desktop-mobileUI acceptance",
+    "Genuine event=schedule follow-up using reviewed collector",
+    "Final reproducible artifact cleanup and irretrievable-observation retention record"
+  ],
+  "goalComplete": false
+}

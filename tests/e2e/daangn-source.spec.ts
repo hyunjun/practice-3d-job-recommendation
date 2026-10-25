@@ -7,12 +7,30 @@ import {
   DAANGN_PAY_TITLE, DAANGN_PAY_URL, DAANGN_ROBOTS_URL,
 } from '../fixtures/daangn-contract'
 import { daangnResponses, isDaangnRequest } from '../fixtures/daangn-wire'
+import type { CoverageReply } from '../fixtures/public-coverage-transport'
 import { withSurveyEmptyBoards } from '../fixtures/public-company-survey'
 import { publicCoverageResponses } from '../fixtures/public-coverage'
 import { integrationServer } from './helpers/source-integrations'
 import {
   expectSurveyPrivacy, seedSurvey, surveyClose, surveyDataButton, surveyImage, surveySearch,
 } from './helpers/public-company-survey'
+
+// Only this test's fictional Daangn HTML gets the observed complete-module shape.
+// Shared fixtures, robots text, response controls and every UI/request oracle stay intact.
+function daangnResponsesWithPostlude() {
+  const postlude = '<script type="module" src="/_astro/fictional-layout.js"></script>'
+    + '<script type="module" src="/_astro/fictional-index.js"></script>'
+  return Object.fromEntries(Object.entries(daangnResponses()).map(([url, value]) => {
+    if (url === DAANGN_ROBOTS_URL) return [url, value]
+    const reply = value as CoverageReply
+    if (!isDaangnRequest(url) || reply.fixtureResponse !== 'orbit-public-coverage-v1'
+      || reply.format !== 'text' || typeof reply.body !== 'string'
+      || !/^<!doctype\s+html\s*>/i.test(reply.body)) {
+      throw new Error(`Unexpected non-HTML Daangn fixture: ${url}`)
+    }
+    return [url, { ...reply, body: reply.body + postlude }]
+  }))
+}
 
 async function nonemptyDialogGeometry(page: Page, info: TestInfo, name: string) {
   await expect(page.getByRole('dialog')).toHaveCount(1)
@@ -48,7 +66,7 @@ for (const width of [1440, 320]) test.describe(`official Daangn sources at ${wid
     test.setTimeout(180_000)
     const server = await integrationServer(page, info, baseURL, {
       clock: DAANGN_NOW,
-      responses: { ...withSurveyEmptyBoards(publicCoverageResponses()), ...daangnResponses() },
+      responses: { ...withSurveyEmptyBoards(publicCoverageResponses()), ...daangnResponsesWithPostlude() },
     })
     try {
       await server.start()

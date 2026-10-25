@@ -1,3 +1,4 @@
+import { AsyncResource } from 'node:async_hooks'
 import { BoardFetchError, parseRetryAfter } from '../catalog-service'
 import type { CareerRequest } from './careers-common'
 import { DAANGN_ORIGIN } from './daangn'
@@ -153,8 +154,9 @@ export function createDaangnRequestFactory(options: { fetch?: typeof fetch } = {
   function enqueue(signal: AbortSignal, interval: number, run: () => Promise<ResponseContent>): Promise<ResponseContent> {
     return new Promise((resolve, reject) => {
       if (signal.aborted) { reject(signal.reason); return }
+      // The previous caller's completion/timer can pump this item; retain its owner.
       const item: Waiting = {
-        signal, interval, run, resolve, reject,
+        signal, interval, run: AsyncResource.bind(run, 'DaangnRequest'), resolve, reject,
         cancel() {
           const index = waiting.indexOf(item)
           if (index !== -1) waiting.splice(index, 1)

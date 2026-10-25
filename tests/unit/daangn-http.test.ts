@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from 'node:async_hooks'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { BoardFetchError } from '../../server/catalog-service'
 import { createDaangnRequestFactory } from '../../server/providers/daangn-http'
@@ -450,6 +451,149 @@ describe('MAIN-DGN-CLOSE-1: delayed stream cancellation remains owned', () => {
       await vi.advanceTimersByTimeAsync(30_000)
       expect(cleanupSettled).toBe(true)
       if (cleanupSettled) await cleanup
+      expect(vi.getTimerCount()).toBe(0)
+    }
+  })
+})
+
+describe('REMEDY queued caller context, pacing and abort ownership', () => {
+  it('REMEDY-REPRO binds every two-company robots/list/detail call to its enqueue context', async () => {
+    const context = new AsyncLocalStorage<{ companyId: string; pass: string }>()
+    const observed: { companyId?: string; pass?: string; url: string; at: number }[] = []
+    const h = transport(url => {
+      observed.push({ ...context.getStore(), url, at: Date.now() - Date.parse(DAANGN_NOW) })
+      return url === DAANGN_ROBOTS_URL ? robots() : html('fictional complete body')
+    })
+    const parents = [new AbortController(), new AbortController()]
+    const sessions = parents.map(parent => h.factory.createSession(parent.signal))
+    const owned = [
+      context.run({ companyId: 'daangn', pass: 'inventory' }, async () => {
+        await sessions[0].request(DAANGN_LIST_URL, parents[0].signal)
+        return context.run({ companyId: 'daangn', pass: 'content' }, () =>
+          sessions[0].request(DAANGN_MARKET_URL, parents[0].signal))
+      }),
+      context.run({ companyId: 'daangn-pay', pass: 'inventory' }, async () => {
+        await sessions[1].request(DAANGN_LIST_URL, parents[1].signal)
+        return context.run({ companyId: 'daangn-pay', pass: 'content' }, () =>
+          sessions[1].request('https://careers.daangn.com/jobs/role/830101/', parents[1].signal))
+      }),
+    ]
+    let completedSettled = false
+    const completed = Promise.allSettled(owned).then(value => { completedSettled = true; return value })
+    try {
+      await vi.advanceTimersByTimeAsync(15_000)
+      expect(completedSettled).toBe(true)
+      expect((await completed).map(item => item.status)).toEqual(['fulfilled', 'fulfilled'])
+      expect(observed).toEqual([
+        { companyId: 'daangn', pass: 'inventory', url: DAANGN_ROBOTS_URL, at: 0 },
+        { companyId: 'daangn-pay', pass: 'inventory', url: DAANGN_ROBOTS_URL, at: 3000 },
+        { companyId: 'daangn', pass: 'inventory', url: DAANGN_LIST_URL, at: 6000 },
+        { companyId: 'daangn-pay', pass: 'inventory', url: DAANGN_LIST_URL, at: 9000 },
+        { companyId: 'daangn', pass: 'content', url: DAANGN_MARKET_URL, at: 12000 },
+        { companyId: 'daangn-pay', pass: 'content',
+          url: 'https://careers.daangn.com/jobs/role/830101/', at: 15000 },
+      ])
+      expect(sessions.map(session => session.requestCount())).toEqual([3, 3])
+      expect(h.calls.every(call => !call.signal.aborted)).toBe(true)
+    } finally {
+      parents.forEach(parent => parent.abort())
+      let joined = false
+      const cleanup = Promise.allSettled([...owned, ...sessions.map(session => session.close())])
+        .then(() => { joined = true })
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(joined).toBe(true)
+      if (joined) await cleanup
+      expect(vi.getTimerCount()).toBe(0)
+    }
+  })
+
+  it('a queued caller abort sends no request and does not overwrite the surviving caller context', async () => {
+    const context = new AsyncLocalStorage<string>()
+    const observed: { context?: string; url: string; at: number }[] = []
+    const h = transport(url => {
+      observed.push({ context: context.getStore(), url, at: Date.now() - Date.parse(DAANGN_NOW) })
+      return url === DAANGN_ROBOTS_URL ? robots() : html('fictional A')
+    })
+    const a = new AbortController(), b = new AbortController()
+    const sa = h.factory.createSession(a.signal), sb = h.factory.createSession(b.signal)
+    const reason = new Error('Fictional queued B cancellation')
+    const pa = context.run('daangn', () => sa.request(DAANGN_LIST_URL, a.signal))
+    const pb = context.run('daangn-pay', () => sb.request(DAANGN_LIST_URL, b.signal))
+    let completedSettled = false
+    const completed = Promise.allSettled([pa, pb]).then(value => { completedSettled = true; return value })
+    try {
+      context.run('daangn-pay', () => b.abort(reason))
+      await vi.advanceTimersByTimeAsync(3000)
+      expect(completedSettled).toBe(true)
+      const results = await completed
+      expect(results[0].status).toBe('fulfilled')
+      expect(results[1].status).toBe('rejected')
+      expect(observed).toEqual([
+        { context: 'daangn', url: DAANGN_ROBOTS_URL, at: 0 },
+        { context: 'daangn', url: DAANGN_LIST_URL, at: 3000 },
+      ])
+      expect(sb.requestCount()).toBe(0)
+      expect(b.signal.reason).toBe(reason)
+    } finally {
+      a.abort(); b.abort()
+      let joined = false
+      const cleanup = Promise.allSettled([completed, sa.close(), sb.close()]).then(() => { joined = true })
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(joined).toBe(true)
+      if (joined) await cleanup
+      expect(vi.getTimerCount()).toBe(0)
+    }
+  })
+
+  it('active caller cancellation keeps its original signal and lets the other context finish', async () => {
+    const context = new AsyncLocalStorage<string>()
+    const observed: { context?: string; url: string; at: number }[] = []
+    let activeSignal: AbortSignal | undefined
+    let activeReason: unknown
+    const h = transport((url, signal) => {
+      observed.push({ context: context.getStore(), url, at: Date.now() - Date.parse(DAANGN_NOW) })
+      if (url === DAANGN_ROBOTS_URL) return robots()
+      if (!activeSignal) {
+        activeSignal = signal
+        return new Promise<Response>((_resolve, reject) => {
+          signal.addEventListener('abort', () => {
+            activeReason = signal.reason
+            reject(signal.reason)
+          }, { once: true })
+        })
+      }
+      return html('fictional B remains available')
+    })
+    const a = new AbortController(), b = new AbortController()
+    const sa = h.factory.createSession(a.signal), sb = h.factory.createSession(b.signal)
+    const pa = context.run('daangn', () => sa.request(DAANGN_LIST_URL, a.signal))
+    const pb = context.run('daangn-pay', () => sb.request(DAANGN_LIST_URL, b.signal))
+    let completedSettled = false
+    const completed = Promise.allSettled([pa, pb]).then(value => { completedSettled = true; return value })
+    const reason = new Error('Fictional active A cancellation')
+    try {
+      await vi.advanceTimersByTimeAsync(6000)
+      expect(activeSignal).toBe(h.calls[2].signal)
+      a.abort(reason)
+      await vi.advanceTimersByTimeAsync(3000)
+      expect(completedSettled).toBe(true)
+      expect((await completed).map(item => item.status)).toEqual(['rejected', 'fulfilled'])
+      expect(activeSignal!.aborted).toBe(true)
+      expect(activeReason).toBe(reason)
+      expect(observed).toEqual([
+        { context: 'daangn', url: DAANGN_ROBOTS_URL, at: 0 },
+        { context: 'daangn-pay', url: DAANGN_ROBOTS_URL, at: 3000 },
+        { context: 'daangn', url: DAANGN_LIST_URL, at: 6000 },
+        { context: 'daangn-pay', url: DAANGN_LIST_URL, at: 9000 },
+      ])
+      expect(h.calls[3].signal.aborted).toBe(false)
+    } finally {
+      a.abort(); b.abort()
+      let joined = false
+      const cleanup = Promise.allSettled([completed, sa.close(), sb.close()]).then(() => { joined = true })
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(joined).toBe(true)
+      if (joined) await cleanup
       expect(vi.getTimerCount()).toBe(0)
     }
   })

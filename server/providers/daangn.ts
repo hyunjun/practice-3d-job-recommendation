@@ -1,4 +1,4 @@
-import { parse, type DefaultTreeAdapterMap } from 'parse5'
+import { defaultTreeAdapter, parse, parseFragment, type DefaultTreeAdapterMap } from 'parse5'
 import { z } from 'zod'
 import { countryCode, countryName } from '../../shared/countries'
 import { BoardFetchError } from '../catalog-service'
@@ -71,18 +71,77 @@ function canonicalUrl(value: string, expected?: string): string {
   return url.href
 }
 
+/** Astro may place complete external module scripts after the HTML end tag. */
+function validatePostlude(suffix: string): void {
+  const whitespace = (value: string) => /^[\t\n\f\r ]*$/.test(value)
+  if (whitespace(suffix)) return
+  let malformed = false
+  const fragment = parseFragment(suffix, {
+    sourceCodeLocationInfo: true,
+    onParseError() { malformed = true },
+  })
+  if (malformed) return failure('공개 페이지의 끝부분을 확인하지 못했어요.')
+  // Apply the same node bound even to a suffix composed only of comments.
+  elements(fragment, () => false)
+  let cursor = 0
+  for (const node of fragment.childNodes) {
+    const location = node.sourceCodeLocation
+    if (!location || location.startOffset < cursor
+      || !whitespace(suffix.slice(cursor, location.startOffset))) {
+      return failure('공개 페이지의 끝부분을 확인하지 못했어요.')
+    }
+    const raw = suffix.slice(location.startOffset, location.endOffset)
+    if (node.nodeName === '#text' && 'value' in node) {
+      if (!whitespace(raw)) return failure('공개 페이지의 끝부분을 확인하지 못했어요.')
+    } else if (node.nodeName === '#comment') {
+      if (!raw.startsWith('<!--') || !raw.endsWith('-->')) {
+        return failure('공개 페이지의 끝부분을 확인하지 못했어요.')
+      }
+    } else if (isElement(node) && node.tagName === 'script') {
+      const start = node.sourceCodeLocation?.startTag
+      const end = node.sourceCodeLocation?.endTag
+      if (!start || !end || start.endOffset !== end.startOffset || node.childNodes.length !== 0
+        || attribute(node, 'type')?.toLowerCase() !== 'module' || !attribute(node, 'src')?.trim()) {
+        return failure('공개 페이지의 끝부분을 확인하지 못했어요.')
+      }
+    } else {
+      return failure('공개 페이지의 끝부분을 확인하지 못했어요.')
+    }
+    cursor = location.endOffset
+  }
+  // A recovering fragment parser can omit stray closing tags. Check their bytes too.
+  if (!whitespace(suffix.slice(cursor))) return failure('공개 페이지의 끝부분을 확인하지 못했어요.')
+}
+
 function documentFor(html: unknown, expectedPath: string): DefaultTreeAdapterMap['document'] {
   if (typeof html !== 'string' || Buffer.byteLength(html, 'utf8') > 4 * 1024 * 1024
-    || !/<!doctype\s+html\s*>/i.test(html) || !/<\/html>\s*$/i.test(html)) {
+    || !/<!doctype\s+html\s*>/i.test(html)) {
     return failure('공개 페이지를 끝까지 확인하지 못했어요.')
   }
   let malformed = false
+  let htmlEnd: number | undefined
   const document = parse(html, {
+    sourceCodeLocationInfo: true,
+    treeAdapter: {
+      ...defaultTreeAdapter,
+      updateNodeSourceCodeLocation(node, location) {
+        // Recovery after a second HTML end tag must not hide rejected suffix bytes.
+        if (htmlEnd === undefined && isElement(node) && node.tagName === 'html'
+          && node.parentNode?.nodeName === '#document' && location.endTag) {
+          htmlEnd = location.endTag.endOffset
+        }
+        defaultTreeAdapter.updateNodeSourceCodeLocation(node, location)
+      },
+    },
     onParseError(error) {
       if (error.code === 'duplicate-attribute' || error.code.startsWith('eof-')) malformed = true
     },
   })
   if (malformed) return failure('공개 페이지의 구조가 올바르지 않아요.')
+  const root = exactlyOne(document.childNodes.filter((node): node is Element => isElement(node) && node.tagName === 'html'),
+    '공개 페이지의 문서 구조를 확인하지 못했어요.')
+  if (!root.sourceCodeLocation?.endTag || htmlEnd === undefined) return failure('공개 페이지를 끝까지 확인하지 못했어요.')
+  validatePostlude(html.slice(htmlEnd))
   const canonical = exactlyOne(elements(document, element => element.tagName === 'link'
     && attribute(element, 'rel')?.toLowerCase().split(/\s+/).includes('canonical') === true),
   '공개 페이지의 정규 주소를 확인하지 못했어요.')
