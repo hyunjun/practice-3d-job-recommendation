@@ -2,6 +2,7 @@ import childProcess from 'node:child_process'
 import { appendFileSync, writeFileSync } from 'node:fs'
 import fsPromises from 'node:fs/promises'
 import { syncBuiltinESMExports } from 'node:module'
+import path from 'node:path'
 
 /**
  * `--import` preload for the publish CLI under test.
@@ -52,6 +53,7 @@ type PreloadPayload =
   | { kind: 'checkpoint-complete'; file: string }
   | { kind: 'head-response'; status: number; ordinal: number }
   | { kind: 'provider-attempt'; host: string }
+  | { kind: 'evidence-partial-write'; bytes: number }
 type PreloadEvent = PreloadPayload & { seq: number }
 const events: PreloadEvent[] = []
 const liveLogErrors: string[] = []
@@ -107,6 +109,24 @@ const wrappedMkdtemp = function (this: unknown, prefix: unknown, ...rest: unknow
   return Reflect.apply(realMkdtemp as (...parameters: unknown[]) => unknown, this, [prefix, ...rest])
 }
 fsPromises.mkdtemp = wrappedMkdtemp as unknown as typeof fsPromises.mkdtemp
+// Opt-in single-write fault, restricted to the test-owned evidence target.
+// Other files, the raw publication build and network behavior remain unchanged.
+if (process.env.ORBIT_TEST_PARTIAL_EVIDENCE_WRITE === '1') {
+  const target = process.env.ORBIT_PUBLICATION_EVIDENCE_FILE
+  if (!target || !path.isAbsolute(target)) throw new Error('Partial-write witness needs its explicit absolute evidence target')
+  const resolvedTarget = path.join(await fsPromises.realpath(path.dirname(target)), path.basename(target))
+  const realWriteFile = fsPromises.writeFile
+  let injected = false
+  fsPromises.writeFile = async (file, data, options) => {
+    if (!injected && file === resolvedTarget) {
+      injected = true
+      await realWriteFile(file, Buffer.from('partial'), options)
+      record({ kind: 'evidence-partial-write', bytes: 7 })
+      throw new Error('Synthetic evidence disk interruption')
+    }
+    return realWriteFile(file, data, options)
+  }
+}
 // Named ESM imports of built-ins (`import { execFileSync } from 'node:child_process'`) see the wrappers after this call.
 syncBuiltinESMExports()
 

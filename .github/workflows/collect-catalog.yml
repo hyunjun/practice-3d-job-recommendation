@@ -42,12 +42,48 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Collect and atomically publish
+        id: collect
         env:
           ORBIT_PUBLICATION_URL: https://job.hyunjun.workers.dev
           ORBIT_PUBLISH_TOKEN: ${{ secrets.ORBIT_PUBLISH_TOKEN }}
           ORBIT_OPERATION: ${{ inputs.operation || 'collect' }}
+          ORBIT_PUBLICATION_EVIDENCE_FILE: ${{ runner.temp }}/orbit-publication-evidence.json
         run: |
           collection_tmp="$(mktemp -d)"
           export TMPDIR="$collection_tmp"
           trap 'rm -rf -- "$collection_tmp"' EXIT
-          npm run publish:catalog -- "$ORBIT_OPERATION"
+          if [[ "$ORBIT_OPERATION" != collect ]]; then
+            npm run publish:catalog -- "$ORBIT_OPERATION"
+            exit "$?"
+          fi
+          publication_output="$(mktemp "$RUNNER_TEMP/orbit-publication-output.XXXXXX")"
+          printf 'output_record=%s\n' "$publication_output" >> "$GITHUB_OUTPUT"
+          set +e
+          npm run publish:catalog -- "$ORBIT_OPERATION" 2>&1 | tee "$publication_output"
+          publication_status=("${PIPESTATUS[@]}")
+          set -e
+          if (( publication_status[1] != 0 )); then
+            echo "Publication output capture failed." >&2
+          fi
+          if (( publication_status[0] != 0 )); then
+            exit "${publication_status[0]}"
+          fi
+          exit "${publication_status[1]}"
+      - name: Verify completed publication evidence
+        id: prepare_evidence
+        if: ${{ always() && (inputs.operation || 'collect') == 'collect' && steps.collect.outputs.output_record != '' }}
+        env:
+          PUBLICATION_OUTPUT_RECORD: ${{ steps.collect.outputs.output_record }}
+          ORBIT_PUBLICATION_EVIDENCE_FILE: ${{ runner.temp }}/orbit-publication-evidence.json
+        run: node scripts/prepare-publication-evidence.mjs --output-record "$PUBLICATION_OUTPUT_RECORD" --evidence-file "$ORBIT_PUBLICATION_EVIDENCE_FILE"
+      - name: Retain publication evidence
+        if: ${{ always() && (inputs.operation || 'collect') == 'collect' && steps.prepare_evidence.outcome == 'success' && steps.prepare_evidence.outputs.ready == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: publication-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/orbit-publication-evidence.json
+          archive: true
+          retention-days: 7
+          if-no-files-found: error
+          overwrite: false
+          include-hidden-files: false

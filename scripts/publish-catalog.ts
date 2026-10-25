@@ -9,6 +9,8 @@ import type { PublicationHead } from '../shared/publication'
 import { buildPublication } from '../server/publication-build'
 import { createPublicationClient, PublicationClientError } from '../server/publication-client'
 import { collectPublication, restorePublicationCheckpoint } from '../server/publication-collector'
+import { writePublicationEvidence } from '../server/publication-evidence'
+import type { PublicationEvidenceReceipt } from '../server/publication-evidence'
 
 const operation = process.argv[2] ?? 'collect'
 const controller = new AbortController()
@@ -17,6 +19,7 @@ let timeout: ReturnType<typeof setTimeout> | undefined
 let temporary: string | undefined
 let published: PublicationHead | null = null
 let attempted: { generation: string; parent: Pick<PublicationHead, 'generation' | 'revision'> | null } | undefined
+let evidence: PublicationEvidenceReceipt | undefined
 const originalFetch = globalThis.fetch
 const startedAt = Date.now()
 try {
@@ -71,6 +74,12 @@ try {
       await writeFile(path.join(directory, `${index}.bin`), chunk, { mode: 0o600, flag: 'wx' })
     }
     controller.signal.throwIfAborted()
+    if (process.env.ORBIT_PUBLICATION_EVIDENCE_FILE !== undefined) {
+      evidence = await writePublicationEvidence(process.env.ORBIT_PUBLICATION_EVIDENCE_FILE, temporary, publication, {
+        companies: capture.catalog.companies.length, boards: capture.catalog.boards.length, jobs: capture.catalog.jobs.length,
+      })
+      controller.signal.throwIfAborted()
+    }
     attempted = { generation: publication.manifest.generation, parent: publication.manifest.parent }
     const head = await client.publish(publication)
     published = head
@@ -84,6 +93,7 @@ try {
       manifestBytes: Buffer.byteLength(publication.manifestText),
       checkpointBytes: Object.fromEntries(PRIVATE_FILES.map(name => [name,
         publication.manifest.fragments[publication.manifest.checkpoint.files[name]].decodedBytes])),
+      ...(evidence ? { evidence } : {}),
       providerPasses: metrics, storage, elapsedMs: Date.now() - startedAt,
     }))
   }
@@ -93,6 +103,7 @@ try {
     operation: ['collect', 'rollback'].includes(operation) ? operation : 'invalid',
     success: false, published: published ? true : attempted ? null : false,
     ...(published ? { head: published } : {}), ...(attempted ? { attempted } : {}),
+    ...(evidence ? { evidence } : {}),
     code: controller.signal.aborted ? 'CANCELLED'
       : error instanceof PublicationClientError ? error.code : 'COLLECTION_OR_VALIDATION_FAILED',
     elapsedMs: Date.now() - startedAt,

@@ -64,9 +64,23 @@ npm run build:cloudflare
 
 워크플로는 검증된 SHA를 checkout하고 `contents: read` 권한으로 일반 `ubuntu-latest` 실행기를 사용합니다. checkout/setup-node는 전체 커밋 SHA로 고정합니다. 실행은 같은 concurrency group에서 직렬화하며 진행 중 작업을 취소하지 않습니다. 시간 제한은 25분입니다.
 
+`ORBIT_COLLECTOR_REF`는 checkout할 수집 코드만 선택합니다. 예약 작업의 workflow 정의는 default branch에서 가져오므로, workflow 변경을 반영할 때는 해당 branch의 정의와 checkout할 코드가 함께 검증된 버전인지 확인합니다. 실행 기록에는 workflow 버전, checkout한 collector 커밋, 발행 generation을 각각 남깁니다.
+
 수동 실행의 `operation`은 `collect` 또는 `rollback`입니다. 예약 활성화 여부와 별개로 수동 실행이 가능하므로 최초 발행과 운영 복구에 사용할 수 있습니다. 워크플로에는 공고 원문 artifact/cache를 업로드하는 단계가 없습니다. 임시 복원·발행 파일은 종료 시 정리합니다.
 
 수집 CLI는 깨끗한 Git checkout에서만 발행합니다. 수집 출처와 실행 코드의 커밋을 연결하기 위해 수정 중인 작업 폴더의 발행을 거부합니다. 목적지는 위 Workers 주소 또는 8787을 제외한 로컬 검증 주소만 허용합니다. 인증된 요청의 redirect를 따라가지 않습니다.
+
+## 발행 증거 보관
+
+`collect`에서 `ORBIT_PUBLICATION_EVIDENCE_FILE`을 설정하면 발행 직전에 증거 JSON 파일 하나를 기록합니다. 호출자가 부모 폴더를 준비하고, 자동 정리되는 실제 수집 임시 폴더 밖의 절대 경로를 지정해야 합니다. 파일은 권한 0600으로 새로 만들며 기존 파일을 덮어쓰지 않습니다. 경로가 잘못됐거나 쓰기가 실패하면 발행을 시작하지 않습니다. 환경 변수를 설정하지 않았거나 `rollback`을 실행하면 증거 파일을 만들지 않습니다.
+
+증거에는 collector 커밋, 후보 generation과 부모 revision, 수집 시각·구성 ID, 회사·게시판·공고 수, manifest와 실제 청크의 크기·SHA256, 압축 조각의 크기·해시·참조 관계만 담습니다. 회사 객체, 공고 제목·본문·URL, 체크포인트 원문, 오류 원문과 인증 정보는 포함하지 않습니다. 개수와 해시는 발행할 파일의 검토 자료이며 출처의 수집 성공이나 게시물의 최신성을 증명하지는 않습니다.
+
+파일 쓰기가 완료되면 CLI 결과의 `evidence`에 `version`, `bytes`, `sha256`을 남깁니다. 이후 업로드·커밋 확인·metrics가 실패해도 이 완료 참조와 증거 파일을 유지합니다. `success`와 `published`의 기존 의미는 그대로이며, 증거 파일이 있다는 이유로 발행 성공으로 판단하지 않습니다.
+
+예약 workflow는 실행기 임시 폴더의 `orbit-publication-evidence.json`을 사용합니다. 이번 호출의 출력은 별도로 새 파일에 기록하며 수집 명령과 출력 기록의 종료 코드를 확인합니다. 후속 준비 단계는 출력의 유일한 `collect` 결과와 완료 참조를 읽고, 대상이 일반 파일인지와 실제 UTF-8 바이트 수·SHA256이 일치하는지 검사합니다. 입력 출력 기록은 1 MiB, 증거 파일은 8 MiB까지 읽으며 초과나 잘못된 UTF-8은 실패로 처리합니다. 준비에 성공한 이번 실행의 파일만 `publication-evidence-<run_id>-<run_attempt>` artifact로 7일간 보관합니다. 출력 기록과 공고 원문은 artifact에 포함하지 않습니다.
+
+발행 명령이 나중에 실패했어도 이미 완성된 증거는 검증 후 보관할 수 있습니다. 증거 기록에 실패해 남은 부분 파일이나 이전 파일은 완료 참조가 없어 보관 대상이 되지 않습니다. 보관 준비·업로드가 실패한 경우 발행 결과를 별도로 확인하며, 확인된 발행을 미발행으로 바꾸거나 자동으로 재수집하지 않습니다. artifact ZIP의 해시는 원본 JSON의 SHA256과 다르고, ZIP은 원본의 0600 권한을 보존하지 않습니다.
 
 ## API와 상태 확인
 

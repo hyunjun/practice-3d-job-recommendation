@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T17:47:37.138379+00:00",
+  "status": "LOCAL_PUBLICATION_EVIDENCE_VALIDATION_CONSENSUS_COMPLETE_ROLLOUT_PENDING",
+  "source": {
+    "baseCommit": "f00c63e631344c45bbe35ccac0eea4ab9a686719",
+    "validatedManifest": {
+      "localPath": "tester/publication-evidence-source-manifest-03.json",
+      "bytes": 107558,
+      "sha256": "ffafb416cb5db86aa2c290da60c36ef9cd4f228143cc80cd979c9525921ffd49"
+    },
+    "contentDigest": "2107ee7f3362f1681e76718d52868100c819dfb5049f25c8b76ef8ab37db16c5",
+    "files": 627,
+    "preservationDelta": "Add only these two validation documents after the tested snapshot; product/test bytes remain identical.",
+    "changedFiles": [
+      {
+        "path": "server/publication-evidence.ts",
+        "bytes": 3693,
+        "sha256": "51362c5b201db7540f940a6b64be3eb165736c9b0657d94283b56b60b1853496"
+      },
+      {
+        "path": "scripts/publish-catalog.ts",
+        "bytes": 6836,
+        "sha256": "71979200777180dc13e5dbaec527311392c4a75141a3f0b105940a85f7d5da3f"
+      },
+      {
+        "path": "scripts/prepare-publication-evidence.mjs",
+        "bytes": 5406,
+        "sha256": "4aef08eb2f8a377bad42bc983f5272b27fec38570c8752e6c409ad45ccb1da2b"
+      },
+      {
+        "path": ".github/workflows/collect-catalog.yml",
+        "bytes": 3751,
+        "sha256": "23c616ed8d95379872861e0de1d73f510448deb94c5ca44b6c6f5b6de8799a90"
+      },
+      {
+        "path": "docs/cloudflare.md",
+        "bytes": 17244,
+        "sha256": "ec55b6298a0c82d2b109e9681533e32946604ee323b7119c97f3c97686e62d54"
+      },
+      {
+        "path": "tests/unit/publication-evidence.test.ts",
+        "bytes": 10598,
+        "sha256": "5681bc58653e5695a82e5652952f72abdf3dff51373363d189d32c1d0274a66f"
+      },
+      {
+        "path": "tests/unit/prepare-publication-evidence.test.ts",
+        "bytes": 9899,
+        "sha256": "b1a508208e66985386ba9dd54d6165bebb7f7d3bd8c5dec48dec2f29920cb92b"
+      },
+      {
+        "path": "tests/unit/publication-evidence-workflow.test.ts",
+        "bytes": 9430,
+        "sha256": "ba69583e7a8707b9df101365b7555da23d09470aa03b65f0f7d803c634a1366b"
+      },
+      {
+        "path": "tests/cloudflare/cli/publish-cli.spec.ts",
+        "bytes": 47781,
+        "sha256": "5cb382296a2b3d79eef8ac3dc01b0d2fdfac9389c880001f0c9990219903512e"
+      },
+      {
+        "path": "tests/cloudflare/cli/harness.ts",
+        "bytes": 23621,
+        "sha256": "6bea8d3e2755bed76ea145c8fc0d740ca1d00e89fa6b15e5c961c2fbf4343ea1"
+      },
+      {
+        "path": "tests/cloudflare/cli/publication-server.ts",
+        "bytes": 14273,
+        "sha256": "e8149ab89d8eb52701020d1cf21819195ce56e8fdb76a76f5c2ec3a5504b9776"
+      },
+      {
+        "path": "tests/cloudflare/cli/provider-preload.ts",
+        "bytes": 7423,
+        "sha256": "8e37f114eeb47d3baddb27013d079a8f122311005a90cc0dcafb2fb997b7f8ae"
+      }
+    ]
+  },
+  "localEvidenceRoot": ".local/research/reference-official-jobs-2026-10-25 (original checkout; ignored local records)",
+  "consensus": {
+    "localPath": "publication-evidence-actual-consensus-02.json",
+    "bytes": 5016,
+    "sha256": "3ff9022c99294d25458873d85da0f2b4b4f11df5773f6d91b3894033a13320fc"
+  },
+  "participants": {
+    "main": {
+      "decision": "approve",
+      "review": {
+        "localPath": "main-publication-evidence-actual-final-02.json",
+        "bytes": 5609,
+        "sha256": "f3488ece8b26be46f39d1715581c75721887d22152792e689743808a03834251"
+      }
+    },
+    "astra": {
+      "decision": "approve",
+      "requestedModel": "global.openai.gpt-6-astra",
+      "requestedReasoning": "max",
+      "configurationNote": "Requested settings; no separate runtime-attestation claim.",
+      "review": {
+        "localPath": "astra-publication-evidence-actual-review-02.json",
+        "bytes": 16448,
+        "sha256": "9c0470e9e815a6081279ab2d23dbd2af281baf020fcee445ca7806bfe35ed444"
+      }
+    },
+    "tester": {
+      "role": "independent test agent",
+      "report": {
+        "localPath": "tester/power-runs/20261025T173320Z-6c1fe08ebd6c/actual-publication-execution-report-02.json",
+        "bytes": 35199,
+        "sha256": "81cb8b0bd003684f6b904cd6cacd4aa9ae14b597774cc54e76631476d79c7619"
+      }
+    },
+    "fable": "Excluded after initial opinion by user decision. Historical blocked/unreceived review remains unreceived, never approval."
+  },
+  "execution": {
+    "go": {
+      "localPath": "publication-evidence-execution-go-02.json",
+      "bytes": 8334,
+      "sha256": "74bc183e6ddc333bffea61884120a7d3f26594eee7932de56f8a9b211c7c9990"
+    },
+    "plan": {
+      "localPath": "tester/publication-evidence-execution-plan-03.json",
+      "bytes": 37179,
+      "sha256": "8610bbe4f82afd604a092eeb7f67bfeb99053f9a576fd1634d5f279eea6a48d7"
+    },
+    "session": 59023,
+    "terminalExit": 0,
+    "phasesPassed": 9,
+    "rootTypesPassed": true,
+    "unitsPassed": 142,
+    "cliPassed": 24,
+    "failures": 0,
+    "notRun": 0,
+    "skipped": 0,
+    "testRetries": 0,
+    "automaticRetries": 0,
+    "unitsByFile": {
+      "publication-evidence.test.ts": 12,
+      "prepare-publication-evidence.test.ts": 58,
+      "publication-evidence-workflow.test.ts": 10,
+      "publication-build.test.ts": 22,
+      "publication-client.test.ts": 15,
+      "publication-collector.test.ts": 25
+    },
+    "cliOriginal": 15,
+    "cliNew": 9,
+    "reportedGlobalErrors": 0,
+    "limitsSeconds": {
+      "units": 600,
+      "cli": 900,
+      "controller": 2400,
+      "outer": 2460,
+      "power": 2820
+    },
+    "outerSeconds": 156.368504,
+    "flags": [
+      "maxWorkers=1",
+      "no-file-parallelism",
+      "no-cache",
+      "retry=0",
+      "bail=1"
+    ],
+    "collectionJsonJunitIdentitiesAndMultiplicitiesMatched": true
+  },
+  "historicalFailure": {
+    "run": 1,
+    "toolSession": 81073,
+    "terminalExit": 1,
+    "unitPassed": 134,
+    "unitFailed": 1,
+    "unitNotRun": 7,
+    "cliNotRun": 24,
+    "cause": "Darwin bare mktemp -d chose user temporary directory over fixture TMPDIR; raw-path containment oracle failed.",
+    "correction": "Synthetic single-d mktemp branch uses explicit fixture-owned raw.XXXXXX template; diagnostic assertion text added. Product/workflow/oracles/case counts/deadlines unchanged.",
+    "missingEvidence": "Exact raw path and subsequent deletion assertion were not recorded; second pass does not retroactively prove deletion.",
+    "consensus": {
+      "localPath": "publication-evidence-failed-run01-consensus-01.json",
+      "bytes": 2662,
+      "sha256": "cb337af04cf03eeab1989fd5848b46a46350150fb101cff59f6b5a102b67c009"
+    }
+  },
+  "integrity": {
+    "sourceFiles": 627,
+    "sourceChecks": 20,
+    "controls": 43,
+    "dependencyRecords": 13611,
+    "dependencyDirectories": 1088,
+    "unchanged": true
+  },
+  "closure": {
+    "literalBirthIdentities": 44,
+    "scopedPids": 171,
+    "finalScopedMatches": 0,
+    "unpairedEsbuildExitCallbacks": 25,
+    "unpairedExitCodesAndSignals": "unknown",
+    "vitestWorkerSIGTERM": 14,
+    "guardExit": -15,
+    "guardReaped": true,
+    "lockRemoved": true,
+    "powerIntervalSeconds": 153.325311624998,
+    "overlappingSleepWakeDarkWake": 0,
+    "census": {
+      "localPath": "tester/power-runs/20261025T173320Z-6c1fe08ebd6c/post-terminal-owned-closure-publication-02.json",
+      "bytes": 143919,
+      "sha256": "2cb812be243edb0f93a83ebc5c38e62f7f92e04224372744201740c1e0c1b687"
+    }
+  },
+  "retention": {
+    "snapshotEntries": 753,
+    "regularFiles": 731,
+    "directories": 22,
+    "regularBytes": 22981569,
+    "laterReportFilesSeparatelyBound": true,
+    "perCaseArtifacts": "Asserted then removed by approved owned test teardown; no separately retained raw per-case transcript.",
+    "currentEvidenceRetained": true,
+    "cleanupComplete": false,
+    "reason": "Outstanding real capture/rollout verification still references the local evidence and retained execution controls."
+  },
+  "limits": [
+    "Local synthetic publication contracts only; no real provider call, remote artifact upload,132-source capacity, deployment, public UI or genuine scheduled event.",
+    "Scoped process absence and bounded power evidence; no all-host process/socket or continuously-awake claim.",
+    "Earlier full application/build/Worker/browser checks remain separate baseline evidence; not rerun or counted as new cases here."
+  ],
+  "baselineValidation": "reference-official-jobs-evidence-2026-10-26.json",
+  "goalComplete": false,
+  "newDeploymentOrPublication": false,
+  "remaining": [
+    "Bounded real capture/replay with new stable ID and canonical URL absent from public baseline.",
+    "Actual132-source capacity and old-source health; verified collector/workflow/default-branch rollout.",
+    "Actual public publication/UI1440/320 and genuine scheduled follow-up.",
+    "Final requirements audit and owned temporary cleanup."
+  ]
+}

@@ -23,6 +23,10 @@ export interface PublicationServerOptions {
   /** What `/head` reports once a commit has been installed (or dropped). */
   headAfterCommit?: 'committed' | 'none'
   metrics?: 'ok' | 'storage-error'
+  begin?: 'ok' | 'bad-request'
+  chunk?: 'ok' | 'bad-request'
+  /** Synthetic-only wire witness, awaited at receipt before accepting upload. */
+  observeUpload?: (route: string, bytes: Buffer) => Promise<void>
   /** Answer every request with a 302 to this origin instead of serving it. */
   redirectTo?: string
   /** Never answer `/head`; used to cancel the CLI mid-request. */
@@ -43,6 +47,8 @@ export interface RecordedRequest {
 export interface PublicationServer {
   origin: string
   requests: RecordedRequest[]
+  /** Callback failures remain visible instead of disappearing behind HTTP 400. */
+  inspectionErrors: string[]
   current: () => { head: PublicationHead; manifest: PublicationManifest } | null
   waitFor: (predicate: (request: RecordedRequest) => boolean, timeoutMs?: number) => Promise<RecordedRequest>
   releaseHeld: () => void
@@ -78,6 +84,11 @@ interface Waiter {
 
 export async function startPublicationServer(options: PublicationServerOptions): Promise<PublicationServer> {
   const requests: RecordedRequest[] = []
+  const inspectionErrors: string[] = []
+  const observeUpload = async (route: string, bytes: Buffer) => {
+    try { await options.observeUpload?.(route, bytes) }
+    catch (error) { inspectionErrors.push(String(error)); throw error }
+  }
   const waiters: Waiter[] = []
   const held = new Set<ServerResponse>()
   const heldCheckpoints: { response: ServerResponse; rest: Buffer }[] = []
@@ -165,10 +176,12 @@ export async function startPublicationServer(options: PublicationServerOptions):
       }
       if (request.method === 'POST' && route === '/begin') {
         const body = await readBody(request)
+        await observeUpload(route, body)
         entry.bodyBytes = body.length
         const manifest = JSON.parse(body.toString('utf8')) as PublicationManifest
         entry.body = { generation: manifest.generation, parent: manifest.parent, collectorCommit: manifest.capture.collectorCommit, companies: manifest.capture.companies.length, chunks: manifest.chunks.length }
         record(entry)
+        if (options.begin === 'bad-request') return json(response, 400, { error: 'Synthetic begin rejection', code: 'PUBLISH_BAD_REQUEST' })
         if (current?.manifest.generation === manifest.generation) return json(response, 200, { committed: true, head: current.head })
         staging = manifest
         return json(response, 200, { committed: false, generation: manifest.generation })
@@ -176,8 +189,10 @@ export async function startPublicationServer(options: PublicationServerOptions):
       const chunk = /^\/chunks\/([a-f0-9-]+)\/(\d+)$/.exec(route)
       if (request.method === 'PUT' && chunk) {
         const body = await readBody(request)
+        await observeUpload(route, body)
         entry.bodyBytes = body.length
         record(entry)
+        if (options.chunk === 'bad-request') return json(response, 400, { error: 'Synthetic chunk rejection', code: 'PUBLISH_BAD_REQUEST' })
         chunks.set(`${chunk[1]}:${chunk[2]}`, body)
         return json(response, 200, { generation: chunk[1], index: Number(chunk[2]), hash: createHash('sha256').update(body).digest('hex'), bytes: body.length })
       }
@@ -235,6 +250,7 @@ export async function startPublicationServer(options: PublicationServerOptions):
   return {
     origin: `http://127.0.0.1:${port}`,
     requests,
+    inspectionErrors,
     current: () => current,
     waitFor: (predicate, timeoutMs = 60_000) => new Promise((resolve, reject) => {
       if (closed) return reject(new Error('The fixture origin is closed'))

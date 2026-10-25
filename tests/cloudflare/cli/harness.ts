@@ -147,6 +147,7 @@ export type PreloadEvent =
   | { seq: number; kind: 'checkpoint-complete'; file: string }
   | { seq: number; kind: 'head-response'; status: number; ordinal: number }
   | { seq: number; kind: 'provider-attempt'; host: string }
+  | { seq: number; kind: 'evidence-partial-write'; bytes: number }
 export interface ProviderEvidence {
   version: 3
   pid: number
@@ -234,7 +235,7 @@ function lastJsonLine(text: string): Record<string, unknown> | null {
   catch { return null }
 }
 
-const EVENT_KINDS = new Set(['execFileSync', 'mkdtemp', 'checkpoint-start', 'checkpoint-complete', 'head-response', 'provider-attempt'])
+const EVENT_KINDS = new Set(['execFileSync', 'mkdtemp', 'checkpoint-start', 'checkpoint-complete', 'head-response', 'provider-attempt', 'evidence-partial-write'])
 function validEvent(event: unknown, index: number | null): event is PreloadEvent {
   if (!event || typeof event !== 'object') return false
   const candidate = event as Record<string, unknown>
@@ -246,6 +247,7 @@ function validEvent(event: unknown, index: number | null): event is PreloadEvent
     case 'checkpoint-start': return typeof candidate.file === 'string' && Number.isInteger(candidate.status)
     case 'checkpoint-complete': return typeof candidate.file === 'string'
     case 'head-response': return Number.isInteger(candidate.status) && Number.isInteger(candidate.ordinal)
+    case 'evidence-partial-write': return candidate.bytes === 7
     default: return typeof candidate.host === 'string'
   }
 }
@@ -291,13 +293,15 @@ export async function startPublishCli(repo: CollectorRepo, options: {
   /** The only origin the preload lets through; defaults to the publication URL. */
   allowedOrigin?: string
   token?: string
+  /** Opt-in evidence target owned by the test, outside the CLI's raw TMPDIR. */
+  evidenceFile?: string
   /**
    * Controlled cleanup-failure witness: a write-protected entry inside the
    * fixture's own `unrelated-keep` directory makes the owned TMPDIR removal fail
    * for real, so the reporting path can be exercised; the test must unlock and
    * remove `outcome.tmpDir` itself afterwards.
    */
-  witness?: { lockedUnrelatedEntry?: boolean }
+  witness?: { lockedUnrelatedEntry?: boolean; partialEvidenceWrite?: boolean }
 }): Promise<CliRun> {
   const tmp = await mkdtemp(path.join(os.tmpdir(), 'orbit-cli-tmpdir-'))
   const evidenceErrors: string[] = []
@@ -335,6 +339,8 @@ export async function startPublishCli(repo: CollectorRepo, options: {
       ORBIT_TEST_GIT_WITNESS: gitWitness,
       ORBIT_TEST_REAL_GIT: repo.realGit,
     })
+    if (options.evidenceFile !== undefined) env.ORBIT_PUBLICATION_EVIDENCE_FILE = options.evidenceFile
+    if (options.witness?.partialEvidenceWrite) env.ORBIT_TEST_PARTIAL_EVIDENCE_WRITE = '1'
     const startedAt = Date.now()
     const child = spawn(process.execPath, ['--import', 'tsx', '--import', PRELOAD, 'scripts/publish-catalog.ts', ...(options.args ?? ['collect'])], {
       cwd: repo.root, stdio: ['ignore', 'pipe', 'pipe'], env,

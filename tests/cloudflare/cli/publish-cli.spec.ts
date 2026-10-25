@@ -1,13 +1,17 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { chmod, rm } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { execFile } from 'node:child_process'
+import { chmod, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
+import { promisify } from 'node:util'
 import { buildPublication } from '../../../server/publication-build'
 import { PUBLIC_COMPANIES } from '../../../shared/companies'
 import { GENERATION_PATTERN } from '../../../shared/publication'
 import type { PublicationHead } from '../../../shared/publication'
 import { FICTIONAL_COMMIT, GENERATION_ONE, privateFiles, publicationHarness, RUN_ONE } from '../../fixtures/publication'
-import { activeRunCount, CLI_TOKEN, liveChildCount, prepareCollectorRepo, runPublishCli, startPublishCli, stopAllRuns, takeRetainedFailures, teardownDecision } from './harness'
+import { activeRunCount, CLI_TOKEN, liveChildCount, prepareCollectorRepo, runPublishCli, startPublishCli, stopAllRuns, takeRetainedFailures, teardownDecision, WORKTREE } from './harness'
 import type { CliOutcome, CollectorRepo, PreloadEvent } from './harness'
 import { startPublicationServer } from './publication-server'
 import type { PublicationServer } from './publication-server'
@@ -19,8 +23,8 @@ import type { PublicationServer } from './publication-server'
  * every real board fail and no request leaves the machine. Explicitly selected by
  * tests/cloudflare/vitest.cli.config.ts; never part of `npm run check`.
  *
- * Fifteen tests contain sixteen nominal CLI launch sites (two admission tests
- * launch twice). Every launch is a registered run that afterEach stops and joins
+ * Evidence cases extend the original fifteen tests without replacing their
+ * disabled-option contracts. Every launch is a registered run that afterEach stops and joins
  * before the fixture origins close; completed finalization failures are retained
  * until teardown reports them, and the fixture repository is removed in afterAll
  * only when every child is known closed and every stop joined (ACLI82-R4/R5).
@@ -34,6 +38,7 @@ const GIT_STATUS = [...GIT_PREFIX, 'status', '--porcelain', '--untracked-files=a
 let repo: CollectorRepo | undefined
 let server: PublicationServer | undefined
 let redirectTarget: PublicationServer | undefined
+const evidenceRoots: string[] = []
 const rejectedReasons = (results: PromiseSettledResult<unknown>[]) => results.filter((result): result is PromiseRejectedResult => result.status === 'rejected').map(result => String(result.reason))
 
 beforeAll(async () => { repo = await prepareCollectorRepo() }, 120_000)
@@ -54,9 +59,14 @@ afterEach(async () => {
   // Children first (stopped and joined through finalization), then both origins independently; every failure is kept.
   const stops = await stopAllRuns('afterEach')
   const closes = await Promise.allSettled([server?.close(), redirectTarget?.close()])
+  const inspections = [...(server?.inspectionErrors ?? []), ...(redirectTarget?.inspectionErrors ?? [])]
+  // Never remove a file that a child with unknown closure might still use.
+  const removals = liveChildCount() === 0
+    ? await Promise.allSettled(evidenceRoots.splice(0).map(root => rm(root, { recursive: true, force: true }))) : []
   server = undefined
   redirectTarget = undefined
-  expect(rejectedReasons([...stops, ...closes])).toEqual([])
+  expect(rejectedReasons([...stops, ...closes, ...removals])).toEqual([])
+  expect(inspections).toEqual([])
   expect(takeRetainedFailures()).toEqual([])
   expect(liveChildCount()).toBe(0)
   expect(activeRunCount()).toBe(0)
@@ -576,5 +586,195 @@ describe('publish CLI rollback outcomes', () => {
     expectGitThenTemp(outcome)
     expectSanitized(outcome)
     expectNoProviderTraffic(outcome)
+  })
+})
+
+const evidenceHash = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex')
+async function evidenceTarget() {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'orbit-cli-evidence-'))
+  evidenceRoots.push(root)
+  return path.join(root, 'evidence.json')
+}
+interface WireEvidence {
+  version: number
+  generation: string
+  collectorCommit: string
+  parent: { generation: string; revision: number } | null
+  counts: { companies: number; boards: number; jobs: number }
+  manifest: { bytes: number; sha256: string }
+  compressedBytes: number
+  chunks: { owner: string; index: number; bytes: number; sha256: string }[]
+}
+function uploadWitness(target: string) {
+  const uploads: { route: string; bytes: Buffer }[] = []
+  const atBegin: { bytes: Buffer; mode: number }[] = []
+  return {
+    uploads, atBegin,
+    observeUpload: async (route: string, bytes: Buffer) => {
+      if (route === '/begin') {
+        // This read happens in the actual receiving HTTP handler, before its
+        // response, proving persistence before any publication mutation.
+        atBegin.push({ bytes: await readFile(target), mode: (await stat(target)).mode & 0o777 })
+      }
+      uploads.push({ route, bytes: Buffer.from(bytes) })
+    },
+  }
+}
+async function prepareActualOutcome(target: string, outcome: CliOutcome, ready: boolean) {
+  const root = path.dirname(target)
+  const record = path.join(root, 'actual-cli-output.log')
+  const githubOutput = path.join(root, 'prepared-output')
+  // Exact captured streams, not a reconstructed/synthetic outcome object.
+  await writeFile(record, outcome.stdout + outcome.stderr, { flag: 'wx', mode: 0o600 })
+  await writeFile(githubOutput, '', { flag: 'wx', mode: 0o600 })
+  const prepared = await promisify(execFile)(process.execPath, [
+    path.join(WORKTREE, 'scripts/prepare-publication-evidence.mjs'),
+    '--output-record', record, '--evidence-file', target,
+  ], {
+    env: { ...process.env, GITHUB_OUTPUT: githubOutput },
+    timeout: 3000, killSignal: 'SIGKILL', maxBuffer: 64 * 1024, encoding: 'utf8',
+  })
+  // execFile completion joins the direct child; timeout/signal/spawn errors reject.
+  expect(prepared).toEqual({ stdout: '', stderr: '' })
+  const bytes = await readFile(target)
+  expect(await readFile(githubOutput, 'utf8')).toBe(ready
+    ? `ready=true\nbytes=${bytes.length}\nsha256=${evidenceHash(bytes)}\n` : 'ready=false\n')
+  if (ready) expect(outcome.report?.evidence).toEqual({ version: 1, bytes: bytes.length, sha256: evidenceHash(bytes) })
+}
+async function expectCompletedEvidence(target: string, outcome: CliOutcome, witness: ReturnType<typeof uploadWitness>) {
+  const bytes = await readFile(target)
+  expect(outcome.report?.evidence).toEqual({ version: 1, bytes: bytes.length, sha256: evidenceHash(bytes) })
+  expect(witness.atBegin).toEqual([{ bytes, mode: 0o600 }])
+  const document = JSON.parse(bytes.toString('utf8')) as WireEvidence
+  const manifestWire = witness.uploads.filter(item => item.route === '/begin')
+  expect(manifestWire).toHaveLength(1)
+  expect(document.manifest).toEqual({ bytes: manifestWire[0].bytes.length, sha256: evidenceHash(manifestWire[0].bytes) })
+  expect(document.manifest.bytes).toBeGreaterThan(manifestWire[0].bytes.toString('utf8').length)
+  expect(document).toMatchObject({
+    version: 1, collectorCommit: fixtureRepo().commit, parent: null,
+    counts: { companies: 132, boards: 132, jobs: 0 },
+  })
+  expect(document.generation).toMatch(LOWERCASE_UUID)
+  expect(document.compressedBytes).toBe(document.chunks.reduce((sum, chunk) => sum + chunk.bytes, 0))
+  const text = bytes.toString('utf8')
+  for (const forbidden of [CLI_TOKEN, 'Bearer', 'Fictional provider outage', 'careerUrl', '"capture"', 'https://']) {
+    expect(text).not.toContain(forbidden)
+  }
+  expect(`${outcome.stdout}\n${outcome.stderr}`).not.toContain(target)
+  expectWellFormedRun(outcome)
+  expectSanitized(outcome)
+  expectGitThenTemp(outcome)
+  await prepareActualOutcome(target, outcome, true)
+  return document
+}
+
+describe('publish CLI optional metadata evidence', () => {
+  it('completes the exclusive file before begin and binds every actually uploaded byte on success', async () => {
+    const target = await evidenceTarget()
+    const witness = uploadWitness(target)
+    server = await startPublicationServer({ token: CLI_TOKEN, observeUpload: witness.observeUpload })
+    const outcome = await runPublishCli(fixtureRepo(), { publicationUrl: server.origin, evidenceFile: target })
+    expect(outcome.code).toBe(0)
+    expect(outcome.report?.success).toBe(true)
+    expect(outcome.report).not.toHaveProperty('published')
+    const evidence = await expectCompletedEvidence(target, outcome, witness)
+    const chunks = witness.uploads.filter(item => item.route.startsWith('/chunks/')).map(item => {
+      const [, , owner, index] = item.route.split('/')
+      return { owner, index: Number(index), bytes: item.bytes.length, sha256: evidenceHash(item.bytes) }
+    }).sort((a, b) => a.index - b.index)
+    expect(chunks.length).toBeGreaterThan(0)
+    expect(evidence.chunks).toEqual(chunks)
+    expect(evidence.compressedBytes).toBe(witness.uploads.filter(item => item.route.startsWith('/chunks/')).reduce((sum, item) => sum + item.bytes.length, 0))
+    expect(outcome.report?.head).toEqual(server.current()?.head)
+    expect(evidence.generation).toBe(server.current()?.head.generation)
+    expect(count('/begin')).toBe(1)
+    expect(count('/commit')).toBe(1)
+  }, 180_000)
+
+  it.each(['begin', 'chunk', 'commit', 'metrics'] as const)('retains the completed receipt after %s fails without changing publication certainty', async phase => {
+    const target = await evidenceTarget()
+    const witness = uploadWitness(target)
+    server = await startPublicationServer({
+      token: CLI_TOKEN, observeUpload: witness.observeUpload,
+      ...(phase === 'begin' ? { begin: 'bad-request' as const } : {}),
+      ...(phase === 'chunk' ? { chunk: 'bad-request' as const } : {}),
+      ...(phase === 'commit' ? { commit: 'drop-without-commit' as const, headAfterCommit: 'none' as const } : {}),
+      ...(phase === 'metrics' ? { metrics: 'storage-error' as const } : {}),
+    })
+    const outcome = await runPublishCli(fixtureRepo(), { publicationUrl: server.origin, evidenceFile: target })
+    expect(outcome.code).toBe(1)
+    expect(outcome.reportStream).toBe('stderr')
+    expect(outcome.report).toMatchObject({
+      operation: 'collect', success: false, published: phase === 'metrics' ? true : null,
+      code: phase === 'commit' ? 'COMMIT_UNCONFIRMED' : phase === 'metrics' ? 'PUBLISH_STORAGE_ERROR' : 'PUBLISH_BAD_REQUEST',
+    })
+    const evidence = await expectCompletedEvidence(target, outcome, witness)
+    expect(outcome.report?.attempted).toEqual({ generation: evidence.generation, parent: null })
+    if (phase === 'metrics') expect(outcome.report?.head).toEqual(server.current()?.head)
+    else {
+      expect(outcome.report).not.toHaveProperty('head')
+      expect(server.current()).toBeNull()
+    }
+    if (phase === 'begin') expect(witness.uploads.map(item => item.route)).toEqual(['/begin'])
+    if (phase === 'begin' || phase === 'chunk') expect(count('/commit')).toBe(0)
+  }, 180_000)
+
+  it.each(['file', 'directory'] as const)('an existing %s fails before attempted publication and retains the original target', async kind => {
+    const target = await evidenceTarget()
+    if (kind === 'file') await writeFile(target, 'old evidence must remain exact')
+    else await mkdir(target)
+    server = await startPublicationServer({ token: CLI_TOKEN })
+    const outcome = await runPublishCli(fixtureRepo(), { publicationUrl: server.origin, evidenceFile: target })
+    expect(outcome.code).toBe(1)
+    expect(outcome.report).toMatchObject({ operation: 'collect', success: false, published: false, code: 'COLLECTION_OR_VALIDATION_FAILED' })
+    expect(outcome.report).not.toHaveProperty('attempted')
+    expect(outcome.report).not.toHaveProperty('evidence')
+    expect(count('/begin')).toBe(0)
+    expect(server.requests.filter(request => request.method !== 'GET')).toEqual([])
+    if (kind === 'file') expect(await readFile(target, 'utf8')).toBe('old evidence must remain exact')
+    else expect((await stat(target)).isDirectory()).toBe(true)
+    expectWellFormedRun(outcome)
+    expectSanitized(outcome)
+    expectGitThenTemp(outcome)
+  }, 180_000)
+
+  it('a real partial write produces no completed receipt or publication attempt and is ineligible for retention', async () => {
+    const target = await evidenceTarget()
+    server = await startPublicationServer({ token: CLI_TOKEN })
+    const outcome = await runPublishCli(fixtureRepo(), {
+      publicationUrl: server.origin, evidenceFile: target, witness: { partialEvidenceWrite: true },
+    })
+    expect(outcome.code).toBe(1)
+    expect(outcome.report).toMatchObject({ operation: 'collect', success: false, published: false, code: 'COLLECTION_OR_VALIDATION_FAILED' })
+    expect(outcome.report).not.toHaveProperty('attempted')
+    expect(outcome.report).not.toHaveProperty('evidence')
+    expect(outcome.events.filter(event => event.kind === 'evidence-partial-write')).toEqual([
+      { seq: expect.any(Number), kind: 'evidence-partial-write', bytes: 7 },
+    ])
+    expect(await readFile(target, 'utf8')).toBe('partial')
+    expect((await stat(target)).mode & 0o777).toBe(0o600)
+    expect(server.requests.filter(request => request.method !== 'GET')).toEqual([])
+    expect(server.current()).toBeNull()
+    expect(`${outcome.stdout}\n${outcome.stderr}`).not.toContain('Synthetic evidence disk interruption')
+    expectWellFormedRun(outcome)
+    expectSanitized(outcome)
+    expectGitThenTemp(outcome)
+    await prepareActualOutcome(target, outcome, false)
+    expect(await readFile(target, 'utf8')).toBe('partial')
+  }, 180_000)
+
+  it('ignores the evidence option during rollback and preserves the old exact result keys', async () => {
+    const target = await evidenceTarget()
+    await writeFile(target, 'existing collect evidence')
+    server = await startPublicationServer({ token: CLI_TOKEN, initial: await initialPublication() })
+    const outcome = await runPublishCli(fixtureRepo(), { args: ['rollback'], publicationUrl: server.origin, evidenceFile: target })
+    expect(outcome.code).toBe(0)
+    expect(Object.keys(outcome.report!).sort()).toEqual(['elapsedMs', 'head', 'operation', 'storage', 'success'])
+    expect(await readFile(target, 'utf8')).toBe('existing collect evidence')
+    expect(count('/begin')).toBe(0)
+    expectNoProviderTraffic(outcome)
+    expectWellFormedRun(outcome)
+    expectSanitized(outcome)
+    expectGitThenTemp(outcome)
   })
 })
