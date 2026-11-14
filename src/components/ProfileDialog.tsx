@@ -157,7 +157,7 @@ export function ProfileDialog({ profile, filters, remember: initialRemember, onA
             <button className={tab === 'linkedin' ? 'selected' : ''} aria-pressed={tab === 'linkedin'} onClick={() => changeTab('linkedin')}><Link2 size={15} />LinkedIn</button>
           </div>
           {tab === 'file' && <>
-            <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md" className="sr-only" aria-label="이력서 파일 선택" onChange={event => {
+            <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md" className="sr-only" tabIndex={-1} aria-label="이력서 파일 선택" onChange={event => {
               const file = event.currentTarget.files?.[0]
               event.currentTarget.value = ''
               void importFile(file)

@@ -3,7 +3,8 @@ import type { CSSProperties, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { ArrowUpRight, Check, CircleHelp, Globe2, X } from 'lucide-react'
 import type { City, Company } from '../../shared/types'
-import { useDialogFeedbackRegistration } from './DialogFeedback'
+import { useDialogFeedbackRegistration, useDialogFocusScope } from './DialogFeedback'
+import { installDialogVisibility, revealRestoredOpener } from '../lib/dialog-visibility'
 
 const dialogScrollLocks = new WeakMap<Document, { count: number; overflow: string }>()
 
@@ -43,6 +44,7 @@ export function Dialog({ title, eyebrow, children, onClose, fallbackFocus, ownsS
   const ref = useRef<HTMLDialogElement>(null)
   const feedback = useRef<HTMLDivElement>(null)
   const registerFeedback = useDialogFeedbackRegistration()
+  const focusScope = useDialogFocusScope()
   const titleId = useId()
   const closeRef = useRef(onClose)
   const fallbackRef = useRef(fallbackFocus)
@@ -53,6 +55,7 @@ export function Dialog({ title, eyebrow, children, onClose, fallbackFocus, ownsS
     const activeElement = document.activeElement as HTMLElement | null
     dialog.showModal()
     const unregister = feedback.current && registerFeedback?.(feedback.current, dialog, ownsStorageNotice)
+    const stopVisibility = focusScope && installDialogVisibility(dialog, focusScope)
     const unlockScroll = lockDialogScroll(dialog.ownerDocument)
     const keepTab = (event: KeyboardEvent) => {
       if (event.key !== 'Tab' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey
@@ -76,6 +79,7 @@ export function Dialog({ title, eyebrow, children, onClose, fallbackFocus, ownsS
     dialog.ownerDocument.addEventListener('keydown', keepTab)
     return () => {
       dialog.ownerDocument.removeEventListener('keydown', keepTab)
+      stopVisibility?.()
       unregister?.()
       dialog.close()
       unlockScroll()
@@ -84,23 +88,16 @@ export function Dialog({ title, eyebrow, children, onClose, fallbackFocus, ownsS
         if (!target?.isConnected || target === document.body || target === document.documentElement || target.closest('[inert]')) return false
         target.focus()
         if (document.activeElement !== target) return false
-        const owner = target.ownerDocument
-        const view = owner.defaultView
         // Unregistering the modal moves feedback into the page after this
         // cleanup. Reveal the restored control after that layout without
         // taking focus or scrolling away from a later user action.
-        if (view) view.requestAnimationFrame(() => {
-          if (!target.isConnected || owner.activeElement !== target || target === owner.body || target === owner.documentElement
-            || target.matches(':disabled') || target.closest('[inert]') || !target.getClientRects().length
-            || view.getComputedStyle(target).visibility !== 'visible' || owner.querySelector('dialog[open]')) return
-          target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })
-        })
+        revealRestoredOpener(target, focusScope?.currentOwner ?? (() => null))
         return true
       }
       if (focus(activeElement) || focus(fallbackRef.current?.())) return
       focus(document.getElementById('main-content'))
     }
-  }, [registerFeedback, ownsStorageNotice])
+  }, [registerFeedback, ownsStorageNotice, focusScope])
 
   return createPortal(<dialog ref={ref} className={`dialog ${className}`} onCancel={event => { event.preventDefault(); closeRef.current() }} onClick={event => {
     if (event.target !== ref.current) return

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Check, ChevronLeft, ChevronRight, Download, FileJson, RefreshCw, Trash2, Upload } from 'lucide-react'
 import { createSavedBackup, MAX_SAVED_FILE_BYTES, parseSavedImport, SavedFileError, savedDifferences, SAVED_DIFFERENCE_LABELS } from '../../shared/saved-backup'
 import type { ParsedSavedImport } from '../../shared/saved-backup'
@@ -12,6 +12,8 @@ import { downloadSavedFile, downloadSavedRecovery } from '../lib/saved-files'
 import { Dialog, Spinner } from './ui'
 import { SavedStorageNotice } from './SavedStorageNotice'
 import { JobSourceCredit } from './JobSourceCredit'
+import { useDialogFocusScope } from './DialogFeedback'
+import type { DialogFocusTicket } from '../lib/dialog-visibility'
 
 type Base = Pick<SavedState, 'records' | 'occupied' | 'unreadableIds'>
 interface Review {
@@ -21,6 +23,21 @@ interface Review {
   variants: Map<string, number>
   selected: Set<string>
   invalidated?: boolean
+}
+interface FileFeedback {
+  revision: number
+  ticket: DialogFocusTicket | null
+  kind: 'error' | 'message'
+  text: string
+}
+interface RemovalOrigin {
+  button: HTMLButtonElement
+  source: SavedRecovery
+}
+interface CancelRestoration {
+  ticket: DialogFocusTicket
+  source: SavedRecovery
+  trigger: HTMLButtonElement | null
 }
 const PAGE_SIZE = 20
 const OPERATION_ERRORS: Record<SavedStorageErrorCode, string> = {
@@ -60,13 +77,68 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
   const [reading, setReading] = useState(false)
   const [page, setPage] = useState(0)
   const [filter, setFilter] = useState('all')
-  const [error, setError] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
+  const [result, setResult] = useState<FileFeedback | null>(null)
+  const error = result?.kind === 'error' ? result.text : null
+  const message = result?.kind === 'message' ? result.text : null
   const [removing, setRemoving] = useState<SavedRecovery | null>(null)
   const request = useRef(0)
   const section = useRef<HTMLElement>(null)
   const feedback = useRef<HTMLDivElement>(null)
-  useEffect(() => { if (error || message) feedback.current?.scrollIntoView({ block: 'nearest' }) }, [error, message])
+  const revision = useRef(0)
+  const removalOrigin = useRef<RemovalOrigin | null>(null)
+  const recoveryTriggers = useRef(new WeakMap<HTMLButtonElement, SavedRecovery>())
+  const cancelRestoration = useRef<CancelRestoration | null>(null)
+  const focus = useDialogFocusScope()
+  const capture = (action: string) => {
+    const active = document.activeElement
+    const owner = feedback.current?.closest('dialog')
+    const origin = active instanceof HTMLElement && owner?.contains(active) ? active : feedback.current
+    return focus?.capture(origin, action) ?? null
+  }
+  const publish = (ticket: DialogFocusTicket | null, kind: FileFeedback['kind'], text: string) => {
+    setResult({ revision: ++revision.current, ticket, kind, text })
+  }
+  // The envelope changes for every result, including repeated identical text.
+  // A result carries its original action's authority through its DOM commit.
+  useLayoutEffect(() => {
+    if (result) focus?.reveal(result.ticket, feedback.current)
+  }, [result, focus])
+  useLayoutEffect(() => {
+    if (removing) return
+    removalOrigin.current = null
+    const restoration = cancelRestoration.current
+    cancelRestoration.current = null
+    if (!restoration || !focus || !focus.valid(restoration.ticket)) return
+    const dialog = restoration.ticket.owner.dialog
+    if (!dialog?.isConnected || !dialog.open || feedback.current?.closest('dialog') !== dialog) return
+    const document = dialog.ownerDocument
+    const active = document.activeElement
+    if (active?.isConnected && active !== restoration.ticket.origin && active !== document.body
+      && active !== document.documentElement && active !== dialog) return
+    const eligible = (button: HTMLButtonElement | null): button is HTMLButtonElement => {
+      if (!button?.isConnected || button.closest('dialog') !== dialog || button.disabled || button.closest('[inert]')
+        || getComputedStyle(button).visibility !== 'visible') return false
+      const rect = button.getBoundingClientRect()
+      return rect.width > 0 && rect.height > 0
+    }
+    const original = restoration.trigger
+    const destination = eligible(original) && recoveryTriggers.current.get(original) === restoration.source
+      && storage.recovery.includes(restoration.source) ? original
+      : dialog.querySelector<HTMLButtonElement>(':scope > .dialog-header .dialog-close')
+    if (!eligible(destination)) return
+    focus.run(restoration.ticket, () => {
+      destination.focus({ preventScroll: true })
+      if (document.activeElement !== destination || !focus.valid(restoration.ticket)) return false
+      // Owned focus invalidates pending controller work, so request the reveal
+      // only after this exact surviving control actually takes focus.
+      focus.reveal(restoration.ticket, destination)
+      return true
+    })
+  }, [removing, focus, storage.recovery])
+  useLayoutEffect(() => () => {
+    removalOrigin.current = null
+    cancelRestoration.current = null
+  }, [])
   const canWrite = storage.ready && storage.phase === 'ready' && !storage.pending && !storage.busy
   const unreadableIds = useMemo(() => new Set(storage.unreadableIds), [storage.unreadableIds])
   const stale = Boolean(review && (review.invalidated || review.base.records !== storage.records
@@ -92,7 +164,8 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
   const readFile = async (file?: File) => {
     if (!file || storage.busy) return
     const ticket = ++request.current
-    setReading(true); setReview(null); setError(null); setMessage(null); setRemoving(null)
+    const intent = capture('backup-read-file')
+    setReading(true); setReview(null); setResult(null); setRemoving(null)
     try {
       if (file.size > MAX_SAVED_FILE_BYTES) throw new SavedFileError('size')
       const text = await file.text()
@@ -100,54 +173,78 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
       const parsed = parseSavedImport(text)
       setReview(makeReview(file.name, parsed, storage)); setPage(0); setFilter('all')
     } catch (failure) {
-      if (ticket === request.current) setError(failure instanceof SavedFileError ? FILE_ERRORS[failure.code] : '파일을 읽지 못했어요. 파일을 다시 선택해 주세요.')
+      if (ticket === request.current) publish(intent, 'error', failure instanceof SavedFileError ? FILE_ERRORS[failure.code] : '파일을 읽지 못했어요. 파일을 다시 선택해 주세요.')
     } finally { if (ticket === request.current) setReading(false) }
   }
   const exportBackup = () => {
+    const intent = capture('backup-export')
     try {
       downloadSavedFile(createSavedBackup(storage.records, storage.pending), `orbit-saved-backup-${new Date().toISOString().slice(0, 10)}.json`)
-      setError(null)
-      setMessage(`현재 공고 ${storage.records.length}개의 백업 파일을 만들었어요.${storage.pending ? ' 아직 브라우저에 저장하지 못한 입력도 포함했어요.' : ''}`)
-    } catch { setError('백업 파일을 만들지 못했어요. 기록은 그대로 남아 있어요.') }
+      publish(intent, 'message', `현재 공고 ${storage.records.length}개의 백업 파일을 만들었어요.${storage.pending ? ' 아직 브라우저에 저장하지 못한 입력도 포함했어요.' : ''}`)
+    } catch { publish(intent, 'error', '백업 파일을 만들지 못했어요. 기록은 그대로 남아 있어요.') }
   }
   const refreshReview = async () => {
     if (!review || reading || storage.busy) return
     const ticket = ++request.current
-    setReading(true); setError(null); setMessage(null)
+    const intent = capture('backup-refresh')
+    setReading(true); setResult(null)
     const result = await storage.refresh()
     if (ticket !== request.current) return
     if (result.status === 'refreshed') {
       setReview(makeReview(review.name, review.parsed, result.snapshot)); setPage(0); setFilter('all')
-      setMessage('현재 기록으로 다시 비교했어요. 기존 기록을 바꾸는 선택은 초기화했어요.')
-    } else setError(OPERATION_ERRORS[result.status === 'failed' ? result.error : result.status === 'stopped' ? 'unavailable' : 'busy'])
+      publish(intent, 'message', '현재 기록으로 다시 비교했어요. 기존 기록을 바꾸는 선택은 초기화했어요.')
+    } else publish(intent, 'error', OPERATION_ERRORS[result.status === 'failed' ? result.error : result.status === 'stopped' ? 'unavailable' : 'busy'])
     setReading(false)
   }
   const apply = async () => {
     if (!review || !canWrite || stale || !chosen.length || overLimit) return
-    setError(null); setMessage(null)
+    const intent = capture('backup-apply')
+    setResult(null)
     const result = await storage.importRecords({ items: chosen.map(row => ({ record: row.record, expected: row.previous ?? null })) })
     if (result.ok) {
       setReview(null)
-      setMessage(`선택한 ${chosen.length}개 기록을 저장했어요. 새 공고 ${additions}개 · 기존 공고 변경 ${replacements}개.${result.refreshFailed ? ' 목록을 다시 읽지 못했으니 저장소에 다시 연결해 주세요.' : ''}`)
+      publish(intent, 'message', `선택한 ${chosen.length}개 기록을 저장했어요. 새 공고 ${additions}개 · 기존 공고 변경 ${replacements}개.${result.refreshFailed ? ' 목록을 다시 읽지 못했으니 저장소에 다시 연결해 주세요.' : ''}`)
     } else {
-      setError(OPERATION_ERRORS[result.error])
+      publish(intent, 'error', OPERATION_ERRORS[result.error])
       if (['changed', 'unreadable', 'limit'].includes(result.error)) setReview({ ...review, invalidated: true })
     }
   }
   const discard = async () => {
     if (!removing || !canWrite) return
-    setError(null); setMessage(null)
+    const intent = capture('backup-discard')
+    setResult(null)
     const result = await storage.discardRecovery(removing)
     if (result.ok) {
       setRemoving(null)
-      setMessage(`선택한 보관본을 삭제했어요. 현재 공고 목록과 다른 보관본은 유지했어요.${result.refreshFailed ? ' 목록을 다시 읽으려면 저장소에 다시 연결해 주세요.' : ''}`)
+      publish(intent, 'message', `선택한 보관본을 삭제했어요. 현재 공고 목록과 다른 보관본은 유지했어요.${result.refreshFailed ? ' 목록을 다시 읽으려면 저장소에 다시 연결해 주세요.' : ''}`)
     } else if (result.error === 'changed') {
       setRemoving(null)
-      setError('보관본이 바뀌었어요. 갱신된 원본을 확인하고 다시 선택해 주세요.')
+      publish(intent, 'error', '보관본이 바뀌었어요. 갱신된 원본을 확인하고 다시 선택해 주세요.')
+      // This refresh only updates storage props. Its local result keeps the
+      // discard action's original ticket; completion never issues a new one.
       await storage.refresh()
-    } else setError(OPERATION_ERRORS[result.error])
+    } else publish(intent, 'error', OPERATION_ERRORS[result.error])
   }
-  const movePage = (next: number) => { setPage(next); section.current?.scrollIntoView({ block: 'start' }) }
+  const cancelRemoval = (button: HTMLButtonElement) => {
+    const ticket = button.ownerDocument.activeElement === button ? focus?.capture(button, 'backup-cancel-removal') : null
+    cancelRestoration.current = ticket && removing ? {
+      ticket, source: removing,
+      trigger: removalOrigin.current?.source === removing ? removalOrigin.current.button : null,
+    } : null
+    setRemoving(null)
+  }
+  const movePage = (next: number) => {
+    const intent = focus?.navigate(section.current, 'backup-page') ?? null
+    setPage(next)
+    focus?.reveal(intent, section.current, 'start')
+  }
+  const exportRecovery = (source: SavedRecovery) => {
+    const intent = capture('backup-recovery-export')
+    try {
+      downloadSavedRecovery([source])
+      setResult(current => current?.kind === 'error' ? null : current)
+    } catch { publish(intent, 'error', '원본 파일을 만들지 못했어요. 보관본은 그대로 남아 있어요.') }
+  }
 
   return <Dialog title="기록 백업과 복원" eyebrow="YOUR RECORDS, WITH YOU" className="saved-data-dialog" ownsStorageNotice onClose={() => { if (!storage.busy) { request.current++; onClose() } }}>
     <div className="dialog-body saved-data-body">
@@ -212,7 +309,11 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
       {storage.recovery.length > 0 && <section className="saved-recovery-management" aria-labelledby="saved-recovery-title">
         <h3 id="saved-recovery-title">따로 보관한 원본 관리</h3>
         <p>이전 목록 전체에는 이미 삭제한 공고의 메모도 남아 있을 수 있어요. 필요한 보관본은 내려받은 뒤 정리할 수 있어요.</p>
-        {storage.recovery.map((source, index) => <div className="saved-recovery-source" key={`${source.kind}-${index}`}><div><strong>{recoveryLabel(source)}</strong><small>{source.kind === 'retired-samples' ? `예전 메모·지원 상태·원본 ${source.count}개를 보관했어요. 실제 공고 목록에는 포함하지 않아요.` : source.count === null ? '일부 기록을 읽을 수 없거나 별도 검토가 필요해요.' : `목록에 합치지 못한 항목 ${source.count}개`}</small></div><div className="saved-storage-actions"><button className="text-button" onClick={() => { try { downloadSavedRecovery([source]); setError(null) } catch { setError('원본 파일을 만들지 못했어요. 보관본은 그대로 남아 있어요.') } }}><Download size={14} />이 원본 내려받기</button><button className="text-button muted" disabled={!canWrite} onClick={() => { setRemoving(source); setError(null); setMessage(null) }}><Trash2 size={14} />보관본 삭제</button></div></div>)}
+        {storage.recovery.map((source, index) => <div className="saved-recovery-source" key={`${source.kind}-${index}`}><div><strong>{recoveryLabel(source)}</strong><small>{source.kind === 'retired-samples' ? `예전 메모·지원 상태·원본 ${source.count}개를 보관했어요. 실제 공고 목록에는 포함하지 않아요.` : source.count === null ? '일부 기록을 읽을 수 없거나 별도 검토가 필요해요.' : `목록에 합치지 못한 항목 ${source.count}개`}</small></div><div className="saved-storage-actions"><button className="text-button" onClick={() => exportRecovery(source)}><Download size={14} />이 원본 내려받기</button><button className="text-button muted" disabled={!canWrite} ref={button => { if (button) recoveryTriggers.current.set(button, source) }} onClick={event => {
+          removalOrigin.current = { button: event.currentTarget, source }
+          cancelRestoration.current = null
+          setRemoving(source); setResult(null)
+        }}><Trash2 size={14} />보관본 삭제</button></div></div>)}
         {removing && <div className="saved-recovery-confirm" role="group" aria-label="보관본 삭제 확인">
           <strong>{recoveryLabel(removing)}을 삭제할까요?</strong><p>선택한 보관본만 삭제하며 되돌릴 수 없어요. 현재 공고 목록, 다른 보관본과 내려받은 파일은 유지해요.</p>
           {removing.kind === 'additional-legacy' && <p>이전 버전의 ORBIT 탭이 열려 있다면 먼저 닫아 주세요. 이 사본은 다른 탭의 동시 수정을 잠글 수 없고, 이전 탭이 다시 기록할 수도 있어요.</p>}
@@ -220,7 +321,7 @@ export function SavedDataDialog({ storage, onClose }: { storage: SavedJobsContro
       </section>}
     </div>
     <footer className="dialog-footer saved-data-footer"><span>{storage.busy ? '기록을 반영하고 있어요…' : removing ? '선택한 보관본의 삭제 범위를 확인해 주세요.' : review ? `선택 ${chosen.length}개 · 새 공고 ${additions}개 · 변경 ${replacements}개` : '파일과 메모를 서버에 보내지 않아요.'}</span>
-      {removing ? <div className="saved-recovery-footer-actions"><button className="button secondary" disabled={storage.busy} onClick={() => setRemoving(null)}>삭제 취소</button><button className="button secondary saved-delete-confirm" disabled={!canWrite} onClick={() => void discard()}><Trash2 size={14} />선택한 보관본 삭제</button></div>
+      {removing ? <div className="saved-recovery-footer-actions"><button className="button secondary" disabled={storage.busy} onClick={event => cancelRemoval(event.currentTarget)}>삭제 취소</button><button className="button secondary saved-delete-confirm" disabled={!canWrite} onClick={() => void discard()}><Trash2 size={14} />선택한 보관본 삭제</button></div>
         : <button className="button primary" disabled={storage.busy || reading || (Boolean(review) && (!canWrite || stale || !chosen.length || overLimit))} onClick={review ? () => void apply() : onClose}>{review ? `선택한 ${chosen.length}개 가져오기` : '완료'}{review && <Upload size={15} />}</button>}
     </footer>
   </Dialog>
